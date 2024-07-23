@@ -37,6 +37,19 @@ const UserSelection = () => {
     }
   };
 
+ 
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      // Make DELETE request with userId as a parameter in the URL
+      await api.delete(`api/register/deleteuser/${userId}`);
+      setUsers(users.filter(user => user.userid !== userId));
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+  
+
   // Filter users based on search term
   const filteredUsers = users.filter(user =>
     user.emailid.toLowerCase().includes(searchTerm.toLowerCase())
@@ -57,7 +70,7 @@ const UserSelection = () => {
   const renderPageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     renderPageNumbers.push(
-      <li key={i} className={i === currentPage ? 'text-blue-500' : ''}>
+      <li key={i} className={`mx-1 ${i === currentPage ? 'text-blue-500' : ''}`}>
         <button onClick={handleClick} id={i} className="px-2 py-1">
           {i}
         </button>
@@ -84,26 +97,35 @@ const UserSelection = () => {
           <table className="min-w-full bg-white">
             <thead>
               <tr>
-                <th className="py-2 px-4 border-b-2 border-gray-300">Index</th>
-                <th className="py-2 px-4 border-b-2 border-gray-300">Email</th>
-                <th className="py-2 px-4 border-b-2 border-gray-300">User Type</th>
+                <th className="py-2 px-4 border-b-2 border-gray-300 text-center">Index</th>
+                <th className="py-2 px-4 border-b-2 border-gray-300 text-center">Email</th>
+                <th className="py-2 px-4 border-b-2 border-gray-300 text-center">User Type</th>
+                <th className="py-2 px-4 border-b-2 border-gray-300 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {currentUsers.map((user, index) => (
                 <tr key={user.userid} className="hover:bg-gray-100">
-                  <td className="py-2 px-4 border-b border-gray-300">{indexOfFirstUser + index + 1}</td>
-                  <td className="py-2 px-4 border-b border-gray-300">{user.emailid}</td>
-                  <td className="py-2 px-4 border-b border-gray-300">
+                  <td className="py-2 px-4 border-b border-gray-300 text-center">{indexOfFirstUser + index + 1}</td>
+                  <td className="py-2 px-4 border-b border-gray-300 text-center">{user.emailid}</td>
+                  <td className="py-2 px-4 border-b border-gray-300 text-center">
                     <select
                       value={user.isuser}
                       onChange={(e) => handleUserTypeChange(indexOfFirstUser + index, e.target.value)}
-                      className="block w-full p-2 border border-gray-300 rounded"
+                      className="block w-full p-2 border border-gray-300 rounded mx-auto"
                     >
                       <option value="1">User Type 1</option>
                       <option value="2">User Type 2</option>
                       <option value="3">User Type 3</option>
                     </select>
+                  </td>
+                  <td className="py-2 px-4 border-b border-gray-300 text-center">
+                    <button
+                      onClick={() => handleDeleteUser(user.userid)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}

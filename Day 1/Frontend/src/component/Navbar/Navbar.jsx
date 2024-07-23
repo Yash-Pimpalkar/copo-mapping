@@ -70,25 +70,25 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [token, setToken] = useState('');
   const [user_id, setUID] = useState(0);
   const [email, setEmail] = useState('');
+  const [userType, setUserType] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem('token');
+    const storedUserType = window.localStorage.getItem('user_type');
 
-    if (storedToken) {
+    if (storedToken && storedUserType) {
       setToken(storedToken);
+      setUserType(parseInt(storedUserType));
 
       const uid = window.localStorage.getItem('uid');
-      const user_type = window.localStorage.getItem('user_type');
       const isRegister = window.localStorage.getItem('isregister');
-      if (uid && user_type && isRegister) {
+      if (uid && isRegister) {
         setUID(parseInt(uid));
-        setToken(storedToken);
         const fetchEmail = async () => {
           try {
             const response = await api.post(`api/register/getemail/${uid}`);
@@ -111,22 +111,26 @@ export default function Navbar() {
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', current: location.pathname == '/dashboard' },
-    { name: 'User Selection', href: '/userselection', current: location.pathname == '/userselection' },
+    { name: 'Dashboard', href: '/dashboard', userTypes: [1] },
+    { name: 'User Selection', href: '/userselection', userTypes: [3] },
   ];
 
   const formNavigation = [
-    { name: 'Add CO Form', href: '/coform' },
-    { name: 'Add PO Form', href: '/posform' },
-    { name: 'Add Course', href: '/course' }
+    { name: 'Add CO Form', href: '/coform', userTypes: [2] },
+    { name: 'Add PO Form', href: '/posform', userTypes: [2] },
+    { name: 'Add Course', href: '/course', userTypes: [2] }
   ];
 
   const formCurriculum = [
-    { name: 'IA1', href: '/ia1' },
-    { name: 'IA2', href: '/ia2' },
-    { name: 'Semester', href: '/sem' },
-    { name: 'Practical', href: '/practical' },
-    { name: 'Assignment', href: '/assg' },
+    { name: 'IA1', href: '/ia1', userTypes: [2] },
+    { name: 'IA2', href: '/ia2', userTypes: [2] },
+    { name: 'Semester', href: '/sem', userTypes: [2] },
+    { name: 'Practical', href: '/practical', userTypes: [2] },
+    { name: 'Assignment', href: '/assg', userTypes: [2] },
+  ];
+
+  const resultNavigation = [
+    { name: 'Results', href: '/results', userTypes: [2] },
   ];
 
   return (
@@ -134,7 +138,6 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            {/* Mobile menu button */}
             <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
               <span className="absolute -inset-0.5" />
               <span className="sr-only">Open main menu</span>
@@ -152,75 +155,76 @@ export default function Navbar() {
             </div>
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
-                {token && user_id !== 0 &&
-                  navigation.map((item) => (
-                    <NavLink
-                      key={item.name}
-                      to={item.href}
-                      aria-current={item.current ? 'page' : undefined}
-                      className={classNames(
-                        item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                        'rounded-md px-3 py-2 text-sm font-medium',
-                      )}
-                    >
-                      {item.name}
-                    </NavLink>
-                  ))}
                 {token && user_id !== 0 && (
                   <>
-                    <Menu as="div" className="relative">
-                      <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                        Form
-                      </MenuButton>
-                      <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                        {formNavigation.map((item) => (
-                          <MenuItem key={item.name}>
-                            {({ active }) => (
-                              <NavLink
-                                to={item.href}
-                                className={classNames(
-                                  active ? 'bg-gray-100' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
+                    {navigation.filter(item => item.userTypes.includes(userType)).map((item) => (
+                      <NavLink
+                        key={item.name}
+                        to={item.href}
+                        aria-current={item.current ? 'page' : undefined}
+                        className={classNames(
+                          location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                          'rounded-md px-3 py-2 text-sm font-medium',
+                        )}
+                      >
+                        {item.name}
+                      </NavLink>
+                    ))}
+                    {userType === 2 && (
+                      <>
+                        <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Form
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {formNavigation.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700'
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
                                 )}
-                              >
-                                {item.name}
-                              </NavLink>
-                            )}
-                          </MenuItem>
-                        ))}
-                      </MenuItems>
-                    </Menu>
-                    <Menu as="div" className="relative">
-                      <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                        Curriculum
-                      </MenuButton>
-                      <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                        {formCurriculum.map((item) => (
-                          <MenuItem key={item.name}>
-                            {({ active }) => (
-                              <NavLink
-                                to={item.href}
-                                className={classNames(
-                                  active ? 'bg-gray-100' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu>
+                        <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Curriculum
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {formCurriculum.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700'
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
                                 )}
-                              >
-                                {item.name}
-                              </NavLink>
-                            )}
-                          </MenuItem>
-                        ))}
-                      </MenuItems>
-                    </Menu>
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu>
+                        <NavLink
+                          to="/results"
+                          className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                        >
+                          Results
+                        </NavLink>
+                      </>
+                    )}
                   </>
-                )}
-                {token && user_id !== 0 && (
-                  <NavLink
-                    to="/results"
-                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    Results
-                  </NavLink>
                 )}
               </div>
             </div>
@@ -242,77 +246,80 @@ export default function Navbar() {
 
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
-          {token && user_id !== 0 &&
-            navigation.map((item) => (
-              <DisclosureButton
-                key={item.name}
-                as="a"
-                href={item.href}
-                className={classNames(
-                  item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                  'block rounded-md px-3 py-2 text-base font-medium',
-                )}
-                aria-current={item.current ? 'page' : undefined}
-              >
-                {item.name}
-              </DisclosureButton>
-            ))}
           {token && user_id !== 0 && (
             <>
-              <Menu as="div" className="relative">
-                <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                  Form
-                </MenuButton>
-                <MenuItems className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                  {formNavigation.map((item) => (
-                    <MenuItem key={item.name}>
-                      {({ active }) => (
-                        <DisclosureButton
-                          as="a"
-                          href={item.href}
-                          className={classNames(
-                            active ? 'bg-gray-100' : '',
-                            'block px-4 py-2 text-base font-medium text-gray-700'
+              {navigation.filter(item => item.userTypes.includes(userType)).map((item) => (
+                <DisclosureButton
+                  key={item.name}
+                  as="a"
+                  href={item.href}
+                  className={classNames(
+                    location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                    'block rounded-md px-3 py-2 text-base font-medium',
+                  )}
+                  aria-current={location.pathname === item.href ? 'page' : undefined}
+                >
+                  {item.name}
+                </DisclosureButton>
+              ))}
+              {userType === 2 && (
+                <>
+                  <Menu as="div" className="relative">
+                    <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                      Form
+                    </MenuButton>
+                    <MenuItems className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                      {formNavigation.map((item) => (
+                        <MenuItem key={item.name}>
+                          {({ active }) => (
+                            <DisclosureButton
+                              as="a"
+                              href={item.href}
+                              className={classNames(
+                                active ? 'bg-gray-100' : '',
+                                'block px-4 py-2 text-base font-medium text-gray-700'
+                              )}
+                            >
+                              {item.name}
+                            </DisclosureButton>
                           )}
-                        >
-                          {item.name}
-                        </DisclosureButton>
-                      )}
-                    </MenuItem>
-                  ))}
-                </MenuItems>
-                <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                  Curriculum
-                </MenuButton>
-                <MenuItems className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                  {formCurriculum.map((item) => (
-                    <MenuItem key={item.name}>
-                      {({ active }) => (
-                        <DisclosureButton
-                          as="a"
-                          href={item.href}
-                          className={classNames(
-                            active ? 'bg-gray-100' : '',
-                            'block px-4 py-2 text-base font-medium text-gray-700'
+                        </MenuItem>
+                      ))}
+                    </MenuItems>
+                  </Menu>
+                  <Menu as="div" className="relative">
+                    <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                      Curriculum
+                    </MenuButton>
+                    <MenuItems className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                      {formCurriculum.map((item) => (
+                        <MenuItem key={item.name}>
+                          {({ active }) => (
+                            <DisclosureButton
+                              as="a"
+                              href={item.href}
+                              className={classNames(
+                                active ? 'bg-gray-100' : '',
+                                'block px-4 py-2 text-base font-medium text-gray-700'
+                              )}
+                            >
+                              {item.name}
+                            </DisclosureButton>
                           )}
-                        >
-                          {item.name}
-                        </DisclosureButton>
-                      )}
-                    </MenuItem>
-                  ))}
-                </MenuItems>
-              </Menu>
+                        </MenuItem>
+                      ))}
+                    </MenuItems>
+                  </Menu>
+                  <DisclosureButton
+                    as="a"
+                    href="/results"
+                    className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                  >
+                    Results
+                  </DisclosureButton>
+                </>
+              )}
             </>
-          )}
-          {token && user_id !== 0 && (
-            <DisclosureButton
-              as="a"
-              href="/results"
-              className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
-              Results
-            </DisclosureButton>
           )}
         </div>
       </DisclosurePanel>

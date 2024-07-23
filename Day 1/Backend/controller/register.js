@@ -74,3 +74,32 @@ export const setusertype = (req, res) => {
     res.json({ message: 'User type updated successfully' });
   });
 };
+
+
+export const deleteUser = (req, res) => {
+  // Extracting userid from URL parameters
+  const { userid } = req.params;
+  console.log(userid);
+
+  // Check if userid is provided
+  if (!userid) {
+    return res.status(400).json({ error: 'Missing userid' });
+  }
+
+  // Prepare the SQL query
+  const query = 'DELETE FROM users WHERE userid = ?';
+
+  // Execute the query
+  db.query(query, [userid], (error, results) => {
+    if (error) {
+      console.error('SQL Error:', error.message);
+      return res.status(500).json({ error: 'Failed to delete user' });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  });
+};
