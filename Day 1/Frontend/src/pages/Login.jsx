@@ -56,7 +56,7 @@ const Login = () => {
         const isregister=window.localStorage.setItem('isregister',res.data.isregister)
  
         setLogin(true);
-        navigate("/dashboard");
+        navigate("/");
         window.location.reload()
         
       }
