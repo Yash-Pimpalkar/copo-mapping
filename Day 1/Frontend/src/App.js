@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Navbar from './component/Navbar/Navbar';
 import DashBoard from './pages/Dashboard';
 import { useEffect, useState } from 'react';
+import UserSelection from './component/Admin/UserSelection/UserSelection';
 
 function App() {
   const [token, setToken] = useState("");
@@ -49,6 +50,7 @@ function App() {
                   <>
                     {/* co-ordinator routes */}
                     <Route path="/" element={<DashBoard />} />
+                    <Route path="/userselection" element={<UserSelection />} />
                     {/* co-ordinator routes */}
                   </>
                 ) : usertype === 3(

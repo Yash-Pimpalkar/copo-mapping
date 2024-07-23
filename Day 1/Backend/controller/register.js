@@ -40,3 +40,37 @@ console.log(email,pass)
     });
   };
   
+  export const getusers = (req, res) => {
+    const query = `SELECT userid,emailid,isuser from users`;
+    db.query(query, (error, results) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.json(results);
+    });
+  };
+
+
+
+  // Assuming you have a database connection `db` set up somewhere
+
+export const setusertype = (req, res) => {
+  // Extracting parameters from the request body
+  const { userid, newType } = req.body;
+
+  // Check if userid and newType are provided
+  if (!userid || !newType) {
+    return res.status(400).json({ error: 'Missing userid or newType' });
+  }
+
+  // Prepare the SQL query
+  const query = 'UPDATE users SET isuser = ? WHERE userid = ?';
+
+  // Execute the query
+  db.query(query, [newType, userid], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ message: 'User type updated successfully' });
+  });
+};
