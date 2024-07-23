@@ -111,7 +111,7 @@ export default function Navbar() {
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', current: location.pathname === '/dashboard' },
+    { name: 'Dashboard', href: '/dashboard', current: location.pathname == '/dashboard' },
   ];
 
   const formNavigation = [
@@ -121,11 +121,11 @@ export default function Navbar() {
   ];
 
   const formCurriculum = [
-    { name: 'IA1', href: '/coform' },
-    { name: 'IA2', href: '/posform' },
-    { name: 'Semester', href: '/posform' },
-    { name: 'Practical', href: '/posform' },
-    { name: 'Assignment', href: '/posform' },
+    { name: 'IA1', href: '/ia1' },
+    { name: 'IA2', href: '/ia2' },
+    { name: 'Semester', href: '/sem' },
+    { name: 'Practical', href: '/practical' },
+    { name: 'Assignment', href: '/assg' },
   ];
 
   return (
