@@ -4,6 +4,7 @@ import axios from "axios";
 export default function Course_reg({ id }) {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [formData, setFormData] = useState({
+        course_id: "",
         course_code: "",
         course_name: "",
     });

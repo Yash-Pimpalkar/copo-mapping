@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-export default function Course_reg({ id }) {
+export default function Pos_reg({ id }) {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [formData, setFormData] = useState({
-        course_code: "",
-        course_name: "",
+        pos_id: "",
+        pos_name: "",
+        pos_body: "",
     });
 
     const [errorMessage, setErrorMessage] = useState("");
@@ -16,9 +17,9 @@ export default function Course_reg({ id }) {
 
     const handleValidation = () => {
         const requiredFields = [
-            "course_id",
-            "course_code",
-            "course_name",
+            "pos_id",
+            "pos_name",
+            "pos_body",
         ];
 
         for (let field of requiredFields) {
@@ -38,9 +39,9 @@ export default function Course_reg({ id }) {
                 const response = await axios.put(
                     `http://localhost:8081/api/register/${id}`,
                     {
-                        course_id: formData.course_id,
-                        course_code: formData.course_code,
-                        course_name: formData.course_name,
+                        pos_id: formData.pos_id,
+                        pos_name: formData.pos_name,
+                        pos_body: formData.pos_body,
                     }
                 );
                 console.log('Successfully updated record:', response.data);
@@ -58,7 +59,7 @@ export default function Course_reg({ id }) {
     return (
         <div className="max-w-screen-md mx-auto p-6 border border-gray-300 shadow-lg rounded-md bg-white mt-10">
             <h1 className="text-2xl mb-6 text-blue-500 text-center">
-                Course Form
+                POS Form
             </h1>
 
             {errorMessage && (
@@ -70,42 +71,42 @@ export default function Course_reg({ id }) {
             <form className="space-y-4">
                 <div className="flex flex-wrap -mx-2 mb-4">
                     <div className="w-full sm:w-1/3 px-3">
-                        <label htmlFor="course_id" className="block text-sm font-medium text-gray-700">
-                            Course id
+                        <label htmlFor="pos_id" className="block text-sm font-medium text-gray-700">
+                            Pos id
                         </label>
                         <input
                             type="text"
-                            id="course_id"
-                            name="course_id"
-                            value={formData.course_id}
+                            id="pos_id"
+                            name="pos_id"
+                            value={formData.pos_id}
                             onChange={handleChange}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                         />
                     </div>
 
                     <div className="w-full sm:w-1/3 px-3">
-                        <label htmlFor="course_code" className="block text-sm font-medium text-gray-700">
-                            Course Code
+                        <label htmlFor="pos_name" className="block text-sm font-medium text-gray-700">
+                          POS Name 
                         </label>
                         <input
                             type="text"
-                            id="course_code"
-                            name="course_code"
-                            value={formData.course_code}
+                            id="pos_name"
+                            name="pos_name"
+                            value={formData.pos_name}
                             onChange={handleChange}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                         />
                     </div>
 
                     <div className="w-full sm:w-1/3 px-3">
-                        <label htmlFor="course_name" className="block text-sm font-medium text-gray-700">
-                            Course Name
+                        <label htmlFor="pos_body" className="block text-sm font-medium text-gray-700">
+                            POS Body
                         </label>
                         <input
                             type="text"
-                            id="course_name"
-                            name="course_name"
-                            value={formData.course_name}
+                            id="pos_body"
+                            name="pos_body"
+                            value={formData.pos_body}
                             onChange={handleChange}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                         />

@@ -75,6 +75,7 @@ export const setusertype = (req, res) => {
   });
 };
 
+
 export const deleteUser = (req, res) => {
   // Extracting userid from URL parameters
   const { userid } = req.params;
