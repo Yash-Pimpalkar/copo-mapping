@@ -15,7 +15,6 @@ function App() {
   const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
   const [usertype, setUserType] = useState(0);
-  const [isRegister, setIsRegister] = useState(-1);
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem("token");
@@ -24,12 +23,10 @@ function App() {
 
       const uid = window.localStorage.getItem("uid");
       const user_type = window.localStorage.getItem("user_type");
-      const isRegister = window.localStorage.getItem("isregister");
 
-      if (uid && user_type && isRegister) {
+      if (uid && user_type) {
         setUID(parseInt(uid));
         setUserType(parseInt(user_type));
-        setIsRegister(parseInt(isRegister));
       }
     }
   }, []);
@@ -38,12 +35,7 @@ function App() {
     <>
       <Navbar />
       <Routes>
-        {isRegister == 0 ? (
-          <>
-            <Route path="/" element={<Dashboard />} />
-            {/* Add other routes for isRegister === 0 here */}
-          </>
-        ) : isRegister == 1 ? (
+        {token ? (
           usertype == 1 ? (
             <>
               <Route path="/" element={<Dashboard />} />
@@ -51,7 +43,7 @@ function App() {
             </>
           ) : usertype == 2 ? (
             <>
-            <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/coform" element={<Cos_reg />} />
               <Route path="/posform" element={<Pos_reg />} />
               <Route path="/courseform" element={<Course_reg />} />
