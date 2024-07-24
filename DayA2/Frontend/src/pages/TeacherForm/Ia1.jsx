@@ -7,6 +7,8 @@ const Ia1 = () => {
         { clgId: 'CLG-002', name: 'Jane Smith', division: 'B', q1a: '85', q1b: '90', q1c: '92', q2: '87', q3: '354', q4: '13', q5: '13', isEditing: false },
         { clgId: 'CLG-003', name: 'Michael Brown', division: 'C', q1a: '88', q1b: '82', q1c: '91', q2: '89', q3: '350', q4: '13', q5: '13', isEditing: false },
     ]);
+    const [isCOEditing, setIsCOEditing] = useState(false);
+    const [coValues, setCOValues] = useState({ CO1: 'CO1', CO2: 'CO1', CO3: 'CO2', CO4: 'CO3', CO5: 'CO4', CO6: 'CO5',CO7:'CO5' });
 
     const handleEdit = (index) => {
         const newData = [...data];
@@ -34,8 +36,8 @@ const Ia1 = () => {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                const formattedData = jsonData.slice(1).map((row) => ({
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1});
+                const formattedData = jsonData.slice(2).map((row) => ({
                     clgId: row[0],
                     name: row[1],
                     division: row[2],
@@ -55,7 +57,8 @@ const Ia1 = () => {
     };
 
     const downloadTableAsExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(data.map(item => ({
+        // Prepare data with line breaks
+        const formattedData = data.map(item => ({
             clgId: item.clgId,
             name: item.name,
             division: item.division,
@@ -66,10 +69,63 @@ const Ia1 = () => {
             q3: item.q3,
             q4: item.q4,
             q5: item.q5,
-        })), { header: ["clgId", "name", "division", "q1a", "q1b", "q1c", "q2", "q3", "q4", "q5"] });
+            Total: Number(item.q1a) + Number(item.q1b) + Number(item.q1c) + Number(item.q2) + Number(item.q3) + Number(item.q4) + Number(item.q5),
+        }));
+    
+        // Create a worksheet from the formatted data
+        const ws = XLSX.utils.json_to_sheet(formattedData);
+    
+        // Add subheader rows
+        const headerRow = ["", "", "", "Q1a", "Q1b", "Q1c", "Q2", "Q3", "Q4", "Q5", "Total"];
+        const subHeaderRow = ["", "", "", coValues.CO1, coValues.CO2, coValues.CO3, coValues.CO4, coValues.CO5, coValues.CO6, coValues.CO7, ""];
+    
+        // Convert header rows to sheet format
+        XLSX.utils.sheet_add_aoa(ws, [headerRow], { origin: 'A1' });
+        XLSX.utils.sheet_add_aoa(ws, [subHeaderRow], { origin: 'A2' });
+        XLSX.utils.sheet_add_json(ws, formattedData, { skipHeader: true, origin: "A3" });
+    
+        // Adjust column widths to accommodate line breaks
+        ws['!cols'] = [
+            { wpx: 100 }, // Width for CLG-Id
+            { wpx: 150 }, // Width for Name
+            { wpx: 100 }, // Width for Division
+            { wpx: 80 },  // Width for Q1a
+            { wpx: 80 },  // Width for Q1b
+            { wpx: 80 },  // Width for Q1c
+            { wpx: 80 },  // Width for Q2
+            { wpx: 80 },  // Width for Q3
+            { wpx: 80 },  // Width for Q4
+            { wpx: 80 },  // Width for Q5
+            { wpx: 120 }, // Width for CO1
+            { wpx: 120 }, // Width for CO2
+            { wpx: 120 }, // Width for CO3
+            { wpx: 120 }, // Width for CO4
+            { wpx: 120 }, // Width for CO5
+            { wpx: 120 }, // Width for CO6
+            { wpx: 120 }, // Width for CO7
+        ];
+    
+        // Create a workbook and append the worksheet
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "IA1 Data");
+    
+        // Write the file
         XLSX.writeFile(wb, "IA1_Data.xlsx");
+    };
+    
+    
+    
+
+    const handleEditCO = () => {
+        setIsCOEditing(true);
+    };
+
+    const handleSaveCO = () => {
+        setIsCOEditing(false);
+    };
+
+    const handleCOChange = (field, value) => {
+        setCOValues(prev => ({ ...prev, [field]: value }));
     };
 
     return (
@@ -122,15 +178,84 @@ const Ia1 = () => {
                         <th scope="col" className="px-6 py-3"></th>
                         <th scope="col" className="px-6 py-3"></th>
                         <th scope="col" className="px-6 py-3"></th>
-                        <th scope="col" className="px-6 py-3 text-center">CO1</th>
-                        <th scope="col" className="px-6 py-3 text-center">CO1</th>
-                        <th scope="col" className="px-6 py-3 text-center">CO2</th>
-                        <th scope="col" className="px-6 py-3 text-center">CO3</th>
-                        <th scope="col" className="px-6 py-3 text-center">CO4</th>
-                        <th scope="col" className="px-6 py-3 text-center">CO5</th>
-                        <th scope="col" className="px-6 py-3 text-center">CO6</th>
-                        <th scope="col" className="px-6 py-3 text-center"></th>
+                       
+                        {isCOEditing ? (
+                            <>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO1}
+                                        onChange={(e) => handleCOChange('CO1', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO2}
+                                        onChange={(e) => handleCOChange('CO2', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO3}
+                                        onChange={(e) => handleCOChange('CO3', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO4}
+                                        onChange={(e) => handleCOChange('CO4', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO5}
+                                        onChange={(e) => handleCOChange('CO5', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO6}
+                                        onChange={(e) => handleCOChange('CO6', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-center">
+                                    <input
+                                        type="text"
+                                        value={coValues.CO7}
+                                        onChange={(e) => handleCOChange('CO7', e.target.value)}
+                                        className="border border-gray-300 p-1"
+                                    />
+                                </th>
+                            </>
+                        ) : (
+                            <>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO1}</th>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO2}</th>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO3}</th>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO4}</th>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO5}</th>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO6}</th>
+                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO7}</th>
+                            </>
+                        )}
                         <th scope="col" className="px-6 py-3"></th>
+                        <th scope="col" className="px-6 py-3"> {isCOEditing ? (
+                                <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={handleSaveCO}>Save</button>
+                            ) : (
+                                <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={handleEditCO}>Edit</button>
+                            )}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -258,7 +383,7 @@ const Ia1 = () => {
                                 )}
                             </td>
                             <td className="px-6 py-4">
-                                {Number(item.q1a.replace('$', '')) + Number(item.q1b.replace('$', '')) + Number(item.q1c.replace('$', '')) + Number(item.q2.replace('$', '')) + Number(item.q3.replace('$', '')) + Number(item.q4.replace('$', '')) + Number(item.q5.replace('$', ''))}
+                                {Number(item.q1a) + Number(item.q1b) + Number(item.q1c) + Number(item.q2) + Number(item.q3) + Number(item.q4) + Number(item.q5)}
                             </td>
                             <td className="px-6 py-4">
                                 {item.isEditing ? (
