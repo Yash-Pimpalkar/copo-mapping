@@ -19,7 +19,7 @@ console.log(email,pass)
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(pass, salt);
   
-      const q = "INSERT INTO users (`emailid`,`password`, `created_time`) VALUES (?,?,?)";
+      const q = "INSERT INTO users (`emailid`,`password`, `created_time`,isuser) VALUES (?,?,?,2)";
       const values = [email, hash, currentDate];
       db.query(q, values, (err, data) => {
         if (err) return res.json(err);

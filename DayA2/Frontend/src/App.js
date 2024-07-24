@@ -10,6 +10,7 @@ import Cos_reg from './pages/TeacherRegistration/Co_reg';
 import Ia1 from './pages/TeacherForm/Ia1';
 import { useEffect, useState } from 'react';
 import UserSelection from './component/Admin/UserSelection/UserSelection';
+import RegistrationForm from './pages/TeacherRegistration/RegisterForm';
 
 function App() {
   const [token, setToken] = useState("");
@@ -49,6 +50,7 @@ function App() {
               <Route path="/courseform" element={<Course_reg />} />
               <Route path="/ia1" element={<Ia1 />} />
               <Route path="/userselection" element={<UserSelection />} />
+              <Route path='/usercourse' element={<RegistrationForm uid={user_id}/>} />
               {/* Add other routes for usertype === 2 here */}
             </>
           ) : usertype == 3 ? (
@@ -59,7 +61,10 @@ function App() {
             </>
           ) : (
             // Handle other user types if needed
-            <Navigate to="/" /> // Redirect to default route or error page
+            <>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} /> //Redirect to default route or error page
+        </>
           )
         ) : (
           <>
