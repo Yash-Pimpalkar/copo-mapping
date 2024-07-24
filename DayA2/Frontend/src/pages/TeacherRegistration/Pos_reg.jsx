@@ -17,7 +17,7 @@ export default function Pos_reg({ id }) {
 
     // Handle change in the number of POS records input
     const handleNumPosChange = (e) => {
-        const value = e.target.value;
+        const value = Math.max(1, Math.min(16, e.target.value)); // Ensure value is between 1 and 16
         setNumPos(value);
         const updatedFormData = Array.from({ length: value }, (_, index) => formData[index] || { pos_id: "", pos_name: "", pos_body: "" });
         setFormData(updatedFormData);
@@ -82,11 +82,28 @@ export default function Pos_reg({ id }) {
                         onChange={handleNumPosChange}
                         className="w-20 border border-gray-300 rounded-md shadow-sm p-2"
                         min="1"
+                        max="16"
                     />
                 </div>
 
                 {formData.map((pos, index) => (
                     <div key={index} className="flex flex-wrap -mx-2 mb-4 justify-center">
+                        <div className="w-full sm:w-1/2 px-3">
+                            <label htmlFor={`pos_id_${index}`} className="block text-sm font-medium text-gray-700">
+                                POS ID
+                            </label>
+                            <input
+                                type="number"
+                                id={`pos_id_${index}`}
+                                name="pos_id"
+                                value={pos.pos_id}
+                                onChange={(e) => handleChange(index, e)}
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                min="1"
+                                max="16"
+                            />
+                        </div>
+
                         <div className="w-full sm:w-1/2 px-3">
                             <label htmlFor={`pos_name_${index}`} className="block text-sm font-medium text-gray-700">
                                 POS Name
@@ -101,7 +118,7 @@ export default function Pos_reg({ id }) {
                             />
                         </div>
 
-                        <div className="w-full sm:w-1/2 px-3">
+                        <div className="w-full px-3 mt-4">
                             <label htmlFor={`pos_body_${index}`} className="block text-sm font-medium text-gray-700">
                                 POS Body
                             </label>
@@ -127,4 +144,4 @@ export default function Pos_reg({ id }) {
             </form>
         </div>
     );
-};
+}
