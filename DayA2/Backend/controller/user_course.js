@@ -51,7 +51,15 @@ export const user_course_registration = (req,res) => {
 
 
 export const show_user_course = (req,res) => {
-
+  const id= req.params.uid;
+  const sql=`select u.usercourse_id,u.user_id,c.coursecode,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where usercourse_id=? `;
+  db.query(sql,id,(err,result)=>{
+    if (err) {
+      console.error('Error saving to database:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.status(201).json(result);
+  })
 }
 
 
