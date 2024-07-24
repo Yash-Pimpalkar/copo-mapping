@@ -16,31 +16,31 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `users`
+-- Table structure for table `course`
 --
 
-DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `course`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `users` (
-  `userid` int NOT NULL AUTO_INCREMENT,
-  `emailid` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `depart` varchar(255) DEFAULT NULL,
-  `isuser` int DEFAULT NULL,
-  `created_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`userid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `course` (
+  `courseid` int NOT NULL AUTO_INCREMENT,
+  `coursecode` varchar(255) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
+  `created_time` varchar(255) NOT NULL,
+  PRIMARY KEY (`courseid`),
+  UNIQUE KEY `coursecode_UNIQUE` (`coursecode`),
+  UNIQUE KEY `course_name_UNIQUE` (`course_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `users`
+-- Dumping data for table `course`
 --
 
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'vu1f2122110@pvppcoe.ac.in','$2b$10$FrqL5JD5MJrkTMIkY0EW8e2O4Hyp0ANQNHepjSBQD.zXyS5FRb7mG',NULL,2,'2024-07-22 13:18:17'),(2,'shantanuvedante3@gmail.com','$2b$10$YenfvbdRmSO8lI3qKiWyfeURp4y3EJeFxIUA1Cjd2Zqc0e013IMX2',NULL,NULL,'2024-07-22 14:23:18');
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+LOCK TABLES `course` WRITE;
+/*!40000 ALTER TABLE `course` DISABLE KEYS */;
+INSERT INTO `course` VALUES (1,'CSC701','Machine Leaning','2024-07-23 16:21:53.442'),(2,'CSC702','Big data Anylytics','2024-07-23 16:21:53.442'),(3,'CSDC7011','Machine Vision','2024-07-23 16:32:08.758'),(4,'CSDC7012','Quantum Computing','2024-07-23 16:32:08.758');
+/*!40000 ALTER TABLE `course` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-22 14:39:20
+-- Dump completed on 2024-07-24 10:51:09
