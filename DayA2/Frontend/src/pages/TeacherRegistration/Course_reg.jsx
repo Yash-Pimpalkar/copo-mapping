@@ -44,10 +44,14 @@ export default function Course_reg() {
                     'http://localhost:8081/api/course/addcourses',
                     formData
                 );
-                console.log('Successfully added courses:', response.data);
-                setSuccessMessage(`Courses added successfully. Inserted Rows: ${response.data.insertedRows}`);
-                setIsSubmitted(true);
-                setErrorMessage("");
+                if (response.data.existingCourses) {
+                    alert(`The following courses are already registered: ${response.data.existingCourses.join(', ')}`);
+                } else {
+                    console.log('Successfully added courses:', response.data);
+                    setSuccessMessage(`Courses added successfully. Inserted Rows: ${response.data.insertedRows}`);
+                    setIsSubmitted(true);
+                    setErrorMessage("");
+                }
             } catch (error) {
                 if (error.response && error.response.data) {
                     setErrorMessage(error.response.data.error || "Error occurred while adding courses");
@@ -57,7 +61,7 @@ export default function Course_reg() {
                 setSuccessMessage("");
             }
         }
-    };
+    };    
 
     return (
         <div className="max-w-screen-md mx-auto p-6 border border-gray-300 shadow-lg rounded-md bg-white mt-10">
