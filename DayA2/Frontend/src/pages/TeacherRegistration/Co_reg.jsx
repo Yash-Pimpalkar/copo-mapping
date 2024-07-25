@@ -1,29 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
+import api from "../../api"; // Ensure this module is properly configured
 
 export default function Cos_reg() {
+    const location = useLocation();
+    const { co_count, usercourse_id } = location.state;
+    const [data, setData] = useState([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [numCos, setNumCos] = useState(1); // Number of COS records user wants to add
-    const [formData, setFormData] = useState([{ cos_name: "", cos_body: "" }]); // Initial state for form data
-    const [errorMessage, setErrorMessage] = useState("");
+    const [formData, setFormData] = useState(
+        Array.from({ length: co_count }, (_, index) => ({ 
+            cos_name: `CO${index + 1}`, 
+            cos_body: "" 
+        }))
+    );
 
-    // Handle change in any of the dynamically generated inputs
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState(""); 
+
     const handleChange = (index, e) => {
         const { name, value } = e.target;
         const updatedFormData = [...formData];
         updatedFormData[index] = { ...updatedFormData[index], [name]: value };
         setFormData(updatedFormData);
     };
-
-    // Handle change in the number of COS records input
-    const handleNumCosChange = (e) => {
-        const value = e.target.value;
-        setNumCos(value);
-        const updatedFormData = Array.from({ length: value }, (_, index) => formData[index] || { cos_name: "", cos_body: "" });
-        setFormData(updatedFormData);
-    };
-
-    // Validate all dynamically generated fields
+    console.log(data)
     const handleValidation = () => {
         const requiredFields = ["cos_name", "cos_body"];
 
@@ -43,14 +44,16 @@ export default function Cos_reg() {
         if (handleValidation()) {
             try {
                 const response = await axios.post(
-                    'http://localhost:8081/api/register/addcos',
-                    formData
+                    'http://localhost:8081/api/cos/add',
+                    { formData, usercourse_id }
                 );
                 console.log('Successfully added COS records:', response.data);
+                setSuccessMessage(response.data.message || "COS records added successfully!");
+                setErrorMessage("");
                 setIsSubmitted(true);
             } catch (error) {
                 if (error.response && error.response.data) {
-                    setErrorMessage(error.response.data);
+                    setErrorMessage(error.response.data.error || "An unknown error occurred.");
                 } else {
                     setErrorMessage("There was an error saving the COS records. Please try again.");
                 }
@@ -70,25 +73,21 @@ export default function Cos_reg() {
                 </div>
             )}
 
-            <form className="space-y-4">
-                <div className="flex items-center mb-4">
-                    <label htmlFor="num_cos" className="block text-sm font-medium text-gray-700 mr-4">
-                        How many COS records do you want to add?
-                    </label>
-                    <input
-                        type="number"
-                        id="num_cos"
-                        value={numCos}
-                        onChange={handleNumCosChange}
-                        className="w-20 border border-gray-300 rounded-md shadow-sm p-2"
-                        min="1"
-                    />
+            {successMessage && (
+                <div className="mb-4 text-green-500">
+                    {successMessage}
                 </div>
+            )}
 
+            <form className="space-y-4">
                 {formData.map((cos, index) => (
                     <div key={index} className="flex flex-wrap -mx-2 mb-4 justify-center">
                         <div className="w-full sm:w-1/2 px-3">
-                            <label htmlFor={`cos_name_${index}`} className="block text-sm font-medium text-gray-700">
+                            <label 
+                                htmlFor={`cos_name_${index}`} 
+                                className="block text-sm font-medium text-gray-700"
+                                style={{ textTransform: 'uppercase' }} 
+                            >
                                 COS Name
                             </label>
                             <input
@@ -98,6 +97,7 @@ export default function Cos_reg() {
                                 value={cos.cos_name}
                                 onChange={(e) => handleChange(index, e)}
                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                style={{ textTransform: 'uppercase' }}
                             />
                         </div>
 

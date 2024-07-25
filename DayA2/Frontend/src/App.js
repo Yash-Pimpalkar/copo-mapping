@@ -10,7 +10,9 @@ import Cos_reg from './pages/TeacherRegistration/Co_reg';
 import Ia1 from './pages/TeacherForm/Ia1';
 import { useEffect, useState } from 'react';
 import UserSelection from './component/Admin/UserSelection/UserSelection';
+import User_course from './pages/TeacherRegistration/User_course';
 import RegistrationForm from './pages/TeacherRegistration/RegisterForm';
+import ShowCos from './pages/TeacherRegistration/ShowCos';
 
 function App() {
   const [token, setToken] = useState("");
@@ -50,7 +52,9 @@ function App() {
               <Route path="/courseform" element={<Course_reg />} />
               <Route path="/ia1" element={<Ia1 />} />
               <Route path="/userselection" element={<UserSelection />} />
-              <Route path='/usercourse' element={<RegistrationForm uid={user_id}/>} />
+              <Route path='/registerform' element={<RegistrationForm uid={user_id}/>} />
+              <Route path='/usercourse' element={<User_course uid={user_id}/>} />
+              <Route path='/cos' element={<ShowCos />} />
               {/* Add other routes for usertype === 2 here */}
             </>
           ) : usertype == 3 ? (

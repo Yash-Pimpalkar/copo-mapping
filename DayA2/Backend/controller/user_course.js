@@ -34,7 +34,7 @@ export const user_course_registration = (req, res) => {
       }
 
       const values = [user_id, courseid, sem, academic_year, branch, co_count];
-      console.log(values); // Log the values
+      // console.log(values); // Log the values
 
       const query = `
         INSERT INTO user_course (user_id, course_id, semester, academic_year, branch, co_count)
@@ -45,7 +45,7 @@ export const user_course_registration = (req, res) => {
           console.error('Error saving to database:', err);
           return callback(err);
         }
-        console.log('New registration:', result);
+        // console.log('New registration:', result);
         callback(null, result);
       });
     });
@@ -81,7 +81,7 @@ export const user_course_registration = (req, res) => {
 
 export const show_user_course = (req,res) => {
   const id= req.params.uid;
-  const sql=`select u.usercourse_id,u.user_id,c.coursecode,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where usercourse_id=? `;
+  const sql=`select u.usercourse_id,u.user_id,c.coursecode,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where user_id=? `;
   db.query(sql,id,(err,result)=>{
     if (err) {
       console.error('Error saving to database:', err);
