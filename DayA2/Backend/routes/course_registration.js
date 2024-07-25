@@ -1,6 +1,6 @@
 import express from "express";
 
-import { addCourses } from "../controller/Course_registration.js";
+import { addCourses } from "../controller/course_registration.js"
 const router =express.Router()
 
 router.post('/addcourses', addCourses); 
