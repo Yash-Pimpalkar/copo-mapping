@@ -1,52 +1,81 @@
 import { connection as db } from "../config/dbConfig.js";
 
-export const user_course_registration = (req,res) => {
-    const { user_id, course_code, sem, academic_year, branch, co_count } = req.body;
-    console.log(user_id, course_code, sem, academic_year, branch, co_count)
-    // Validate the data (additional validation logic can be added as needed)
-    if (!user_id || !course_code || !sem || !academic_year || !branch || !co_count) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-  
-    // Simulate saving to a database (this is just an example, replace with actual DB logic)
-   
-  
+export const user_course_registration = (req, res) => {
+  const courses = req.body.formData; // Access the array of course objects
+  console.log("Received courses:", courses);
 
+  if (!Array.isArray(courses) || courses.length === 0) {
+    return res.status(400).json({ error: 'No courses provided' });
+  }
+
+  // Validate each course object in the array
+  for (const course of courses) {
+    const { user_id, course_code, sem, academic_year, branch, co_count } = course;
+    if (!user_id || !course_code || !sem || !academic_year || !branch || !co_count) {
+      return res.status(400).json({ error: 'All fields are required for each course' });
+    }
+  }
+
+  // Simulate saving to a database (this is just an example, replace with actual DB logic)
+  const saveCourse = (course, callback) => {
+    const { user_id, course_code, sem, academic_year, branch, co_count } = course;
 
     const q = `SELECT courseid FROM course WHERE coursecode = ?`;
     db.query(q, course_code, (err, result) => {
-    if (err) {
-    console.error('Error querying the database:', err);
-    return res.status(500).json({ error: 'Database error' });
-  }
-  
-  
-  const courseid=result[0].courseid;
-  
-  
-  const values = [
-    user_id,
-    courseid,
-    sem,
-    academic_year,
-    branch,
-    co_count
-  ];
-  console.log(values)// Log the result after query is completed
-  const query = `
-  INSERT INTO user_course (user_id, course_id, semester, academic_year, branch, co_count)
-  VALUES (?,?,?,?,?,?)`;
-  db.query(query, values, (err, result) => {
-  if (err) {
-    console.error('Error saving to database:', err);
-    return res.status(500).json({ error: 'Database error' });
-  }
-  console.log('New registration:', result);
-  res.status(201).json({ message: 'Registration successful'});
-  });
-  // Optionally send the result back to the clien
-});
-}
+      if (err) {
+        console.error('Error querying the database:', err);
+        return callback(err);
+      }
+
+      const courseid = result[0]?.courseid;
+
+      if (!courseid) {
+        return callback(new Error('Course ID not found for the given course code'));
+      }
+
+      const values = [user_id, courseid, sem, academic_year, branch, co_count];
+      console.log(values); // Log the values
+
+      const query = `
+        INSERT INTO user_course (user_id, course_id, semester, academic_year, branch, co_count)
+        VALUES (?,?,?,?,?,?)`;
+
+      db.query(query, values, (err, result) => {
+        if (err) {
+          console.error('Error saving to database:', err);
+          return callback(err);
+        }
+        console.log('New registration:', result);
+        callback(null, result);
+      });
+    });
+  };
+
+  // Process all courses
+  let errorOccurred = false;
+  const results = [];
+
+  const processCourse = (index) => {
+    if (index >= courses.length) {
+      if (errorOccurred) {
+        return res.status(500).json({ error: 'Database error occurred while processing courses' });
+      }
+      return res.status(201).json({ message: 'All registrations successful', results });
+    }
+
+    saveCourse(courses[index], (err, result) => {
+      if (err) {
+        errorOccurred = true;
+        return processCourse(index + 1);
+      }
+      results.push(result);
+      processCourse(index + 1);
+    });
+  };
+
+  processCourse(0);
+};
+
 
 
 

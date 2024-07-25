@@ -5,27 +5,38 @@ import api from "../../api";
 export default function RegistrationForm({ uid }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [numCourses, setNumCourses] = useState(1);
-  const [formData, setFormData] = useState({
-    user_id: uid,
-    course_code: "",
-    sem: "",
-    academic_year: "",
-    branch: "",
-    co_count: 1,
-  });
+  const [formData, setFormData] = useState([
+    {
+      user_id: uid,
+      course_code: "",
+      sem: "",
+      academic_year: "",
+      branch: "",
+      co_count: 1,
+    },
+  ]);
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleNumCoursesChange = (e) => {
     const value = Math.max(1, Math.min(parseInt(e.target.value), 10)); // Restrict to range 1-10
     setNumCourses(value);
-    setFormData({ ...formData, co_count: value });
+    const updatedFormData = Array.from({ length: value }, (_, index) => formData[index] || {
+      user_id: uid,
+      course_code: "",
+      sem: "",
+      academic_year: "",
+      branch: "",
+      co_count: 1,
+    });
+    setFormData(updatedFormData);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (index, e) => {
     const { name, value } = e.target;
-
-    setFormData({ ...formData, [name]: value });
+    const updatedFormData = [...formData];
+    updatedFormData[index] = { ...updatedFormData[index], [name]: value };
+    setFormData(updatedFormData);
   };
 
   const handleValidation = () => {
@@ -37,10 +48,12 @@ export default function RegistrationForm({ uid }) {
       "co_count",
     ];
 
-    for (let field of requiredFields) {
-      if (!formData[field] || formData[field].toString().trim() === "") {
-        alert(`Please fill in the ${field} field.`);
-        return false;
+    for (const course of formData) {
+      for (let field of requiredFields) {
+        if (!course[field] || course[field].toString().trim() === "") {
+          alert(`Please fill in the ${field} field for all courses.`);
+          return false;
+        }
       }
     }
 
@@ -75,16 +88,10 @@ export default function RegistrationForm({ uid }) {
   const handleProceedClick = async () => {
     if (handleValidation()) {
       try {
+        console.log(formData)
         const response = await api.post(
           `http://localhost:8081/api/usercourse/`,
-          {
-            user_id: formData.user_id,
-            course_code: formData.course_code,
-            sem: formData.sem,
-            academic_year: formData.academic_year,
-            branch: formData.branch,
-            co_count: formData.co_count,
-          }
+         {formData}
         );
 
         console.log("Successfully updated record:", response.data);
@@ -121,118 +128,138 @@ export default function RegistrationForm({ uid }) {
         </div>
       ) : (
         <form className="space-y-4">
-          <div className="flex flex-wrap -mx-3 mb-4">
-            <div className="w-full sm:w-1/2 px-3">
-              <label
-                htmlFor="co_count"
-                className="block text-sm font-medium text-gray-700"
-              >
-                CO Count
-              </label>
-              <input
-                type="number"
-                id="co_count"
-                name="co_count"
-                value={numCourses}
-                onChange={handleNumCoursesChange}
-                className="w-full border border-gray-300 rounded-md shadow-sm p-2"
-                min="1"
-                max="10"
-              />
-            </div>
-
-            <div className="w-full sm:w-1/2 px-3">
-              <label
-                htmlFor="sem"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Semester
-              </label>
-              <select
-                id="sem"
-                name="sem"
-                value={formData.sem}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              >
-                <option value="">Select Semester</option>
-                <option value="1">1st</option>
-                <option value="2">2nd</option>
-                <option value="3">3rd</option>
-                <option value="4">4th</option>
-                <option value="5">5th</option>
-                <option value="6">6th</option>
-                <option value="7">7th</option>
-                <option value="8">8th</option>
-              </select>
-            </div>
+          <div className="flex items-center mb-4">
+            <label htmlFor="num_courses" className="block text-sm font-medium text-gray-700 mr-4">
+              How many courses do you want to add?
+            </label>
+            <input
+              type="number"
+              id="num_courses"
+              value={numCourses}
+              onChange={handleNumCoursesChange}
+              className="w-20 border border-gray-300 rounded-md shadow-sm p-2"
+              min="1"
+              max="10"
+            />
           </div>
 
-          <div className="flex flex-wrap -mx-3 mb-4">
-            <div className="w-full sm:w-1/2 px-3">
-              <label
-                htmlFor="branch"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Branch
-              </label>
-              <select
-                id="branch"
-                name="branch"
-                value={formData.branch}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              >
-                <option value="">Select Branch</option>
-                <option value="Comps">Comps</option>
-                <option value="IT">IT</option>
-                <option value="AIDS">AIDS</option>
-                <option value="EXTC">EXTC</option>
-              </select>
-            </div>
+          {formData.map((course, index) => (
+            <div key={index} className="space-y-4 border-b border-gray-300 pb-4 mb-4">
+              <h2 className="text-xl mb-4 text-blue-400">Course {index + 1}</h2>
+              <div className="flex flex-wrap -mx-3 mb-4">
+                <div className="w-full sm:w-1/2 px-3">
+                  <label
+                    htmlFor={`co_count_${index}`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    CO Count
+                  </label>
+                  <input
+                    type="number"
+                    id={`co_count_${index}`}
+                    name="co_count"
+                    value={course.co_count}
+                    onChange={(e) => handleChange(index, e)}
+                    className="w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    min="1"
+                    max="10"
+                  />
+                </div>
 
-            <div className="w-full sm:w-1/2 px-3">
-              <label
-                htmlFor="academic_year"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Academic Year
-              </label>
-              <select
-                id="academic_year"
-                name="academic_year"
-                value={formData.academic_year}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              >
-                <option value="">Select Year</option>
-                {yearList.map((year, index) => (
-                  <option key={index} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+                <div className="w-full sm:w-1/2 px-3">
+                  <label
+                    htmlFor={`sem_${index}`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Semester
+                  </label>
+                  <select
+                    id={`sem_${index}`}
+                    name="sem"
+                    value={course.sem}
+                    onChange={(e) => handleChange(index, e)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  >
+                    <option value="">Select Semester</option>
+                    <option value="1">1st</option>
+                    <option value="2">2nd</option>
+                    <option value="3">3rd</option>
+                    <option value="4">4th</option>
+                    <option value="5">5th</option>
+                    <option value="6">6th</option>
+                    <option value="7">7th</option>
+                    <option value="8">8th</option>
+                  </select>
+                </div>
+              </div>
 
-          <div className="flex flex-wrap -mx-3 mb-4">
-            <div className="w-full px-3">
-              <label
-                htmlFor="course_code"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Course Code
-              </label>
-              <input
-                type="text"
-                id="course_code"
-                name="course_code"
-                value={formData.course_code}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              />
+              <div className="flex flex-wrap -mx-3 mb-4">
+                <div className="w-full sm:w-1/2 px-3">
+                  <label
+                    htmlFor={`branch_${index}`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Branch
+                  </label>
+                  <select
+                    id={`branch_${index}`}
+                    name="branch"
+                    value={course.branch}
+                    onChange={(e) => handleChange(index, e)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  >
+                    <option value="">Select Branch</option>
+                    <option value="Comps">Comps</option>
+                    <option value="IT">IT</option>
+                    <option value="AIDS">AIDS</option>
+                    <option value="EXTC">EXTC</option>
+                  </select>
+                </div>
+
+                <div className="w-full sm:w-1/2 px-3">
+                  <label
+                    htmlFor={`academic_year_${index}`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Academic Year
+                  </label>
+                  <select
+                    id={`academic_year_${index}`}
+                    name="academic_year"
+                    value={course.academic_year}
+                    onChange={(e) => handleChange(index, e)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  >
+                    <option value="">Select Year</option>
+                    {yearList.map((year, yearIndex) => (
+                      <option key={yearIndex} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap -mx-3 mb-4">
+                <div className="w-full px-3">
+                  <label
+                    htmlFor={`course_code_${index}`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Course Code
+                  </label>
+                  <input
+                    type="text"
+                    id={`course_code_${index}`}
+                    name="course_code"
+                    value={course.course_code}
+                    onChange={(e) => handleChange(index, e)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
 
           <button
             type="button"
