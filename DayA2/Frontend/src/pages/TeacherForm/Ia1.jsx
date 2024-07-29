@@ -8,7 +8,7 @@ const Ia1 = () => {
         { clgId: 'CLG-003', name: 'Michael Brown', division: 'C', q1a: '88', q1b: '82', q1c: '91', q2: '89', q3: '350', q4: '13', q5: '13', isEditing: false },
     ]);
     const [isCOEditing, setIsCOEditing] = useState(false);
-    const [coValues, setCOValues] = useState({ CO1: 'CO1', CO2: 'CO1', CO3: 'CO2', CO4: 'CO3', CO5: 'CO4', CO6: 'CO5',CO7:'CO5' });
+    const [coValues, setCOValues] = useState({ CO1: 'CO1', CO2: 'CO1', CO3: 'CO2', CO4: 'CO3', CO5: 'CO4', CO6: 'CO5', CO7: 'CO5' });
 
     const handleEdit = (index) => {
         const newData = [...data];
@@ -57,7 +57,6 @@ const Ia1 = () => {
     };
 
     const downloadTableAsExcel = () => {
-        // Prepare data with line breaks
         const formattedData = data.map(item => ({
             clgId: item.clgId,
             name: item.name,
@@ -71,50 +70,41 @@ const Ia1 = () => {
             q5: item.q5,
             Total: Number(item.q1a) + Number(item.q1b) + Number(item.q1c) + Number(item.q2) + Number(item.q3) + Number(item.q4) + Number(item.q5),
         }));
-    
-        // Create a worksheet from the formatted data
+
         const ws = XLSX.utils.json_to_sheet(formattedData);
-    
-        // Add subheader rows
+
         const headerRow = ["", "", "", "Q1a", "Q1b", "Q1c", "Q2", "Q3", "Q4", "Q5", "Total"];
         const subHeaderRow = ["", "", "", coValues.CO1, coValues.CO2, coValues.CO3, coValues.CO4, coValues.CO5, coValues.CO6, coValues.CO7, ""];
-    
-        // Convert header rows to sheet format
+
         XLSX.utils.sheet_add_aoa(ws, [headerRow], { origin: 'A1' });
         XLSX.utils.sheet_add_aoa(ws, [subHeaderRow], { origin: 'A2' });
         XLSX.utils.sheet_add_json(ws, formattedData, { skipHeader: true, origin: "A3" });
-    
-        // Adjust column widths to accommodate line breaks
+
         ws['!cols'] = [
-            { wpx: 100 }, // Width for CLG-Id
-            { wpx: 150 }, // Width for Name
-            { wpx: 100 }, // Width for Division
-            { wpx: 80 },  // Width for Q1a
-            { wpx: 80 },  // Width for Q1b
-            { wpx: 80 },  // Width for Q1c
-            { wpx: 80 },  // Width for Q2
-            { wpx: 80 },  // Width for Q3
-            { wpx: 80 },  // Width for Q4
-            { wpx: 80 },  // Width for Q5
-            { wpx: 120 }, // Width for CO1
-            { wpx: 120 }, // Width for CO2
-            { wpx: 120 }, // Width for CO3
-            { wpx: 120 }, // Width for CO4
-            { wpx: 120 }, // Width for CO5
-            { wpx: 120 }, // Width for CO6
-            { wpx: 120 }, // Width for CO7
+            { wpx: 100 },
+            { wpx: 150 },
+            { wpx: 100 },
+            { wpx: 80 },
+            { wpx: 80 },
+            { wpx: 80 },
+            { wpx: 80 },
+            { wpx: 80 },
+            { wpx: 80 },
+            { wpx: 80 },
+            { wpx: 120 },
+            { wpx: 120 },
+            { wpx: 120 },
+            { wpx: 120 },
+            { wpx: 120 },
+            { wpx: 120 },
+            { wpx: 120 },
         ];
-    
-        // Create a workbook and append the worksheet
+
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "IA1 Data");
-    
-        // Write the file
+
         XLSX.writeFile(wb, "IA1_Data.xlsx");
     };
-    
-    
-    
 
     const handleEditCO = () => {
         setIsCOEditing(true);
@@ -153,250 +143,206 @@ const Ia1 = () => {
                     Download
                 </button>
             </div>
-            <table className="w-full text-sm text-left rtl:text-right text-black bg-white">
-                <thead className="text-xs text-black uppercase bg-gray-100">
+            <table className="w-full text-sm text-left rtl:text-right text-black bg-white border border-collapse border-black">
+                <thead className="text-xs text-black uppercase bg-white-100 border border-black">
                     <tr>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Sr.No</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">CLG-Id</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Name</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Division</th>
-                        <th scope="col" colSpan="3" className="px-6 py-3 text-center">Q1</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Q2</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Q3</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Q4</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Q5</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Total</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3">Actions</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Sr.No</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">CLG-Id</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Name</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Division</th>
+                        <th scope="col" colSpan="3" className="px-6 py-3 text-center border border-black">Q1</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q2</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q3</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q4</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q5</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Total</th>
+                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Actions</th>
                     </tr>
                     <tr>
-                        <th scope="col" className="px-6 py-3 text-center">Q1a</th>
-                        <th scope="col" className="px-6 py-3 text-center">Q1b</th>
-                        <th scope="col" className="px-6 py-3 text-center">Q1c</th>
+                        <th scope="col" className="px-6 py-3 text-center border border-black">Q1a</th>
+                        <th scope="col" className="px-6 py-3 text-center border border-black">Q1b</th>
+                        <th scope="col" className="px-6 py-3 text-center border border-black">Q1c</th>
                     </tr>
                     <tr>
-                        <th scope="col" className="px-6 py-3"></th>
-                        <th scope="col" className="px-6 py-3"></th>
-                        <th scope="col" className="px-6 py-3"></th>
-                        <th scope="col" className="px-6 py-3"></th>
-                       
-                        {isCOEditing ? (
-                            <>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO1}
-                                        onChange={(e) => handleCOChange('CO1', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                        <th scope="col" className="px-6 py-3 border border-black"></th>
+                        <th scope="col" className="px-6 py-3 border border-black"></th>
+                        <th scope="col" className="px-6 py-3 border border-black"></th>
+                        <th scope="col" className="px-6 py-3 border border-black"></th>
+                        {Object.keys(coValues).map(coKey => (
+                            isCOEditing ? (
+                                <th key={coKey} scope="col" className="px-6 py-3 text-center border border-black">
+                                    <input 
+                                        type="text" 
+                                        value={coValues[coKey]} 
+                                        onChange={(e) => handleCOChange(coKey, e.target.value)} 
+                                        className="text-center"
                                     />
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO2}
-                                        onChange={(e) => handleCOChange('CO2', e.target.value)}
-                                        className="border border-gray-300 p-1"
-                                    />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO3}
-                                        onChange={(e) => handleCOChange('CO3', e.target.value)}
-                                        className="border border-gray-300 p-1"
-                                    />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO4}
-                                        onChange={(e) => handleCOChange('CO4', e.target.value)}
-                                        className="border border-gray-300 p-1"
-                                    />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO5}
-                                        onChange={(e) => handleCOChange('CO5', e.target.value)}
-                                        className="border border-gray-300 p-1"
-                                    />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO6}
-                                        onChange={(e) => handleCOChange('CO6', e.target.value)}
-                                        className="border border-gray-300 p-1"
-                                    />
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-center">
-                                    <input
-                                        type="text"
-                                        value={coValues.CO7}
-                                        onChange={(e) => handleCOChange('CO7', e.target.value)}
-                                        className="border border-gray-300 p-1"
-                                    />
-                                </th>
-                            </>
-                        ) : (
-                            <>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO1}</th>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO2}</th>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO3}</th>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO4}</th>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO5}</th>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO6}</th>
-                                <th scope="col" className="px-6 py-3 text-center">{coValues.CO7}</th>
-                            </>
-                        )}
-                        <th scope="col" className="px-6 py-3"></th>
-                        <th scope="col" className="px-6 py-3"> {isCOEditing ? (
-                                <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={handleSaveCO}>Save</button>
                             ) : (
-                                <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={handleEditCO}>Edit</button>
+                                <th key={coKey} scope="col" className="px-6 py-3 text-center border border-black">
+                                    {coValues[coKey]}
+                                </th>
+                            )
+                        ))}
+                        <th scope="col" className="px-6 py-3 border border-black"></th>
+                        <th scope="col" className="px-6 py-3 border border-black">
+                            {isCOEditing ? (
+                                <button 
+                                    className="bg-blue-500 text-white px-2 py-1 rounded" 
+                                    onClick={handleSaveCO}
+                                >
+                                    Save
+                                </button>
+                            ) : (
+                                <button 
+                                    className="bg-blue-500 text-white px-2 py-1 rounded" 
+                                    onClick={handleEditCO}
+                                >
+                                    Edit
+                                </button>
                             )}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     {data.map((item, index) => (
-                        <tr key={index} className="bg-white border-b">
-                            <td className="px-6 py-4">{index + 1}</td>
-                            <td className="px-6 py-4">
+                        <tr key={index} className="bg-white border-b border-black">
+                            <td className="px-6 py-4 border border-black">{index + 1}</td>
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.clgId}
-                                        onChange={(e) => handleChange(index, 'clgId', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.clgId} 
+                                        onChange={(e) => handleChange(index, 'clgId', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.clgId
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.name}
-                                        onChange={(e) => handleChange(index, 'name', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.name} 
+                                        onChange={(e) => handleChange(index, 'name', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.name
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.division}
-                                        onChange={(e) => handleChange(index, 'division', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.division} 
+                                        onChange={(e) => handleChange(index, 'division', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.division
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q1a}
-                                        onChange={(e) => handleChange(index, 'q1a', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q1a} 
+                                        onChange={(e) => handleChange(index, 'q1a', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q1a
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q1b}
-                                        onChange={(e) => handleChange(index, 'q1b', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q1b} 
+                                        onChange={(e) => handleChange(index, 'q1b', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q1b
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q1c}
-                                        onChange={(e) => handleChange(index, 'q1c', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q1c} 
+                                        onChange={(e) => handleChange(index, 'q1c', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q1c
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q2}
-                                        onChange={(e) => handleChange(index, 'q2', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q2} 
+                                        onChange={(e) => handleChange(index, 'q2', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q2
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q3}
-                                        onChange={(e) => handleChange(index, 'q3', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q3} 
+                                        onChange={(e) => handleChange(index, 'q3', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q3
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q4}
-                                        onChange={(e) => handleChange(index, 'q4', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q4} 
+                                        onChange={(e) => handleChange(index, 'q4', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q4
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={item.q5}
-                                        onChange={(e) => handleChange(index, 'q5', e.target.value)}
-                                        className="border border-gray-300 p-1"
+                                    <input 
+                                        type="text" 
+                                        value={item.q5} 
+                                        onChange={(e) => handleChange(index, 'q5', e.target.value)} 
+                                        className="text-center"
                                     />
                                 ) : (
                                     item.q5
                                 )}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {Number(item.q1a) + Number(item.q1b) + Number(item.q1c) + Number(item.q2) + Number(item.q3) + Number(item.q4) + Number(item.q5)}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 border border-black">
                                 {item.isEditing ? (
-                                    <button
+                                    <button 
+                                        className="bg-blue-500 text-white px-2 py-1 rounded" 
                                         onClick={() => handleSave(index)}
-                                        className="bg-green-500 text-white px-2 py-1 rounded"
                                     >
                                         Save
                                     </button>
                                 ) : (
-                                    <button
+                                    <button 
+                                        className="bg-blue-500 text-white px-2 py-1 rounded" 
                                         onClick={() => handleEdit(index)}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded"
                                     >
                                         Edit
                                     </button>
