@@ -34,7 +34,7 @@ function ProfileDropdown({ email, onSignOut }) {
       </div>
       <MenuItems
         transition
-        className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+        className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
       >
         <MenuItem>
           <NavLink
@@ -179,7 +179,7 @@ export default function Navbar() {
                           <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                             Form
                           </MenuButton>
-                          <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                             {formNavigation.map((item) => (
                               <MenuItem key={item.name}>
                                 {({ active }) => (
@@ -201,7 +201,7 @@ export default function Navbar() {
                           <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                             Curriculum
                           </MenuButton>
-                          <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                             {formCurriculum.map((item) => (
                               <MenuItem key={item.name}>
                                 {({ active }) => (
@@ -232,8 +232,10 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-          {token && user_id !== 0 && (
+         
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            {token && user_id !== 0 ? (
+              <>
               <button
                 type="button"
                 className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
@@ -242,8 +244,24 @@ export default function Navbar() {
                 <BellIcon className="h-6 w-6" aria-hidden="true" />
               </button>
               <ProfileDropdown email={email} onSignOut={handleSignOut} />
-            </div>
+              </>
+            ) : (
+            <>
+            <NavLink
+              to="/login"
+              className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+            >
+              Login
+            </NavLink>
+            <NavLink
+              to="/register"
+              className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+            >
+              Register
+            </NavLink>
+          </>
           )}
+            </div>
         </div>
       </div>
 
@@ -271,7 +289,7 @@ export default function Navbar() {
                     <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                       Form
                     </MenuButton>
-                    <MenuItems className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                    <MenuItems className="absolute right-0 z-50 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                       {formNavigation.map((item) => (
                         <MenuItem key={item.name}>
                           {({ active }) => (
@@ -294,7 +312,7 @@ export default function Navbar() {
                     <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                       Curriculum
                     </MenuButton>
-                    <MenuItems className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                    <MenuItems className="absolute right-0 z-50 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                       {formCurriculum.map((item) => (
                         <MenuItem key={item.name}>
                           {({ active }) => (

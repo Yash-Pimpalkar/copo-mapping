@@ -25,6 +25,22 @@ app.use("/api/usercourse",UserCourseRoute)
 app.use("/api/cos",cosRoute)
 app.use("/api/pos",posRoute)
 app.use("/api/copo",copoRoute)
+
+
+
+import bcrypt from "bcrypt"
+
+// Hashing the password asynchronously
+const pass = '12345678'; // Replace with the actual password
+
+const salt = bcrypt.genSaltSync(10);
+const hash = bcrypt.hashSync(pass, salt);
+
+console.log(`${hash}`)
+
+const isPassCorrect = bcrypt.compareSync(pass, hash);
+console.log(isPassCorrect)
+
 app.listen(port, () => {
     console.log("Server is Running on PORT :", port);
   });
