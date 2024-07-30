@@ -129,6 +129,7 @@ export default function Navbar() {
     { name: 'Semester', href: '/sem', userTypes: [2] },
     { name: 'Practical', href: '/practical', userTypes: [2] },
     { name: 'Assignment', href: '/assg', userTypes: [2] },
+    { name: 'copo', href: '/coposhow', userTypes: [2] },
   ];
 
   const resultNavigation = [

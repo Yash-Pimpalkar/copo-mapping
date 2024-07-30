@@ -16,31 +16,37 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `course`
+-- Table structure for table `co_ia`
 --
 
-DROP TABLE IF EXISTS `course`;
+DROP TABLE IF EXISTS `co_ia`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `course` (
-  `courseid` int NOT NULL AUTO_INCREMENT,
-  `coursecode` varchar(255) NOT NULL,
-  `course_name` varchar(255) NOT NULL,
-  `created_time` varchar(255) NOT NULL,
-  PRIMARY KEY (`courseid`),
-  UNIQUE KEY `coursecode_UNIQUE` (`coursecode`),
-  UNIQUE KEY `course_name_UNIQUE` (`course_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `co_ia` (
+  `idco_ia` int NOT NULL AUTO_INCREMENT,
+  `usercorseid` int NOT NULL,
+  `q1a` varchar(45) DEFAULT NULL,
+  `q1b` varchar(45) DEFAULT NULL,
+  `q1c` varchar(45) DEFAULT NULL,
+  `q2` varchar(45) DEFAULT NULL,
+  `q3` varchar(45) DEFAULT NULL,
+  `q4` varchar(45) DEFAULT NULL,
+  `q5` varchar(45) DEFAULT NULL,
+  `ia1` int DEFAULT NULL,
+  `ia2` int DEFAULT NULL,
+  PRIMARY KEY (`idco_ia`),
+  KEY `usercourse_foreignkey_idx` (`usercorseid`),
+  CONSTRAINT `usercourse_foreignkey` FOREIGN KEY (`usercorseid`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `course`
+-- Dumping data for table `co_ia`
 --
 
-LOCK TABLES `course` WRITE;
-/*!40000 ALTER TABLE `course` DISABLE KEYS */;
-INSERT INTO `course` VALUES (1,'CSC701','Machine Leaning','2024-07-23 16:21:53.442'),(2,'CSC702','Big data Anylytics','2024-07-23 16:21:53.442'),(3,'CSDC7011','Machine Vision','2024-07-23 16:32:08.758'),(4,'CSDC7012','Quantum Computing','2024-07-23 16:32:08.758');
-/*!40000 ALTER TABLE `course` ENABLE KEYS */;
+LOCK TABLES `co_ia` WRITE;
+/*!40000 ALTER TABLE `co_ia` DISABLE KEYS */;
+/*!40000 ALTER TABLE `co_ia` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-24 10:51:09
+-- Dump completed on 2024-07-30 14:03:37

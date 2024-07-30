@@ -15,7 +15,7 @@ import UserSelection from './component/Admin/UserSelection/UserSelection';
 import User_course from './pages/TeacherRegistration/User_course';
 import RegistrationForm from './pages/TeacherRegistration/RegisterForm';
 import ShowCos from './pages/TeacherRegistration/ShowCos';
-
+import Coposhow from './pages/TeacherForm/CoposhowComponent';
 function App() {
   const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
@@ -59,6 +59,7 @@ function App() {
               <Route path='/registerform' element={<RegistrationForm uid={user_id}/>} />
               <Route path='/usercourse' element={<User_course uid={user_id}/>} />
               <Route path='/cos' element={<ShowCos />} />
+              <Route path='/coposhow' element={<Coposhow  uid={user_id}/>} />
               {/* Add other routes for usertype === 2 here */}
             </>
           ) : usertype == 3 ? (

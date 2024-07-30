@@ -9,6 +9,8 @@ import loginRoute from "./routes/login.js"
 import courseRoute from "./routes/course_registration.js"
 import UserCourseRoute from "./routes/user_course.js"
 import cosRoute from "./routes/cos.js"
+import posRoute from "./routes/pos.js"
+import copoRoute from "./routes/coporoutes.js"
 const port = 8081;
 
 app.use(cors())
@@ -21,6 +23,8 @@ app.use("/api/login",loginRoute)
 app.use("/api/course",courseRoute)
 app.use("/api/usercourse",UserCourseRoute)
 app.use("/api/cos",cosRoute)
+app.use("/api/pos",posRoute)
+app.use("/api/copo",copoRoute)
 app.listen(port, () => {
     console.log("Server is Running on PORT :", port);
   });

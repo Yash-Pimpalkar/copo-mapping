@@ -23,19 +23,19 @@ DROP TABLE IF EXISTS `user_course`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_course` (
-  `usercouse_id` int NOT NULL AUTO_INCREMENT,
+  `usercourse_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `course_id` int DEFAULT NULL,
   `semester` int DEFAULT NULL,
   `academic_year` varchar(255) DEFAULT NULL,
   `branch` varchar(255) DEFAULT NULL,
   `co_count` int DEFAULT NULL,
-  PRIMARY KEY (`usercouse_id`),
+  PRIMARY KEY (`usercourse_id`),
   KEY `user_idx_idx` (`user_id`),
   KEY `course_idx_idx` (`course_id`),
   CONSTRAINT `course_idx` FOREIGN KEY (`course_id`) REFERENCES `course` (`courseid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_idx` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `user_idx` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,6 +44,7 @@ CREATE TABLE `user_course` (
 
 LOCK TABLES `user_course` WRITE;
 /*!40000 ALTER TABLE `user_course` DISABLE KEYS */;
+INSERT INTO `user_course` VALUES (1,5,1,7,'2023-2024','Comps',4),(2,5,2,7,'2023-2024','Comps',1),(3,5,5,5,'2023-2024','Comps',1);
 /*!40000 ALTER TABLE `user_course` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-24 10:51:09
+-- Dump completed on 2024-07-30 14:03:36

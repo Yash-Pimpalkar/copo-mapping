@@ -25,26 +25,27 @@ DROP TABLE IF EXISTS `co_po`;
 CREATE TABLE `co_po` (
   `co_po_id` int NOT NULL AUTO_INCREMENT,
   `co_id` int NOT NULL,
-  `po_1` int DEFAULT NULL,
-  `po_2` int DEFAULT NULL,
-  `po_3` int DEFAULT NULL,
-  `po_4` int DEFAULT NULL,
-  `po_5` int DEFAULT NULL,
-  `po_6` int DEFAULT NULL,
-  `po_7` int DEFAULT NULL,
-  `po_8` int DEFAULT NULL,
-  `po_9` int DEFAULT NULL,
-  `po_10` int DEFAULT NULL,
-  `po_11` int DEFAULT NULL,
-  `po_12` int DEFAULT NULL,
-  `pso_1` int DEFAULT NULL,
-  `pso_2` int DEFAULT NULL,
-  `pso_3` int DEFAULT NULL,
-  `pso_4` int DEFAULT NULL,
+  `po_1` float DEFAULT NULL,
+  `po_2` float DEFAULT NULL,
+  `po_3` float DEFAULT NULL,
+  `po_4` float DEFAULT NULL,
+  `po_5` float DEFAULT NULL,
+  `po_6` float DEFAULT NULL,
+  `po_7` float DEFAULT NULL,
+  `po_8` float DEFAULT NULL,
+  `po_9` float DEFAULT NULL,
+  `po_10` float DEFAULT NULL,
+  `po_11` float DEFAULT NULL,
+  `po_12` float DEFAULT NULL,
+  `pso_1` float DEFAULT NULL,
+  `pso_2` float DEFAULT NULL,
+  `pso_3` float DEFAULT NULL,
+  `pso_4` float DEFAULT NULL,
+  `avg` float DEFAULT NULL,
   PRIMARY KEY (`co_po_id`),
   KEY `co_po_idx_idx` (`co_id`),
   CONSTRAINT `co_po_idx` FOREIGN KEY (`co_id`) REFERENCES `cos` (`idcos`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -53,6 +54,7 @@ CREATE TABLE `co_po` (
 
 LOCK TABLES `co_po` WRITE;
 /*!40000 ALTER TABLE `co_po` DISABLE KEYS */;
+INSERT INTO `co_po` VALUES (1,1,2,NULL,2,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(2,2,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,3,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(4,4,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `co_po` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -65,4 +67,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-24 10:51:10
+-- Dump completed on 2024-07-30 14:03:36
