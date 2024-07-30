@@ -93,7 +93,7 @@ const User_course = ({ uid }) => {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Index</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Course ID</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Code</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Year</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
@@ -114,7 +114,7 @@ const User_course = ({ uid }) => {
                   {item.user_id}
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-500">
-                  {item.coursecode}
+                  {item.course_name}
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-500">
                   {editIndex === index ? (
