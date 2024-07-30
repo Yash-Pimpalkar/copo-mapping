@@ -130,7 +130,10 @@ const CoposhowComponent = ({ uid }) => {
             <thead className="bg-gray-50">
               <tr>
                 {headers.map(header => (
-                  <th key={header} className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'CO Name' ? 'sticky left-0 bg-gray-50 z-10' : ''}`}>
+                  <th
+                    key={header}
+                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'CO Name' ? 'sticky left-0 bg-gray-50 z-10' : ''} ${header === 'Average' ? 'sticky right-0 bg-gray-50 z-10' : ''}`}
+                  >
                     {header}
                   </th>
                 ))}
@@ -175,7 +178,7 @@ const CoposhowComponent = ({ uid }) => {
                 </tr>
               ))}
               <tr className="bg-gray-50 font-semibold">
-                <td className="px-6 py-4 whitespace-nowrap text-sm">Average</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">Average</td>
                 {[...Array(12)].map((_, poIndex) => (
                   <td key={`avg_po_${poIndex + 1}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {averages[`po_${poIndex + 1}`]}
