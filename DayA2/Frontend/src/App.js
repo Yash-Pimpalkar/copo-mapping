@@ -16,6 +16,9 @@ import User_course from './pages/TeacherRegistration/User_course';
 import RegistrationForm from './pages/TeacherRegistration/RegisterForm';
 import ShowCos from './pages/TeacherRegistration/ShowCos';
 import Coposhow from './pages/TeacherForm/CoposhowComponent';
+import Semester from './pages/TeacherForm/Semester';
+
+
 function App() {
   const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
@@ -55,6 +58,7 @@ function App() {
               <Route path="/ia1" element={<Ia1 />} />
               <Route path="/ia2" element={<Ia2 />} />
               <Route path="/practical" element={<Practical />} />
+              <Route path='/sem' element={<Semester/>} />
               <Route path="/userselection" element={<UserSelection />} />
               <Route path='/registerform' element={<RegistrationForm uid={user_id}/>} />
               <Route path='/usercourse' element={<User_course uid={user_id}/>} />

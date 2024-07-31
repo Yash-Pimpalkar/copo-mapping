@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 
-const Practical = () => {
+const Semester = () => {
   const initialData = [
     { name: "MHATRE JAY H", scores: [15, 14, 14, 15, 14, 14, 14, 14, 14, 14, 14] },
     { name: "RUPANWAR ROHAN N", scores: [15, 15, 14, 14, 14, 14, 14, 14, 14, 14, 14] },
@@ -35,8 +35,8 @@ const Practical = () => {
     })));
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "practical.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet2");
+    XLSX.writeFile(wb, "semester.xlsx");
   };
 
   const uploadCSV = (e) => {
@@ -83,7 +83,7 @@ const Practical = () => {
 
   return (
     <div className="relative overflow-x-auto" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-      <h1 className='text-3xl mb-6 text-blue-500 text-center mt-5'>Practical</h1>
+      <h1 className='text-3xl mb-6 text-blue-500 text-center mt-5'>Semester</h1>
       <div className="flex justify-between items-center mb-6">
         <label className="bg-blue-500 text-white ml-5 px-4 py-2 rounded cursor-pointer">
           Upload
@@ -109,9 +109,9 @@ const Practical = () => {
       <table className="w-full text-sm text-left rtl:text-right text-black bg-white border border-collapse border-black mb-20">
         <thead className="text-xs text-black uppercase bg-white-100 border border-black">
           <tr>
-            <th rowSpan="2" className="px-6 py-3 border border-black">Name of Students</th>
-            <th colSpan="10" className="px-6 py-3 text-center border border-black">Experiments</th>
-            <th rowSpan="2" className="px-6 py-3 border border-black">Marks out of 15</th>
+            <th rowSpan="2" className="px-6 py-3 border border-black sticky">Name of Students</th>
+            <th colSpan="10" className="px-6 py-3 text-center border border-black">Semester Questions</th>
+            <th rowSpan="2" className="px-6 py-3 border border-black">Marks out of 80</th>
             <th rowSpan="2" className="px-6 py-3 border border-black">Actions
               {isCOEditing ? (
                 <button
@@ -210,4 +210,4 @@ const Practical = () => {
   );
 };
 
-export default Practical;
+export default Semester;
