@@ -130,6 +130,7 @@ export default function Navbar() {
     { name: 'Practical', href: '/practical', userTypes: [2] },
     { name: 'Assignment', href: '/assg', userTypes: [2] },
     { name: 'copo', href: '/coposhow', userTypes: [2] },
+    { name: 'demoia1', href: '/demo', userTypes: [2] },
   ];
 
   const resultNavigation = [
