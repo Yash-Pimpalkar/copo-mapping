@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.38
+-- Server version	8.0.37
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,28 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `branch`
+-- Table structure for table `upload_ia`
 --
 
-DROP TABLE IF EXISTS `branch`;
+DROP TABLE IF EXISTS `upload_ia`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `branch` (
-  `idbranch` int NOT NULL AUTO_INCREMENT,
-  `branchname` varchar(255) NOT NULL,
-  PRIMARY KEY (`idbranch`),
-  UNIQUE KEY `branchname_UNIQUE` (`branchname`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `upload_ia` (
+  `idupload_ia` int NOT NULL AUTO_INCREMENT,
+  `sid` int NOT NULL,
+  `qid` int NOT NULL,
+  `marks` int NOT NULL,
+  PRIMARY KEY (`idupload_ia`),
+  KEY `sid_idx_idx` (`sid`),
+  KEY `qid_idx` (`qid`),
+  CONSTRAINT `qid` FOREIGN KEY (`qid`) REFERENCES `table_ia` (`idtable_ia`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sid_idx` FOREIGN KEY (`sid`) REFERENCES `copo_students_details` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `branch`
+-- Dumping data for table `upload_ia`
 --
 
-LOCK TABLES `branch` WRITE;
-/*!40000 ALTER TABLE `branch` DISABLE KEYS */;
-INSERT INTO `branch` VALUES (3,'AIDS'),(4,'AIML'),(1,'COMPUTER'),(2,'IT'),(5,'MECATRONICS');
-/*!40000 ALTER TABLE `branch` ENABLE KEYS */;
+LOCK TABLES `upload_ia` WRITE;
+/*!40000 ALTER TABLE `upload_ia` DISABLE KEYS */;
+/*!40000 ALTER TABLE `upload_ia` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -49,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-30 14:03:35
+-- Dump completed on 2024-08-02 10:44:02

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.38
+-- Server version	8.0.37
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,36 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `user_course`
+-- Table structure for table `table_ia`
 --
 
-DROP TABLE IF EXISTS `user_course`;
+DROP TABLE IF EXISTS `table_ia`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_course` (
-  `usercourse_id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
-  `course_id` int DEFAULT NULL,
-  `semester` int DEFAULT NULL,
-  `academic_year` varchar(255) DEFAULT NULL,
-  `branch` varchar(255) DEFAULT NULL,
-  `co_count` int DEFAULT NULL,
-  PRIMARY KEY (`usercourse_id`),
-  KEY `user_idx_idx` (`user_id`),
-  KEY `course_idx_idx` (`course_id`),
-  CONSTRAINT `course_idx` FOREIGN KEY (`course_id`) REFERENCES `course` (`courseid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_idx` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `table_ia` (
+  `idtable_ia` int NOT NULL AUTO_INCREMENT,
+  `qname` varchar(45) NOT NULL,
+  `coname` varchar(45) NOT NULL,
+  `usercourseid` int NOT NULL,
+  `marks` int NOT NULL,
+  PRIMARY KEY (`idtable_ia`),
+  UNIQUE KEY `usercourseid_UNIQUE` (`usercourseid`),
+  KEY `usercourseid_IA1_idx` (`usercourseid`),
+  CONSTRAINT `usercourseid_IA1` FOREIGN KEY (`usercourseid`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user_course`
+-- Dumping data for table `table_ia`
 --
 
-LOCK TABLES `user_course` WRITE;
-/*!40000 ALTER TABLE `user_course` DISABLE KEYS */;
-INSERT INTO `user_course` VALUES (1,5,1,7,'2023-2024','Comps',4),(2,5,2,7,'2023-2024','Comps',1),(3,5,5,5,'2023-2024','Comps',1);
-/*!40000 ALTER TABLE `user_course` ENABLE KEYS */;
+LOCK TABLES `table_ia` WRITE;
+/*!40000 ALTER TABLE `table_ia` DISABLE KEYS */;
+/*!40000 ALTER TABLE `table_ia` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -57,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-30 14:03:36
+-- Dump completed on 2024-08-02 10:44:01

@@ -4,7 +4,7 @@ import { connection as db } from "../config/dbConfig.js";
 export const showCourse = (req, res) => {
   const { uid} = req.params;
 
-  const sql = `select u.usercourse_id, u.user_id, c.course_name,u.course_id
+  const sql = `select u.usercourse_id, u.user_id, c.course_name,u.course_id,u.academic_year
 from user_course as u inner join
 course as c on u.course_id=c.courseid where u.user_id=?`;
   db.query(sql, uid, (err, result) => {

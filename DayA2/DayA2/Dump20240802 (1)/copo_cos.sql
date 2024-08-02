@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.38
+-- Server version	8.0.37
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -31,7 +31,7 @@ CREATE TABLE `cos` (
   PRIMARY KEY (`idcos`),
   KEY `usercourse_idx_idx` (`usercourse_id`),
   CONSTRAINT `usercourse_idx` FOREIGN KEY (`usercourse_id`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `cos` (
 
 LOCK TABLES `cos` WRITE;
 /*!40000 ALTER TABLE `cos` DISABLE KEYS */;
-INSERT INTO `cos` VALUES (1,1,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-25 21:38:58'),(2,1,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-07-25 21:38:58'),(3,1,'CO3','To demonstrate ensemble techniques to combine predictions from different models. ','2024-07-25 21:38:58'),(4,1,'CO4','To demonstrate the dimensionality reduction techniques.','2024-07-25 21:38:58'),(5,3,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-26 16:01:01');
+INSERT INTO `cos` VALUES (1,1,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-25 21:38:58'),(2,1,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-07-25 21:38:58'),(3,1,'CO3','To demonstrate ensemble techniques to combine predictions from different models. ','2024-07-25 21:38:58'),(4,1,'CO4','To demonstrate the dimensionality reduction techniques.','2024-07-25 21:38:58'),(5,3,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-26 16:01:01'),(10,6,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-08-01 10:51:07'),(11,6,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-08-01 10:51:07'),(12,6,'CO3','sdvkaj','2024-08-01 10:51:07'),(13,6,'CO4','asfasf','2024-08-01 10:51:07');
 /*!40000 ALTER TABLE `cos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-30 14:03:36
+-- Dump completed on 2024-08-02 10:44:00
