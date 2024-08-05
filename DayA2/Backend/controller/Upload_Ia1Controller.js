@@ -83,48 +83,61 @@ WHERE uc.usercourse_id IS NOT NULL`
   
 
 // Controller function to get IA data
+// export const showIaData = async (req, res) => {
+//   const userCourseId = req.params.uid;
+
+//   try {
+//     // Generate the list of qname columns
+//     const [colNamesResult] = await db.promise().query(`
+//       SELECT GROUP_CONCAT(DISTINCT CONCAT(
+//           'MAX(CASE WHEN ti.qname = \'', qname, '\' THEN ui.marks END) AS \`', qname, '\`'
+//       )) AS colNames 
+//       FROM table_ia ti
+//       JOIN user_course uc ON ti.usercourseid = uc.usercourse_id
+//       WHERE uc.usercourse_id = ?
+//     `, [userCourseId]);
+
+//     const colNames = colNamesResult[0].colNames;
+
+//     if (!colNames) {
+//       return res.status(404).send('No questions found for this course.');
+//     }
+
+//     // Construct the final query
+//     const sqlQuery = `
+//       SELECT
+//           csd.sid, csd.student_name, csd.stud_clg_id, ${colNames}
+//       FROM upload_ia ui
+//       JOIN table_ia ti ON ui.qid = ti.idtable_ia
+//       JOIN user_course uc ON ti.usercourseid = uc.usercourse_id
+//       JOIN copo_students_details csd ON ui.sid = csd.sid
+//       WHERE uc.usercourse_id = ?
+//       GROUP BY csd.sid, csd.student_name, csd.stud_clg_id
+//     `;
+
+//     // Execute the final query
+//     const [results] = await db.promise().query(sqlQuery, [userCourseId]);
+
+//     res.status(200).json(results);
+//   } catch (error) {
+//     console.error('Error fetching IA data:', error);
+//     res.status(500).send('Server error');
+//   }
+// };
+
 export const showIaData = async (req, res) => {
   const userCourseId = req.params.uid;
-
-  try {
-    // Generate the list of qname columns
-    const [colNamesResult] = await db.promise().query(`
-      SELECT GROUP_CONCAT(DISTINCT CONCAT(
-          'MAX(CASE WHEN ti.qname = \'', qname, '\' THEN ui.marks END) AS \`', qname, '\`'
-      )) AS colNames 
-      FROM table_ia ti
-      JOIN user_course uc ON ti.usercourseid = uc.usercourse_id
-      WHERE uc.usercourse_id = ?
-    `, [userCourseId]);
-
-    const colNames = colNamesResult[0].colNames;
-
-    if (!colNames) {
-      return res.status(404).send('No questions found for this course.');
+ 
+  const sql='CALL GetStudentMarksByCourseID(?)';
+  db.query(sql,userCourseId,(error,results)=>{
+    if(error){
+      console.error('Error fetching IA data:', error);
+      res.status(500).send('Server error');
     }
-
-    // Construct the final query
-    const sqlQuery = `
-      SELECT
-          csd.sid, csd.student_name, csd.stud_clg_id, ${colNames}
-      FROM upload_ia ui
-      JOIN table_ia ti ON ui.qid = ti.idtable_ia
-      JOIN user_course uc ON ti.usercourseid = uc.usercourse_id
-      JOIN copo_students_details csd ON ui.sid = csd.sid
-      WHERE uc.usercourse_id = ?
-      GROUP BY csd.sid, csd.student_name, csd.stud_clg_id
-    `;
-
-    // Execute the final query
-    const [results] = await db.promise().query(sqlQuery, [userCourseId]);
-
-    res.status(200).json(results);
-  } catch (error) {
-    console.error('Error fetching IA data:', error);
-    res.status(500).send('Server error');
-  }
+    res.status(200).json(results[0]);
+  })
+  
 };
-
 
 export const IaCOsName = (req,res)=> {
   const userCourseId = req.params.uid;
@@ -134,8 +147,66 @@ export const IaCOsName = (req,res)=> {
       console.error('Error fetching IA data:', error);
       res.status(500).send('Server error');
     }
+    console.log(results)
     res.status(200).json(results);
   })
 }
 
+
+
+export const IaUpload = async (req, res) => {
+  const updates = req.body; // Expecting an array of update objects
+  console.log('Received updates:', updates);
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE upload_ia SET marks = ? WHERE sid = ? AND qid = ?';
+  const queryValues = updates.map(update => [
+    parseInt(update.marks, 10), // Convert marks to integer
+    update.sid,
+    update.qid
+  ]);
+
+  // Log the queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Use Promise.all to handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        console.log(`Executing query: ${sql} with values: ${values}`);
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error); // More detailed error logging
+            return reject(error);
+          }
+          console.log('Query result:', results); // Log results of the query
+          resolve(results);
+        });
+      });
+    }));
+
+    // Send success response after all updates are complete
+    res.status(200).json('Marks updated successfully');
+  } catch (error) {
+    console.error('Error updating marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+
+
   
+
+
+
+
+  // Define the userCourseID
+
+
+
+
+

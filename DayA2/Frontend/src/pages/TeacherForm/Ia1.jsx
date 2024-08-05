@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api";
-import Pagination from "../../component/Pagination/Pagination"; // Import the Pagination component
+import Pagination from "../../component/Pagination/Pagination";
+import * as XLSX from "xlsx";
 
 const Ia1 = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -10,9 +11,13 @@ const Ia1 = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [IaData, setIaData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Number of items per page
-  const [COsData,SetCOsData] = useState();
+  const [itemsPerPage] = useState(10);
+  const [COsData, setCOsData] = useState([]);
+  const [editingRow, setEditingRow] = useState(null);
+  const [marksData, setMarksData] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch courses and set distinct course names
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -33,21 +38,21 @@ const Ia1 = ({ uid }) => {
         console.error("Error fetching course data:", error);
       }
     };
-    
 
     if (uid) {
       fetchCourseData();
     }
   }, [uid]);
 
+  // Fetch IA data when the userCourseId changes
   useEffect(() => {
     const fetchIaData = async () => {
       if (userCourseId) {
         try {
           const res = await api.get(`/api/ia/${userCourseId}`);
           setIaData(res.data);
-          const res1 = await api.get(`/api/ia/cos${userCourseId}`);
-          SetCOsData(res1.data);
+          const res1 = await api.get(`/api/ia/cos/${userCourseId}`);
+          setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
         }
@@ -57,6 +62,7 @@ const Ia1 = ({ uid }) => {
     fetchIaData();
   }, [userCourseId]);
 
+  // Handle course selection change
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
     setSelectedCourse(selectedCourse);
@@ -64,6 +70,7 @@ const Ia1 = ({ uid }) => {
     setUserCourseId(null);
   };
 
+  // Handle year selection change
   const handleYearChange = (event) => {
     const selectedYear = event.target.value;
     setSelectedYear(selectedYear);
@@ -75,21 +82,28 @@ const Ia1 = ({ uid }) => {
     setUserCourseId(course?.usercourse_id || null);
   };
 
-  // Function to get unique question columns
+  // Get unique question columns from COsData
   const getQuestionColumns = () => {
-    const columns = [];
-    if (IaData.length > 0) {
-      const example = IaData[0];
-      Object.keys(example).forEach((key) => {
-        if (key.startsWith('Q')) {
-          columns.push(key);
-        }
-      });
-    }
-    return columns;
+    return COsData.map((data) => ({
+      id: data.idtable_ia,
+      qname: data.qname,
+      coname: data.coname,
+    }));
   };
 
   const questionColumns = getQuestionColumns();
+
+  // Function to calculate the total
+  const calculateTotal = (row) => {
+    const specialColumns = ['Q2', 'Q3', 'Q4', 'Q5'];
+    const values = specialColumns.map((col) => row[col] || 0);
+    const highestValues = values.sort((a, b) => b - a).slice(0, 3);
+    const remainingValues = questionColumns
+      .filter(col => !specialColumns.includes(col.qname))
+      .map(col => row[col.qname] || 0);
+    const total = highestValues.reduce((acc, value) => acc + value, 0) + remainingValues.reduce((acc, value) => acc + value, 0);
+    return total;
+  };
 
   // Pagination logic
   const totalItems = IaData.length;
@@ -102,11 +116,128 @@ const Ia1 = ({ uid }) => {
     setCurrentPage(pageNumber);
   };
 
+  // Handle the start of editing a row
+  const handleEditClick = (index) => {
+    setEditingRow(index);
+  };
+
+  // Handle saving changes to a row
+  const handleSaveClick = async (index) => {
+    const changes = [];
+  
+    questionColumns.forEach((col) => {
+      if (marksData[index] && marksData[index][col.qname] !== undefined) {
+        changes.push({
+          sid: IaData[index].sid,
+          qid: col.id,
+          marks: marksData[index][col.qname],
+        });
+      }
+    });
+  
+    try {
+      await updateMarks(changes);
+      console.log("Updated values:", changes);
+      setEditingRow(null);
+    } catch (error) {
+      console.error("Error saving IA data:", error);
+    }
+  };
+  
+  // Handle changes to input fields
+  const handleInputChange = (event, index, column) => {
+    const newData = [...IaData];
+    newData[index][column] = event.target.value;
+    setIaData(newData);
+
+    setMarksData((prevMarksData) => ({
+      ...prevMarksData,
+      [index]: {
+        ...prevMarksData[index],
+        [column]: event.target.value,
+      },
+    }));
+  };
+
+  // Handle file upload
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+  
+    reader.onload = async (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      setIaData(jsonData);
+  
+      const changes = [];
+  
+      jsonData.forEach((student) => {
+        COsData.forEach((col) => {
+          const marks = student[col.qname];
+          if (marks !== undefined) {
+            console.log(`idtable_ia: ${col.idtable_ia}, sid: ${student.sid}, marks: ${marks}`);
+            changes.push({
+              sid: student.sid,
+              qid: col.idtable_ia,
+              marks: marks,
+            });
+          }
+        });
+      });
+  
+      try {
+        await updateMarks(changes);
+      } catch (error) {
+        console.error("Error updating marks:", error);
+      }
+    };
+  
+    reader.readAsArrayBuffer(file);
+  };
+
+  const updateMarks = async (changes) => {
+    try {
+      const response = await api.put('/api/ia/', changes);
+      if (response.ok) {
+        console.log('Marks updated successfully');
+      } else {
+        console.error('Failed to update marks:');
+      }
+    } catch (error) {
+      console.error('Error updating marks:', error);
+    }
+  };
+  
+  // Handle file download
+  const handleFileDownload = () => {
+    const worksheet = XLSX.utils.json_to_sheet(IaData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "IA Data");
+    XLSX.writeFile(workbook, "ia_data.xlsx");
+  };
+
+  // Handle search input change
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  // Filter data based on search query
+  const filteredData = IaData.filter((item) => {
+    return (
+      item.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.sid.toString().includes(searchQuery.toLowerCase())
+    );
+  });
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-semibold mb-4">Select Course and Year</h1>
-        
+
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
           <div className="mb-4 md:mb-0 flex-1">
             <label
@@ -129,7 +260,7 @@ const Ia1 = ({ uid }) => {
               ))}
             </select>
           </div>
-          
+
           <div className="mb-4 md:mb-0 flex-1">
             <label
               htmlFor="year-select"
@@ -155,33 +286,195 @@ const Ia1 = ({ uid }) => {
           </div>
         </div>
 
+        {/* Upload, Search, and Download Controls */}
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4 items-center">
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              htmlFor="file-upload"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Upload File
+            </label>
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={handleFileUpload}
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              htmlFor="search-bar"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Search
+            </label>
+            <input
+              type="text"
+              id="search-bar"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by student name or ID"
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Download Data
+            </label>
+            <button
+              onClick={handleFileDownload}
+              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              Download
+            </button>
+          </div>
+        </div>
+
         {/* Display IA Data */}
-        {IaData.length > 0 && (
+        {filteredData.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">College ID</th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Student ID
+                  </th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Student Name
+                  </th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    College ID
+                  </th>
                   {questionColumns.map((col) => (
-                    <th key={col} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {col}
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.qname}
+                    </th>
+                  ))}
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Total
+                  </th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+                <tr>
+                  {questionColumns.map((col) => (
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.coname}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedData.map((student) => (
+                {filteredData.slice(startIndex, endIndex).map((student, index) => (
                   <tr key={student.sid}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.sid}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.student_name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.stud_clg_id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {editingRow === index ? (
+                        <input
+                          type="text"
+                          value={student.sid}
+                          onChange={(e) => handleInputChange(e, index, "sid")}
+                          className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                      ) : (
+                        student.sid
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {editingRow === index ? (
+                        <input
+                          type="text"
+                          value={student.student_name}
+                          onChange={(e) =>
+                            handleInputChange(e, index, "student_name")
+                          }
+                          className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                      ) : (
+                        student.student_name
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {editingRow === index ? (
+                        <input
+                          type="text"
+                          value={student.stud_clg_id}
+                          onChange={(e) =>
+                            handleInputChange(e, index, "stud_clg_id")
+                          }
+                          className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                      ) : (
+                        student.stud_clg_id
+                      )}
+                    </td>
                     {questionColumns.map((col) => (
-                      <td key={col} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {student[col] !== null ? student[col] : "N/A"}
+                      <td
+                        key={col.id}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                      >
+                        {editingRow === index ? (
+                          <input
+                            type="text"
+                            value={student[col.qname] || ""}
+                            onChange={(e) =>
+                              handleInputChange(e, index, col.qname)
+                            }
+                            className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          />
+                        ) : student[col.qname] !== null ? (
+                          student[col.qname]
+                        ) : (
+                          "N/A"
+                        )}
                       </td>
                     ))}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {calculateTotal(student)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {editingRow === index ? (
+                        <button
+                          onClick={() => handleSaveClick(index)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Save
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEditClick(index)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
