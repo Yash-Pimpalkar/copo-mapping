@@ -26,7 +26,7 @@ app.use("/api/usercourse",UserCourseRoute)
 app.use("/api/cos",cosRoute)
 app.use("/api/pos",posRoute)
 app.use("/api/copo",copoRoute)
-app.use("/api/ia1",Ia1Route)
+app.use("/api/ia",Ia1Route)
 
 app.listen(port, () => {
     console.log("Server is Running on PORT :", port);
