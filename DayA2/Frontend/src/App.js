@@ -53,7 +53,7 @@ function App() {
               <Route path="/coform" element={<Cos_reg />} />
               <Route path="/posform" element={<Pos_reg />} />
               <Route path="/courseform" element={<Course_reg />} />
-              <Route path="/ia1" element={<Ia1 />} />
+              <Route path="/ia1" element={<Ia1 uid={user_id} />} />
               <Route path="/ia2" element={<Ia2 />} />
               <Route path="/practical" element={<Practical />} />
               <Route path="/userselection" element={<UserSelection />} />
