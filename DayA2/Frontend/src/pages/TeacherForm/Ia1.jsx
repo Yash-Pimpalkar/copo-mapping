@@ -107,11 +107,22 @@ const Ia1 = ({ uid }) => {
     const q1Columns = ["Q1A", "Q1B", "Q1C"];
     const specialColumns = ["Q2", "Q3", "Q4", "Q5"];
 
-    // Parse the values for Q1 columns
-    const q1Values = q1Columns.map((col) => parseFloat(row[col]) || 0);
-    
-    // Parse the values for special columns
-    const specialValues = specialColumns.map((col) => parseFloat(row[col]) || 0);
+    // Parse and constrain the values for Q1 columns
+    const q1Values = q1Columns.map((col) => {
+        let value = parseFloat(row[col]) || 0;
+        if (col === "Q1c") {
+            value = Math.max(0, Math.min(value, 1)); // Q1c: 0 to 1
+        } else {
+            value = Math.max(0, Math.min(value, 2)); // Q1a and Q1b: 0 to 2
+        }
+        return value;
+    });
+
+    // Parse and constrain the values for special columns
+    const specialValues = specialColumns.map((col) => {
+        let value = parseFloat(row[col]) || 0;
+        return Math.max(0, Math.min(value, 5)); // Q2, Q3, Q4, Q5: 0 to 5
+    });
 
     // Get the highest three values from special columns
     const highestSpecialValues = specialValues.sort((a, b) => b - a).slice(0, 3);
@@ -168,23 +179,53 @@ const Ia1 = ({ uid }) => {
       console.error("Error saving IA data:", error);
     }
   };
-  
-  // Handle changes to input fields
+
   const handleInputChange = (event, index, column) => {
-    const actualIndex = index + startIndex; // Adjust index to match actual data index
+    let value = event.target.value;
+  
+    // Ensure value is a single digit and an integer
+    if (column === "Q1A" || column === "Q1B") {
+      value = value.length > 1 ? value.charAt(0) : value; // Keep only the first character
+      value = parseInt(value, 10);
+  
+      // Constrain value between 0 and 2
+      value = Math.max(0, Math.min(value, 2));
+    } else {
+      value = parseInt(value, 10) || 0; // Ensure value is an integer
+  
+      // Constrain values based on column
+      value = (() => {
+        switch (column) {
+          case "Q1C":
+            return Math.max(0, Math.min(value, 1)); // Q1C: 0 to 1
+          case "Q2":
+          case "Q3":
+          case "Q4":
+          case "Q5":
+            return Math.max(0, Math.min(value, 5)); // Q2, Q3, Q4, Q5: 0 to 5
+          default:
+            return value;
+        }
+      })();
+    }
+  
+    // Ensure no negative values for any column
+    value = Math.max(0, value);
+  
+    const actualIndex = index; // Adjust index to match actual data index, if necessary
     const newData = [...IaData];
-    newData[actualIndex][column] = event.target.value;
+    newData[actualIndex][column] = value;
     setIaData(newData);
   
     setMarksData((prevMarksData) => ({
       ...prevMarksData,
       [actualIndex]: {
         ...prevMarksData[actualIndex],
-        [column]: event.target.value,
+        [column]: value,
       },
     }));
-  };  
-  
+  };
+
   // Handle file upload
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -508,26 +549,24 @@ const Ia1 = ({ uid }) => {
                     )}
                   </td>
                   {questionColumns.map((col) => (
-                    <td
-                      key={col.id}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {editingRow === actualIndex ? (
-                        <input
-                          type="text"
-                          value={student[col.qname] || ""}
-                          onChange={(e) =>
-                            handleInputChange(e, index, col.qname)
-                          }
-                          className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
-                      ) : student[col.qname] !== null ? (
-                        student[col.qname]
-                      ) : (
-                        "N/A"
-                      )}
-                    </td>
-                  ))}
+                  <td key={col.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="number"
+                        value={student[col.qname] || ""}
+                        onChange={(e) => handleInputChange(e, index, col.qname)}
+                        min={col.qname === "Q1c" ? 0 : 0} // Minimum value based on column
+                        max={col.qname === "Q1c" ? 1 : 5} // Maximum value based on column
+                        step="1" // Ensure integer input
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : student[col.qname] !== null ? (
+                      student[col.qname]
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
+                ))}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {calculateTotal(student)}
                   </td>
