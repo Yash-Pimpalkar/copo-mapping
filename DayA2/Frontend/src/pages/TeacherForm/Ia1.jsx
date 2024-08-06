@@ -11,7 +11,7 @@ const Ia1 = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [IaData, setIaData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(25);
+  const [itemsPerPage] = useState(10);
   const [COsData, setCOsData] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
@@ -104,15 +104,30 @@ const Ia1 = ({ uid }) => {
 
   // Function to calculate the total
   const calculateTotal = (row) => {
-    const specialColumns = ['Q2', 'Q3', 'Q4', 'Q5'];
-    const values = specialColumns.map((col) => row[col] || 0);
-    const highestValues = values.sort((a, b) => b - a).slice(0, 3);
-    const remainingValues = questionColumns
-      .filter(col => !specialColumns.includes(col.qname))
-      .map(col => row[col.qname] || 0);
-    const total = highestValues.reduce((acc, value) => acc + value, 0) + remainingValues.reduce((acc, value) => acc + value, 0);
+    const q1Columns = ["Q1A", "Q1B", "Q1C"];
+    const specialColumns = ["Q2", "Q3", "Q4", "Q5"];
+
+    // Parse the values for Q1 columns
+    const q1Values = q1Columns.map((col) => parseFloat(row[col]) || 0);
+    
+    // Parse the values for special columns
+    const specialValues = specialColumns.map((col) => parseFloat(row[col]) || 0);
+
+    // Get the highest three values from special columns
+    const highestSpecialValues = specialValues.sort((a, b) => b - a).slice(0, 3);
+
+    // Calculate the total for Q1 columns
+    const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
+
+    // Calculate the total for the highest three special columns
+    const specialTotal = highestSpecialValues.reduce((acc, value) => acc + value, 0);
+
+    // Sum both totals to get the final total
+    const total = q1Total + specialTotal;
+
     return total;
-  };
+};
+
 
   // Pagination logic
   const totalItems = IaData.length;
