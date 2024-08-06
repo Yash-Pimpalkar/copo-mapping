@@ -11,11 +11,20 @@ const Ia1 = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [IaData, setIaData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(25);
   const [COsData, setCOsData] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [attainmentData, setAttainmentData] = useState({ passedPercentage: 50 });
+  const handleAttainmentChange = (event, key) => {
+    setAttainmentData((prevData) => ({
+      ...prevData,
+      [key]: event.target.value,
+    }));
+  };
+  
+
 
   // Fetch courses and set distinct course names
   useEffect(() => {
@@ -118,19 +127,20 @@ const Ia1 = ({ uid }) => {
 
   // Handle the start of editing a row
   const handleEditClick = (index) => {
-    setEditingRow(index);
+    setEditingRow(index + startIndex); // Adjust index to match actual data index
   };
 
   // Handle saving changes to a row
   const handleSaveClick = async (index) => {
+    const actualIndex = index + startIndex; // Adjust index to match actual data index
     const changes = [];
-  
+    
     questionColumns.forEach((col) => {
-      if (marksData[index] && marksData[index][col.qname] !== undefined) {
+      if (marksData[actualIndex] && marksData[actualIndex][col.qname] !== undefined) {
         changes.push({
-          sid: IaData[index].sid,
+          sid: IaData[actualIndex].sid,
           qid: col.id,
-          marks: marksData[index][col.qname],
+          marks: marksData[actualIndex][col.qname],
         });
       }
     });
@@ -146,23 +156,20 @@ const Ia1 = ({ uid }) => {
   
   // Handle changes to input fields
   const handleInputChange = (event, index, column) => {
+    const actualIndex = index + startIndex; // Adjust index to match actual data index
     const newData = [...IaData];
-    newData[index][column] = event.target.value;
+    newData[actualIndex][column] = event.target.value;
     setIaData(newData);
-  
-    // Assuming you have a way to identify the original index in the full dataset
-    const originalIndex = [index].originalIndex;
   
     setMarksData((prevMarksData) => ({
       ...prevMarksData,
-      [originalIndex]: {
-        ...prevMarksData[originalIndex],
+      [actualIndex]: {
+        ...prevMarksData[actualIndex],
         [column]: event.target.value,
       },
     }));
-  };
+  };  
   
-
   // Handle file upload
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -438,103 +445,128 @@ const Ia1 = ({ uid }) => {
                   ))}
                 </tr>
               </thead>
+      
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.slice(startIndex, endIndex).map((student, index) => (
-                  <tr key={student.sid}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {editingRow === index ? (
+            {filteredData.slice(startIndex, endIndex).map((student, index) => {
+              const actualIndex = index + startIndex; // Adjust index to match actual data index
+
+              return (
+                <tr key={student.sid}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={student.sid}
+                        onChange={(e) => handleInputChange(e, index, "sid")}
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : (
+                      student.sid
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={student.student_name}
+                        onChange={(e) =>
+                          handleInputChange(e, index, "student_name")
+                        }
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : (
+                      student.student_name
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={student.stud_clg_id}
+                        onChange={(e) =>
+                          handleInputChange(e, index, "stud_clg_id")
+                        }
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : (
+                      student.stud_clg_id
+                    )}
+                  </td>
+                  {questionColumns.map((col) => (
+                    <td
+                      key={col.id}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      {editingRow === actualIndex ? (
                         <input
                           type="text"
-                          value={student.sid}
-                          onChange={(e) => handleInputChange(e, index, "sid")}
-                          className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
-                      ) : (
-                        student.sid
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {editingRow === index ? (
-                        <input
-                          type="text"
-                          value={student.student_name}
+                          value={student[col.qname] || ""}
                           onChange={(e) =>
-                            handleInputChange(e, index, "student_name")
+                            handleInputChange(e, index, col.qname)
                           }
                           className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         />
+                      ) : student[col.qname] !== null ? (
+                        student[col.qname]
                       ) : (
-                        student.student_name
+                        "N/A"
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {editingRow === index ? (
-                        <input
-                          type="text"
-                          value={student.stud_clg_id}
-                          onChange={(e) =>
-                            handleInputChange(e, index, "stud_clg_id")
-                          }
-                          className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
-                      ) : (
-                        student.stud_clg_id
-                      )}
-                    </td>
-                    {questionColumns.map((col) => (
-                      <td
-                        key={col.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                  ))}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {calculateTotal(student)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <button
+                        onClick={() => handleSaveClick(index)}
+                        className="text-indigo-600 hover:text-indigo-900"
                       >
-                        {editingRow === index ? (
-                          <input
-                            type="text"
-                            value={student[col.qname] || ""}
-                            onChange={(e) =>
-                              handleInputChange(e, index, col.qname)
-                            }
-                            className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          />
-                        ) : student[col.qname] !== null ? (
-                          student[col.qname]
-                        ) : (
-                          "N/A"
-                        )}
-                      </td>
-                    ))}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {calculateTotal(student)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {editingRow === index ? (
-                        <button
-                          onClick={() => handleSaveClick(index)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Save
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleEditClick(index)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEditClick(index)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          </table>
           </div>
         )}
 
         {/* Pagination Controls */}
-        {/* <Pagination
+        { <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-        /> */}
+        />}
+      </div>
+         {/* New container */}
+         <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+        <h1 className="text-2xl font-semibold mb-4">Total Student Passed</h1>
+        <div className="mb-4">
+          <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
+            Total Student Passed with &gt;= PERCENTAGE %
+          </label>
+          <select
+              id="total-student-passed"
+              value={attainmentData.passedPercentage}
+              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+              {[...Array(11).keys()].map((i) => (
+                <option key={i} value={50 + i * 5}>
+                  {50 + i * 5}%
+                </option>
+              ))}
+            </select>
+        </div>
       </div>
     </div>
   );
