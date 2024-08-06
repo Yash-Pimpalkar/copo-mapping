@@ -149,15 +149,19 @@ const Ia1 = ({ uid }) => {
     const newData = [...IaData];
     newData[index][column] = event.target.value;
     setIaData(newData);
-
+  
+    // Assuming you have a way to identify the original index in the full dataset
+    const originalIndex = [index].originalIndex;
+  
     setMarksData((prevMarksData) => ({
       ...prevMarksData,
-      [index]: {
-        ...prevMarksData[index],
+      [originalIndex]: {
+        ...prevMarksData[originalIndex],
         [column]: event.target.value,
       },
     }));
   };
+  
 
   // Handle file upload
   const handleFileUpload = (event) => {
@@ -169,15 +173,18 @@ const Ia1 = ({ uid }) => {
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-  
+      let jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      jsonData = jsonData.filter((_, index) => index !== (1- 1));
       setIaData(jsonData);
-  
+   console.log(jsonData)
       const changes = [];
   
       jsonData.forEach((student) => {
         COsData.forEach((col) => {
           const marks = student[col.qname];
+          console.log(marks)
+          console.log([col.qname])
           if (marks !== undefined) {
             console.log(`idtable_ia: ${col.idtable_ia}, sid: ${student.sid}, marks: ${marks}`);
             changes.push({
@@ -199,6 +206,7 @@ const Ia1 = ({ uid }) => {
     reader.readAsArrayBuffer(file);
   };
 
+
   const updateMarks = async (changes) => {
     try {
       const response = await api.put('/api/ia/', changes);
@@ -214,11 +222,36 @@ const Ia1 = ({ uid }) => {
   
   // Handle file download
   const handleFileDownload = () => {
-    const worksheet = XLSX.utils.json_to_sheet(IaData);
+    // Create a new array to include Total column
+    const dataWithTotal = IaData.map(row => ({
+      ...row,
+      Total: calculateTotal(row)
+    }));
+  
+    // Create headers for the questions and COs
+    const headers = ["sid", "student_name", "stud_clg_id", ...questionColumns.map(col => col.qname), "Total"];
+    const coHeaders = ["", "", "", ...questionColumns.map(col => col.coname), ""];
+  
+    // Combine headers with the data
+    const dataForExport = [headers, coHeaders, ...dataWithTotal.map(row => [
+      row.sid,
+      row.student_name,
+      row.stud_clg_id,
+      ...questionColumns.map(col => row[col.qname]),
+      row.Total
+    ])];
+  
+    // Convert data to worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExport);
+  
+    // Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "IA Data");
+  
+    // Write the workbook to a file
     XLSX.writeFile(workbook, "ia_data.xlsx");
   };
+  
 
   // Handle search input change
   const handleSearchChange = (event) => {
@@ -227,16 +260,30 @@ const Ia1 = ({ uid }) => {
 
   // Filter data based on search query
   const filteredData = IaData.filter((item) => {
+     item.student_name = item.student_name ? item.student_name.toUpperCase() : '';
+     item.sid = item.sid ? item.sid.toString() : '';
+     item.stud_clg_id = item.stud_clg_id ? item.stud_clg_id.toUpperCase() : '';
+    
+    const query = searchQuery.toUpperCase();
+  
     return (
-      item.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.sid.toString().includes(searchQuery.toLowerCase())
+      item.student_name.includes(query) ||
+      item.sid.includes(query) ||
+      item.stud_clg_id.includes(query)
     );
   });
-
+  
+ console.log(IaData)
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-semibold mb-4">Select Course and Year</h1>
+      <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Select Course and Year</h1>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+            Add Student
+          </button>
+        </div>
+
 
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
           <div className="mb-4 md:mb-0 flex-1">
@@ -483,11 +530,11 @@ const Ia1 = ({ uid }) => {
         )}
 
         {/* Pagination Controls */}
-        <Pagination
+        {/* <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-        />
+        /> */}
       </div>
     </div>
   );

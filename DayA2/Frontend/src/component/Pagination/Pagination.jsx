@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const [inputPage, setInputPage] = useState(currentPage);
+
+  useEffect(() => {
+    setInputPage(currentPage);
+  }, [currentPage]);
 
   // Handle page input change
   const handleInputChange = (event) => {
