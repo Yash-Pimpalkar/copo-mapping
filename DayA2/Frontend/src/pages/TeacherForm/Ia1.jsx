@@ -126,58 +126,67 @@ const Ia1 = ({ uid }) => {
 
   const questionColumns = getQuestionColumns();
 
-  const calculateTotal = (row) => {
-    const q1Columns = ["Q1A", "Q1B", "Q1C"];
-    const specialColumns = ["Q2", "Q3", "Q4", "Q5"];
-
-    // Helper function to parse and constrain values, handling null
-    const parseAndConstrainValue = (value, min, max) => {
-      if (value === null || value === "") {
-        return null; // Return null if the value is null or empty
-      }
-      value = parseFloat(value);
-      if (isNaN(value)) return ""; // Handle cases where conversion to number fails
-      return Math.max(min, Math.min(value, max));
-    };
-
-    // Parse and constrain the values for Q1 columns
-    const q1Values = q1Columns.map((col) => {
-      let value = parseAndConstrainValue(row[col], 0, col === "Q1C" ? 1 : 2);
-      if (value === null) return null;
-      return value;
-    });
-
-    // Parse and constrain the values for special columns
-    const specialValues = specialColumns.map((col) => {
-      let value = parseAndConstrainValue(row[col], 0, 5);
-      if (value === null) return null;
-      return value;
-    });
-
-    // If any value is null, return null
-    if (q1Values.includes(null) || specialValues.includes(null)) {
-      return null;
+  // Function to extract column names based on COsData
+const extractColumnNames = () => {
+  const q1Columns = [];
+  const specialColumns = [];
+  
+  COsData.forEach(item => {
+    if (item.marks === 5) {
+      specialColumns.push(item.qname);
+    } else {
+      q1Columns.push(item.qname);
     }
+  });
 
-    // Get the highest three values from special columns
-    const highestSpecialValues = specialValues
-      .sort((a, b) => b - a)
-      .slice(0, 3);
+  return { q1Columns, specialColumns };
+};
 
-    // Calculate the total for Q1 columns
-    const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
+const { q1Columns, specialColumns } = extractColumnNames();
 
-    // Calculate the total for the highest three special columns
-    const specialTotal = highestSpecialValues.reduce(
-      (acc, value) => acc + value,
-      0
-    );
-
-    // Sum both totals to get the final total
-    const total = q1Total + specialTotal;
-
-    return total;
+const calculateTotal = (row) => {
+  // Helper function to parse and constrain values, handling null
+  const parseAndConstrainValue = (value, min, max) => {
+    if (value === null || value === "") {
+      return null; // Return null if the value is null or empty
+    }
+    value = parseFloat(value);
+    if (isNaN(value)) return ""; // Handle cases where conversion to number fails
+    return Math.max(min, Math.min(value, max));
   };
+
+  // Parse and constrain the values for Q1 columns
+  const q1Values = q1Columns.map((col) => {
+    let value = parseAndConstrainValue(row[col], 0, col === "Q1C" ? 1 : 2);
+    return value !== null ? value : 0; // Replace null with 0 for calculation
+  });
+
+  // Parse and constrain the values for special columns
+  const specialValues = specialColumns.map((col) => {
+    let value = parseAndConstrainValue(row[col], 0, 5);
+    return value !== null ? value : 0; // Replace null with 0 for calculation
+  });
+
+  // Get the highest three values from special columns
+  const highestSpecialValues = specialValues
+    .sort((a, b) => b - a)
+    .slice(0, 3);
+
+  // Calculate the total for Q1 columns
+  const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
+
+  // Calculate the total for the highest three special columns
+  const specialTotal = highestSpecialValues.reduce(
+    (acc, value) => acc + value,
+    0
+  );
+
+  // Sum both totals to get the final total
+  const total = q1Total + specialTotal;
+
+  return total;
+};
+  
 
   // Pagination logic
   const totalItems = IaData.length;
