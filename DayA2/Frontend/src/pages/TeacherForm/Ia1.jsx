@@ -16,6 +16,9 @@ const Ia1 = ({ uid }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const calculatePercentage = (total, maxMarks) => {
+    return (total / maxMarks) * 100;
+  };
   const [attainmentData, setAttainmentData] = useState({ passedPercentage: 50 });
   const handleAttainmentChange = (event, key) => {
     setAttainmentData((prevData) => ({
@@ -70,6 +73,26 @@ const Ia1 = ({ uid }) => {
 
     fetchIaData();
   }, [userCourseId]);
+
+//last container total student passed calculation
+  const getTotalStudentsPassed = (percentage) => {
+    // Assuming `calculateTotal` returns the total marks and you have the max marks
+    const maxMarks = 20; // Replace this with the actual maximum marks if available
+    
+    return IaData.filter((student) => {
+      const totalMarks = calculateTotal(student);
+      const studentPercentage = calculatePercentage(totalMarks, maxMarks);
+      return studentPercentage >= percentage;
+    }).length;
+  };
+  
+  //total student attempted question
+  const getTotalStudentsAttempted = () => {  
+    const attemptedCounts = questionColumns.map(col => {
+      return IaData.filter(student => student[col.qname] > 0).length;
+    });
+    return attemptedCounts;
+  };
 
   // Handle course selection change
   const handleCourseChange = (event) => {
@@ -180,51 +203,49 @@ const Ia1 = ({ uid }) => {
     }
   };
 
+  // Handle changes to input fields
   const handleInputChange = (event, index, column) => {
-    let value = event.target.value;
-  
-    // Ensure value is a single digit and an integer
-    if (column === "Q1A" || column === "Q1B") {
-      value = value.length > 1 ? value.charAt(0) : value; // Keep only the first character
-      value = parseInt(value, 10);
-  
-      // Constrain value between 0 and 2
-      value = Math.max(0, Math.min(value, 2));
-    } else {
-      value = parseInt(value, 10) || 0; // Ensure value is an integer
-  
-      // Constrain values based on column
-      value = (() => {
-        switch (column) {
-          case "Q1C":
-            return Math.max(0, Math.min(value, 1)); // Q1C: 0 to 1
-          case "Q2":
-          case "Q3":
-          case "Q4":
-          case "Q5":
-            return Math.max(0, Math.min(value, 5)); // Q2, Q3, Q4, Q5: 0 to 5
-          default:
-            return value;
-        }
-      })();
-    }
-  
-    // Ensure no negative values for any column
-    value = Math.max(0, value);
-  
-    const actualIndex = index; // Adjust index to match actual data index, if necessary
-    const newData = [...IaData];
-    newData[actualIndex][column] = value;
-    setIaData(newData);
-  
-    setMarksData((prevMarksData) => ({
-      ...prevMarksData,
-      [actualIndex]: {
-        ...prevMarksData[actualIndex],
-        [column]: value,
-      },
-    }));
-  };
+  let value = event.target.value;
+
+  // Ensure value is a single digit and an integer
+  if (column === "Q1A" || column === "Q1B") {
+    value = value.length > 1 ? value.charAt(0) : value; // Keep only the first character
+    value = parseInt(value, 10);
+
+    // Constrain value between 0 and 2
+    value = Math.max(0, Math.min(value, 2));
+  } else {
+    value = parseInt(value, 10) || 0; // Ensure value is an integer
+
+    // Constrain values based on column
+    value = (() => {
+      switch (column) {
+        case "Q1C":
+          return Math.max(0, Math.min(value, 1)); // Q1c: 0 to 1
+        case "Q2":
+        case "Q3":
+        case "Q4":
+        case "Q5":
+          return Math.max(0, Math.min(value, 5)); // Q2, Q3, Q4, Q5: 0 to 5
+        default:
+          return value;
+      }
+    })();
+  }
+
+  const actualIndex = index + startIndex; // Adjust index to match actual data index
+  const newData = [...IaData];
+  newData[actualIndex][column] = value;
+  setIaData(newData);
+
+  setMarksData((prevMarksData) => ({
+    ...prevMarksData,
+    [actualIndex]: {
+      ...prevMarksData[actualIndex],
+      [column]: value,
+    },
+  }));
+};
 
   // Handle file upload
   const handleFileUpload = (event) => {
@@ -602,14 +623,14 @@ const Ia1 = ({ uid }) => {
           onPageChange={handlePageChange}
         />}
       </div>
-         {/* New container */}
-         <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <h1 className="text-2xl font-semibold mb-4">Total Student Passed</h1>
-        <div className="mb-4">
-          <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
-            Total Student Passed with &gt;= PERCENTAGE %
-          </label>
-          <select
+          {/* New container */}
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+          <h1 className="text-2xl font-semibold mb-4">Total Student Passed</h1>
+          <div className="mb-4">
+            <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
+              Total Student Passed with &gt;= PERCENTAGE %
+            </label>
+            <select
               id="total-student-passed"
               value={attainmentData.passedPercentage}
               onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
@@ -620,10 +641,62 @@ const Ia1 = ({ uid }) => {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="text-lg font-semibold">
+            Total Students Passed: {getTotalStudentsPassed(attainmentData.passedPercentage)}
+          </div>
+
+       {/* Section to display Total Students Attempted each question */}
+       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+          <h1 className="text-lg font-semibold mb-4">Total Students Attempted Each Question</h1>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {questionColumns.map((col) => (
+                    <>
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.qname}
+                    </th>
+                    
+                    </>
+                  ))}
+                </tr>
+                <tr>
+                  {questionColumns.map((col) => (
+                    <>
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.coname}
+                    </th>
+                    
+                    </>
+                  ))}
+                </tr>
+              
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  {getTotalStudentsAttempted().map((count, index) => (
+                    <td
+                      key={index}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      {count}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+   </div>
   );
 };
-
 export default Ia1;
