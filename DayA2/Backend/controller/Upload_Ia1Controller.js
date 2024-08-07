@@ -166,7 +166,7 @@ export const IaUpload = async (req, res) => {
   // Prepare the query and values
   const sql = 'UPDATE upload_ia SET marks = ? WHERE sid = ? AND qid = ?';
   const queryValues = updates.map(update => [
-    parseInt(update.marks, 10), // Convert marks to integer
+    update.marks === null ? null : parseInt(update.marks, 10), // Use null if marks is null, otherwise parse the integer
     update.sid,
     update.qid
   ]);
@@ -197,11 +197,6 @@ export const IaUpload = async (req, res) => {
     res.status(500).json('Server error');
   }
 };
-
-
-  
-
-
 
 
   // Define the userCourseID
