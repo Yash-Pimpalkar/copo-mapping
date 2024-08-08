@@ -125,14 +125,14 @@ const CoposhowComponent = ({ uid }) => {
         </select>
       </div>
       {selectedCourseId && copo.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-blue-500 ">
               <tr>
                 {headers.map(header => (
                   <th
                     key={header}
-                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header === 'CO Name' ? 'sticky left-0 bg-gray-50 z-10' : ''} ${header === 'Average' ? 'sticky right-0 bg-gray-50 z-10' : ''}`}
+                    className={`px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider ${header === 'CO Name' ? 'sticky left-0  bg-blue-600 z-10' : ''} ${header === 'Average' ? 'sticky right-0  bg-blue-500 z-10' : ''}`}
                   >
                     {header}
                   </th>

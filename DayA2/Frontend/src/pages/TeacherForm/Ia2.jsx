@@ -1,359 +1,703 @@
-import React, { useState } from 'react';
-import * as XLSX from 'xlsx';
+import React, { useEffect, useState } from "react";
+import api from "../../api";
+import Pagination from "../../component/Pagination/Pagination";
+import * as XLSX from "xlsx";
 
-const Ia2 = () => {
-    const [data, setData] = useState([
-        { clgId: 'CLG-001', name: 'John Doe', division: 'A', q1a: '90', q1b: '80', q1c: '85', q2: '88', q3: '343', q4: '13', q5: '13', isEditing: false },
-        { clgId: 'CLG-002', name: 'Jane Smith', division: 'B', q1a: '85', q1b: '90', q1c: '92', q2: '87', q3: '354', q4: '13', q5: '13', isEditing: false },
-        { clgId: 'CLG-003', name: 'Michael Brown', division: 'C', q1a: '88', q1b: '82', q1c: '91', q2: '89', q3: '350', q4: '13', q5: '13', isEditing: false },
-    ]);
-    const [isCOEditing, setIsCOEditing] = useState(false);
-    const [coValues, setCOValues] = useState({ CO1: 'CO1', CO2: 'CO1', CO3: 'CO2', CO4: 'CO3', CO5: 'CO4', CO6: 'CO5', CO7: 'CO5' });
+const Ia2 = ({ uid }) => {
+  const [courses, setCourses] = useState([]);
+  const [distinctCourses, setDistinctCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [userCourseId, setUserCourseId] = useState(null);
+  const [IaData, setIaData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [COsData, setCOsData] = useState([]);
+  const [editingRow, setEditingRow] = useState(null);
+  const [marksData, setMarksData] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const calculatePercentage = (total, maxMarks) => {
+    return (total / maxMarks) * 100;
+  };
+  const [attainmentData, setAttainmentData] = useState({ passedPercentage: 50 });
+  const handleAttainmentChange = (event, key) => {
+    setAttainmentData((prevData) => ({
+      ...prevData,
+      [key]: event.target.value,
+    }));
+  };
+  
 
-    const handleEdit = (index) => {
-        const newData = [...data];
-        newData[index].isEditing = true;
-        setData(newData);
-    };
 
-    const handleSave = (index) => {
-        const newData = [...data];
-        newData[index].isEditing = false;
-        setData(newData);
-    };
+  // Fetch courses and set distinct course names
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        const res = await api.get(`/api/copo/${uid}`);
+        setCourses(res.data);
 
-    const handleChange = (index, field, value) => {
-        const newData = [...data];
-        newData[index][field] = value;
-        setData(newData);
-    };
-
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1});
-                const formattedData = jsonData.slice(2).map((row) => ({
-                    clgId: row[0],
-                    name: row[1],
-                    division: row[2],
-                    q1a: row[3],
-                    q1b: row[4],
-                    q1c: row[5],
-                    q2: row[6],
-                    q3: row[7],
-                    q4: row[8],
-                    q5: row[9],
-                    isEditing: false
-                }));
-                setData(formattedData);
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
-
-    const downloadTableAsExcel = () => {
-        const formattedData = data.map(item => ({
-            clgId: item.clgId,
-            name: item.name,
-            division: item.division,
-            q1a: item.q1a,
-            q1b: item.q1b,
-            q1c: item.q1c,
-            q2: item.q2,
-            q3: item.q3,
-            q4: item.q4,
-            q5: item.q5,
-            Total: Number(item.q1a) + Number(item.q1b) + Number(item.q1c) + Number(item.q2) + Number(item.q3) + Number(item.q4) + Number(item.q5),
+        const distinct = Array.from(
+          new Set(res.data.map((course) => course.course_name))
+        ).map((course_name) => ({
+          course_name,
+          academic_year: res.data.find(
+            (course) => course.course_name === course_name
+          ).academic_year,
         }));
 
-        const ws = XLSX.utils.json_to_sheet(formattedData);
-
-        const headerRow = ["", "", "", "Q1a", "Q1b", "Q1c", "Q2", "Q3", "Q4", "Q5", "Total"];
-        const subHeaderRow = ["", "", "", coValues.CO1, coValues.CO2, coValues.CO3, coValues.CO4, coValues.CO5, coValues.CO6, coValues.CO7, ""];
-
-        XLSX.utils.sheet_add_aoa(ws, [headerRow], { origin: 'A1' });
-        XLSX.utils.sheet_add_aoa(ws, [subHeaderRow], { origin: 'A2' });
-        XLSX.utils.sheet_add_json(ws, formattedData, { skipHeader: true, origin: "A3" });
-
-        ws['!cols'] = [
-            { wpx: 100 },
-            { wpx: 150 },
-            { wpx: 100 },
-            { wpx: 80 },
-            { wpx: 80 },
-            { wpx: 80 },
-            { wpx: 80 },
-            { wpx: 80 },
-            { wpx: 80 },
-            { wpx: 80 },
-            { wpx: 120 },
-            { wpx: 120 },
-            { wpx: 120 },
-            { wpx: 120 },
-            { wpx: 120 },
-            { wpx: 120 },
-            { wpx: 120 },
-        ];
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "IA1 Data");
-
-        XLSX.writeFile(wb, "IA1_Data.xlsx");
+        setDistinctCourses(distinct);
+      } catch (error) {
+        console.error("Error fetching course data:", error);
+      }
     };
 
-    const handleEditCO = () => {
-        setIsCOEditing(true);
+    if (uid) {
+      fetchCourseData();
+    }
+  }, [uid]);
+
+  // Fetch IA data when the userCourseId changes
+  useEffect(() => {
+    const fetchIaData = async () => {
+      if (userCourseId) {
+        try {
+          const res = await api.get(`/api/ia/${userCourseId}`);
+          setIaData(res.data);
+          const res1 = await api.get(`/api/ia/cos/${userCourseId}`);
+          setCOsData(res1.data);
+        } catch (error) {
+          console.error("Error fetching IA data:", error);
+        }
+      }
     };
 
-    const handleSaveCO = () => {
-        setIsCOEditing(false);
-    };
+    fetchIaData();
+  }, [userCourseId]);
 
-    const handleCOChange = (field, value) => {
-        setCOValues(prev => ({ ...prev, [field]: value }));
-    };
+//last container total student passed calculation
+  const getTotalStudentsPassed = (percentage) => {
+    // Assuming `calculateTotal` returns the total marks and you have the max marks
+    const maxMarks = 20; // Replace this with the actual maximum marks if available
+    
+    return IaData.filter((student) => {
+      const totalMarks = calculateTotal(student);
+      const studentPercentage = calculatePercentage(totalMarks, maxMarks);
+      return studentPercentage >= percentage;
+    }).length;
+  };
+  
+  //total student attempted question
+  const getTotalStudentsAttempted = () => {  
+    const attemptedCounts = questionColumns.map(col => {
+      return IaData.filter(student => student[col.qname] > 0).length;
+    });
+    return attemptedCounts;
+  };
 
-    return (
-        <div className="relative overflow-x-auto">
-            <h1 className='text-3xl mb-6 text-blue-500 text-center mt-5'>IA2</h1>
-            <div className="flex justify-between items-center mb-6">
-                <label className="bg-blue-500 text-white ml-5 px-4 py-2 rounded cursor-pointer">
-                    Upload
-                    <input 
-                        type="file" 
-                        accept=".xlsx, .xls" 
-                        onChange={handleFileUpload} 
-                        className="hidden"
-                    />
-                </label>
-                <input 
-                    type="text" 
-                    placeholder="Search..." 
-                    className="flex-grow px-4 py-2 border border-gray-300 rounded mx-4"
-                />
-                <button 
-                    className="bg-blue-500 text-white mr-5 px-4 py-2 rounded" 
-                    onClick={downloadTableAsExcel}
-                >
-                    Download
-                </button>
-            </div>
-            <table className="w-full text-sm text-left rtl:text-right text-black bg-white border border-collapse border-black">
-                <thead className="text-xs text-black uppercase bg-white-100 border border-black">
-                    <tr>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Sr.No</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">CLG-Id</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Name</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Division</th>
-                        <th scope="col" colSpan="3" className="px-6 py-3 text-center border border-black">Q1</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q2</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q3</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q4</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Q5</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Total</th>
-                        <th scope="col" rowSpan="2" className="px-6 py-3 border border-black">Actions</th>
-                    </tr>
-                    <tr>
-                        <th scope="col" className="px-6 py-3 text-center border border-black">Q1a</th>
-                        <th scope="col" className="px-6 py-3 text-center border border-black">Q1b</th>
-                        <th scope="col" className="px-6 py-3 text-center border border-black">Q1c</th>
-                    </tr>
-                    <tr>
-                        <th scope="col" className="px-6 py-3 border border-black"></th>
-                        <th scope="col" className="px-6 py-3 border border-black"></th>
-                        <th scope="col" className="px-6 py-3 border border-black"></th>
-                        <th scope="col" className="px-6 py-3 border border-black"></th>
-                        {Object.keys(coValues).map(coKey => (
-                            isCOEditing ? (
-                                <th key={coKey} scope="col" className="px-6 py-3 text-center border border-black">
-                                    <input 
-                                        type="text" 
-                                        value={coValues[coKey]} 
-                                        onChange={(e) => handleCOChange(coKey, e.target.value)} 
-                                        className="text-center"
-                                    />
-                                </th>
-                            ) : (
-                                <th key={coKey} scope="col" className="px-6 py-3 text-center border border-black">
-                                    {coValues[coKey]}
-                                </th>
-                            )
-                        ))}
-                        <th scope="col" className="px-6 py-3 border border-black"></th>
-                        <th scope="col" className="px-6 py-3 border border-black">
-                            {isCOEditing ? (
-                                <button 
-                                    className="bg-blue-500 text-white px-2 py-1 rounded" 
-                                    onClick={handleSaveCO}
-                                >
-                                    Save
-                                </button>
-                            ) : (
-                                <button 
-                                    className="bg-blue-500 text-white px-2 py-1 rounded" 
-                                    onClick={handleEditCO}
-                                >
-                                    Edit
-                                </button>
-                            )}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((item, index) => (
-                        <tr key={index} className="bg-white border-b border-black">
-                            <td className="px-6 py-4 border border-black">{index + 1}</td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.clgId} 
-                                        onChange={(e) => handleChange(index, 'clgId', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.clgId
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.name} 
-                                        onChange={(e) => handleChange(index, 'name', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.name
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.division} 
-                                        onChange={(e) => handleChange(index, 'division', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.division
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q1a} 
-                                        onChange={(e) => handleChange(index, 'q1a', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q1a
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q1b} 
-                                        onChange={(e) => handleChange(index, 'q1b', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q1b
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q1c} 
-                                        onChange={(e) => handleChange(index, 'q1c', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q1c
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q2} 
-                                        onChange={(e) => handleChange(index, 'q2', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q2
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q3} 
-                                        onChange={(e) => handleChange(index, 'q3', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q3
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q4} 
-                                        onChange={(e) => handleChange(index, 'q4', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q4
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <input 
-                                        type="text" 
-                                        value={item.q5} 
-                                        onChange={(e) => handleChange(index, 'q5', e.target.value)} 
-                                        className="text-center"
-                                    />
-                                ) : (
-                                    item.q5
-                                )}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {Number(item.q1a) + Number(item.q1b) + Number(item.q1c) + Number(item.q2) + Number(item.q3) + Number(item.q4) + Number(item.q5)}
-                            </td>
-                            <td className="px-6 py-4 border border-black">
-                                {item.isEditing ? (
-                                    <button 
-                                        className="bg-blue-500 text-white px-2 py-1 rounded" 
-                                        onClick={() => handleSave(index)}
-                                    >
-                                        Save
-                                    </button>
-                                ) : (
-                                    <button 
-                                        className="bg-blue-500 text-white px-2 py-1 rounded" 
-                                        onClick={() => handleEdit(index)}
-                                    >
-                                        Edit
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+  // Handle course selection change
+  const handleCourseChange = (event) => {
+    const selectedCourse = event.target.value;
+    setSelectedCourse(selectedCourse);
+    setSelectedYear("");
+    setUserCourseId(null);
+  };
+
+  // Handle year selection change
+  const handleYearChange = (event) => {
+    const selectedYear = event.target.value;
+    setSelectedYear(selectedYear);
+    const course = courses.find(
+      (course) =>
+        course.course_name === selectedCourse &&
+        course.academic_year === selectedYear
     );
+    setUserCourseId(course?.usercourse_id || null);
+  };
+
+  // Get unique question columns from COsData
+  const getQuestionColumns = () => {
+    return COsData.map((data) => ({
+      id: data.idtable_ia,
+      qname: data.qname,
+      coname: data.coname,
+    }));
+  };
+
+  const questionColumns = getQuestionColumns();
+
+  // Function to calculate the total
+  const calculateTotal = (row) => {
+    const q1Columns = ["Q1A", "Q1B", "Q1C"];
+    const specialColumns = ["Q2", "Q3", "Q4", "Q5"];
+
+    // Parse and constrain the values for Q1 columns
+    const q1Values = q1Columns.map((col) => {
+        let value = parseFloat(row[col]) || 0;
+        if (col === "Q1c") {
+            value = Math.max(0, Math.min(value, 1)); // Q1c: 0 to 1
+        } else {
+            value = Math.max(0, Math.min(value, 2)); // Q1a and Q1b: 0 to 2
+        }
+        return value;
+    });
+
+    // Parse and constrain the values for special columns
+    const specialValues = specialColumns.map((col) => {
+        let value = parseFloat(row[col]) || 0;
+        return Math.max(0, Math.min(value, 5)); // Q2, Q3, Q4, Q5: 0 to 5
+    });
+
+    // Get the highest three values from special columns
+    const highestSpecialValues = specialValues.sort((a, b) => b - a).slice(0, 3);
+
+    // Calculate the total for Q1 columns
+    const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
+
+    // Calculate the total for the highest three special columns
+    const specialTotal = highestSpecialValues.reduce((acc, value) => acc + value, 0);
+
+    // Sum both totals to get the final total
+    const total = q1Total + specialTotal;
+
+    return total;
 };
 
+
+  // Pagination logic
+  const totalItems = IaData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = IaData.slice(startIndex, endIndex);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Handle the start of editing a row
+  const handleEditClick = (index) => {
+    setEditingRow(index + startIndex); // Adjust index to match actual data index
+  };
+
+  // Handle saving changes to a row
+  const handleSaveClick = async (index) => {
+    const actualIndex = index + startIndex; // Adjust index to match actual data index
+    const changes = [];
+    
+    questionColumns.forEach((col) => {
+      if (marksData[actualIndex] && marksData[actualIndex][col.qname] !== undefined) {
+        changes.push({
+          sid: IaData[actualIndex].sid,
+          qid: col.id,
+          marks: marksData[actualIndex][col.qname],
+        });
+      }
+    });
+  
+    try {
+      await updateMarks(changes);
+      console.log("Updated values:", changes);
+      setEditingRow(null);
+    } catch (error) {
+      console.error("Error saving IA data:", error);
+    }
+  };
+
+  // Handle changes to input fields
+  const handleInputChange = (event, index, column) => {
+  let value = event.target.value;
+
+  // Ensure value is a single digit and an integer
+  if (column === "Q1A" || column === "Q1B") {
+    value = value.length > 1 ? value.charAt(0) : value; // Keep only the first character
+    value = parseInt(value, 10);
+
+    // Constrain value between 0 and 2
+    value = Math.max(0, Math.min(value, 2));
+  } else {
+    value = parseInt(value, 10) || 0; // Ensure value is an integer
+
+    // Constrain values based on column
+    value = (() => {
+      switch (column) {
+        case "Q1C":
+          return Math.max(0, Math.min(value, 1)); // Q1c: 0 to 1
+        case "Q2":
+        case "Q3":
+        case "Q4":
+        case "Q5":
+          return Math.max(0, Math.min(value, 5)); // Q2, Q3, Q4, Q5: 0 to 5
+        default:
+          return value;
+      }
+    })();
+  }
+
+  const actualIndex = index + startIndex; // Adjust index to match actual data index
+  const newData = [...IaData];
+  newData[actualIndex][column] = value;
+  setIaData(newData);
+
+  setMarksData((prevMarksData) => ({
+    ...prevMarksData,
+    [actualIndex]: {
+      ...prevMarksData[actualIndex],
+      [column]: value,
+    },
+  }));
+};
+
+  // Handle file upload
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+  
+    reader.onload = async (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      let jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      jsonData = jsonData.filter((_, index) => index !== (1- 1));
+      setIaData(jsonData);
+   console.log(jsonData)
+      const changes = [];
+  
+      jsonData.forEach((student) => {
+        COsData.forEach((col) => {
+          const marks = student[col.qname];
+          console.log(marks)
+          console.log([col.qname])
+          if (marks !== undefined) {
+            console.log(`idtable_ia: ${col.idtable_ia}, sid: ${student.sid}, marks: ${marks}`);
+            changes.push({
+              sid: student.sid,
+              qid: col.idtable_ia,
+              marks: marks,
+            });
+          }
+        });
+      });
+  
+      try {
+        await updateMarks(changes);
+      } catch (error) {
+        console.error("Error updating marks:", error);
+      }
+    };
+  
+    reader.readAsArrayBuffer(file);
+  };
+
+
+  const updateMarks = async (changes) => {
+    try {
+      const response = await api.put('/api/ia/', changes);
+      if (response.ok) {
+        console.log('Marks updated successfully');
+      } else {
+        console.error('Failed to update marks:');
+      }
+    } catch (error) {
+      console.error('Error updating marks:', error);
+    }
+  };
+  
+  // Handle file download
+  const handleFileDownload = () => {
+    // Create a new array to include Total column
+    const dataWithTotal = IaData.map(row => ({
+      ...row,
+      Total: calculateTotal(row)
+    }));
+  
+    // Create headers for the questions and COs
+    const headers = ["sid", "student_name", "stud_clg_id", ...questionColumns.map(col => col.qname), "Total"];
+    const coHeaders = ["", "", "", ...questionColumns.map(col => col.coname), ""];
+  
+    // Combine headers with the data
+    const dataForExport = [headers, coHeaders, ...dataWithTotal.map(row => [
+      row.sid,
+      row.student_name,
+      row.stud_clg_id,
+      ...questionColumns.map(col => row[col.qname]),
+      row.Total
+    ])];
+  
+    // Convert data to worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExport);
+  
+    // Create a new workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "IA2 Data");
+  
+    // Write the workbook to a file
+    XLSX.writeFile(workbook, "ia_data.xlsx");
+  };
+  
+
+  // Handle search input change
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  // Filter data based on search query
+  const filteredData = IaData.filter((item) => {
+     item.student_name = item.student_name ? item.student_name.toUpperCase() : '';
+     item.sid = item.sid ? item.sid.toString() : '';
+     item.stud_clg_id = item.stud_clg_id ? item.stud_clg_id.toUpperCase() : '';
+    
+    const query = searchQuery.toUpperCase();
+  
+    return (
+      item.student_name.includes(query) ||
+      item.sid.includes(query) ||
+      item.stud_clg_id.includes(query)
+    );
+  });
+  
+ console.log(IaData)
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+    <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">IA2</h1>
+      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
+      <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold">Select Course and Year</h1>
+          <button className="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+            Add Student
+          </button>
+        </div>
+
+
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              htmlFor="course-select"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Course
+            </label>
+            <select
+              id="course-select"
+              value={selectedCourse}
+              onChange={handleCourseChange}
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Select a course</option>
+              {distinctCourses.map((course, index) => (
+                <option key={index} value={course.course_name}>
+                  {course.course_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              htmlFor="year-select"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Year
+            </label>
+            <select
+              id="year-select"
+              value={selectedYear}
+              onChange={handleYearChange}
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">Select a year</option>
+              {courses
+                .filter((course) => course.course_name === selectedCourse)
+                .map((course, index) => (
+                  <option key={index} value={course.academic_year}>
+                    {course.academic_year}
+                  </option>
+                ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Upload, Search, and Download Controls */}
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4 items-center">
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              htmlFor="file-upload"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Upload File
+            </label>
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={handleFileUpload}
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              htmlFor="search-bar"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Search
+            </label>
+            <input
+              type="text"
+              id="search-bar"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by student name or ID"
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div className="mb-4 md:mb-0 flex-1">
+            <label
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Download Data
+            </label>
+            <button
+              onClick={handleFileDownload}
+              className="w-full bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              Download
+            </button>
+          </div>
+        </div>
+
+        {/* Display IA Data */}
+        {filteredData.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Student ID
+                  </th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Student Name
+                  </th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    College ID
+                  </th>
+                  {questionColumns.map((col) => (
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.qname}
+                    </th>
+                  ))}
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Total
+                  </th>
+                  <th
+                    rowSpan="2"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+                <tr>
+                  {questionColumns.map((col) => (
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.coname}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+      
+              <tbody className="bg-white divide-y divide-gray-200">
+            {filteredData.slice(startIndex, endIndex).map((student, index) => {
+              const actualIndex = index + startIndex; // Adjust index to match actual data index
+
+              return (
+                <tr key={student.sid}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={student.sid}
+                        onChange={(e) => handleInputChange(e, index, "sid")}
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : (
+                      student.sid
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={student.student_name}
+                        onChange={(e) =>
+                          handleInputChange(e, index, "student_name")
+                        }
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : (
+                      student.student_name
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={student.stud_clg_id}
+                        onChange={(e) =>
+                          handleInputChange(e, index, "stud_clg_id")
+                        }
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : (
+                      student.stud_clg_id
+                    )}
+                  </td>
+                  {questionColumns.map((col) => (
+                  <td key={col.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="number"
+                        value={student[col.qname] || ""}
+                        onChange={(e) => handleInputChange(e, index, col.qname)}
+                        min={col.qname === "Q1c" ? 0 : 0} // Minimum value based on column
+                        max={col.qname === "Q1c" ? 1 : 5} // Maximum value based on column
+                        step="1" // Ensure integer input
+                        className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    ) : student[col.qname] !== null ? (
+                      student[col.qname]
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
+                ))}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {calculateTotal(student)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {editingRow === actualIndex ? (
+                      <button
+                        onClick={() => handleSaveClick(index)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEditClick(index)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          </table>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {selectedCourse && selectedYear && filteredData.length>0 && ( <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />)}
+      </div>
+          {/* New container */}
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+          <h1 className="text-2xl font-semibold mb-4">Total Student Passed</h1>
+          <div className="mb-4">
+            <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
+              Total Student Passed with &gt;= PERCENTAGE %
+            </label>
+            <select
+              id="total-student-passed"
+              value={attainmentData.passedPercentage}
+              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+              {[...Array(11).keys()].map((i) => (
+                <option key={i} value={50 + i * 5}>
+                  {50 + i * 5}%
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="text-lg font-semibold">
+            Total Students Passed: {getTotalStudentsPassed(attainmentData.passedPercentage)}
+          </div>
+
+       {/* Section to display Total Students Attempted each question */}
+       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+          <h1 className="text-lg font-semibold mb-4">Total Students Attempted Each Question</h1>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {questionColumns.map((col) => (
+                    <>
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.qname}
+                    </th>
+                    
+                    </>
+                  ))}
+                </tr>
+                <tr>
+                  {questionColumns.map((col) => (
+                    <>
+                    <th
+                      key={col.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {col.coname}
+                    </th>
+                    
+                    </>
+                  ))}
+                </tr>
+              
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  {getTotalStudentsAttempted().map((count, index) => (
+                    <td
+                      key={index}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      {count}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+   </div>
+  );
+};
 export default Ia2;

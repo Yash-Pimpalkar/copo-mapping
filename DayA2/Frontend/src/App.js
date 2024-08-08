@@ -17,6 +17,10 @@ import RegistrationForm from './pages/TeacherRegistration/RegisterForm';
 import ShowCos from './pages/TeacherRegistration/ShowCos';
 import Coposhow from './pages/TeacherForm/CoposhowComponent';
 import Demo from './pages/TeacherForm/Demo';
+import TeacherDashboard from './component/Dashboard/TeacherDashboard';
+import UploadIa1 from './pages/Questions/UploadIa';
+import Semester from './pages/TeacherForm/Semester';
+
 function App() {
   const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
@@ -49,12 +53,12 @@ function App() {
             </>
           ) : usertype == 2 ? (
             <>
-              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/coform" element={<Cos_reg />} />
               <Route path="/posform" element={<Pos_reg />} />
               <Route path="/courseform" element={<Course_reg />} />
               <Route path="/ia1" element={<Ia1 uid={user_id} />} />
               <Route path="/ia2" element={<Ia2 />} />
+              <Route path="/semester" element={<Semester />} />
               <Route path="/practical" element={<Practical />} />
               <Route path="/userselection" element={<UserSelection />} />
               <Route path='/registerform' element={<RegistrationForm uid={user_id}/>} />
@@ -62,6 +66,9 @@ function App() {
               <Route path='/cos' element={<ShowCos />} />
               <Route path='/coposhow' element={<Coposhow  uid={user_id}/>} />
               <Route path='/demo' element={<Demo  uid={user_id}/>} />
+              <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
+              <Route path='/uploadia1' element={<UploadIa1  uid={user_id}/>} />
+
               {/* Add other routes for usertype === 2 here */}
             </>
           ) : usertype == 3 ? (

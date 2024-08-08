@@ -86,10 +86,12 @@ const Ia1 = ({ uid }) => {
     }).length;
   };
 
-  //total student attempted question
+  // Total students attempted question
   const getTotalStudentsAttempted = () => {
     const attemptedCounts = questionColumns.map((col) => {
-      return IaData.filter((student) => student[col.qname] > 0).length;
+      return IaData.filter(
+        (student) => student[col.qname] !== null && student[col.qname] >= 0
+      ).length;
     });
     return attemptedCounts;
   };
@@ -127,66 +129,65 @@ const Ia1 = ({ uid }) => {
   const questionColumns = getQuestionColumns();
 
   // Function to extract column names based on COsData
-const extractColumnNames = () => {
-  const q1Columns = [];
-  const specialColumns = [];
-  
-  COsData.forEach(item => {
-    if (item.marks === 5) {
-      specialColumns.push(item.qname);
-    } else {
-      q1Columns.push(item.qname);
-    }
-  });
+  const extractColumnNames = () => {
+    const q1Columns = [];
+    const specialColumns = [];
 
-  return { q1Columns, specialColumns };
-};
+    COsData.forEach((item) => {
+      if (item.marks === 5) {
+        specialColumns.push(item.qname);
+      } else {
+        q1Columns.push(item.qname);
+      }
+    });
 
-const { q1Columns, specialColumns } = extractColumnNames();
-
-const calculateTotal = (row) => {
-  // Helper function to parse and constrain values, handling null
-  const parseAndConstrainValue = (value, min, max) => {
-    if (value === null || value === "") {
-      return null; // Return null if the value is null or empty
-    }
-    value = parseFloat(value);
-    if (isNaN(value)) return ""; // Handle cases where conversion to number fails
-    return Math.max(min, Math.min(value, max));
+    return { q1Columns, specialColumns };
   };
 
-  // Parse and constrain the values for Q1 columns
-  const q1Values = q1Columns.map((col) => {
-    let value = parseAndConstrainValue(row[col], 0, col === "Q1C" ? 1 : 2);
-    return value !== null ? value : 0; // Replace null with 0 for calculation
-  });
+  const { q1Columns, specialColumns } = extractColumnNames();
 
-  // Parse and constrain the values for special columns
-  const specialValues = specialColumns.map((col) => {
-    let value = parseAndConstrainValue(row[col], 0, 5);
-    return value !== null ? value : 0; // Replace null with 0 for calculation
-  });
+  const calculateTotal = (row) => {
+    // Helper function to parse and constrain values, handling null
+    const parseAndConstrainValue = (value, min, max) => {
+      if (value === null || value === "") {
+        return null; // Return null if the value is null or empty
+      }
+      value = parseFloat(value);
+      if (isNaN(value)) return ""; // Handle cases where conversion to number fails
+      return Math.max(min, Math.min(value, max));
+    };
 
-  // Get the highest three values from special columns
-  const highestSpecialValues = specialValues
-    .sort((a, b) => b - a)
-    .slice(0, 3);
+    // Parse and constrain the values for Q1 columns
+    const q1Values = q1Columns.map((col) => {
+      let value = parseAndConstrainValue(row[col], 0, col === "Q1C" ? 1 : 2);
+      return value !== null ? value : 0; // Replace null with 0 for calculation
+    });
 
-  // Calculate the total for Q1 columns
-  const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
+    // Parse and constrain the values for special columns
+    const specialValues = specialColumns.map((col) => {
+      let value = parseAndConstrainValue(row[col], 0, 5);
+      return value !== null ? value : 0; // Replace null with 0 for calculation
+    });
 
-  // Calculate the total for the highest three special columns
-  const specialTotal = highestSpecialValues.reduce(
-    (acc, value) => acc + value,
-    0
-  );
+    // Get the highest three values from special columns
+    const highestSpecialValues = specialValues
+      .sort((a, b) => b - a)
+      .slice(0, 3);
 
-  // Sum both totals to get the final total
-  const total = q1Total + specialTotal;
+    // Calculate the total for Q1 columns
+    const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
 
-  return total;
-};
-  
+    // Calculate the total for the highest three special columns
+    const specialTotal = highestSpecialValues.reduce(
+      (acc, value) => acc + value,
+      0
+    );
+
+    // Sum both totals to get the final total
+    const total = q1Total + specialTotal;
+
+    return total;
+  };
 
   // Pagination logic
   const totalItems = IaData.length;
@@ -326,7 +327,7 @@ const calculateTotal = (row) => {
   };
 
   const updateMarks = async (changes) => {
-    console.log(changes)
+    console.log(changes);
     try {
       const response = await api.put("/api/ia/", changes);
       if (response.ok) {
@@ -412,6 +413,7 @@ const calculateTotal = (row) => {
   console.log(IaData);
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
+       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">IA1</h1>
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
@@ -431,7 +433,7 @@ const calculateTotal = (row) => {
               id="course-select"
               value={selectedCourse}
               onChange={handleCourseChange}
-              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             >
               <option value="">Select a course</option>
               {distinctCourses.map((course, index) => (
@@ -453,7 +455,7 @@ const calculateTotal = (row) => {
               id="year-select"
               value={selectedYear}
               onChange={handleYearChange}
-              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             >
               <option value="">Select a year</option>
               {courses
@@ -479,7 +481,7 @@ const calculateTotal = (row) => {
               type="file"
               accept=".xlsx"
               onChange={handleFileUpload}
-              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
 
@@ -496,7 +498,7 @@ const calculateTotal = (row) => {
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search by student name or ID"
-              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
 
@@ -512,7 +514,7 @@ const calculateTotal = (row) => {
             </button>
           </div>
         </div>
-        // Display IA Data
+        {/* // Display IA Data */}
         {filteredData.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -520,39 +522,39 @@ const calculateTotal = (row) => {
                 <tr>
                   <th
                     rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                   >
                     Student ID
                   </th>
                   <th
                     rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                   >
                     Student Name
                   </th>
                   <th
                     rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                   >
                     College ID
                   </th>
                   {questionColumns.map((col) => (
                     <th
                       key={col.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                     >
                       {col.qname}
                     </th>
                   ))}
                   <th
                     rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                   >
                     Total
                   </th>
                   <th
                     rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                   >
                     Actions
                   </th>
@@ -561,7 +563,7 @@ const calculateTotal = (row) => {
                   {questionColumns.map((col) => (
                     <th
                       key={col.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                     >
                       {col.coname}
                     </th>
@@ -726,7 +728,7 @@ const calculateTotal = (row) => {
                     <>
                       <th
                         key={col.id}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         {col.qname}
                       </th>
@@ -738,7 +740,7 @@ const calculateTotal = (row) => {
                     <>
                       <th
                         key={col.id}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         {col.coname}
                       </th>

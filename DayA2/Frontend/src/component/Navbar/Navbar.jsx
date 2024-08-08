@@ -126,15 +126,19 @@ export default function Navbar() {
   const formCurriculum = [
     { name: 'IA1', href: '/ia1', userTypes: [2] },
     { name: 'IA2', href: '/ia2', userTypes: [2] },
-    { name: 'Semester', href: '/sem', userTypes: [2] },
+    { name: 'Semester', href: '/semester', userTypes: [2] },
     { name: 'Practical', href: '/practical', userTypes: [2] },
     { name: 'Assignment', href: '/assg', userTypes: [2] },
-    { name: 'copo', href: '/coposhow', userTypes: [2] },
-    { name: 'demoia1', href: '/demo', userTypes: [2] },
+    { name: 'copo', href: '/coposhow', userTypes: [2] }
   ];
 
   const resultNavigation = [
     { name: 'Results', href: '/results', userTypes: [2] },
+  ];
+
+  const questionNavigation = [
+    { name: 'Upload Ia1', href: '/uploadia1', userType: [2]},
+    { name: 'Upload Practical', href: '/uploadpractical', userType: [2]}
   ];
 
   return (
@@ -155,6 +159,7 @@ export default function Navbar() {
                 alt="Your Company"
                 src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
                 className="h-8 w-auto"
+                onClick={() => navigate("/")}
               />
             </div>
             <div className="hidden sm:ml-6 sm:block">
@@ -200,6 +205,28 @@ export default function Navbar() {
                         </Menu>
                         <Menu as="div" className="relative">
                           <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Questions
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {questionNavigation.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700'
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
+                                )}
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu>
+                        <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                             Curriculum
                           </MenuButton>
                           <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
@@ -220,6 +247,7 @@ export default function Navbar() {
                             ))}
                           </MenuItems>
                         </Menu>
+                       
                         <NavLink
                           to="/results"
                           className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
