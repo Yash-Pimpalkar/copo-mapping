@@ -16,7 +16,7 @@ const Ia1 = ({ uid }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [display,setDisplay]=useState("Total student passed with >=")
+  const [display, setDisplay] = useState("Total student passed with >=");
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
   };
@@ -299,38 +299,46 @@ const Ia1 = ({ uid }) => {
       },
     }));
   };
+  
+ // Handle file upload
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  const reader = new FileReader();
 
-  // Handle file upload
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
+  reader.onload = async (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    let jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-    reader.onload = async (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      let jsonData = XLSX.utils.sheet_to_json(worksheet);
+    jsonData = jsonData.filter((_, index) => index !== 1 - 1);
 
-      jsonData = jsonData.filter((_, index) => index !== 1 - 1);
+    let errors = [];
+    const validatedData = jsonData.map((student, rowIndex) => {
+      const validatedStudent = { ...student };
 
-      const validatedData = jsonData.map((student) => {
-        const validatedStudent = { ...student };
+      COsData.forEach((col) => {
+        let marks = student[col.qname];
 
-        COsData.forEach((col) => {
-          let marks = student[col.qname];
+        // Ensure marks are within limits and handle null
+        const maxLimit = col.marks;
+        if (marks !== null && marks > maxLimit) {
+          errors.push(
+            `Row ${rowIndex + 2}: ${col.qname} has marks ${marks}, which exceeds the limit of ${maxLimit}.`
+          );
+          marks = Math.min(marks, maxLimit); // Adjust the marks to be within the limit
+        }
 
-          // Ensure marks are within limits and handle null
-          const maxLimit = col.marks;
-          marks =
-            marks === null ? null : Math.max(0, Math.min(marks, maxLimit));
-
-          validatedStudent[col.qname] = marks;
-        });
-
-        return validatedStudent;
+        validatedStudent[col.qname] = marks;
       });
 
+      return validatedStudent;
+    });
+
+    if (errors.length > 0) {
+      alert("Errors found:\n" + errors.join("\n"));
+    } else {
       setIaData(validatedData);
 
       const changes = [];
@@ -352,10 +360,12 @@ const Ia1 = ({ uid }) => {
       } catch (error) {
         console.error("Error updating marks:", error);
       }
-    };
-
-    reader.readAsArrayBuffer(file);
+    }
   };
+
+  reader.readAsArrayBuffer(file);
+};
+
 
   const updateMarks = async (changes) => {
     console.log(changes);
@@ -722,82 +732,157 @@ const Ia1 = ({ uid }) => {
         }
       </div>
 
-     {/* New container for Total Students Passed */}
-<div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-  <h1 className="text-lg font-semibold mb-4">Total Students Passed Each Question</h1>
-  <div className="mb-4">
-    <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
-      Total Students Passed with &gt;= PERCENTAGE %
-    </label>
-    <select
-      id="total-student-passed"
-      value={attainmentData.passedPercentage}
-      onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-      className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    >
-      {[...Array(11).keys()].map((i) => (
-        <option key={i} value={50 + i * 5}>
-          {50 + i * 5}%
-        </option>
-      ))}
-    </select>
-  </div>
-  <div className="overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50">
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-            Type
-          </th>
-          {questionColumns.map((col) => (
-            <th
-              key={col.id}
-              className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-            >
-              {col.qname}
-            </th>
-          ))}
-        </tr>
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-            &nbsp;
-          </th>
-          {questionColumns.map((col) => (
-            <th
-              key={col.id}
-              className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-            >
-              {col.coname}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        <tr>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-        {  display} {attainmentData.passedPercentage} {"%"}
-          </td>
-          {getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage).map((count, index) => (
-            <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-              {count}
-            </td>
-          ))}
-        </tr>
-        <tr>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-            Students Attempted Per Question
-          </td>
-          {getTotalStudentsAttempted().map((count, index) => (
-            <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-              {count}
-            </td>
-          ))}
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+      {/* New container for Total Students Passed */}
+      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+        <h1 className="text-lg font-semibold mb-4">
+          Total Students Passed Each Question
+        </h1>
+        <div className="mb-4">
+          <label
+            htmlFor="total-student-passed"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Total Students Passed with &gt;= PERCENTAGE %
+          </label>
+          <input
+            id="total-student-passed"
+            type="number"
+            value={attainmentData.passedPercentage}
+            onChange={(e) => {
+              let value = e.target.value;
 
+              // Convert value to a number for validation
+              const numericValue = Number(value);
+
+              // Allow empty input or numbers between 50 and 100
+              if (value === "" || (numericValue >= 50 && numericValue <= 100)) {
+                handleAttainmentChange(e, "passedPercentage");
+              }
+            }}
+            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  Type
+                </th>
+                {questionColumns.map((col) => (
+                  <th
+                    key={col.id}
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                  >
+                    {col.qname}
+                  </th>
+                ))}
+              </tr>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  &nbsp;
+                </th>
+                {questionColumns.map((col) => (
+                  <th
+                    key={col.id}
+                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                  >
+                    {col.coname}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                  {display} {attainmentData.passedPercentage} {"%"}
+                </td>
+                {getTotalStudentsPassedPerQuestion(
+                  attainmentData.passedPercentage
+                ).map((count, index) => (
+                  <td
+                    key={index}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                  >
+                    {count}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                  Students Attempted Per Question
+                </td>
+                {getTotalStudentsAttempted().map((count, index) => (
+                  <td
+                    key={index}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                  >
+                    {count}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                  CO Attainment
+                </td>
+                {getTotalStudentsPassedPerQuestion(
+                  attainmentData.passedPercentage
+                ).map((passedCount, index) => {
+                  const attemptedCount = getTotalStudentsAttempted()[index];
+                  const attainment = attemptedCount
+                    ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                    : 0;
+                  return (
+                    <td
+                      key={index}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                    >
+                      {attainment} %
+                    </td>
+                  );
+                })}
+              </tr>
+              {/* Dynamic Rows for COs */}
+              {["CO1", "CO2"].map((coName) => {
+                const coColumns = questionColumns
+                  .map((col, index) => ({ ...col, index })) // include index for mapping
+                  .filter((col) => col.coname === coName); // filter by CO name
+
+                const coAverage = coColumns.length
+                  ? (
+                      coColumns.reduce((sum, col) => {
+                        const attainmentValue =
+                          getTotalStudentsPassedPerQuestion(
+                            attainmentData.passedPercentage
+                          )[col.index];
+                        const attemptedCount =
+                          getTotalStudentsAttempted()[col.index];
+                        const attainment = attemptedCount
+                          ? (attainmentValue / attemptedCount) * 100
+                          : 0;
+                        return sum + attainment;
+                      }, 0) / coColumns.length
+                    ).toFixed(2)
+                  : 0;
+
+                return (
+                  <tr key={coName}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      {coName} Average
+                    </td>
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                      colSpan={questionColumns.length}
+                    >
+                      {coAverage} %
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Section to display Total Students Attempted each question
           <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
