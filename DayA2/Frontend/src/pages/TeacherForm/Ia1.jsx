@@ -16,6 +16,7 @@ const Ia1 = ({ uid }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [display,setDisplay]=useState("Total student passed with >=")
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
   };
@@ -74,15 +75,13 @@ const Ia1 = ({ uid }) => {
     fetchIaData();
   }, [userCourseId]);
 
-  //function to calculate no of student attempted the per question 
+  //function to calculate no of student attempted the per question
 
   const getTotalStudentsAttempted = () => {
     const attemptedCounts = questionColumns.map((col) => {
       return IaData.filter(
         (student) => student[col.qname] !== null && student[col.qname] >= 0
-        
       ).length;
-
     });
     return attemptedCounts;
   };
@@ -91,20 +90,24 @@ const Ia1 = ({ uid }) => {
   const getTotalStudentsPassedPerQuestion = (percentage) => {
     const passedCounts = questionColumns.map((col) => {
       // Find the corresponding object in COsData that matches the qname
-      const correspondingCoData = COsData.find(data => data.qname === col.qname);
-      
+      const correspondingCoData = COsData.find(
+        (data) => data.qname === col.qname
+      );
+
       // Get the maximum marks from the matched object
       const maxMarks = correspondingCoData ? correspondingCoData.marks : 0;
-      console.log('Max Marks:', maxMarks);
-  
+      console.log("Max Marks:", maxMarks);
+
       return IaData.filter((student) => {
         // Get the marks for the current question
         const studentMarks = student[col.qname];
-        
+
         // Calculate the percentage for the student's marks in this specific question
-        const studentPercentage = studentMarks ? (studentMarks / maxMarks) * 100 : 0;
-        console.log('Student Percentage:', studentPercentage);
-  
+        const studentPercentage = studentMarks
+          ? (studentMarks / maxMarks) * 100
+          : 0;
+        console.log("Student Percentage:", studentPercentage);
+
         return (
           studentPercentage >= percentage &&
           student[col.qname] !== null &&
@@ -112,10 +115,10 @@ const Ia1 = ({ uid }) => {
         );
       }).length;
     });
-  
+
     return passedCounts;
   };
-  
+
   // Handle course selection change
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
@@ -176,47 +179,46 @@ const Ia1 = ({ uid }) => {
       if (isNaN(value)) return ""; // Handle cases where conversion to number fails
       return Math.max(min, Math.min(value, max));
     };
-  
+
     // Parse and constrain the values for Q1 columns
     const q1Values = q1Columns.map((col) => {
       // Get the max marks for the current qname from COsData
-      const correspondingCoData = COsData.find(data => data.qname === col);
+      const correspondingCoData = COsData.find((data) => data.qname === col);
       const maxMarks = correspondingCoData ? correspondingCoData.marks : 0;
-  
+
       let value = parseAndConstrainValue(row[col], 0, maxMarks);
       return value !== null ? value : 0; // Replace null with 0 for calculation
     });
-  
+
     // Parse and constrain the values for special columns
     const specialValues = specialColumns.map((col) => {
       // Get the max marks for the current qname from COsData
-      const correspondingCoData = COsData.find(data => data.qname === col);
+      const correspondingCoData = COsData.find((data) => data.qname === col);
       const maxMarks = correspondingCoData ? correspondingCoData.marks : 0;
-  
+
       let value = parseAndConstrainValue(row[col], 0, maxMarks);
       return value !== null ? value : 0; // Replace null with 0 for calculation
     });
-  
+
     // Get the highest three values from special columns
     const highestSpecialValues = specialValues
       .sort((a, b) => b - a)
       .slice(0, 3);
-  
+
     // Calculate the total for Q1 columns
     const q1Total = q1Values.reduce((acc, value) => acc + value, 0);
-  
+
     // Calculate the total for the highest three special columns
     const specialTotal = highestSpecialValues.reduce(
       (acc, value) => acc + value,
       0
     );
-  
+
     // Sum both totals to get the final total
     const total = q1Total + specialTotal;
-  
+
     return total;
   };
-  
 
   // Pagination logic
   const totalItems = IaData.length;
@@ -545,7 +547,7 @@ const Ia1 = ({ uid }) => {
             </button>
           </div>
         </div>
-        
+
         {/* // Display IA Data */}
         {filteredData.length > 0 && (
           <div className="overflow-x-auto">
@@ -720,75 +722,84 @@ const Ia1 = ({ uid }) => {
         }
       </div>
 
-        {/* New container for Total Students Passed */}
-        <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-          <h1 className="text-lg font-semibold mb-4">
-            Total Students Passed Each Question
-          </h1>
-          <div className="mb-4">
-            <label
-              htmlFor="total-student-passed"
-              className="block text-sm font-medium text-gray-700 mb-2"
+     {/* New container for Total Students Passed */}
+<div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+  <h1 className="text-lg font-semibold mb-4">Total Students Passed Each Question</h1>
+  <div className="mb-4">
+    <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
+      Total Students Passed with &gt;= PERCENTAGE %
+    </label>
+    <select
+      id="total-student-passed"
+      value={attainmentData.passedPercentage}
+      onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+      className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    >
+      {[...Array(11).keys()].map((i) => (
+        <option key={i} value={50 + i * 5}>
+          {50 + i * 5}%
+        </option>
+      ))}
+    </select>
+  </div>
+  <div className="overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+            Type
+          </th>
+          {questionColumns.map((col) => (
+            <th
+              key={col.id}
+              className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
             >
-              Total Students Passed with &gt;= PERCENTAGE %
-            </label>
-            <select
-              id="total-student-passed"
-              value={attainmentData.passedPercentage}
-              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              {col.qname}
+            </th>
+          ))}
+        </tr>
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+            &nbsp;
+          </th>
+          {questionColumns.map((col) => (
+            <th
+              key={col.id}
+              className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
             >
-              {[...Array(11).keys()].map((i) => (
-                <option key={i} value={50 + i * 5}>
-                  
-                  {50 + i * 5}%
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {questionColumns.map((col) => (
-                    <th
-                      key={col.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                    >
-                      {col.qname}
-                    </th>
-                  ))}
-                </tr>
-                <tr>
-                  {questionColumns.map((col) => (
-                    <th
-                      key={col.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                    >
-                      {col.coname}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  {getTotalStudentsPassedPerQuestion(
-                    attainmentData.passedPercentage
-                  ).map((count, index) => (
-                    <td
-                      key={index}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {count}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-          {/* Section to display Total Students Attempted each question */}
+              {col.coname}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+        {  display} {attainmentData.passedPercentage} {"%"}
+          </td>
+          {getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage).map((count, index) => (
+            <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+              {count}
+            </td>
+          ))}
+        </tr>
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+            Students Attempted Per Question
+          </td>
+          {getTotalStudentsAttempted().map((count, index) => (
+            <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+              {count}
+            </td>
+          ))}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+      {/* Section to display Total Students Attempted each question
           <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
           <h1 className="text-lg font-semibold mb-4">
             Total Students Attempted Each Question
@@ -822,21 +833,10 @@ const Ia1 = ({ uid }) => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  {getTotalStudentsAttempted().map((count, index) => (
-                    <td
-                      key={index}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {count}
-                    </td>
-                  ))}
-                </tr>
+             
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div> 
+            </table> */}
+    </div>
   );
 };
 export default Ia1;
