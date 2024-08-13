@@ -20,6 +20,8 @@ import Demo from './pages/TeacherForm/Demo';
 import TeacherDashboard from './component/Dashboard/TeacherDashboard';
 import UploadIa1 from './pages/Questions/UploadIa';
 import Semester from './pages/TeacherForm/Semester';
+import AssignCourse from './component/Admin/UserSelection/AssignCourse';
+
 
 function App() {
   const [token, setToken] = useState("");
@@ -73,8 +75,8 @@ function App() {
             </>
           ) : usertype == 3 ? (
             <>
-              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/userselection" element={<UserSelection />} />
+              <Route path="/AssignCourse" element={<AssignCourse />} />
               {/* Add other routes for usertype === 3 here */}
             </>
           ) : (

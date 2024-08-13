@@ -113,6 +113,7 @@ export default function Navbar() {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', userTypes: [1] },
     { name: 'User Selection', href: '/userselection', userTypes: [3] },
+    { name: 'Assign Course', href: '/assigncourse', userTypes: [3] },
   ];
 
   const formNavigation = [

@@ -759,7 +759,7 @@ const handleFileUpload = (event) => {
                 handleAttainmentChange(e, "passedPercentage");
               }
             }}
-            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
         <div className="overflow-x-auto">
