@@ -383,14 +383,16 @@ const handleFileUpload = (event) => {
 
   // Handle file download
   const handleFileDownload = () => {
-    // Create a new array to include Total column
+    // Step 1: Prepare the IA Data (Table 1)
+  
+    // Create a new array to include the Total column for IA data
     const dataWithTotal = IaData.map((row) => ({
       ...row,
       Total: calculateTotal(row),
     }));
-
-    // Create headers for the questions and COs
-    const headers = [
+  
+    // Create headers for the IA data
+    const iaHeaders = [
       "sid",
       "student_name",
       "stud_clg_id",
@@ -404,10 +406,10 @@ const handleFileUpload = (event) => {
       ...questionColumns.map((col) => col.coname),
       "",
     ];
-
-    // Combine headers with the data
-    const dataForExport = [
-      headers,
+  
+    // Combine headers with the IA data
+    const iaDataForExport = [
+      iaHeaders,
       coHeaders,
       ...dataWithTotal.map((row) => [
         row.sid,
@@ -417,17 +419,88 @@ const handleFileUpload = (event) => {
         row.Total,
       ]),
     ];
-
-    // Convert data to worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(dataForExport);
-
-    // Create a new workbook and append the worksheet
+  
+    // Step 2: Prepare the Attainment Data (Table 2)
+  
+    const attainmentHeaders = [
+      "Type",
+      ...questionColumns.map((col) => col.qname),
+    ];
+  
+    const passedRow = [
+      `Passed >= ${attainmentData.passedPercentage}%`,
+      ...getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage),
+    ];
+  
+    const attemptedRow = [
+      "Students Attempted Per Question",
+      ...getTotalStudentsAttempted(),
+    ];
+  
+    const coAttainmentRow = [
+      "CO Attainment",
+      ...getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage).map(
+        (passedCount, index) => {
+          const attemptedCount = getTotalStudentsAttempted()[index];
+          return attemptedCount
+            ? ((passedCount / attemptedCount) * 100).toFixed(2) + " %"
+            : "0 %";
+        }
+      ),
+    ];
+  
+    // Add dynamic rows for CO averages
+    const coAverageRows = ["CO1", "CO2"].map((coName) => {
+      const coColumns = questionColumns
+        .map((col, index) => ({ ...col, index })) // include index for mapping
+        .filter((col) => col.coname === coName); // filter by CO name
+  
+      const coAverage = coColumns.length
+        ? (
+            coColumns.reduce((sum, col) => {
+              const attainmentValue =
+                getTotalStudentsPassedPerQuestion(
+                  attainmentData.passedPercentage
+                )[col.index];
+              const attemptedCount = getTotalStudentsAttempted()[col.index];
+              const attainment = attemptedCount
+                ? (attainmentValue / attemptedCount) * 100
+                : 0;
+              return sum + attainment;
+            }, 0) / coColumns.length
+          ).toFixed(2)
+        : 0;
+  
+      return [coName + " Average", coAverage + " %"];
+    });
+  
+    const attainmentDataForExport = [
+      attainmentHeaders,
+      passedRow,
+      attemptedRow,
+      coAttainmentRow,
+      ...coAverageRows.map((row) => [...row, ...Array(questionColumns.length - 1).fill('')]),
+    ];
+  
+    // Step 3: Combine IA Data and Attainment Data into the same worksheet
+  
+    // Convert IA data to worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(iaDataForExport);
+  
+    // Calculate starting row for the second table (Attainment Data)
+    const attainmentStartRow = iaDataForExport.length + 2; // Leave a couple of rows between tables
+  
+    // Append Attainment Data to the worksheet
+    XLSX.utils.sheet_add_aoa(worksheet, attainmentDataForExport, { origin: { r: attainmentStartRow, c: 0 } });
+  
+    // Step 4: Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "IA Data");
-
-    // Write the workbook to a file
-    XLSX.writeFile(workbook, "ia_data.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "IA1 Data & Attainment");
+  
+    // Step 5: Write the workbook to a file
+    XLSX.writeFile(workbook, "ia_data_and_attainment.xlsx");
   };
+  
 
   // Handle search input change
   const handleSearchChange = (event) => {
@@ -723,13 +796,13 @@ const handleFileUpload = (event) => {
           </div>
         )}
         {/* Pagination Controls */}
-        {
+        {selectedCourse && selectedYear && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
-        }
+        )}
       </div>
 
       {/* New container for Total Students Passed */}
