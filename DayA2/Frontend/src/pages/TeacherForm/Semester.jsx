@@ -376,7 +376,7 @@ const Semester = ({ uid }) => {
             ))}
           </tbody>
         </table>
-
+        {/* Pagination  */}
         {selectedCourse && selectedYear && filteredData.length>0 && ( <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
