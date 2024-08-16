@@ -117,7 +117,6 @@ export default function Navbar() {
   ];
 
   const formNavigation = [
-    // { name: 'Add CO Form', href: '/coform', userTypes: [2] },
     { name: 'Add PO Form', href: '/posform', userTypes: [2] },
     { name: 'Add Course', href: '/courseform', userTypes: [2] },
     { name: 'Register Form', href: '/registerform', userTypes: [2] },
@@ -129,6 +128,7 @@ export default function Navbar() {
     { name: 'IA2', href: '/ia2', userTypes: [2] },
     { name: 'Semester', href: '/semester', userTypes: [2] },
     { name: 'Practical', href: '/practical', userTypes: [2] },
+    { name: 'Termwork', href: '/termwork', userTypes: [2] },
     { name: 'Assignment', href: '/assg', userTypes: [2] },
     { name: 'copo', href: '/coposhow', userTypes: [2] }
   ];
@@ -147,11 +147,10 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-              <span className="absolute -inset-0.5" />
+            <DisclosureButton className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
               <span className="sr-only">Open main menu</span>
-              <Bars3Icon aria-hidden="true" className="block h-6 w-6 group-data-[open]:hidden" />
-              <XMarkIcon aria-hidden="true" className="hidden h-6 w-6 group-data-[open]:block" />
+              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+              <XMarkIcon className="h-6 w-6 hidden" aria-hidden="true" />
             </DisclosureButton>
           </div>
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
@@ -159,7 +158,7 @@ export default function Navbar() {
               <img
                 alt="Your Company"
                 src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
+                className="h-8 w-auto cursor-pointer"
                 onClick={() => navigate("/")}
               />
             </div>
@@ -171,7 +170,6 @@ export default function Navbar() {
                       <NavLink
                         key={item.name}
                         to={item.href}
-                        aria-current={item.current ? 'page' : undefined}
                         className={classNames(
                           location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                           'rounded-md px-3 py-2 text-sm font-medium',
@@ -248,13 +246,50 @@ export default function Navbar() {
                             ))}
                           </MenuItems>
                         </Menu>
-                       
-                        <NavLink
-                          to="/results"
-                          className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                        >
-                          Results
-                        </NavLink>
+                        <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Results
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {resultNavigation.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700'
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
+                                )}
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu>
+                        {/* <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Questions
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {questionNavigation.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700'
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
+                                )}
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu> */}
                       </>
                     )}
                   </>
@@ -262,112 +297,100 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-         
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            {token && user_id !== 0 ? (
-              <>
-              <button
-                type="button"
-                className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-              >
-                <span className="sr-only">View notifications</span>
-                <BellIcon className="h-6 w-6" aria-hidden="true" />
-              </button>
-              <ProfileDropdown email={email} onSignOut={handleSignOut} />
-              </>
-            ) : (
-            <>
-            <NavLink
-              to="/login"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
-            >
-              Login
-            </NavLink>
-            <NavLink
-              to="/register"
-              className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
-            >
-              Register
-            </NavLink>
-          </>
-          )}
-            </div>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            {token && email && <ProfileDropdown email={email} onSignOut={handleSignOut} />}
+          </div>
         </div>
       </div>
 
       <DisclosurePanel className="sm:hidden">
-        <div className="space-y-1 px-2 pb-3 pt-2">
+        <div className="space-y-1 pt-2 pb-3">
           {token && user_id !== 0 && (
             <>
               {navigation.filter(item => item.userTypes.includes(userType)).map((item) => (
                 <DisclosureButton
                   key={item.name}
-                  as="a"
-                  href={item.href}
+                  as={NavLink}
+                  to={item.href}
                   className={classNames(
                     location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block rounded-md px-3 py-2 text-base font-medium',
+                    'block px-3 py-2 text-base font-medium'
                   )}
-                  aria-current={location.pathname === item.href ? 'page' : undefined}
                 >
                   {item.name}
                 </DisclosureButton>
               ))}
               {userType === 2 && (
                 <>
-                  <Menu as="div" className="relative">
-                    <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                  <Disclosure as="div" className="relative">
+                    <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                       Form
-                    </MenuButton>
-                    <MenuItems className="absolute right-0 z-50 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                    </DisclosureButton>
+                    <DisclosurePanel className="space-y-1">
                       {formNavigation.map((item) => (
-                        <MenuItem key={item.name}>
-                          {({ active }) => (
-                            <DisclosureButton
-                              as="a"
-                              href={item.href}
-                              className={classNames(
-                                active ? 'bg-gray-100' : '',
-                                'block px-4 py-2 text-base font-medium text-gray-700'
-                              )}
-                            >
-                              {item.name}
-                            </DisclosureButton>
-                          )}
-                        </MenuItem>
+                        <DisclosureButton
+                          key={item.name}
+                          as={NavLink}
+                          to={item.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.name}
+                        </DisclosureButton>
                       ))}
-                    </MenuItems>
-                  </Menu>
-                  <Menu as="div" className="relative">
-                    <MenuButton className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                    </DisclosurePanel>
+                  </Disclosure>
+                  <Disclosure as="div" className="relative">
+                    <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                      Questions
+                    </DisclosureButton>
+                    <DisclosurePanel className="space-y-1">
+                      {questionNavigation.map((item) => (
+                        <DisclosureButton
+                          key={item.name}
+                          as={NavLink}
+                          to={item.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.name}
+                        </DisclosureButton>
+                      ))}
+                    </DisclosurePanel>
+                  </Disclosure>
+                  <Disclosure as="div" className="relative">
+                    <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                       Curriculum
-                    </MenuButton>
-                    <MenuItems className="absolute right-0 z-50 mt-2 w-full origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                    </DisclosureButton>
+                    <DisclosurePanel className="space-y-1">
                       {formCurriculum.map((item) => (
-                        <MenuItem key={item.name}>
-                          {({ active }) => (
-                            <DisclosureButton
-                              as="a"
-                              href={item.href}
-                              className={classNames(
-                                active ? 'bg-gray-100' : '',
-                                'block px-4 py-2 text-base font-medium text-gray-700'
-                              )}
-                            >
-                              {item.name}
-                            </DisclosureButton>
-                          )}
-                        </MenuItem>
+                        <DisclosureButton
+                          key={item.name}
+                          as={NavLink}
+                          to={item.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.name}
+                        </DisclosureButton>
                       ))}
-                    </MenuItems>
-                  </Menu>
-                  <DisclosureButton
-                    as="a"
-                    href="/results"
-                    className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    Results
-                  </DisclosureButton>
+                    </DisclosurePanel>
+                  </Disclosure>
+                  <Disclosure as="div" className="relative">
+                    <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                      Results
+                    </DisclosureButton>
+                    <DisclosurePanel className="space-y-1">
+                      {resultNavigation.map((item) => (
+                        <DisclosureButton
+                          key={item.name}
+                          as={NavLink}
+                          to={item.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.name}
+                        </DisclosureButton>
+                      ))}
+                    </DisclosurePanel>
+                  </Disclosure>
+                 
                 </>
               )}
             </>

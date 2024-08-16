@@ -21,7 +21,7 @@ import TeacherDashboard from './component/Dashboard/TeacherDashboard';
 import UploadIa1 from './pages/Questions/UploadIa';
 import Semester from './pages/TeacherForm/Semester';
 import AssignCourse from './component/Admin/UserSelection/AssignCourse';
-
+import Termwork from './pages/TeacherForm/Termwork';
 
 function App() {
   const [token, setToken] = useState("");
@@ -70,6 +70,7 @@ function App() {
               <Route path='/demo' element={<Demo  uid={user_id}/>} />
               <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
               <Route path='/uploadia1' element={<UploadIa1  uid={user_id}/>} />
+              <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
 
               {/* Add other routes for usertype === 2 here */}
             </>
