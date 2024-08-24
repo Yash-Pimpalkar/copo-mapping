@@ -19,6 +19,7 @@ import Coposhow from './pages/TeacherForm/CoposhowComponent';
 import Demo from './pages/TeacherForm/Demo';
 import TeacherDashboard from './component/Dashboard/TeacherDashboard';
 import UploadIa1 from './pages/Questions/UploadIa';
+import UploadIa2 from './pages/Questions/UploadIa2';
 import Semester from './pages/TeacherForm/Semester';
 import AssignCourse from './component/Admin/UserSelection/AssignCourse';
 import Termwork from './pages/TeacherForm/Termwork';
@@ -70,6 +71,7 @@ function App() {
               <Route path='/demo' element={<Demo  uid={user_id}/>} />
               <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
               <Route path='/uploadia1' element={<UploadIa1  uid={user_id}/>} />
+              <Route path='/uploadia2' element={<UploadIa2  uid={user_id}/>} />
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
 
               {/* Add other routes for usertype === 2 here */}
