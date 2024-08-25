@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 
 app.use(cookieParser())
 app.use("/api/register",registerRoute)
-app.use("/api/login",loginRoute)
+app.use("/api/login/",loginRoute)
 app.use("/api/course",courseRoute)
 app.use("/api/usercourse",UserCourseRoute)
 app.use("/api/cos",cosRoute)

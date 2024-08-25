@@ -140,6 +140,7 @@ export default function Navbar() {
   const questionNavigation = [
     { name: 'Upload Ia1', href: '/uploadia1', userType: [2]},
     { name: 'Upload Ia2', href: '/uploadia2', userType: [2]},
+    { name: 'Upload Sem', href: '/uploadsem', userType: [2]},
     { name: 'Upload Practical', href: '/uploadpractical', userType: [2]}
   ];
 

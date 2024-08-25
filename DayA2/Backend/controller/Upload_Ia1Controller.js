@@ -42,6 +42,13 @@ FROM copo_students_details csd
 JOIN semester s ON csd.sid = s.sid
 JOIN user_course uc ON csd.branch = uc.branch AND s.sem = uc.semester
 JOIN table_ia ia ON uc.usercourse_id = ia.usercourseid
+WHERE uc.usercourse_id IS NOT NULL;
+INSERT INTO upload_ia2 (sid, qid)
+SELECT DISTINCT csd.sid, ia.idtable_ia2 AS qid
+FROM copo_students_details csd
+JOIN semester s ON csd.sid = s.sid
+JOIN user_course uc ON csd.branch = uc.branch AND s.sem = uc.semester
+JOIN table_ia2 ia ON uc.usercourse_id = ia.usercourseid
 WHERE uc.usercourse_id IS NOT NULL`
 
  }
@@ -199,9 +206,117 @@ export const IaUpload = async (req, res) => {
 };
 
 
+export const Ia2COsName = (req,res)=> {
+  const userCourseId = req.params.uid;
+  const sql= `select * from table_ia2 where usercourseid = ? `;
+  db.query(sql,userCourseId,(error,results)=>{
+    if(error){
+      console.error('Error fetching IA data:', error);
+      res.status(500).send('Server error');
+    }
+    console.log(results)
+    res.status(200).json(results);
+  })
+}
+
   // Define the userCourseID
 
 
+  export const showIa2Data = async (req, res) => {
+    const userCourseId = req.params.uid;
+   
+    const sql='CALL GetStudentMarksByCourseID_IA2(?)';
+    db.query(sql,userCourseId,(error,results)=>{
+      if(error){
+        console.error('Error fetching IA data:', error);
+        res.status(500).send('Server error');
+      }
+      res.status(200).json(results[0]);
+    })
+    
+  };
+  
+ 
+  
+  
+  
+  export const Ia2Upload = async (req, res) => {
+    const updates = req.body; // Expecting an array of update objects
+    console.log('Received updates:', updates);
+  
+    // Validate input format
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return res.status(400).send('Invalid input');
+    }
+  
+    // Prepare the query and values
+    const sql = 'UPDATE upload_ia2 SET marks = ? WHERE sid = ? AND qid = ?';
+    const queryValues = updates.map(update => [
+      update.marks === null ? null : parseInt(update.marks, 10), // Use null if marks is null, otherwise parse the integer
+      update.sid,
+      update.qid
+    ]);
+  
+    // Log the queryValues for debugging
+    console.log('Query Values:', queryValues);
+  
+    try {
+      // Use Promise.all to handle multiple queries in parallel
+      await Promise.all(queryValues.map(values => {
+        return new Promise((resolve, reject) => {
+          console.log(`Executing query: ${sql} with values: ${values}`);
+          db.query(sql, values, (error, results) => {
+            if (error) {
+              console.error('Database query error:', error); // More detailed error logging
+              return reject(error);
+            }
+            console.log('Query result:', results); // Log results of the query
+            resolve(results);
+          });
+        });
+      }));
+  
+      // Send success response after all updates are complete
+      res.status(200).json('Marks updated successfully');
+    } catch (error) {
+      console.error('Error updating marks:', error);
+      res.status(500).json('Server error');
+    }
+  };
+  
 
+  export const upload_Ia2_questions = async (req, res) => {
+    const { formDataWithUserCourseId } = req.body;
+  
+    console.log('Received data:', formDataWithUserCourseId);
+  
+    // Validate input
+    if (!formDataWithUserCourseId || typeof formDataWithUserCourseId !== 'object') {
+      return res.status(400).json({ error: 'Invalid data' });
+    }
+  
+    // Extract data and ensure it's in array format
+    const dataArray = Object.values(formDataWithUserCourseId);
+  
+    // Check if dataArray is empty
+    if (dataArray.length === 0) {
+      return res.status(400).json({ error: 'No data to insert' });
+    }
+  
+    // Prepare the SQL query and values for batch insertion
+    const query = 'INSERT INTO table_ia2 (qname, coname, usercourseid, marks) VALUES ?';
+    const values = dataArray.map(({ qname, coname, usercourseid, marks }) => [qname, coname, usercourseid, marks]);
+  
+    
+      // Perform the batch insert
+      db.query(query, [values],(error,result)=>{
+        if (error){
+            console.log(error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.status(201).json({ message: 'Data submitted successfully' });
+      });  
+  };
 
 

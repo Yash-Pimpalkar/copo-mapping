@@ -62,9 +62,9 @@ const Ia2 = ({ uid }) => {
     const fetchIaData = async () => {
       if (userCourseId) {
         try {
-          const res = await api.get(`/api/ia/${userCourseId}`);
+          const res = await api.get(`/api/ia/ia2/${userCourseId}`);
           setIaData(res.data);
-          const res1 = await api.get(`/api/ia/cos/${userCourseId}`);
+          const res1 = await api.get(`/api/ia/cos/ia2/${userCourseId}`);
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
@@ -370,7 +370,7 @@ const handleFileUpload = (event) => {
   const updateMarks = async (changes) => {
     console.log(changes);
     try {
-      const response = await api.put("/api/ia/", changes);
+      const response = await api.put("/api/ia/ia2", changes);
       if (response.ok) {
         console.log("Marks updated successfully");
       } else {

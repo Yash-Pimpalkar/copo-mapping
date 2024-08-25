@@ -91,6 +91,20 @@ export const show_user_course = (req,res) => {
   })
 }
 
+export const show_CoCount = (req,res) => {
+  const id= req.params.uid;
+  // console.log(id)
+  const sql=`select * from user_course where usercourse_id=? `;
+  db.query(sql,id,(err,result)=>{
+    if (err) {
+      console.error('Error saving to database:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.status(201).json(result);
+  })
+}
+
 
 
 

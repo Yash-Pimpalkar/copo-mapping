@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 export const login=(req,res)=>{
     const email=req.body.email
     const password=req.body.password
-
+  console.log(email,password)
      const additional_query=`SELECT * FROM users WHERE emailid = (?) AND (
              password IS NULL OR
              depart IS NULL OR

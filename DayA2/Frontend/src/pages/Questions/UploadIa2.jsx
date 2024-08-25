@@ -94,7 +94,7 @@ const UploadIa2 = ({ uid }) => {
 
     try {
        console.log(formattedData)
-      await api.post('/api/ia1/create', { formDataWithUserCourseId: formattedData });
+      await api.post('/api/ia/create/ia2', { formDataWithUserCourseId: formattedData });
       alert('Data submitted successfully');
     } catch (error) {
       console.error('Error submitting data:', error);

@@ -20,6 +20,7 @@ import Demo from './pages/TeacherForm/Demo';
 import TeacherDashboard from './component/Dashboard/TeacherDashboard';
 import UploadIa1 from './pages/Questions/UploadIa';
 import UploadIa2 from './pages/Questions/UploadIa2';
+import UploadSem from './pages/Questions/UploadSem';
 import Semester from './pages/TeacherForm/Semester';
 import AssignCourse from './component/Admin/UserSelection/AssignCourse';
 import Termwork from './pages/TeacherForm/Termwork';
@@ -60,8 +61,8 @@ function App() {
               <Route path="/posform" element={<Pos_reg />} />
               <Route path="/courseform" element={<Course_reg />} />
               <Route path="/ia1" element={<Ia1 uid={user_id} />} />
-              <Route path="/ia2" element={<Ia2 />} />
-              <Route path="/semester" element={<Semester />} />
+              <Route path="/ia2" element={<Ia2 uid={user_id} />} />
+              <Route path="/semester" element={<Semester uid={user_id} />} />
               <Route path="/practical" element={<Practical />} />
               <Route path="/userselection" element={<UserSelection />} />
               <Route path='/registerform' element={<RegistrationForm uid={user_id}/>} />
@@ -72,6 +73,7 @@ function App() {
               <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
               <Route path='/uploadia1' element={<UploadIa1  uid={user_id}/>} />
               <Route path='/uploadia2' element={<UploadIa2  uid={user_id}/>} />
+              <Route path='/uploadsem' element={<UploadSem  uid={user_id}/>} />
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
 
               {/* Add other routes for usertype === 2 here */}
