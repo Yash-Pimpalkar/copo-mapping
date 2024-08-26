@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
-
+import LoadingButton from "../../component/Loading/Loading";
 const Ia1 = ({ uid }) => {
   const [courses, setCourses] = useState([]);
   const [distinctCourses, setDistinctCourses] = useState([]);
@@ -16,6 +16,7 @@ const Ia1 = ({ uid }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
   const [display, setDisplay] = useState("Total student passed with >=");
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
@@ -34,6 +35,7 @@ const Ia1 = ({ uid }) => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -49,6 +51,8 @@ const Ia1 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -61,6 +65,7 @@ const Ia1 = ({ uid }) => {
   useEffect(() => {
     const fetchIaData = async () => {
       if (userCourseId) {
+        setLoading(true);
         try {
           const res = await api.get(`/api/ia/${userCourseId}`);
           setIaData(res.data);
@@ -68,6 +73,8 @@ const Ia1 = ({ uid }) => {
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
+        }finally {
+          setLoading(false);
         }
       }
     };
@@ -526,6 +533,7 @@ const handleFileUpload = (event) => {
   });
 
   console.log(IaData);
+ 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -631,7 +639,12 @@ const handleFileUpload = (event) => {
             </button>
           </div>
         </div>
-
+        {loading ? (
+        <div className="flex justify-center items-center">
+          <LoadingButton />
+        </div>
+      ) : (
+        <>
         {/* // Display IA Data */}
         {filteredData.length > 0 && (
           <div className="overflow-x-auto">
@@ -796,7 +809,7 @@ const handleFileUpload = (event) => {
               </tbody>
             </table>
           </div>
-        )}
+        )}</> )}
         {/* Pagination Controls */}
         {selectedCourse && selectedYear && (
           <Pagination
