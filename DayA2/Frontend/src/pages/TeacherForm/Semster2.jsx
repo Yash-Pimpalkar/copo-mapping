@@ -12,10 +12,26 @@ const Semester = ({ uid }) => {
   const [SemData, SetSemdata] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [COsData, setCOsData] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
-  const [editedMarks, setEditedMarks] = useState({});
+  const [marksData, setMarksData] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [attainmentData, setAttainmentData] = useState({
+    passedPercentage: 50,
+  });
 
+  const calculatePercentage = (total, maxMarks) => {
+    return (total / maxMarks) * 100;
+  };
+
+  const handleAttainmentChange = (event, key) => {
+    setAttainmentData((prevData) => ({
+      ...prevData,
+      [key]: event.target.value,
+    }));
+  };
+
+  // Fetch courses and set distinct course names
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -42,13 +58,13 @@ const Semester = ({ uid }) => {
     }
   }, [uid]);
 
+  // Fetch IA data when the userCourseId changes
   useEffect(() => {
     const fetchSemData = async () => {
       if (userCourseId) {
         try {
           const res = await api.get(`/api/sem/show/${userCourseId}`);
           SetSemdata(res.data);
-          console.log(res.data)
         } catch (error) {
           console.error("Error fetching IA data:", error);
         }
@@ -58,10 +74,32 @@ const Semester = ({ uid }) => {
     fetchSemData();
   }, [userCourseId]);
 
+  // Placeholder for calculateTotal function
   const calculateTotal = (student) => {
-    return 0; // Implement your logic to calculate the total marks for a student
+    // Implement your logic to calculate the total marks for a student
+    return 0;
   };
 
+  // Last container total student passed calculation
+  const getTotalStudentsPassed = (percentage) => {
+    const maxMarks = 20; // Replace this with the actual maximum marks if available
+    return SemData.filter((student) => {
+      const totalMarks = calculateTotal(student);
+      const studentPercentage = calculatePercentage(totalMarks, maxMarks);
+      return studentPercentage >= percentage;
+    }).length;
+  };
+
+  // Total student attempted question
+  const getTotalStudentsAttempted = () => {
+    const questionColumns = COsData.map((col) => col.qname); // Assuming COsData contains qname
+    const attemptedCounts = questionColumns.map((col) => {
+      return SemData.filter((student) => student[col] > 0).length;
+    });
+    return attemptedCounts;
+  };
+
+  // Handle course selection change
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
     setSelectedCourse(selectedCourse);
@@ -69,6 +107,7 @@ const Semester = ({ uid }) => {
     setUserCourseId(null);
   };
 
+  // Handle year selection change
   const handleYearChange = (event) => {
     const selectedYear = event.target.value;
     setSelectedYear(selectedYear);
@@ -78,14 +117,107 @@ const Semester = ({ uid }) => {
         course.academic_year === selectedYear
     );
     setUserCourseId(course?.usercourse_id || null);
-    setCurrentPage(1); // Reset to the first page whenever the course or year is changed
   };
+
   const totalItems = SemData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  console.log(startIndex)
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = SemData.slice(startIndex, endIndex);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Handle the start of editing a row
+  const handleEditClick = (index) => {
+    setEditingRow(index + startIndex); // Adjust index to match actual data index
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      let jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      jsonData = jsonData.filter((_, index) => index !== 0);
+      SetSemdata(jsonData);
+      const changes = [];
+
+      jsonData.forEach((student) => {
+        COsData.forEach((col) => {
+          const marks = student[col.qname];
+          if (marks !== undefined) {
+            changes.push({
+              sid: student.sid,
+              qid: col.idtable_ia,
+              marks: marks,
+            });
+          }
+        });
+      });
+
+      try {
+        await api.post('/api/update-marks', changes); // Assuming the API endpoint for updating marks
+      } catch (error) {
+        console.error("Error updating marks:", error);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const getExperimentColumns = () => {
+    return COsData.map((data) => ({
+      id: data.idtable_ia,
+      qname: data.qname,
+      coname: data.coname,
+    }));
+  };
+
+  const ExperimentColumns = getExperimentColumns();
+
+  const handleFileDownload = () => {
+    const dataWithTotal = SemData.map((row) => ({
+      ...row,
+      Total: calculateTotal(row),
+    }));
+
+    const headers = [
+      "sid",
+      "student_name",
+      "stud_clg_id",
+      ...ExperimentColumns.map((col) => col.qname),
+      "Total",
+    ];
+    const coHeaders = ["", "", "", ...ExperimentColumns.map((col) => col.coname), ""];
+
+    const dataForExport = [
+      headers,
+      coHeaders,
+      ...dataWithTotal.map((row) => [
+        row.sid,
+        row.student_name,
+        row.stud_clg_id,
+        ...ExperimentColumns.map((col) => row[col.qname]),
+        row.Total,
+      ]),
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dataForExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Practical Data");
+    XLSX.writeFile(workbook, "student_practical_data.xlsx");
+  };
 
   const filteredData = SemData.filter((item) => {
     const query = searchQuery.toUpperCase();
@@ -96,115 +228,9 @@ const Semester = ({ uid }) => {
     );
   });
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  // const handleFileDownload = () => {
-  //   const worksheet = XLSX.utils.json_to_sheet(SemData);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "SemesterData");
-  //   XLSX.writeFile(workbook, "semester_data.xlsx");
-  // };
-
-  const handlePageChange = (pageNumber) => {
-    console.log(pageNumber);
-    setCurrentPage(pageNumber);
-  };
-
-  const handleEditClick = (index) => {
-    console.log(index)
-    setEditingRow(index);
-    setEditedMarks({
-      ...editedMarks,
-      [index]: SemData[index].marks,
-    });
-  };
-
-  const handleSaveClick = async (index) => {
-    const actualIndex = index ;
-    const semId = SemData[actualIndex].sem_id;
-    const marks = editedMarks[index];
-
-    try {
-      await api.put("/api/sem/", { sem_id: semId, marks });
-      console.log(`Saving sem_id: ${semId}, marks: ${marks}`);
-      SetSemdata((prevData) =>
-        prevData.map((item, idx) =>
-          idx === actualIndex ? { ...item, marks } : item
-        )
-      );
-      setEditingRow(null);
-    } catch (error) {
-      console.error("Error saving IA data:", error);
-    }
-  };
-
-  const handleCancelClick = () => {
-    setEditingRow(null);
-    setEditedMarks({});
-  };
-
-  const handleMarksChange = (event, index) => {
-    const value = event.target.value;
-    setEditedMarks({ ...editedMarks, [index]: value });
-  };
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
-      // Assuming the first row contains headers
-      const headers = jsonData[0];
-      const rows = jsonData.slice(1); // Skip header row
-  
-      const validatedData = rows.map((row) => {
-        const student = {};
-        headers.forEach((header, index) => {
-          student[header] = row[index];
-        });
-        return student;
-      });
-  
-      try {
-        console.log(validatedData)
-        await api.put("/api/sem/", validatedData);
-        SetSemdata(validatedData);
-      } catch (error) {
-        console.error("Error updating marks:", error);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  };
-  
-  const handleFileDownload = () => {
-    const formattedData = SemData.map((student) => ({
-      sem_id: student.sem_id,
-      stud_clg_id: student.stud_clg_id,
-      student_name: student.student_name,
-      marks: student.marks,
-    }));
-  
-    const headers = ["sem_id","Student ID", "Student Name", "Marks"];
-    const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
-  
-    const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "SemesterData");
-    XLSX.writeFile(workbook, "semester_data.xlsx");
-  };
-  
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
-        Semester
-      </h1>
+    <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">Semester</h1>
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
@@ -290,7 +316,7 @@ const Semester = ({ uid }) => {
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search by student name or ID"
-              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 pl-3 focus:border-indigo-500 sm:text-sm"
+              className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 pl-3  focus:border-indigo-500 sm:text-sm"
             />
           </div>
 
@@ -310,91 +336,52 @@ const Semester = ({ uid }) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Seat No.
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Student ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Student Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">Seat No.</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">Student ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">Student Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">Marks</th>
+              {/* {ExperimentColumns.map((col) => (
+                <th key={col.id} className="py-2 px-4 border-b">
+                  {col.qname}
+                </th>
+              ))} */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.slice(startIndex, endIndex).map((student, index) => {
-              const actualIndex = index + startIndex; // Adjust index to match actual data index
-    // { console.log(actualIndex)
-    //  console.log(editingRow)}
-              return (
-                <tr key={student.sid} className="hover:bg-gray-100">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {actualIndex + 1} {/* Displaying the row number */}
+          <tbody>
+            {filteredData.map((student, index) => (
+              <tr key={student.sid}>
+                {/* <td className="py-2 px-4 border-b">{student.seatno}</td> */}
+                <td className="py-2 px-4 border-b">{student.sid}</td>
+                <td  className="py-2 px-4 border-b">{student.stud_clg_id}</td>
+                <td className="py-2 px-4 border-b">{student.student_name}</td>
+                {/* {ExperimentColumns.map((col) => (
+                  <td key={col.id} className="py-2 px-4 border-b">
+                    {student[col.qname]}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.stud_clg_id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.student_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {editingRow === actualIndex ? (
-                      <input
-                        type="text"
-                        value={editedMarks[actualIndex] || student.marks} // Pre-fill with existing marks
-                        onChange={(event) =>
-                          handleMarksChange(event, actualIndex)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      />
-                    ) : (
-                      student.marks // Show existing marks if not editing
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {editingRow === actualIndex ? (
-                      <>
-                        <button
-                          onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
-                          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={handleCancelClick}
-                          className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+                ))} */}
+             
+                <td className="py-2 px-4 border-b">
+                  {calculateTotal(student)}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  <button
+                    onClick={() => handleEditClick(index)}
+                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        {totalPages > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        )}
+        {/* Pagination  */}
+        {selectedCourse && selectedYear && filteredData.length>0 && ( <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />)}
       </div>
     </div>
   );

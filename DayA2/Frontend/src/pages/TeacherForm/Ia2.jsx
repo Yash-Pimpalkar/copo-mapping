@@ -142,7 +142,7 @@ const Ia2 = ({ uid }) => {
   // Get unique question columns from COsData
   const getQuestionColumns = () => {
     return COsData.map((data) => ({
-      id: data.idtable_ia,
+      id: data.idtable_ia2,
       qname: data.qname,
       coname: data.coname,
       marks: data.marks,
@@ -348,7 +348,7 @@ const handleFileUpload = (event) => {
           if (marks !== undefined) {
             changes.push({
               sid: student.sid,
-              qid: col.idtable_ia,
+              qid: col.idtable_ia2,
               marks: marks,
             });
           }
@@ -703,7 +703,7 @@ const handleFileUpload = (event) => {
                               onChange={(e) =>
                                 handleInputChange(e, index, "sid")
                               }
-                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
                             />
                           ) : (
                             student.sid
@@ -717,7 +717,7 @@ const handleFileUpload = (event) => {
                               onChange={(e) =>
                                 handleInputChange(e, index, "student_name")
                               }
-                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
                             />
                           ) : (
                             student.student_name
@@ -731,7 +731,7 @@ const handleFileUpload = (event) => {
                               onChange={(e) =>
                                 handleInputChange(e, index, "stud_clg_id")
                               }
-                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
                             />
                           ) : (
                             student.stud_clg_id

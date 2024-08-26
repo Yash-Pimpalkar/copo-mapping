@@ -225,6 +225,7 @@ const Ia1 = ({ uid }) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
+
   const paginatedData = IaData.slice(startIndex, endIndex);
 
   const handlePageChange = (pageNumber) => {
@@ -692,7 +693,8 @@ const handleFileUpload = (event) => {
                   .slice(startIndex, endIndex)
                   .map((student, index) => {
                     const actualIndex = index + startIndex; // Adjust index to match actual data index
-
+{console.log(actualIndex)}
+{console.log(editingRow)}
                     return (
                       <tr key={student.sid}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

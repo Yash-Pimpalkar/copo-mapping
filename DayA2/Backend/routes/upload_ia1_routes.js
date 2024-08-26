@@ -9,5 +9,5 @@ router.get("/cos/:uid",IaCOsName);
 router.get("/cos/ia2/:uid",Ia2COsName);
 router.put("/",IaUpload);
 router.get("/ia2/:uid",showIa2Data);
-router.put("/ia2/",Ia2Upload);
+router.put("/ia2",Ia2Upload);
 export default router;

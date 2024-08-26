@@ -49,6 +49,13 @@ FROM copo_students_details csd
 JOIN semester s ON csd.sid = s.sid
 JOIN user_course uc ON csd.branch = uc.branch AND s.sem = uc.semester
 JOIN table_ia2 ia ON uc.usercourse_id = ia.usercourseid
+WHERE uc.usercourse_id IS NOT NULL;
+INSERT INTO table_sem (sid, semid)
+SELECT DISTINCT csd.sid, ia.semid AS marks
+FROM copo_students_details csd
+JOIN semester s ON csd.sid = s.sid
+JOIN user_course uc ON csd.branch = uc.branch AND s.sem = uc.semester
+JOIN semester_marks ia ON uc.usercourse_id = ia.usercourseid
 WHERE uc.usercourse_id IS NOT NULL`
 
  }

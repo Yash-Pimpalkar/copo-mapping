@@ -6,11 +6,12 @@ const UploadSem = ({ uid }) => {
   const [distinctCourses, setDistinctCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
-  const [numQuestions, setNumQuestions] = useState(0);
+  const [numQuestions, setNumQuestions] = useState(1); // Default to 1
   const [formData, setFormData] = useState({});
   const [questions, setQuestions] = useState([]);
   const [userCourseId, setUserCourseId] = useState(null);
   const [cocount, SetCoCount] = useState(null);
+  const [error, setError] = useState(null); // Error state
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -36,7 +37,7 @@ const UploadSem = ({ uid }) => {
       fetchCourseData();
     }
   }, [uid]);
-  // console.log(cocount)
+
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
     setSelectedCourse(selectedCourse);
@@ -48,7 +49,7 @@ const UploadSem = ({ uid }) => {
         ?.usercourse_id || null
     );
   };
-  console.log(selectedCourse);
+
   const handleYearChange = (event) => {
     const selectedYear = event.target.value;
     setSelectedYear(selectedYear);
@@ -57,16 +58,27 @@ const UploadSem = ({ uid }) => {
   };
 
   const handleNumQuestionsChange = () => {
-    const num = 1; // Limit to max 10 questions
+    const num = 1; // Default to 1 question, non-changeable
     setNumQuestions(num);
-    setQuestions(
-      Array.from({ length: num }, (_, index) => ({
-        qid: index + 1,
+    const initialQuestions = Array.from({ length: num }, (_, index) => ({
+      qid: index + 1,
+      qname: "",
+      cocount: "",
+      marks: 80, // Default to 80
+    }));
+    setQuestions(initialQuestions);
+
+    // Initialize formData with default values
+    const initialFormData = initialQuestions.reduce((acc, question, index) => {
+      acc[index] = {
         qname: "",
         cocount: "",
-        marks: 0,
-      }))
-    );
+        marks: 80, // Default to 80
+      };
+      return acc;
+    }, {});
+
+    setFormData(initialFormData);
   };
 
   useEffect(() => {
@@ -97,7 +109,7 @@ const UploadSem = ({ uid }) => {
         acc[key] = {
           qname: data.qname || "",
           cocount: cocount || "",
-          marks: parseInt(data.marks, 80) || 0, // Convert marks to number
+          marks: parseInt(data.marks, 10) || 0, // Convert marks to number
           usercourseid: userCourseId,
         };
         return acc;
@@ -107,32 +119,31 @@ const UploadSem = ({ uid }) => {
 
     try {
       console.log(formattedData);
-      await api.post("/api/ia/create/ia2", {
+      await api.post("/api/sem/create", {
         formDataWithUserCourseId: formattedData,
       });
       alert("Data submitted successfully");
+      setError(null); // Clear any previous errors
     } catch (error) {
       console.error("Error submitting data:", error);
-      alert("Failed to submit data");
+      setError(error.response?.data?.error || "Failed to submit data"); // Set error message
     }
   };
 
   useEffect(() => {
     const fetchCoCount = async () => {
       try {
-        // console.log(userCourseId)
         const res = await api.get(`/api/usercourse/cocount/${userCourseId}`);
-        //   console.log(res.data)
         SetCoCount(res.data[0].co_count);
       } catch (error) {
-        console.error("Error fetching course data:", error);
+        console.error("Error fetching CO count:", error);
       }
     };
     if (userCourseId && selectedYear) {
       fetchCoCount();
     }
   }, [userCourseId, selectedYear]);
-  //  console.log(cocount)
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Upload Sem</h1>
@@ -187,22 +198,6 @@ const UploadSem = ({ uid }) => {
 
       {selectedCourse && selectedYear && (
         <div className="mb-4">
-          <label
-            htmlFor="num-questions"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Number of Questions (Max 10)
-          </label>
-          {/* <input
-            id="num-questions"
-            type="number"
-            value={numQuestions}
-            onChange={handleNumQuestionsChange}
-            min="0"
-            max="10"
-            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          /> */}
-
           <div className="text-center">{numQuestions}</div>
         </div>
       )}
@@ -228,7 +223,7 @@ const UploadSem = ({ uid }) => {
                     </label>
                     <input
                       type="text"
-                      value={formData[index]?.qname || question.qname || "MARKS"}
+                      value={formData[index]?.qname || question.qname || ""}
                       onChange={(e) =>
                         handleFormChange(index, "qname", e.target.value)
                       }
@@ -246,25 +241,31 @@ const UploadSem = ({ uid }) => {
                       Max Marks
                     </label>
                     <input
-                    type="number"
-                    value={formData[index]?.marks || question.marks || 80}
-                    onChange={(e) =>
-                      handleFormChange(index, "marks", e.target.value)
-                    }
-                    className="mt-1 block text-center w-full border border-gray-300 rounded-md shadow-sm"
-                  />
+                      type="number"
+                      value={formData[index]?.marks || question.marks || 80} // Default 80
+                      onChange={(e) =>
+                        handleFormChange(index, "marks", e.target.value)
+                      }
+                      className="mt-1 block text-center w-full border border-gray-300 rounded-md shadow-sm"
+                    />
                   </div>
-                
                 </div>
               </div>
             ))}
           </div>
-          <button
-            type="submit"
-            className="mt-4 py-2 px-4 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
-          >
-            Submit
-          </button>
+          {error && (
+            <div className="mt-4 text-red-600 text-center font-medium">
+              {error}
+            </div>
+          )}
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="mt-4 py-2 px-4 bg-indigo-500 text-white rounded-md shadow-md hover:bg-indigo-600 focus:outline-none"
+            >
+              Submit
+            </button>
+          </div>
         </form>
       )}
     </div>
