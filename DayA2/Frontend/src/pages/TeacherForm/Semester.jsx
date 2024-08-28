@@ -136,7 +136,7 @@ const Semester = ({ uid }) => {
     
     setLoading(true);
     try {
-      await api.put("/api/sem/", { sem_id: semId, marks });
+      await api.put("/api/sem/", { sem_id: semId, Marks:marks });
       console.log(`Saving sem_id: ${semId}, marks: ${marks}`);
       SetSemdata((prevData) =>
         prevData.map((item, idx) =>
@@ -155,6 +155,7 @@ const Semester = ({ uid }) => {
     setEditingRow(null);
     setEditedMarks({});
   };
+// 
 
   const handleMarksChange = (event, index) => {
     const value = event.target.value;
