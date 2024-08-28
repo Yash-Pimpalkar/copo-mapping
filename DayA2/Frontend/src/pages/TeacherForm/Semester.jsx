@@ -157,10 +157,13 @@ const Semester = ({ uid }) => {
   };
 // 
 
-  const handleMarksChange = (event, index) => {
-    const value = event.target.value;
-    setEditedMarks({ ...editedMarks, [index]: value });
-  };
+const handleMarksChange = (event, index) => {
+  const value = event.target.value;
+  setEditedMarks((prev) => ({
+    ...prev,
+    [index]: value,
+  }));
+};
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
