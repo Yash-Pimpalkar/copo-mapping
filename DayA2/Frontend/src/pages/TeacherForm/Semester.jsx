@@ -360,15 +360,13 @@ const handleMarksChange = (event, index) => {
                     {student.student_name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {editingRow === actualIndex ? (
-                      <input
-                        type="text"
-                        value={editedMarks[actualIndex] || student.marks} // Pre-fill with existing marks
-                        onChange={(event) =>
-                          handleMarksChange(event, actualIndex)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      />
+                   {editingRow === actualIndex ? (
+                     <input
+                     type="text"
+                     value={editedMarks[actualIndex] !== undefined ? editedMarks[actualIndex] : student.marks}
+                     onChange={(event) => handleMarksChange(event, actualIndex)}
+                     className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                   />
                     ) : (
                       student.marks // Show existing marks if not editing
                     )}
