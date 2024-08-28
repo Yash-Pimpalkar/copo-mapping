@@ -144,7 +144,7 @@ const Semester = ({ uid }) => {
     setEditingRow(null);
     setEditedMarks({});
   };
-
+// 
   const handleMarksChange = (event, index) => {
     const value = event.target.value;
     setEditedMarks({ ...editedMarks, [index]: value });
