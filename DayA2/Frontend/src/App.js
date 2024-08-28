@@ -70,7 +70,7 @@ function App() {
               <Route path='/cos' element={<ShowCos />} />
               <Route path='/coposhow' element={<Coposhow  uid={user_id}/>} />
               <Route path='/demo' element={<Demo  uid={user_id}/>} />
-              <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
+              <Route path='/teacherdashboard' element={<TeacherDashboard  uid={user_id}/>} />
               <Route path='/uploadia1' element={<UploadIa1  uid={user_id}/>} />
               <Route path='/uploadia2' element={<UploadIa2  uid={user_id}/>} />
               <Route path='/uploadsem' element={<UploadSem  uid={user_id}/>} />
@@ -98,7 +98,7 @@ function App() {
           </>
         )}
         {/* Handle unknown routes */}
-        <Route path="*" element={<Navigate to="/" />} />
+        {/* <Route path="*" element={<Navigate to="/" />} /> */}
       </Routes>
     </>
   );

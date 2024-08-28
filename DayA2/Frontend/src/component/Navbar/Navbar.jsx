@@ -164,7 +164,6 @@ export default function Navbar() {
                 alt="Your Company"
                 src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
                 className="h-8 w-auto cursor-pointer"
-                onClick={() => navigate("/")}
               />
             </div>
             <div className="hidden sm:ml-6 sm:block">
@@ -190,6 +189,10 @@ export default function Navbar() {
                     {userType === 2 && (
                       <>
                         <Menu as="div" className="relative">
+                          <MenuButton onClick={() => navigate("/teacherdashboard")} className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Home
+                          </MenuButton>
+                        </Menu>                        <Menu as="div" className="relative">
                           <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                             Form
                           </MenuButton>

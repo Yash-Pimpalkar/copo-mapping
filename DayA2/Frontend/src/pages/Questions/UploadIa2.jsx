@@ -11,6 +11,7 @@ const UploadIa2 = ({ uid }) => {
   const [formData, setFormData] = useState({});
   const [questions, setQuestions] = useState([]);
   const [userCourseId, setUserCourseId] = useState(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -99,12 +100,15 @@ const UploadIa2 = ({ uid }) => {
 
     try {
       setLoading(true);
-       console.log(formattedData)
-      await api.post('/api/ia/create/ia2', { formDataWithUserCourseId: formattedData });
-      alert('Data submitted successfully');
+      console.log(formattedData);
+      await api.post("/api/ia/create/ia2", {
+        formDataWithUserCourseId: formattedData,
+      });
+      alert("Data submitted successfully");
+      setError(null);
     } catch (error) {
       console.error('Error submitting data:', error);
-      alert('Failed to submit data');
+      setError(error.response?.data?.error || "Failed to submit data"); 
     } finally {
       setLoading(false);
     }
@@ -219,6 +223,11 @@ const UploadIa2 = ({ uid }) => {
               </div>
             ))}
           </div>
+          {error && (
+            <div className="mt-4 text-red-600 text-center font-medium">
+              {error}
+            </div>
+          )}
           <button
             type="submit"
             className="mt-4 py-2 px-4 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
