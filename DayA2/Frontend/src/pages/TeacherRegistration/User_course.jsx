@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from "../../api";
+import LoadingButton from "../../component/Loading/Loading";
+
 
 const User_course = ({ uid }) => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
@@ -14,10 +17,13 @@ const User_course = ({ uid }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const res = await api.post(`/api/usercourse/${uid}`);
         setData(res.data);
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -53,6 +59,7 @@ const User_course = ({ uid }) => {
 
   const handleSaveClick = async (index, usercourse_id) => {
     try {
+      setLoading(true);
       const response = await api.put(`/api/usercourse/${usercourse_id}`, editFormData);
       if (response.status === 200) {
         const updatedData = [...data];
@@ -64,6 +71,8 @@ const User_course = ({ uid }) => {
       }
     } catch (err) {
       console.error("Error saving data:", err);
+    } finally {
+      setLoading(false);
     }
   };
 

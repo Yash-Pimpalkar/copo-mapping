@@ -4,8 +4,10 @@ import { HiEye, HiEyeOff } from 'react-icons/hi';
 import axios from 'axios';
 import { useNavigate, NavLink } from 'react-router-dom';
 import api from '../../api';
+import LoadingButton from "../../component/Loading/Loading";
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
   const [usertype, setUserType] = useState(0);
@@ -45,6 +47,7 @@ const Login = () => {
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length === 0) {
       try {
+        setLoading(true);
         const res = await api.post('api/login', { email: formData.email, password: formData.password });
         window.localStorage.setItem("uid", res.data.uid);
         window.localStorage.setItem('token', res.data.token);
@@ -56,6 +59,8 @@ const Login = () => {
         window.location.reload();
       } catch (err) {
         setErr(err.response.data);
+      } finally{
+        setLoading(false);
       }
     } else {
       setErrors(validationErrors);

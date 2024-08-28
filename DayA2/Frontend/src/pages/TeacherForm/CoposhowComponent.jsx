@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api";
+import LoadingButton from "../../component/Loading/Loading";
 
 const CoposhowComponent = ({ uid }) => {
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [copo, setCopo] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
       } catch (error) {
         console.error("Error fetching course data:", error);
+      } finally{
+        setLoading(false);
       }
     };
 
@@ -23,10 +28,13 @@ const CoposhowComponent = ({ uid }) => {
 
   const fetchCopo = async (usercourse) => {
     try {
+      setLoading(true);
       const res = await api.get(`/api/copo/show/${usercourse}`);
       setCopo(res.data);
     } catch (error) {
       console.error("Error fetching CO-PO data:", error);
+    } finally{
+      setLoading(false);
     }
   };
 
@@ -46,6 +54,7 @@ const CoposhowComponent = ({ uid }) => {
   const handleSave = async (coId) => {
     const item = copo.find(c => c.co_id === coId);
     try {
+      setLoading(true);
       await api.put(`/api/copo/update/${coId}`, {
         po_1: item.po_1,
         po_2: item.po_2,
@@ -65,6 +74,8 @@ const CoposhowComponent = ({ uid }) => {
       alert("Changes saved successfully!");
     } catch (error) {
       console.error("Error saving changes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

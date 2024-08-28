@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { useLocation } from 'react-router-dom';
+import LoadingButton from "../../component/Loading/Loading";
+
 
 export default function ShowCos() {
     const location = useLocation();
     const { usercourse_id } = location.state;
+    const [loading, setLoading] = useState(false);
     const [cosData, setCosData] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         const fetchCosData = async () => {
             try {
+                setLoading(true);
                 const response = await api.post(`/api/cos/${usercourse_id}`); // Assuming GET request
                 console.log(response.data);
                 setCosData(response.data);
@@ -20,6 +24,8 @@ export default function ShowCos() {
                 } else {
                     setErrorMessage("There was an error fetching the COS records. Please try again.");
                 }
+            } finally {
+                setLoading(false);
             }
         };
 

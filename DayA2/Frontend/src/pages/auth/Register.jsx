@@ -3,6 +3,7 @@ import validateForm from './validate';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { NavLink } from 'react-router-dom';
 import api from '../../api';
+import LoadingButton from "../../component/Loading/Loading";
 
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
@@ -11,6 +12,8 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors,setErrors]=useState([]);
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -24,6 +27,7 @@ const Register = () => {
         setErrors({ confirmPassword: 'Passwords do not match' });
       } else {
         try {
+          setLoading(true);
           const res = await api.post("api/register", { email: formData.email, password: formData.password });
           console.log(res);
           alert('Form submitted successfully!');
@@ -31,6 +35,8 @@ const Register = () => {
         } catch (error) {
           console.log(error);
           setErr(error.response.data)
+        } finally{
+          setLoading(false);
         }
       }
     } else {

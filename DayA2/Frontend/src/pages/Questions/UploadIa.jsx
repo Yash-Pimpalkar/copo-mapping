@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
+import LoadingButton from "../../component/Loading/Loading";
 
 const UploadIa1 = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -10,10 +11,12 @@ const UploadIa1 = ({ uid }) => {
   const [formData, setFormData] = useState({});
   const [questions, setQuestions] = useState([]);
   const [userCourseId, setUserCourseId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -26,6 +29,8 @@ const UploadIa1 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error('Error fetching course data:', error);
+      }finally{
+        setLoading(false);
       }
     };
 
@@ -93,12 +98,15 @@ const UploadIa1 = ({ uid }) => {
     }, {});
 
     try {
+      setLoading(true);
        console.log(formattedData)
       await api.post('/api/ia1/create', { formDataWithUserCourseId: formattedData });
       alert('Data submitted successfully');
     } catch (error) {
       console.error('Error submitting data:', error);
       alert('Failed to submit data');
+    }finally{
+      setLoading(false);
     }
   };
 

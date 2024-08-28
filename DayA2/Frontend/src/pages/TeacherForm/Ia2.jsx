@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
+import LoadingButton from "../../component/Loading/Loading";
 
 const Ia2 = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -13,6 +14,7 @@ const Ia2 = ({ uid }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [COsData, setCOsData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,6 +36,7 @@ const Ia2 = ({ uid }) => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -49,6 +52,8 @@ const Ia2 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -61,6 +66,7 @@ const Ia2 = ({ uid }) => {
   useEffect(() => {
     const fetchIaData = async () => {
       if (userCourseId) {
+        setLoading(true);
         try {
           const res = await api.get(`/api/ia/ia2/${userCourseId}`);
           setIaData(res.data);
@@ -68,6 +74,8 @@ const Ia2 = ({ uid }) => {
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
+        } finally{
+          setLoading(false);
         }
       }
     };
@@ -629,7 +637,13 @@ const handleFileUpload = (event) => {
               Download
             </button>
           </div>
-        </div>
+        </div> 
+        {loading ? (
+          <div className="flex justify-center items-center">
+            <LoadingButton />
+          </div>
+        ) : (
+          <>
 
         {/* // Display IA Data */}
         {filteredData.length > 0 && (
@@ -794,6 +808,8 @@ const handleFileUpload = (event) => {
               </tbody>
             </table>
           </div>
+        )}
+        </>
         )}
         {/* Pagination Controls */}
         {selectedCourse && selectedYear && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const [inputPage, setInputPage] = useState(currentPage);
@@ -29,59 +29,64 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   };
 
   return (
-    <div className="flex items-center justify-between mt-4">
-      <button
-        onClick={() => handlePageChange(1)}
-        disabled={currentPage === 1}
-        className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
-      >
-        First
-      </button>
-      <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
-      >
-        Previous
-      </button>
-
-      <form onSubmit={handleInputSubmit} className="flex items-center space-x-2">
-        <span className="text-sm text-gray-700">
-          Page
-        </span>
-        <input
-          type="number"
-          min="1"
-          max={totalPages}
-          value={inputPage}
-          onChange={handleInputChange}
-          className="w-16 text-center border border-gray-300 rounded-md shadow-sm"
-        />
-        <span className="text-sm text-gray-700">
-          of {totalPages}
-        </span>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-indigo-500 text-white rounded-md"
+    <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row items-center justify-between mt-4">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 items-center sm:order-2">
+        <form
+          onSubmit={handleInputSubmit}
+          className="flex items-center space-x-2 sm:order-2"
         >
-          Go
-        </button>
-      </form>
+          <span className="text-sm text-gray-700">Page</span>
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            value={inputPage}
+            onChange={handleInputChange}
+            className="w-16 text-center border border-gray-300 rounded-md shadow-sm"
+          />
+          <span className="text-sm text-gray-700">of {totalPages}</span>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-indigo-500 text-white rounded-md"
+          >
+            Go
+          </button>
+        </form>
+      </div>
 
-      <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
-      >
-        Next
-      </button>
-      <button
-        onClick={() => handlePageChange(totalPages)}
-        disabled={currentPage === totalPages}
-        className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
-      >
-        Last
-      </button>
+      <div className="flex space-x-2 sm:order-1">
+        <button
+          onClick={() => handlePageChange(1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
+        >
+          First
+        </button>
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
+        >
+          Previous
+        </button>
+      </div>
+
+      <div className="flex space-x-2 sm:order-3">
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
+        >
+          Next
+        </button>
+        <button
+          onClick={() => handlePageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-indigo-500 text-white rounded-md disabled:bg-gray-300"
+        >
+          Last
+        </button>
+      </div>
     </div>
   );
 };

@@ -5,12 +5,12 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  MenuItems
-} from '@headlessui/react';
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import api from '../../api.js';
+  MenuItems,
+} from "@headlessui/react";
+import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../../api.js";
 
 function ProfileDropdown({ email, onSignOut }) {
   const [isTruncated, setIsTruncated] = useState(true);
@@ -47,7 +47,10 @@ function ProfileDropdown({ email, onSignOut }) {
           </NavLink>
         </MenuItem>
         <MenuItem>
-          <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+          <a
+            href="#"
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
             Settings
           </a>
         </MenuItem>
@@ -66,27 +69,27 @@ function ProfileDropdown({ email, onSignOut }) {
 }
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 export default function Navbar() {
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [userType, setUserType] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedToken = window.localStorage.getItem('token');
-    const storedUserType = window.localStorage.getItem('user_type');
+    const storedToken = window.localStorage.getItem("token");
+    const storedUserType = window.localStorage.getItem("user_type");
 
     if (storedToken && storedUserType) {
       setToken(storedToken);
       setUserType(parseInt(storedUserType));
 
-      const uid = window.localStorage.getItem('uid');
-      const isRegister = window.localStorage.getItem('isregister');
+      const uid = window.localStorage.getItem("uid");
+      const isRegister = window.localStorage.getItem("isregister");
       if (uid && isRegister) {
         setUID(parseInt(uid));
         const fetchEmail = async () => {
@@ -96,7 +99,7 @@ export default function Navbar() {
               setEmail(response.data[0].emailid);
             }
           } catch (err) {
-            console.error('Failed to fetch email:', err);
+            console.error("Failed to fetch email:", err);
           }
         };
         fetchEmail();
@@ -105,43 +108,43 @@ export default function Navbar() {
   }, []);
 
   const handleSignOut = () => {
-    navigate('/');
+    navigate("/");
     localStorage.clear();
     window.location.reload();
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', userTypes: [1] },
-    { name: 'User Selection', href: '/userselection', userTypes: [3] },
-    { name: 'Assign Course', href: '/assigncourse', userTypes: [3] },
+    { name: "Dashboard", href: "/dashboard", userTypes: [1] },
+    { name: "User Selection", href: "/userselection", userTypes: [3] },
+    { name: "Assign Course", href: "/assigncourse", userTypes: [3] },
   ];
 
   const formNavigation = [
-    { name: 'Add PO Form', href: '/posform', userTypes: [2] },
-    { name: 'Add Course', href: '/courseform', userTypes: [2] },
-    { name: 'Register Form', href: '/registerform', userTypes: [2] },
-    { name: 'User Course', href: '/usercourse', userTypes: [2] }
+    { name: "Add PO Form", href: "/posform", userTypes: [2] },
+    { name: "Add Course", href: "/courseform", userTypes: [2] },
+    { name: "Register Form", href: "/registerform", userTypes: [2] },
+    { name: "User Course", href: "/usercourse", userTypes: [2] },
   ];
 
   const formCurriculum = [
-    { name: 'IA1', href: '/ia1', userTypes: [2] },
-    { name: 'IA2', href: '/ia2', userTypes: [2] },
-    { name: 'Semester', href: '/semester', userTypes: [2] },
-    { name: 'Practical', href: '/practical', userTypes: [2] },
-    { name: 'Termwork', href: '/termwork', userTypes: [2] },
-    { name: 'Assignment', href: '/assg', userTypes: [2] },
-    { name: 'copo', href: '/coposhow', userTypes: [2] }
+    { name: "IA1", href: "/ia1", userTypes: [2] },
+    { name: "IA2", href: "/ia2", userTypes: [2] },
+    { name: "Semester", href: "/semester", userTypes: [2] },
+    { name: "Practical", href: "/practical", userTypes: [2] },
+    { name: "Termwork", href: "/termwork", userTypes: [2] },
+    { name: "Assignment", href: "/assg", userTypes: [2] },
+    { name: "copo", href: "/coposhow", userTypes: [2] },
   ];
 
   const resultNavigation = [
-    { name: 'Results', href: '/results', userTypes: [2] },
+    { name: "Results", href: "/results", userTypes: [2] },
   ];
 
   const questionNavigation = [
-    { name: 'Upload Ia1', href: '/uploadia1', userType: [2]},
-    { name: 'Upload Ia2', href: '/uploadia2', userType: [2]},
-    { name: 'Upload Sem', href: '/uploadsem', userType: [2]},
-    { name: 'Upload Practical', href: '/uploadpractical', userType: [2]}
+    { name: "Upload Ia1", href: "/uploadia1", userType: [2] },
+    { name: "Upload Ia2", href: "/uploadia2", userType: [2] },
+    { name: "Upload Sem", href: "/uploadsem", userType: [2] },
+    { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
   ];
 
   return (
@@ -168,18 +171,22 @@ export default function Navbar() {
               <div className="flex space-x-4">
                 {token && user_id !== 0 && (
                   <>
-                    {navigation.filter(item => item.userTypes.includes(userType)).map((item) => (
-                      <NavLink
-                        key={item.name}
-                        to={item.href}
-                        className={classNames(
-                          location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                          'rounded-md px-3 py-2 text-sm font-medium',
-                        )}
-                      >
-                        {item.name}
-                      </NavLink>
-                    ))}
+                    {navigation
+                      .filter((item) => item.userTypes.includes(userType))
+                      .map((item) => (
+                        <NavLink
+                          key={item.name}
+                          to={item.href}
+                          className={classNames(
+                            location.pathname === item.href
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            "rounded-md px-3 py-2 text-sm font-medium"
+                          )}
+                        >
+                          {item.name}
+                        </NavLink>
+                      ))}
                     {userType === 2 && (
                       <>
                         <Menu as="div" className="relative">
@@ -193,8 +200,8 @@ export default function Navbar() {
                                   <NavLink
                                     to={item.href}
                                     className={classNames(
-                                      active ? 'bg-gray-100' : '',
-                                      'block px-4 py-2 text-sm text-gray-700'
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
@@ -215,8 +222,8 @@ export default function Navbar() {
                                   <NavLink
                                     to={item.href}
                                     className={classNames(
-                                      active ? 'bg-gray-100' : '',
-                                      'block px-4 py-2 text-sm text-gray-700'
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
@@ -237,8 +244,8 @@ export default function Navbar() {
                                   <NavLink
                                     to={item.href}
                                     className={classNames(
-                                      active ? 'bg-gray-100' : '',
-                                      'block px-4 py-2 text-sm text-gray-700'
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
@@ -259,8 +266,8 @@ export default function Navbar() {
                                   <NavLink
                                     to={item.href}
                                     className={classNames(
-                                      active ? 'bg-gray-100' : '',
-                                      'block px-4 py-2 text-sm text-gray-700'
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
@@ -300,7 +307,9 @@ export default function Navbar() {
             </div>
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            {token && email && <ProfileDropdown email={email} onSignOut={handleSignOut} />}
+            {token && email && (
+              <ProfileDropdown email={email} onSignOut={handleSignOut} />
+            )}
           </div>
         </div>
       </div>
@@ -309,19 +318,23 @@ export default function Navbar() {
         <div className="space-y-1 pt-2 pb-3">
           {token && user_id !== 0 && (
             <>
-              {navigation.filter(item => item.userTypes.includes(userType)).map((item) => (
-                <DisclosureButton
-                  key={item.name}
-                  as={NavLink}
-                  to={item.href}
-                  className={classNames(
-                    location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block px-3 py-2 text-base font-medium'
-                  )}
-                >
-                  {item.name}
-                </DisclosureButton>
-              ))}
+              {navigation
+                .filter((item) => item.userTypes.includes(userType))
+                .map((item) => (
+                  <DisclosureButton
+                    key={item.name}
+                    as={NavLink}
+                    to={item.href}
+                    className={classNames(
+                      location.pathname === item.href
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                      "block px-3 py-2 text-base font-medium"
+                    )}
+                  >
+                    {item.name}
+                  </DisclosureButton>
+                ))}
               {userType === 2 && (
                 <>
                   <Disclosure as="div" className="relative">
@@ -334,7 +347,7 @@ export default function Navbar() {
                           key={item.name}
                           as={NavLink}
                           to={item.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white"
                         >
                           {item.name}
                         </DisclosureButton>
@@ -351,7 +364,7 @@ export default function Navbar() {
                           key={item.name}
                           as={NavLink}
                           to={item.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white"
                         >
                           {item.name}
                         </DisclosureButton>
@@ -368,8 +381,7 @@ export default function Navbar() {
                           key={item.name}
                           as={NavLink}
                           to={item.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
+                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white">
                           {item.name}
                         </DisclosureButton>
                       ))}
@@ -385,14 +397,13 @@ export default function Navbar() {
                           key={item.name}
                           as={NavLink}
                           to={item.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white"
                         >
                           {item.name}
                         </DisclosureButton>
                       ))}
                     </DisclosurePanel>
                   </Disclosure>
-                 
                 </>
               )}
             </>

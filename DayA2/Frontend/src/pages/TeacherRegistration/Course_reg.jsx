@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import LoadingButton from "../../component/Loading/Loading";
 
 export default function Course_reg() {
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -7,6 +8,7 @@ export default function Course_reg() {
     const [formData, setFormData] = useState([{ course_code: "", course_name: "" }]);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (index, e) => {
         const { name, value } = e.target;
@@ -40,6 +42,7 @@ export default function Course_reg() {
     const handleProceedClick = async () => {
         if (handleValidation()) {
             try {
+                setLoading(true);
                 const response = await axios.post(
                     'http://localhost:8081/api/course/addcourses',
                     formData
@@ -57,8 +60,10 @@ export default function Course_reg() {
                     setErrorMessage(error.response.data.error || "Error occurred while adding courses");
                 } else {
                     setErrorMessage("There was an error saving the courses. Please try again.");
-                }
+                } 
                 setSuccessMessage("");
+            } finally {
+                setLoading(false);
             }
         }
     };    

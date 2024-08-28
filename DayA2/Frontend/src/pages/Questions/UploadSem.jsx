@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api";
+import LoadingButton from "../../component/Loading/Loading";
 
 const UploadSem = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -12,10 +13,12 @@ const UploadSem = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [cocount, SetCoCount] = useState(null);
   const [error, setError] = useState(null); // Error state
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
         const distinct = Array.from(
@@ -30,6 +33,8 @@ const UploadSem = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -118,6 +123,7 @@ const UploadSem = ({ uid }) => {
     );
 
     try {
+      setLoading(true);
       console.log(formattedData);
       await api.post("/api/sem/create", {
         formDataWithUserCourseId: formattedData,
@@ -127,16 +133,21 @@ const UploadSem = ({ uid }) => {
     } catch (error) {
       console.error("Error submitting data:", error);
       setError(error.response?.data?.error || "Failed to submit data"); // Set error message
+    } finally{
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     const fetchCoCount = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/usercourse/cocount/${userCourseId}`);
         SetCoCount(res.data[0].co_count);
       } catch (error) {
         console.error("Error fetching CO count:", error);
+      } finally {
+        setLoading(false);
       }
     };
     if (userCourseId && selectedYear) {

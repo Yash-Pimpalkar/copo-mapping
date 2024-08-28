@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import api from "../../api";
+import LoadingButton from "../../component/Loading/Loading";
+
 
 export default function RegistrationForm({ uid }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [numCourses, setNumCourses] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState([
     {
       user_id: uid,
@@ -88,6 +91,7 @@ export default function RegistrationForm({ uid }) {
   const handleProceedClick = async () => {
     if (handleValidation()) {
       try {
+        setLoading(true);
         console.log(formData)
         const response = await api.post(
           `http://localhost:8081/api/usercourse/`,
@@ -105,6 +109,8 @@ export default function RegistrationForm({ uid }) {
             "There was an error saving the registration. Please try again."
           );
         }
+      } finally {
+        setLoading(false);
       }
     }
   };

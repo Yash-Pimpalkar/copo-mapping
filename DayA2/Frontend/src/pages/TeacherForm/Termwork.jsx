@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import api from '../../api';
+import LoadingButton from "../../component/Loading/Loading";
+
 
 const Termwork = () => {
     // State to manage checkbox selections
@@ -12,6 +14,7 @@ const Termwork = () => {
     const [selectedCourse, setSelectedCourse] = useState('');
     const [selectedYear, setSelectedYear] = useState('');
     const [userCourseId, setUserCourseId] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const handleCourseChange = (event) => {
         const selectedCourse = event.target.value;

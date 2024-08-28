@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
+import LoadingButton from "../../component/Loading/Loading";
 
 const Semester = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -12,6 +13,7 @@ const Semester = ({ uid }) => {
   const [SemData, SetSemdata] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
@@ -19,6 +21,7 @@ const Semester = ({ uid }) => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -34,6 +37,8 @@ const Semester = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -46,11 +51,14 @@ const Semester = ({ uid }) => {
     const fetchSemData = async () => {
       if (userCourseId) {
         try {
+          setLoading(true)
           const res = await api.get(`/api/sem/show/${userCourseId}`);
           SetSemdata(res.data);
           console.log(res.data)
         } catch (error) {
           console.error("Error fetching IA data:", error);
+        } finally{
+          setLoading(false);
         }
       }
     };
@@ -125,7 +133,8 @@ const Semester = ({ uid }) => {
     const actualIndex = index ;
     const semId = SemData[actualIndex].sem_id;
     const marks = editedMarks[index];
-
+    
+    setLoading(true);
     try {
       await api.put("/api/sem/", { sem_id: semId, marks });
       console.log(`Saving sem_id: ${semId}, marks: ${marks}`);
@@ -137,6 +146,8 @@ const Semester = ({ uid }) => {
       setEditingRow(null);
     } catch (error) {
       console.error("Error saving IA data:", error);
+    }finally{
+      setLoading(false);
     }
   };
 

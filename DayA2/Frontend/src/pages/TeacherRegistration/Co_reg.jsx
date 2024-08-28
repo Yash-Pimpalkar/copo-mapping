@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import api from "../../api"; // Ensure this module is properly configured
+import LoadingButton from "../../component/Loading/Loading";
 
 export default function Cos_reg() {
     const location = useLocation();
     const { co_count, usercourse_id } = location.state;
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [formData, setFormData] = useState(
         Array.from({ length: co_count }, (_, index) => ({ 
@@ -43,6 +45,7 @@ export default function Cos_reg() {
     const handleSubmit = async () => {
         if (handleValidation()) {
             try {
+                setLoading(true);
                 const response = await axios.post(
                     'http://localhost:8081/api/cos/add',
                     { formData, usercourse_id }
@@ -57,6 +60,8 @@ export default function Cos_reg() {
                 } else {
                     setErrorMessage("There was an error saving the COS records. Please try again.");
                 }
+            } finally {
+                setLoading(false);
             }
         }
     };
