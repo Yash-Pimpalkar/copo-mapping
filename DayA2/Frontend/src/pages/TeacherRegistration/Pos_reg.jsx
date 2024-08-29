@@ -73,7 +73,7 @@ export default function ShowPos() {
   };
 
   return (
-    <div className="max-w-screen-xl mx-auto container p-6 bg-gray-100 min-h-screen">
+    <div className="max-w-screen-3xl mx-auto container p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-extrabold flex justify-center">
         PO Records
       </h1>
