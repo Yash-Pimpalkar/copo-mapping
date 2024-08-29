@@ -24,6 +24,7 @@ import UploadSem from './pages/Questions/UploadSem';
 import Semester from './pages/TeacherForm/Semester';
 import AssignCourse from './component/Admin/UserSelection/AssignCourse';
 import Termwork from './pages/TeacherForm/Termwork';
+import NotFound from './component/PageNotfound/NotFound';
 
 function App() {
   const [token, setToken] = useState("");
@@ -57,6 +58,7 @@ function App() {
             </>
           ) : usertype == 2 ? (
             <>
+              <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
               <Route path="/coform" element={<Cos_reg />} />
               <Route path="/posform" element={<Pos_reg />} />
               <Route path="/courseform" element={<Course_reg />} />
@@ -70,12 +72,11 @@ function App() {
               <Route path='/cos' element={<ShowCos />} />
               <Route path='/coposhow' element={<Coposhow  uid={user_id}/>} />
               <Route path='/demo' element={<Demo  uid={user_id}/>} />
-              <Route path='/teacherdashboard' element={<TeacherDashboard  uid={user_id}/>} />
               <Route path='/uploadia1' element={<UploadIa1  uid={user_id}/>} />
               <Route path='/uploadia2' element={<UploadIa2  uid={user_id}/>} />
               <Route path='/uploadsem' element={<UploadSem  uid={user_id}/>} />
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
-
+              <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>
           ) : usertype == 3 ? (

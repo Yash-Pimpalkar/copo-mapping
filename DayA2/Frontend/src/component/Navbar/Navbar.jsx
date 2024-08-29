@@ -189,7 +189,7 @@ export default function Navbar() {
                     {userType === 2 && (
                       <>
                         <Menu as="div" className="relative">
-                          <MenuButton onClick={() => navigate("/teacherdashboard")} className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                          <MenuButton onClick={() => navigate("/")} className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                             Home
                           </MenuButton>
                         </Menu>                        <Menu as="div" className="relative">
