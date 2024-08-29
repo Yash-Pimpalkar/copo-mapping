@@ -26,11 +26,24 @@ const Ia1 = ({ uid }) => {
     passedPercentage: 50,
   });
   const handleAttainmentChange = (event, key) => {
+    const value = event.target.value;
+
+    // Convert value to a number for validation
+    const numericValue = Number(value);
+
+    // Validate input
+    if (numericValue < 50 || numericValue > 100) {
+      setError("Value must be between 50 and 100.");
+    } else {
+      setError(""); // Clear error if within range
+    }
+
     setAttainmentData((prevData) => ({
       ...prevData,
-      [key]: event.target.value,
+      [key]: value,
     }));
   };
+  const [error, setError] = useState("");
 
   // Fetch courses and set distinct course names
   useEffect(() => {
@@ -849,22 +862,13 @@ const Ia1 = ({ uid }) => {
             Total Students Passed with &gt;= PERCENTAGE %
           </label>
           <input
-            id="total-student-passed"
-            type="number"
-            value={attainmentData.passedPercentage}
-            onChange={(e) => {
-              let value = e.target.value;
-
-              // Convert value to a number for validation
-              const numericValue = Number(value);
-
-              // Allow empty input or numbers between 50 and 100
-              if (value === "" || (numericValue >= 50 && numericValue <= 100)) {
-                handleAttainmentChange(e, "passedPercentage");
-              }
-            }}
-            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
+        id="total-student-passed"
+        type="text"
+        value={attainmentData.passedPercentage}
+        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+        className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">

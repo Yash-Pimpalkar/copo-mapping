@@ -73,8 +73,8 @@ export default function ShowPos() {
   };
 
   return (
-    <div className="container p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-extrabold">
+    <div className="max-w-screen-xl mx-auto container p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-extrabold flex justify-center">
         PO Records
       </h1>
 
@@ -91,14 +91,14 @@ export default function ShowPos() {
           <option value="">Select a branch</option>
           <option value="1">Computer</option>
           <option value="2">IT</option>
-          <option value="3">AIDS</option>
+          <option value="3">AI ML</option>
           {/* Add more options as needed */}
         </select>
       </div>
 
       {responseData && responseData.length > 0 && (
         <>
-          <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
+          <div className="overflow-x-auto bg-white shadow-lg rounded-lg flex items-center justify-center">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-blue-500 text-white">
                 <tr>
