@@ -120,9 +120,9 @@ export default function Navbar() {
   ];
 
   const formNavigation = [
-    { name: "Add PO Form", href: "/posform", userTypes: [2] },
+    { name: "PO Form", href: "/posform", userTypes: [2] },
     { name: "Add Course", href: "/courseform", userTypes: [2] },
-    { name: "Register Form", href: "/registerform", userTypes: [2] },
+    { name: "User Course Registration", href: "/registerform", userTypes: [2] },
     { name: "User Course", href: "/usercourse", userTypes: [2] },
   ];
 
