@@ -25,6 +25,7 @@ import Semester from './pages/TeacherForm/Semester';
 import AssignCourse from './component/Admin/UserSelection/AssignCourse';
 import Termwork from './pages/TeacherForm/Termwork';
 import NotFound from './component/PageNotfound/NotFound';
+import TheoryOnly from './pages/TeacherForm/Termwork/TheoryOnly';
 
 function App() {
   const [token, setToken] = useState("");
@@ -76,6 +77,7 @@ function App() {
               <Route path='/uploadia2' element={<UploadIa2  uid={user_id}/>} />
               <Route path='/uploadsem' element={<UploadSem  uid={user_id}/>} />
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
+              <Route path='/theoryonly' element={<TheoryOnly uid={user_id}/>}/>
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>
