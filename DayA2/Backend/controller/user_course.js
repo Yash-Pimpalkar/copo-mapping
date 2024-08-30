@@ -106,6 +106,20 @@ export const show_CoCount = (req,res) => {
 }
 
 
+export const coname = (req,res)=>{
+  const userCourseId = req.params.uid; 
+  console.log(userCourseId)
+  const sql='select * from cos where usercourse_id = ?'
+  db.query(sql,userCourseId,(Err,result)=>{
+    if(Err){
+      console.log(Err)
+    }
+    res.status(200).json(result)
+  })
+}
+
+
+
 
 
 
