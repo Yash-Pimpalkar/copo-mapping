@@ -18,6 +18,7 @@ const Ia1 = ({ uid }) => {
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [Err,setErr] = useState();
   const [display, setDisplay] = useState("Total student passed with >=");
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
@@ -30,7 +31,7 @@ const Ia1 = ({ uid }) => {
 
     // Convert value to a number for validation
     const numericValue = Number(value);
-
+    
     // Validate input
     if (numericValue < 50 || numericValue > 100) {
       setError("Value must be between 50 and 100.");
@@ -49,7 +50,11 @@ const Ia1 = ({ uid }) => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
+        setErr()
+        setIaData([]);
+        setCOsData([]);
         setLoading(true);
+        
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -65,6 +70,7 @@ const Ia1 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
+        setErr(error.response?.data?.error || 'An unexpected error occurred');
       } finally {
         setLoading(false);
       }
@@ -79,6 +85,9 @@ const Ia1 = ({ uid }) => {
   useEffect(() => {
     const fetchIaData = async () => {
       if (userCourseId) {
+        setErr("")
+        setIaData([]);
+        setCOsData([]);
         setLoading(true);
         try {
           const res = await api.get(`/api/ia/${userCourseId}`);
@@ -87,6 +96,7 @@ const Ia1 = ({ uid }) => {
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
+          setErr(error.response?.data?.error || 'An unexpected error occurred');
         } finally {
           setLoading(false);
         }
@@ -660,6 +670,9 @@ const Ia1 = ({ uid }) => {
             </button>
           </div>
         </div>
+
+        {Err && <p style={{ color: 'red', fontWeight: 'bold', textAlign:"center" }}>Error: {Err}</p>}
+
         {loading ? (
           <div className="flex justify-center items-center">
             <LoadingButton />
@@ -848,7 +861,8 @@ const Ia1 = ({ uid }) => {
           />
         )}
       </div>
-
+      {filteredData.length > 0 && (
+        <>
       {/* New container for Total Students Passed */}
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
         <h1 className="text-lg font-semibold mb-4">
@@ -867,8 +881,8 @@ const Ia1 = ({ uid }) => {
         value={attainmentData.passedPercentage}
         onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
         className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-      />
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+       />
+       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -991,7 +1005,8 @@ const Ia1 = ({ uid }) => {
           </table>
         </div>
       </div>
-
+      </>
+      )}
       {/* Section to display Total Students Attempted each question
           <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
           <h1 className="text-lg font-semibold mb-4">
