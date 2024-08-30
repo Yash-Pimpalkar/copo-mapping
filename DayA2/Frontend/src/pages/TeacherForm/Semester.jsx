@@ -157,14 +157,34 @@ const Semester = ({ uid }) => {
   };
 // 
 
-const handleMarksChange = (event, index) => {
-  const value = event.target.value;
-  setEditedMarks((prev) => ({
-    ...prev,
-    [index]: value,
-  }));
-};
-
+  const handleMarksChange = (event, index) => {
+    const value = event.target.value;
+  
+    // Check if the value is blank and should be sent as null
+    if (value === "") {
+      setEditedMarks((prev) => ({
+        ...prev,
+        [index]: null,
+      }));
+      return; // Exit the function after setting null
+    }
+  
+    // Check if the value is outside the range
+    if (value > 80) {
+      alert("Value should not be greater than 80");
+      return; // Exit the function without updating
+    }
+    
+    if (value < 0) {
+      alert("Value should not be less than 0");
+      return; // Exit the function without updating
+    }
+  
+    setEditedMarks((prev) => ({
+      ...prev,
+      [index]: value,
+    }));
+  };
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
