@@ -81,49 +81,57 @@ WHERE uc.usercourse_id IS NOT NULL`
 
 }
 
-export const showiadata = (req,res)=>{
-   const id=req.params.uid;
-  const sql=`SELECT
-    ui.qid,
-    ui.sid,
-    ui.marks,
-    ti.qname,
-    ti.idtable_ia,
-    ti.coname,
-    csd.student_name,
-    csd.stud_clg_id
-FROM
-    upload_ia ui
-JOIN
-    table_ia ti ON ui.qid = ti.idtable_ia
-JOIN
-    user_course uc ON ti.usercourseid = uc.usercourse_id
-JOIN
-    copo_students_details csd ON ui.sid = csd.sid
-WHERE
-    uc.usercourse_id = ?`;
-    db.query(sql,id,(error,result)=>{
-      if (error){
-        console.log(error);
-        return res.status(500).json({ error: error.message });
+// export const showiadata = (req,res)=>{
+//    const id=req.params.uid;
+//   const sql=`SELECT
+//     ui.qid,
+//     ui.sid,
+//     ui.marks,
+//     ti.qname,
+//     ti.idtable_ia,
+//     ti.coname,
+//     csd.student_name,
+//     csd.stud_clg_id
+// FROM
+//     upload_ia ui
+// JOIN
+//     table_ia ti ON ui.qid = ti.idtable_ia
+// JOIN
+//     user_course uc ON ti.usercourseid = uc.usercourse_id
+// JOIN
+//     copo_students_details csd ON ui.sid = csd.sid
+// WHERE
+//     uc.usercourse_id = ?`;
+//     db.query(sql,id,(error,result)=>{
+//       if (error){
+//         console.log(error);
+//         return res.status(500).json({ error: error.message });
+//     }
+//     res.status(200).json(result)
+//     })
+//   }
+
+  export const showIaData = async (req, res) => {
+    const userCourseId = req.params.uid;
+    console.log(userCourseId)
+    if (!userCourseId) {
+      return res.status(400).send('Invalid userCourseId');
     }
-    res.status(200).json(result)
-    })
-  }
-
-export const showIaData = async (req, res) => {
-  const userCourseId = req.params.uid;
-
-  const sql = 'CALL GetStudentMarksByCourseID(?)';
-  db.query(sql, userCourseId, (error, results) => {
-    if (error) {
-      console.error('Error fetching IA data:', error);
-      res.status(500).send('Server error');
-    }
-    res.status(200).json(results[0]);
-  })
-
-};
+  
+    const sql = 'CALL GetStudentMarksByCourseID(?)';
+    db.query(sql, [userCourseId], (error, results) => {
+      if (error) {
+        console.log('Error fetching IA data:', error);
+        return res.status(500).send('Server error');
+      }
+      if (!results || results.length == 0 || results[0][0].message) {
+        return res.status(404).json({error:'No data found'});
+      }
+  
+      return res.status(200).json(results[0]);
+    });
+  };
+  
 
 export const IaCOsName = (req, res) => {
   const userCourseId = req.params.uid;
@@ -200,50 +208,58 @@ export const Ia2COsName = (req, res) => {
 
 // Define the userCourseID
 
-export const showia2data = (req,res)=>{
-  const id=req.params.uid;
- const sql=`SELECT
-   ui.qid,
-   ui.sid,
-   ui.marks,
-   ti.qname,
-   ti.idtable_ia,
-   ti.coname,
-   csd.student_name,
-   csd.stud_clg_id
-FROM
-   upload_ia ui
-JOIN
-   table_ia ti ON ui.qid = ti.idtable_ia
-JOIN
-   user_course uc ON ti.usercourseid = uc.usercourse_id
-JOIN
-   copo_students_details csd ON ui.sid = csd.sid
-WHERE
-   uc.usercourse_id = ?`;
-   db.query(sql,id,(error,result)=>{
-     if (error){
-       console.log(error);
-       return res.status(500).json({ error: error.message });
-   }
-   res.status(200).json(result)
-   })
- }
+// export const showia2data = (req,res)=>{
+//   const id=req.params.uid;
+//  const sql=`SELECT
+//    ui.qid,
+//    ui.sid,
+//    ui.marks,
+//    ti.qname,
+//    ti.idtable_ia,
+//    ti.coname,
+//    csd.student_name,
+//    csd.stud_clg_id
+// FROM
+//    upload_ia ui
+// JOIN
+//    table_ia ti ON ui.qid = ti.idtable_ia
+// JOIN
+//    user_course uc ON ti.usercourseid = uc.usercourse_id
+// JOIN
+//    copo_students_details csd ON ui.sid = csd.sid
+// WHERE
+//    uc.usercourse_id = ?`;
+//    db.query(sql,id,(error,result)=>{
+//      if (error){
+//        console.log(error);
+//        return res.status(500).json({ error: error.message });
+//    }
+//    res.status(200).json(result)
+//    })
+//  }
 
 
 
-export const showIa2Data = async (req, res) => {
+ export const showIa2Data = async (req, res) => {
   const userCourseId = req.params.uid;
+  console.log(userCourseId)
+  if (!userCourseId) {
+    return res.status(400).send('Invalid userCourseId');
+  }
 
   const sql = 'CALL GetStudentMarksByCourseID_IA2(?)';
-  db.query(sql, userCourseId, (error, results) => {
+  db.query(sql, [userCourseId], (error, results) => {
     if (error) {
       console.error('Error fetching IA data:', error);
-      res.status(500).send('Server error');
+      return res.status(500).send('Server error');
     }
-    res.status(200).json(results[0]);
-  })
+    console.log(results)
+    if (!results || results.length == 0 || results[0][0].message) {
+      return res.status(404).json({error:'No data found'});
+    }
 
+    res.status(200).json(results[0]);
+  });
 };
 
 
