@@ -146,6 +146,15 @@ export default function Navbar() {
     { name: "Upload Sem", href: "/uploadsem", userType: [2] },
     { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
   ];
+   
+  const TermworkNavigation = [
+    { name:"Upload Theory only", href:"", userType: [2]},
+    { name:"Upload Theory+Assignment", href:"", userType: [2]},
+    { name:"Upload Practical Internal", href:"", userType: [2]},
+    { name:"Upload Pract hav MiniPro", href:"", userType: [2]},
+    { name:"Upload Pure Practical", href:"", userType: [2]},
+    { name:"Upload Pracical 10+10(mini)+5", href:"", userType: [2]},
+  ];
 
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -260,6 +269,28 @@ export default function Navbar() {
                         </Menu>
                         <Menu as="div" className="relative">
                           <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Term Work
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {TermworkNavigation.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
+                                )}
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu>
+                        <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                             Results
                           </MenuButton>
                           <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
@@ -350,8 +381,7 @@ export default function Navbar() {
                           key={item.name}
                           as={NavLink}
                           to={item.href}
-                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white"
-                        >
+                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white">
                           {item.name}
                         </DisclosureButton>
                       ))}
@@ -363,6 +393,23 @@ export default function Navbar() {
                     </DisclosureButton>
                     <DisclosurePanel className="space-y-1">
                       {questionNavigation.map((item) => (
+                        <DisclosureButton
+                          key={item.name}
+                          as={NavLink}
+                          to={item.href}
+                          className="block px-8 py-2 text-xs text-white hover:bg-gray-600 hover:text-white"
+                        >
+                          {item.name}
+                        </DisclosureButton>
+                      ))}
+                    </DisclosurePanel>
+                  </Disclosure>
+                  <Disclosure as="div" className="relative">
+                    <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                      Term Work
+                    </DisclosureButton>
+                    <DisclosurePanel className="space-y-1">
+                      {TermworkNavigation.map((item) => (
                         <DisclosureButton
                           key={item.name}
                           as={NavLink}
