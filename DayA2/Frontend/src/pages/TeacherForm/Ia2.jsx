@@ -11,6 +11,7 @@ const Ia2 = ({ uid }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const [userCourseId, setUserCourseId] = useState(null);
   const [IaData, setIaData] = useState([]);
+  const [Err,setErr] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [COsData, setCOsData] = useState([]);
@@ -26,15 +27,31 @@ const Ia2 = ({ uid }) => {
     passedPercentage: 50,
   });
   const handleAttainmentChange = (event, key) => {
+    const value = event.target.value;
+
+    // Convert value to a number for validation
+    const numericValue = Number(value);
+
+    // Validate input
+    if (numericValue < 50 || numericValue > 100) {
+      setError("Value must be between 50 and 100.");
+    } else {
+      setError(""); // Clear error if within range
+    }
+
     setAttainmentData((prevData) => ({
       ...prevData,
-      [key]: event.target.value,
+      [key]: value,
     }));
   };
+  const [error, setError] = useState("");
 
   // Fetch courses and set distinct course names
   useEffect(() => {
     const fetchCourseData = async () => {
+      setErr("")
+      setIaData([]);
+      setCOsData([]);
       try {
         setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
@@ -52,6 +69,7 @@ const Ia2 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
+        setErr(error.response?.data?.error || 'An unexpected error occurred');
       }finally {
         setLoading(false);
       }
@@ -65,7 +83,11 @@ const Ia2 = ({ uid }) => {
   // Fetch IA data when the userCourseId changes
   useEffect(() => {
     const fetchIaData = async () => {
+      setErr("")
+      setIaData([]);
+      setCOsData([]);
       if (userCourseId) {
+        
         setLoading(true);
         try {
           const res = await api.get(`/api/ia/ia2/${userCourseId}`);
@@ -74,6 +96,7 @@ const Ia2 = ({ uid }) => {
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
+          setErr(error.response?.data?.error || 'An unexpected error occurred');
         } finally{
           setLoading(false);
         }
@@ -638,6 +661,7 @@ const handleFileUpload = (event) => {
             </button>
           </div>
         </div> 
+        {Err && <p style={{ color: 'red', fontWeight: 'bold', textAlign:"center" }}>Error: {Err}</p>}
         {loading ? (
           <div className="flex justify-center items-center">
             <LoadingButton />
@@ -820,7 +844,8 @@ const handleFileUpload = (event) => {
           />
         )}
       </div>
-
+      {filteredData.length > 0 && (
+        <>
       {/* New container for Total Students Passed */}
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
         <h1 className="text-lg font-semibold mb-4">
@@ -834,22 +859,13 @@ const handleFileUpload = (event) => {
             Total Students Passed with &gt;= PERCENTAGE %
           </label>
           <input
-            id="total-student-passed"
-            type="number"
-            value={attainmentData.passedPercentage}
-            onChange={(e) => {
-              let value = e.target.value;
-
-              // Convert value to a number for validation
-              const numericValue = Number(value);
-
-              // Allow empty input or numbers between 50 and 100
-              if (value === "" || (numericValue >= 50 && numericValue <= 100)) {
-                handleAttainmentChange(e, "passedPercentage");
-              }
-            }}
-            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
+        id="total-student-passed"
+        type="text"
+        value={attainmentData.passedPercentage}
+        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+        className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -972,7 +988,8 @@ const handleFileUpload = (event) => {
           </table>
         </div>
       </div>
-
+      </>
+      )}
       {/* Section to display Total Students Attempted each question
           <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
           <h1 className="text-lg font-semibold mb-4">
