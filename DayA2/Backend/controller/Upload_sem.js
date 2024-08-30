@@ -145,3 +145,15 @@ WHERE
         res.status(500).json('Server error');
     }
 };
+
+
+export const limit =(req,res)=>{
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM semester_marks WHERE usercourseid = ?'; 
+  db.query(checkQuery,userCourseId,(Err,result)=>{
+    if(Err){
+      console.log(Err)
+    }
+    res.status(200).json(result)
+  })
+}
