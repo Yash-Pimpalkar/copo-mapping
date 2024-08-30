@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
-import LoadingButton from "../../component/Loading/Loading";
 
 const Semester = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -10,21 +9,23 @@ const Semester = ({ uid }) => {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [userCourseId, setUserCourseId] = useState(null);
+  const [userCourse, setUserCourse] = useState(null);
   const [SemData, SetSemdata] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
-
+  const [maxLimit,setmaxlimit]=useState()
+  const [attainmentData, setAttainmentData] = useState({
+    passedPercentage: 50,
+  });
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
-
+        console.log(res.data)
         const distinct = Array.from(
           new Set(res.data.map((course) => course.course_name))
         ).map((course_name) => ({
@@ -37,8 +38,6 @@ const Semester = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -51,24 +50,27 @@ const Semester = ({ uid }) => {
     const fetchSemData = async () => {
       if (userCourseId) {
         try {
-          setLoading(true)
           const res = await api.get(`/api/sem/show/${userCourseId}`);
           SetSemdata(res.data);
-          console.log(res.data)
+          const res1 = await api.get(`/api/usercourse/coname/${userCourseId}`);
+          setUserCourse(res1.data);
+          const res2 = await api.get(`/api/sem/limit/${userCourseId}`);
+          setmaxlimit(res2.data[0].max_marks);
+        
         } catch (error) {
           console.error("Error fetching IA data:", error);
-        } finally{
-          setLoading(false);
         }
       }
     };
 
     fetchSemData();
   }, [userCourseId]);
-
+  console.log(maxLimit);
+  console.log(userCourse)
   const calculateTotal = (student) => {
     return 0; // Implement your logic to calculate the total marks for a student
   };
+  console.log(maxLimit)
 
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
@@ -91,7 +93,7 @@ const Semester = ({ uid }) => {
   const totalItems = SemData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  console.log(startIndex)
+  // console.log(startIndex);
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = SemData.slice(startIndex, endIndex);
 
@@ -121,7 +123,7 @@ const Semester = ({ uid }) => {
   };
 
   const handleEditClick = (index) => {
-    console.log(index)
+    console.log(index);
     setEditingRow(index);
     setEditedMarks({
       ...editedMarks,
@@ -130,13 +132,12 @@ const Semester = ({ uid }) => {
   };
 
   const handleSaveClick = async (index) => {
-    const actualIndex = index ;
+    const actualIndex = index;
     const semId = SemData[actualIndex].sem_id;
     const marks = editedMarks[index];
-    
-    setLoading(true);
+
     try {
-      await api.put("/api/sem/", { sem_id: semId, Marks:marks });
+      await api.put("/api/sem/", { sem_id: semId, Marks: marks });
       console.log(`Saving sem_id: ${semId}, marks: ${marks}`);
       SetSemdata((prevData) =>
         prevData.map((item, idx) =>
@@ -146,8 +147,6 @@ const Semester = ({ uid }) => {
       setEditingRow(null);
     } catch (error) {
       console.error("Error saving IA data:", error);
-    }finally{
-      setLoading(false);
     }
   };
 
@@ -155,8 +154,7 @@ const Semester = ({ uid }) => {
     setEditingRow(null);
     setEditedMarks({});
   };
-// 
-
+  //
   const handleMarksChange = (event, index) => {
     const value = event.target.value;
   
@@ -170,8 +168,8 @@ const Semester = ({ uid }) => {
     }
   
     // Check if the value is outside the range
-    if (value > 80) {
-      alert("Value should not be greater than 80");
+    if (value > maxLimit) {
+      alert(`Value should not be greater than ${maxLimit}`);
       return; // Exit the function without updating
     }
     
@@ -185,6 +183,28 @@ const Semester = ({ uid }) => {
       [index]: value,
     }));
   };
+  
+  const handleAttainmentChange = (event, key) => {
+    const value = event.target.value;
+
+    // Convert value to a number for validation
+    const numericValue = Number(value);
+    
+    // Validate input
+    if (numericValue < 50 || numericValue > 100) {
+      setError("Value must be between 50 and 100.");
+    } else {
+      setError(""); // Clear error if within range
+    }
+
+    setAttainmentData((prevData) => ({
+      ...prevData,
+      [key]: value,
+    }));
+  };
+  const [error, setError] = useState("");
+
+  
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -194,11 +214,11 @@ const Semester = ({ uid }) => {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
+
       // Assuming the first row contains headers
       const headers = jsonData[0];
       const rows = jsonData.slice(1); // Skip header row
-  
+
       const validatedData = rows.map((row) => {
         const student = {};
         headers.forEach((header, index) => {
@@ -206,9 +226,9 @@ const Semester = ({ uid }) => {
         });
         return student;
       });
-  
+
       try {
-        console.log(validatedData)
+        console.log(validatedData);
         await api.put("/api/sem/", validatedData);
         SetSemdata(validatedData);
       } catch (error) {
@@ -217,7 +237,7 @@ const Semester = ({ uid }) => {
     };
     reader.readAsArrayBuffer(file);
   };
-  
+
   const handleFileDownload = () => {
     const formattedData = SemData.map((student) => ({
       sem_id: student.sem_id,
@@ -225,16 +245,16 @@ const Semester = ({ uid }) => {
       student_name: student.student_name,
       marks: student.marks,
     }));
-  
-    const headers = ["sem_id","Student ID", "Student Name", "Marks"];
+
+    const headers = ["sem_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
-  
+
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "SemesterData");
     XLSX.writeFile(workbook, "semester_data.xlsx");
   };
-  
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -366,8 +386,8 @@ const Semester = ({ uid }) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredData.slice(startIndex, endIndex).map((student, index) => {
               const actualIndex = index + startIndex; // Adjust index to match actual data index
-    // { console.log(actualIndex)
-    //  console.log(editingRow)}
+              // { console.log(actualIndex)
+              //  console.log(editingRow)}
               return (
                 <tr key={student.sid} className="hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -380,13 +400,19 @@ const Semester = ({ uid }) => {
                     {student.student_name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                   {editingRow === actualIndex ? (
-                     <input
-                     type="text"
-                     value={editedMarks[actualIndex] !== undefined ? editedMarks[actualIndex] : student.marks}
-                     onChange={(event) => handleMarksChange(event, actualIndex)}
-                     className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                   />
+                    {editingRow === actualIndex ? (
+                      <input
+                        type="text"
+                        value={
+                          editedMarks[actualIndex] !== undefined
+                            ? editedMarks[actualIndex]
+                            : student.marks
+                        }
+                        onChange={(event) =>
+                          handleMarksChange(event, actualIndex)
+                        }
+                        className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
                     ) : (
                       student.marks // Show existing marks if not editing
                     )}
@@ -428,6 +454,91 @@ const Semester = ({ uid }) => {
             onPageChange={handlePageChange}
           />
         )}
+      </div>
+      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+        <h1 className="text-lg font-semibold mb-4">
+          Total Students Passed Each Question
+        </h1>
+        <div className="mb-4">
+          <label
+            htmlFor="total-student-passed"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Total Students Passed with &gt;= PERCENTAGE %
+          </label>
+          <input
+        id="total-student-passed"
+        type="text"
+        value={attainmentData.passedPercentage}
+        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+        className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+       />
+       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+        </div>
+        <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+  <h1 className="text-lg font-semibold mb-4">
+    Student Statistics
+  </h1>
+  <table className="min-w-full divide-y divide-gray-200">
+  <thead className="bg-blue-500 text-white">
+    <tr>
+      <th colSpan={2} className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider">
+        Attenment calculation
+      </th>
+      
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-200">
+  <tr className="bg-white">
+      <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+        Students passed with {attainmentData.passedPercentage} %
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+        {SemData.filter((student) => student.marks >= attainmentData.passedPercentage).length}
+      </td>
+    </tr>
+    <tr className="bg-white">
+      <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+        Total Students
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+        {SemData.length}
+      </td>
+    </tr>
+  </tbody>
+
+</table>
+{userCourse.length > 0 && (
+ <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-blue-500 text-white">
+        <tr>
+          {userCourse.map((course) => (
+            <th key={course.idcos} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+              {course.co_name}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200 bg-white">
+        <tr>
+          {userCourse.map((course) => (
+            <td key={`total-${course.idcos}`} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+              {SemData.filter((student) => student.marks >= attainmentData.passedPercentage).length}
+            </td>
+          ))}
+        </tr>
+        <tr>
+          {userCourse.map((course) => (
+            <td key={`count-${course.idcos}`} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+              {SemData.length}
+            </td>
+          ))}
+        </tr>
+      </tbody>
+    </table>
+)}
+</div>
+
       </div>
     </div>
   );
