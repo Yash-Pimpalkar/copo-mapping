@@ -947,7 +947,7 @@ const handleFileUpload = (event) => {
                   );
                 })}
               </tr>
-            {/* shsh */}
+            
               {/* Dynamic Rows for COs */}
               {distinctConames.map((coName) => {
                 const coColumns = questionColumns
