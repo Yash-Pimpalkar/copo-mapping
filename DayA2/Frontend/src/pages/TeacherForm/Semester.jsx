@@ -9,7 +9,7 @@ const Semester = ({ uid }) => {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [userCourseId, setUserCourseId] = useState(null);
-  const [userCourse, setUserCourse] = useState(null);
+  const [userCourse, setUserCourse] = useState(0);
   const [SemData, SetSemdata] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -537,6 +537,7 @@ const Semester = ({ uid }) => {
       </tbody>
     </table>
 )}
+
 </div>
 
       </div>

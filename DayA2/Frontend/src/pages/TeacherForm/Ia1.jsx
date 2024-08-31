@@ -170,6 +170,7 @@ const Ia1 = ({ uid }) => {
     setUserCourseId(course?.usercourse_id || null);
   };
   console.log(COsData);
+  const distinctConames = [...new Set(COsData.map(item => item.coname.trim()))];
   // Get unique question columns from COsData
   const getQuestionColumns = () => {
     return COsData.map((data) => ({
@@ -294,7 +295,7 @@ const Ia1 = ({ uid }) => {
       console.error("Error saving IA data:", error);
     }
   };
-
+console.log(COsData)
   // Handle changes to input fields
   const handleInputChange = (event, index, column) => {
     let value = event.target.value;
@@ -965,7 +966,7 @@ const Ia1 = ({ uid }) => {
                 })}
               </tr>
               {/* Dynamic Rows for COs */}
-              {["CO1", "CO2"].map((coName) => {
+              {distinctConames.map((coName) => {
                 const coColumns = questionColumns
                   .map((col, index) => ({ ...col, index })) // include index for mapping
                   .filter((col) => col.coname === coName); // filter by CO name

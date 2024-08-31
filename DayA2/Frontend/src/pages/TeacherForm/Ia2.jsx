@@ -330,7 +330,7 @@ const Ia2 = ({ uid }) => {
       },
     }));
   };
-  
+  const distinctConames = [...new Set(COsData.map(item => item.coname.trim()))];
  // Handle file upload
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
@@ -948,7 +948,7 @@ const handleFileUpload = (event) => {
                 })}
               </tr>
               {/* Dynamic Rows for COs */}
-              {["CO1", "CO2"].map((coName) => {
+              {distinctConames.map((coName) => {
                 const coColumns = questionColumns
                   .map((col, index) => ({ ...col, index })) // include index for mapping
                   .filter((col) => col.coname === coName); // filter by CO name
