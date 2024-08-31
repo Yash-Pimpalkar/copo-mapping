@@ -185,23 +185,33 @@ const Semester = ({ uid }) => {
   };
   
   const handleAttainmentChange = (event, key) => {
-    const value = event.target.value;
-
+    let value = event.target.value;
+  
+    // Prevent non-numeric input
+    if (!/^\d*$/.test(value)) {
+      setError("Only numeric values are allowed.");
+      return;
+    }
+  
     // Convert value to a number for validation
     const numericValue = Number(value);
-    
-    // Validate input
-    if (numericValue < 50 || numericValue > 100) {
-      setError("Value must be between 50 and 100.");
+  
+    // Ensure value is within the range
+    if (numericValue < 0 || numericValue > maxLimit) {
+      setError(`Value must be between 0 and ${maxLimit}`);
+      return;
     } else {
       setError(""); // Clear error if within range
     }
-
+  
+    // Update the attainment data state
     setAttainmentData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
   };
+  
+  
   const [error, setError] = useState("");
 
   
@@ -509,34 +519,31 @@ const Semester = ({ uid }) => {
 
 </table>
 {userCourse.length > 0 && (
- <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-blue-500 text-white">
-        <tr>
-          {userCourse.map((course) => (
-            <th key={course.idcos} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-              {course.co_name}
-            </th>
-          ))}
+  <table className="min-w-full divide-y divide-gray-200">
+    <thead className="bg-blue-500 text-white">
+      <tr>
+        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">CO Name</th>
+        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Total Passed</th>
+        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Total Students</th>
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-gray-200 bg-white">
+      {userCourse.map((course) => (
+        <tr key={course.idcos}>
+          {/* CO Name */}
+          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{course.co_name}</td>
+          {/* Total Passed */}
+          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+            {SemData.filter((student) => student.marks >= attainmentData.passedPercentage).length}
+          </td>
+          {/* Total Students */}
+          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{SemData.length}</td>
         </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-200 bg-white">
-        <tr>
-          {userCourse.map((course) => (
-            <td key={`total-${course.idcos}`} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-              {SemData.filter((student) => student.marks >= attainmentData.passedPercentage).length}
-            </td>
-          ))}
-        </tr>
-        <tr>
-          {userCourse.map((course) => (
-            <td key={`count-${course.idcos}`} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-              {SemData.length}
-            </td>
-          ))}
-        </tr>
-      </tbody>
-    </table>
+      ))}
+    </tbody>
+  </table>
 )}
+
 
 </div>
 
