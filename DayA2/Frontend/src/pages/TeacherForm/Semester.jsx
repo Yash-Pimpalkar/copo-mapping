@@ -16,7 +16,7 @@ const Semester = ({ uid }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
-  const [maxLimit,setmaxlimit]=useState()
+  const [maxLimit, setmaxlimit] = useState();
   const [attainmentData, setAttainmentData] = useState({
     passedPercentage: 50,
   });
@@ -25,7 +25,7 @@ const Semester = ({ uid }) => {
       try {
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
-        console.log(res.data)
+        console.log(res.data);
         const distinct = Array.from(
           new Set(res.data.map((course) => course.course_name))
         ).map((course_name) => ({
@@ -56,7 +56,6 @@ const Semester = ({ uid }) => {
           setUserCourse(res1.data);
           const res2 = await api.get(`/api/sem/limit/${userCourseId}`);
           setmaxlimit(res2.data[0].max_marks);
-        
         } catch (error) {
           console.error("Error fetching IA data:", error);
         }
@@ -66,11 +65,11 @@ const Semester = ({ uid }) => {
     fetchSemData();
   }, [userCourseId]);
   console.log(maxLimit);
-  console.log(userCourse)
+  console.log(userCourse);
   const calculateTotal = (student) => {
     return 0; // Implement your logic to calculate the total marks for a student
   };
-  console.log(maxLimit)
+  console.log(maxLimit);
 
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
@@ -109,7 +108,7 @@ const Semester = ({ uid }) => {
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
-  let t ;
+  let t;
 
   // const handleFileDownload = () => {
   //   const worksheet = XLSX.utils.json_to_sheet(SemData);
@@ -158,7 +157,7 @@ const Semester = ({ uid }) => {
   //
   const handleMarksChange = (event, index) => {
     const value = event.target.value;
-  
+
     // Check if the value is blank and should be sent as null
     if (value === "") {
       setEditedMarks((prev) => ({
@@ -167,36 +166,36 @@ const Semester = ({ uid }) => {
       }));
       return; // Exit the function after setting null
     }
-  
+
     // Check if the value is outside the range
     if (value > maxLimit) {
       alert(`Value should not be greater than ${maxLimit}`);
       return; // Exit the function without updating
     }
-    
+
     if (value < 0) {
       alert("Value should not be less than 0");
       return; // Exit the function without updating
     }
-  
+
     setEditedMarks((prev) => ({
       ...prev,
       [index]: value,
     }));
   };
-  
+
   const handleAttainmentChange = (event, key) => {
     let value = event.target.value;
-  
+
     // Prevent non-numeric input
     if (!/^\d*$/.test(value)) {
       setError("Only numeric values are allowed.");
       return;
     }
-  
+
     // Convert value to a number for validation
     const numericValue = Number(value);
-  
+
     // Ensure value is within the range
     if (numericValue < 0 || numericValue > maxLimit) {
       setError(`Value must be between 0 and ${maxLimit}`);
@@ -204,18 +203,16 @@ const Semester = ({ uid }) => {
     } else {
       setError(""); // Clear error if within range
     }
-  
+
     // Update the attainment data state
     setAttainmentData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
   };
-  
-  
+
   const [error, setError] = useState("");
 
-  
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -470,7 +467,7 @@ const Semester = ({ uid }) => {
         <h1 className="text-lg font-semibold mb-4">
           Total Students Passed Each Question
         </h1>
-      
+
         <div className="mb-4">
           <label
             htmlFor="total-student-passed"
@@ -479,85 +476,131 @@ const Semester = ({ uid }) => {
             Total Students Passed with &gt;= PERCENTAGE %
           </label>
           <input
-        id="total-student-passed"
-        type="text"
-        value={attainmentData.passedPercentage}
-        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-        className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-       />
-       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            id="total-student-passed"
+            type="text"
+            value={attainmentData.passedPercentage}
+            onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
         <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-  <h1 className="text-lg font-semibold mb-4">
-    Student Statistics
-  </h1>
-  <h1> {attainmentData.passedPercentage} % of Max Marks: {(maxLimit)} =  {  t=((maxLimit * attainmentData.passedPercentage) / 100) }   </h1>
-  <table className="min-w-full divide-y divide-gray-200">
-  <thead className="bg-blue-500 text-white">
-    <tr>
-      <th colSpan={2} className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider">
-        Attenment calculation
-      </th>
-      
-    </tr>
-  </thead>
-  <tbody className="divide-y divide-gray-200">
-  <tr className="bg-white">
-      <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
-        Students passed with {attainmentData.passedPercentage} %
-      </td>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-        {SemData.filter((student) => student.marks >= ((maxLimit * attainmentData.passedPercentage) / 100)).length}
-      </td>
-    </tr>
-    <tr className="bg-white">
-      <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
-        Total Students
-      </td>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-        {SemData.length}
-      </td>
-    </tr>
-  </tbody>
-
-</table>
-{userCourse.length > 0 && (
-  <table className="min-w-full divide-y divide-gray-200">
-  <thead className="bg-blue-500 text-white">
-    <tr>
-      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Details</th>
-      {userCourse.map((course) => (
-        <th key={course.idcos} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-          {course.co_name}
-        </th>
-      ))}
-    </tr>
-  </thead>
-  <tbody className="divide-y divide-gray-200 bg-white">
-    <tr>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Total Passed</td>
-      {userCourse.map((course) => (
-        <td key={course.idcos} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-          {SemData.filter((student) => student.marks >= ( (maxLimit * attainmentData.passedPercentage) / 100)).length}
-        </td>
-      ))}
-    </tr>
-    <tr>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Total Students</td>
-      {userCourse.map((course) => (
-        <td key={course.idcos} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-          {SemData.length}
-        </td>
-      ))}
-    </tr>
-  </tbody>
-</table>
-
-)}
-
-
-</div>
-
+          <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
+          <h1>
+            {" "}
+            {attainmentData.passedPercentage} % of Max Marks: {maxLimit} ={" "}
+            {(t = (maxLimit * attainmentData.passedPercentage) / 100)}{" "}
+          </h1>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-blue-500 text-white">
+              <tr>
+                <th
+                  colSpan={2}
+                  className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider"
+                >
+                  Attenment calculation
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              <tr className="bg-white">
+                <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                  Students passed with {attainmentData.passedPercentage} %
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {
+                    SemData.filter(
+                      (student) =>
+                        student.marks >=
+                        (maxLimit * attainmentData.passedPercentage) / 100
+                    ).length
+                  }
+                </td>
+              </tr>
+              <tr className="bg-white">
+                <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                  Total Students
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {SemData.length}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          {userCourse.length > 0 && (
+          <table className="min-w-full table-fixed divide-y divide-gray-200">
+          <thead className="bg-blue-500 text-white">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
+                Details
+              </th>
+              {userCourse.map((course) => (
+                <th
+                  key={course.idcos}
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
+                >
+                  {course.co_name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            <tr>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                Total Passed
+              </td>
+              {userCourse.map((course) => (
+                <td
+                  key={course.idcos}
+                  className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                >
+                  {
+                    SemData.filter(
+                      (student) =>
+                        student.marks >=
+                        (maxLimit * attainmentData.passedPercentage) / 100
+                    ).length
+                  }
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                Total Students
+              </td>
+              {userCourse.map((course) => (
+                <td
+                  key={course.idcos}
+                  className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                >
+                  {SemData.length}
+                </td>
+              ))}
+            </tr>
+        
+            {userCourse.map((course) => (
+              <tr
+                key={course.idcos}
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                <td className="w-1/4"> {course.co_name}</td>
+                <td className="w-1/4">
+                  {(
+                    (SemData.filter(
+                      (student) =>
+                        student.marks >=
+                        (maxLimit * attainmentData.passedPercentage) / 100
+                    ).length /
+                      SemData.length) *
+                    100
+                  ).toFixed(2)} %
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>        
+          )}
+        </div>
       </div>
     </div>
   );
