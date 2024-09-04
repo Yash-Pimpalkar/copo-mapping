@@ -239,11 +239,14 @@ const Semester = ({ uid }) => {
         console.log(validatedData);
         await api.put("/api/sem/", validatedData);
         SetSemdata(validatedData);
+        alert("File is uploaded");
+        window.location.reload();
       } catch (error) {
         console.error("Error updating marks:", error);
       }
     };
     reader.readAsArrayBuffer(file);
+
   };
 
   const handleFileDownload = () => {
