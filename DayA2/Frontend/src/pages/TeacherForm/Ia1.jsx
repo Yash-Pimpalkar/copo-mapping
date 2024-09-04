@@ -18,7 +18,7 @@ const Ia1 = ({ uid }) => {
   const [marksData, setMarksData] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [Err,setErr] = useState();
+  const [Err, setErr] = useState();
   const [display, setDisplay] = useState("Total student passed with >=");
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
@@ -31,7 +31,7 @@ const Ia1 = ({ uid }) => {
 
     // Convert value to a number for validation
     const numericValue = Number(value);
-    
+
     // Validate input
     if (numericValue < 50 || numericValue > 100) {
       setError("Value must be between 50 and 100.");
@@ -50,11 +50,11 @@ const Ia1 = ({ uid }) => {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        setErr()
+        setErr();
         setIaData([]);
         setCOsData([]);
         setLoading(true);
-        
+
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -70,7 +70,7 @@ const Ia1 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
-        setErr(error.response?.data?.error || 'An unexpected error occurred');
+        setErr(error.response?.data?.error || "An unexpected error occurred");
       } finally {
         setLoading(false);
       }
@@ -85,7 +85,7 @@ const Ia1 = ({ uid }) => {
   useEffect(() => {
     const fetchIaData = async () => {
       if (userCourseId) {
-        setErr("")
+        setErr("");
         setIaData([]);
         setCOsData([]);
         setLoading(true);
@@ -96,7 +96,7 @@ const Ia1 = ({ uid }) => {
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
-          setErr(error.response?.data?.error || 'An unexpected error occurred');
+          setErr(error.response?.data?.error || "An unexpected error occurred");
         } finally {
           setLoading(false);
         }
@@ -127,7 +127,7 @@ const Ia1 = ({ uid }) => {
 
       // Get the maximum marks from the matched object
       const maxMarks = correspondingCoData ? correspondingCoData.marks : 0;
-      console.log("Max Marks:", maxMarks);
+      // console.log("Max Marks:", maxMarks);
 
       return IaData.filter((student) => {
         // Get the marks for the current question
@@ -137,7 +137,7 @@ const Ia1 = ({ uid }) => {
         const studentPercentage = studentMarks
           ? (studentMarks / maxMarks) * 100
           : 0;
-        console.log("Student Percentage:", studentPercentage);
+        // console.log("Student Percentage:", studentPercentage);
 
         return (
           studentPercentage >= percentage &&
@@ -169,8 +169,10 @@ const Ia1 = ({ uid }) => {
     );
     setUserCourseId(course?.usercourse_id || null);
   };
-  console.log(COsData);
-  const distinctConames = [...new Set(COsData.map(item => item.coname.trim()))];
+  // console.log(COsData);
+  const distinctConames = [
+    ...new Set(COsData.map((item) => item.coname.trim())),
+  ];
   // Get unique question columns from COsData
   const getQuestionColumns = () => {
     return COsData.map((data) => ({
@@ -295,7 +297,7 @@ const Ia1 = ({ uid }) => {
       console.error("Error saving IA data:", error);
     }
   };
-console.log(COsData)
+  // console.log(COsData)
   // Handle changes to input fields
   const handleInputChange = (event, index, column) => {
     let value = event.target.value;
@@ -402,7 +404,7 @@ console.log(COsData)
   };
 
   const updateMarks = async (changes) => {
-    console.log(changes);
+    // console.log(changes);
     try {
       setLoading(true);
       const response = await api.put("/api/ia/", changes);
@@ -564,7 +566,73 @@ console.log(COsData)
     );
   });
 
-  console.log(IaData);
+  // console.log(IaData);
+  function calculateCoAverages(
+    distinctConames,
+    questionColumns,
+    attainmentData
+  ) {
+    return distinctConames.map((coName) => {
+      const coColumns = questionColumns
+        .map((col, index) => ({ ...col, index })) // include index for mapping
+        .filter((col) => col.coname === coName); // filter by CO name
+
+      const coAverage = coColumns.length
+        ? (
+            coColumns.reduce((sum, col) => {
+              const attainmentValue = getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              )[col.index];
+              const attemptedCount = getTotalStudentsAttempted()[col.index];
+              const attainment = attemptedCount
+                ? (attainmentValue / attemptedCount) * 100
+                : 0;
+              return sum + attainment;
+            }, 0) / coColumns.length
+          ).toFixed(2)
+        : 0;
+
+      return { coName, coAverage };
+    });
+  }
+
+  const coAverages = calculateCoAverages(
+    distinctConames,
+    questionColumns,
+    attainmentData
+  );
+
+  // console.log(coAverages);
+  const [message, setMessage] = useState("");
+  const handle_Attenment = (
+    distinctConames,
+    questionColumns,
+    attainmentData,
+    userCourseId
+  ) => {
+    if (userCourseId) {
+      const coAverages = calculateCoAverages(
+        distinctConames,
+        questionColumns,
+        attainmentData
+      );
+      console.log(coAverages);
+
+      api
+        .post("/api/ia/insert-co-averages", {
+          coAverages,
+          userCourseId,
+        })
+        .then((response) => {
+          setMessage(response.data.message);
+          console.log("Data inserted successfully:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error inserting data:", error);
+          setMessage("Error inserting data");
+        });
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -672,7 +740,11 @@ console.log(COsData)
           </div>
         </div>
 
-        {Err && <p style={{ color: 'red', fontWeight: 'bold', textAlign:"center" }}>Error: {Err}</p>}
+        {Err && (
+          <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+            Error: {Err}
+          </p>
+        )}
 
         {loading ? (
           <div className="flex justify-center items-center">
@@ -741,12 +813,12 @@ console.log(COsData)
                       .slice(startIndex, endIndex)
                       .map((student, index) => {
                         const actualIndex = index + startIndex; // Adjust index to match actual data index
-                        {
-                          console.log(actualIndex);
-                        }
-                        {
-                          console.log(editingRow);
-                        }
+                        // {
+                        //   console.log(actualIndex);
+                        // }
+                        // {
+                        //   console.log(editingRow);
+                        // }
                         return (
                           <tr key={student.sid}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -864,149 +936,170 @@ console.log(COsData)
       </div>
       {filteredData.length > 0 && (
         <>
-      {/* New container for Total Students Passed */}
-      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <h1 className="text-lg font-semibold mb-4">
-          Total Students Passed Each Question
-        </h1>
-        <div className="mb-4">
-          <label
-            htmlFor="total-student-passed"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Total Students Passed with &gt;= PERCENTAGE %
-          </label>
-          <input
-        id="total-student-passed"
-        type="text"
-        value={attainmentData.passedPercentage}
-        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-        className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-       />
-       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                  Type
-                </th>
-                {questionColumns.map((col) => (
-                  <th
-                    key={col.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    {col.qname}
-                  </th>
-                ))}
-              </tr>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                  &nbsp;
-                </th>
-                {questionColumns.map((col) => (
-                  <th
-                    key={col.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    {col.coname}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                  {display} {attainmentData.passedPercentage} {"%"}
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((count, index) => (
-                  <td
-                    key={index}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                  >
-                    {count}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                  Students Attempted Per Question
-                </td>
-                {getTotalStudentsAttempted().map((count, index) => (
-                  <td
-                    key={index}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                  >
-                    {count}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                  CO Attainment
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((passedCount, index) => {
-                  const attemptedCount = getTotalStudentsAttempted()[index];
-                  const attainment = attemptedCount
-                    ? ((passedCount / attemptedCount) * 100).toFixed(2)
-                    : 0;
-                  return (
-                    <td
-                      key={index}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                    >
-                      {attainment} %
-                    </td>
-                  );
-                })}
-              </tr>
-              {/* Dynamic Rows for COs */}
-              {distinctConames.map((coName) => {
-                const coColumns = questionColumns
-                  .map((col, index) => ({ ...col, index })) // include index for mapping
-                  .filter((col) => col.coname === coName); // filter by CO name
-
-                const coAverage = coColumns.length
-                  ? (
-                      coColumns.reduce((sum, col) => {
-                        const attainmentValue =
-                          getTotalStudentsPassedPerQuestion(
-                            attainmentData.passedPercentage
-                          )[col.index];
-                        const attemptedCount =
-                          getTotalStudentsAttempted()[col.index];
-                        const attainment = attemptedCount
-                          ? (attainmentValue / attemptedCount) * 100
-                          : 0;
-                        return sum + attainment;
-                      }, 0) / coColumns.length
-                    ).toFixed(2)
-                  : 0;
-
-                return (
-                  <tr key={coName}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                      {coName} Average
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                      colSpan={questionColumns.length}
-                    >
-                      {coAverage} %
-                    </td>
+          {/* New container for Total Students Passed */}
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-lg font-semibold">
+                Total Students Passed Each Question
+              </h1>
+             
+              <button
+                onClick={() =>
+                  handle_Attenment(
+                    distinctConames,
+                    questionColumns,
+                    attainmentData,
+                    userCourseId
+                  )
+                }
+                className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+              >
+                Update Attainment
+              </button>
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="total-student-passed"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Total Students Passed with &gt;= PERCENTAGE %
+              </label>
+              <input
+                id="total-student-passed"
+                type="text"
+                value={attainmentData.passedPercentage}
+                onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+                className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              {message && (
+                <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
+                  {message}
+                </div>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    {questionColumns.map((col) => (
+                      <th
+                        key={col.id}
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        {col.qname}
+                      </th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      </>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                      &nbsp;
+                    </th>
+                    {questionColumns.map((col) => (
+                      <th
+                        key={col.id}
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        {col.coname}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      {display} {attainmentData.passedPercentage} {"%"}
+                    </td>
+                    {getTotalStudentsPassedPerQuestion(
+                      attainmentData.passedPercentage
+                    ).map((count, index) => (
+                      <td
+                        key={index}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                      >
+                        {count}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      Students Attempted Per Question
+                    </td>
+                    {getTotalStudentsAttempted().map((count, index) => (
+                      <td
+                        key={index}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                      >
+                        {count}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      CO Attainment
+                    </td>
+                    {getTotalStudentsPassedPerQuestion(
+                      attainmentData.passedPercentage
+                    ).map((passedCount, index) => {
+                      const attemptedCount = getTotalStudentsAttempted()[index];
+                      const attainment = attemptedCount
+                        ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                        : 0;
+                      return (
+                        <td
+                          key={index}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                        >
+                          {attainment} %
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  {/* Dynamic Rows for COs */}
+                  {distinctConames.map((coName) => {
+                    const coColumns = questionColumns
+                      .map((col, index) => ({ ...col, index })) // include index for mapping
+                      .filter((col) => col.coname === coName); // filter by CO name
+
+                    const coAverage = coColumns.length
+                      ? (
+                          coColumns.reduce((sum, col) => {
+                            const attainmentValue =
+                              getTotalStudentsPassedPerQuestion(
+                                attainmentData.passedPercentage
+                              )[col.index];
+                            const attemptedCount =
+                              getTotalStudentsAttempted()[col.index];
+                            const attainment = attemptedCount
+                              ? (attainmentValue / attemptedCount) * 100
+                              : 0;
+                            return sum + attainment;
+                          }, 0) / coColumns.length
+                        ).toFixed(2)
+                      : 0;
+
+                    return (
+                      <tr key={coName}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                          {coName} Average
+                        </td>
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                          colSpan={questionColumns.length}
+                        >
+                          {coAverage} %
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
       {/* Section to display Total Students Attempted each question
           <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">

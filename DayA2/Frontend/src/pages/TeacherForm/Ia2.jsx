@@ -11,7 +11,7 @@ const Ia2 = ({ uid }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const [userCourseId, setUserCourseId] = useState(null);
   const [IaData, setIaData] = useState([]);
-  const [Err,setErr] = useState();
+  const [Err, setErr] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [COsData, setCOsData] = useState([]);
@@ -49,7 +49,7 @@ const Ia2 = ({ uid }) => {
   // Fetch courses and set distinct course names
   useEffect(() => {
     const fetchCourseData = async () => {
-      setErr("")
+      setErr("");
       setIaData([]);
       setCOsData([]);
       try {
@@ -69,8 +69,8 @@ const Ia2 = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error("Error fetching course data:", error);
-        setErr(error.response?.data?.error || 'An unexpected error occurred');
-      }finally {
+        setErr(error.response?.data?.error || "An unexpected error occurred");
+      } finally {
         setLoading(false);
       }
     };
@@ -83,11 +83,10 @@ const Ia2 = ({ uid }) => {
   // Fetch IA data when the userCourseId changes
   useEffect(() => {
     const fetchIaData = async () => {
-      setErr("")
+      setErr("");
       setIaData([]);
       setCOsData([]);
       if (userCourseId) {
-        
         setLoading(true);
         try {
           const res = await api.get(`/api/ia/ia2/${userCourseId}`);
@@ -96,8 +95,8 @@ const Ia2 = ({ uid }) => {
           setCOsData(res1.data);
         } catch (error) {
           console.error("Error fetching IA data:", error);
-          setErr(error.response?.data?.error || 'An unexpected error occurred');
-        } finally{
+          setErr(error.response?.data?.error || "An unexpected error occurred");
+        } finally {
           setLoading(false);
         }
       }
@@ -330,73 +329,76 @@ const Ia2 = ({ uid }) => {
       },
     }));
   };
-  const distinctConames = [...new Set(COsData.map(item => item.coname.trim()))];
- // Handle file upload
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  const reader = new FileReader();
+  const distinctConames = [
+    ...new Set(COsData.map((item) => item.coname.trim())),
+  ];
+  // Handle file upload
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
 
-  reader.onload = async (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: "array" });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    let jsonData = XLSX.utils.sheet_to_json(worksheet);
+    reader.onload = async (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      let jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-    jsonData = jsonData.filter((_, index) => index !== 1 - 1);
+      jsonData = jsonData.filter((_, index) => index !== 1 - 1);
 
-    let errors = [];
-    const validatedData = jsonData.map((student, rowIndex) => {
-      const validatedStudent = { ...student };
+      let errors = [];
+      const validatedData = jsonData.map((student, rowIndex) => {
+        const validatedStudent = { ...student };
 
-      COsData.forEach((col) => {
-        let marks = student[col.qname];
-
-        // Ensure marks are within limits and handle null
-        const maxLimit = col.marks;
-        if (marks !== null && marks > maxLimit) {
-          errors.push(
-            `Row ${rowIndex + 2}: ${col.qname} has marks ${marks}, which exceeds the limit of ${maxLimit}.`
-          );
-          marks = Math.min(marks, maxLimit); // Adjust the marks to be within the limit
-        }
-
-        validatedStudent[col.qname] = marks;
-      });
-
-      return validatedStudent;
-    });
-
-    if (errors.length > 0) {
-      alert("Errors found:\n" + errors.join("\n"));
-    } else {
-      setIaData(validatedData);
-
-      const changes = [];
-      validatedData.forEach((student) => {
         COsData.forEach((col) => {
-          const marks = student[col.qname];
-          if (marks !== undefined) {
-            changes.push({
-              sid: student.sid,
-              qid: col.idtable_ia2,
-              marks: marks,
-            });
+          let marks = student[col.qname];
+
+          // Ensure marks are within limits and handle null
+          const maxLimit = col.marks;
+          if (marks !== null && marks > maxLimit) {
+            errors.push(
+              `Row ${rowIndex + 2}: ${
+                col.qname
+              } has marks ${marks}, which exceeds the limit of ${maxLimit}.`
+            );
+            marks = Math.min(marks, maxLimit); // Adjust the marks to be within the limit
           }
+
+          validatedStudent[col.qname] = marks;
         });
+
+        return validatedStudent;
       });
 
-      try {
-        await updateMarks(changes);
-      } catch (error) {
-        console.error("Error updating marks:", error);
+      if (errors.length > 0) {
+        alert("Errors found:\n" + errors.join("\n"));
+      } else {
+        setIaData(validatedData);
+
+        const changes = [];
+        validatedData.forEach((student) => {
+          COsData.forEach((col) => {
+            const marks = student[col.qname];
+            if (marks !== undefined) {
+              changes.push({
+                sid: student.sid,
+                qid: col.idtable_ia2,
+                marks: marks,
+              });
+            }
+          });
+        });
+
+        try {
+          await updateMarks(changes);
+        } catch (error) {
+          console.error("Error updating marks:", error);
+        }
       }
-    }
+    };
+
+    reader.readAsArrayBuffer(file);
   };
-
-  reader.readAsArrayBuffer(file);
-};
-
 
   const updateMarks = async (changes) => {
     console.log(changes);
@@ -415,13 +417,13 @@ const handleFileUpload = (event) => {
   // Handle file download
   const handleFileDownload = () => {
     // Step 1: Prepare the IA Data (Table 1)
-  
+
     // Create a new array to include the Total column for IA data
     const dataWithTotal = IaData.map((row) => ({
       ...row,
       Total: calculateTotal(row),
     }));
-  
+
     // Create headers for the IA data
     const iaHeaders = [
       "sid",
@@ -437,7 +439,7 @@ const handleFileUpload = (event) => {
       ...questionColumns.map((col) => col.coname),
       "",
     ];
-  
+
     // Combine headers with the IA data
     const iaDataForExport = [
       iaHeaders,
@@ -450,24 +452,24 @@ const handleFileUpload = (event) => {
         row.Total,
       ]),
     ];
-  
+
     // Step 2: Prepare the Attainment Data (Table 2)
-  
+
     const attainmentHeaders = [
       "Type",
       ...questionColumns.map((col) => col.qname),
     ];
-  
+
     const passedRow = [
       `Passed >= ${attainmentData.passedPercentage}%`,
       ...getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage),
     ];
-  
+
     const attemptedRow = [
       "Students Attempted Per Question",
       ...getTotalStudentsAttempted(),
     ];
-  
+
     const coAttainmentRow = [
       "CO Attainment",
       ...getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage).map(
@@ -479,20 +481,19 @@ const handleFileUpload = (event) => {
         }
       ),
     ];
-  
+
     // Add dynamic rows for CO averages
     const coAverageRows = ["CO1", "CO2"].map((coName) => {
       const coColumns = questionColumns
         .map((col, index) => ({ ...col, index })) // include index for mapping
         .filter((col) => col.coname === coName); // filter by CO name
-  
+
       const coAverage = coColumns.length
         ? (
             coColumns.reduce((sum, col) => {
-              const attainmentValue =
-                getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                )[col.index];
+              const attainmentValue = getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              )[col.index];
               const attemptedCount = getTotalStudentsAttempted()[col.index];
               const attainment = attemptedCount
                 ? (attainmentValue / attemptedCount) * 100
@@ -501,37 +502,41 @@ const handleFileUpload = (event) => {
             }, 0) / coColumns.length
           ).toFixed(2)
         : 0;
-  
+
       return [coName + " Average", coAverage + " %"];
     });
-  
+
     const attainmentDataForExport = [
       attainmentHeaders,
       passedRow,
       attemptedRow,
       coAttainmentRow,
-      ...coAverageRows.map((row) => [...row, ...Array(questionColumns.length - 1).fill('')]),
+      ...coAverageRows.map((row) => [
+        ...row,
+        ...Array(questionColumns.length - 1).fill(""),
+      ]),
     ];
-  
+
     // Step 3: Combine IA Data and Attainment Data into the same worksheet
-  
+
     // Convert IA data to worksheet
     const worksheet = XLSX.utils.aoa_to_sheet(iaDataForExport);
-  
+
     // Calculate starting row for the second table (Attainment Data)
     const attainmentStartRow = iaDataForExport.length + 2; // Leave a couple of rows between tables
-  
+
     // Append Attainment Data to the worksheet
-    XLSX.utils.sheet_add_aoa(worksheet, attainmentDataForExport, { origin: { r: attainmentStartRow, c: 0 } });
-  
+    XLSX.utils.sheet_add_aoa(worksheet, attainmentDataForExport, {
+      origin: { r: attainmentStartRow, c: 0 },
+    });
+
     // Step 4: Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "IA2 Data & Attainment");
-  
+
     // Step 5: Write the workbook to a file
     XLSX.writeFile(workbook, "ia_data_and_attainment.xlsx");
   };
-  
 
   // Handle search input change
   const handleSearchChange = (event) => {
@@ -555,7 +560,73 @@ const handleFileUpload = (event) => {
     );
   });
 
-  console.log(IaData);
+  // console.log(IaData);
+  function calculateCoAverages(
+    distinctConames,
+    questionColumns,
+    attainmentData
+  ) {
+    return distinctConames.map((coName) => {
+      const coColumns = questionColumns
+        .map((col, index) => ({ ...col, index })) // include index for mapping
+        .filter((col) => col.coname === coName); // filter by CO name
+
+      const coAverage = coColumns.length
+        ? (
+            coColumns.reduce((sum, col) => {
+              const attainmentValue = getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              )[col.index];
+              const attemptedCount = getTotalStudentsAttempted()[col.index];
+              const attainment = attemptedCount
+                ? (attainmentValue / attemptedCount) * 100
+                : 0;
+              return sum + attainment;
+            }, 0) / coColumns.length
+          ).toFixed(2)
+        : 0;
+
+      return { coName, coAverage };
+    });
+  }
+
+  const coAverages = calculateCoAverages(
+    distinctConames,
+    questionColumns,
+    attainmentData
+  );
+
+  // console.log(coAverages);
+  const [message, setMessage] = useState("");
+  const handle_Attenment = (
+    distinctConames,
+    questionColumns,
+    attainmentData,
+    userCourseId
+  ) => {
+    if (userCourseId) {
+      const coAverages = calculateCoAverages(
+        distinctConames,
+        questionColumns,
+        attainmentData
+      );
+      console.log(coAverages);
+
+      api
+        .post("/api/ia/ia2/insert-co-averages", {
+          coAverages,
+          userCourseId,
+        })
+        .then((response) => {
+          setMessage(response.data.message);
+          console.log("Data inserted successfully:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error inserting data:", error);
+          setMessage("Error inserting data");
+        });
+    }
+  };
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -660,180 +731,185 @@ const handleFileUpload = (event) => {
               Download
             </button>
           </div>
-        </div> 
-        {Err && <p style={{ color: 'red', fontWeight: 'bold', textAlign:"center" }}>Error: {Err}</p>}
+        </div>
+        {Err && (
+          <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+            Error: {Err}
+          </p>
+        )}
         {loading ? (
           <div className="flex justify-center items-center">
             <LoadingButton />
           </div>
         ) : (
           <>
+            {/* // Display IA Data */}
+            {filteredData.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        rowSpan="2"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        Student ID
+                      </th>
+                      <th
+                        rowSpan="2"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        Student Name
+                      </th>
+                      <th
+                        rowSpan="2"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        College ID
+                      </th>
+                      {questionColumns.map((col) => (
+                        <th
+                          key={col.id}
+                          className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        >
+                          {col.qname}
+                        </th>
+                      ))}
+                      <th
+                        rowSpan="2"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        Total
+                      </th>
+                      <th
+                        rowSpan="2"
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                    <tr>
+                      {questionColumns.map((col) => (
+                        <th
+                          key={col.id}
+                          className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        >
+                          {col.coname}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredData
+                      .slice(startIndex, endIndex)
+                      .map((student, index) => {
+                        const actualIndex = index + startIndex; // Adjust index to match actual data index
 
-        {/* // Display IA Data */}
-        {filteredData.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    Student ID
-                  </th>
-                  <th
-                    rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    Student Name
-                  </th>
-                  <th
-                    rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    College ID
-                  </th>
-                  {questionColumns.map((col) => (
-                    <th
-                      key={col.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                    >
-                      {col.qname}
-                    </th>
-                  ))}
-                  <th
-                    rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    Total
-                  </th>
-                  <th
-                    rowSpan="2"
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    Actions
-                  </th>
-                </tr>
-                <tr>
-                  {questionColumns.map((col) => (
-                    <th
-                      key={col.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                    >
-                      {col.coname}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData
-                  .slice(startIndex, endIndex)
-                  .map((student, index) => {
-                    const actualIndex = index + startIndex; // Adjust index to match actual data index
-
-                    return (
-                      <tr key={student.sid}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {editingRow === actualIndex ? (
-                            <input
-                              type="text"
-                              value={student.sid}
-                              onChange={(e) =>
-                                handleInputChange(e, index, "sid")
-                              }
-                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                            />
-                          ) : (
-                            student.sid
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {editingRow === actualIndex ? (
-                            <input
-                              type="text"
-                              value={student.student_name}
-                              onChange={(e) =>
-                                handleInputChange(e, index, "student_name")
-                              }
-                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                            />
-                          ) : (
-                            student.student_name
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {editingRow === actualIndex ? (
-                            <input
-                              type="text"
-                              value={student.stud_clg_id}
-                              onChange={(e) =>
-                                handleInputChange(e, index, "stud_clg_id")
-                              }
-                              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                            />
-                          ) : (
-                            student.stud_clg_id
-                          )}
-                        </td>
-                        {questionColumns.map((col) => (
-                          <td
-                            key={col.id}
-                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                          >
-                            {editingRow === actualIndex ? (
-                              <select
-                                value={
-                                  student[col.qname] === null
-                                    ? ""
-                                    : student[col.qname]
-                                }
-                                onChange={(e) =>
-                                  handleInputChange(e, index, col.qname)
-                                }
-                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        return (
+                          <tr key={student.sid}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {editingRow === actualIndex ? (
+                                <input
+                                  type="text"
+                                  value={student.sid}
+                                  onChange={(e) =>
+                                    handleInputChange(e, index, "sid")
+                                  }
+                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
+                                />
+                              ) : (
+                                student.sid
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {editingRow === actualIndex ? (
+                                <input
+                                  type="text"
+                                  value={student.student_name}
+                                  onChange={(e) =>
+                                    handleInputChange(e, index, "student_name")
+                                  }
+                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
+                                />
+                              ) : (
+                                student.student_name
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {editingRow === actualIndex ? (
+                                <input
+                                  type="text"
+                                  value={student.stud_clg_id}
+                                  onChange={(e) =>
+                                    handleInputChange(e, index, "stud_clg_id")
+                                  }
+                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
+                                />
+                              ) : (
+                                student.stud_clg_id
+                              )}
+                            </td>
+                            {questionColumns.map((col) => (
+                              <td
+                                key={col.id}
+                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                               >
-                                <option value="">NULL</option>
-                                {[...Array(col.marks + 1).keys()].map((i) => (
-                                  <option key={i} value={i}>
-                                    {i}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : student[col.qname] !== null ? (
-                              student[col.qname]
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
-                        ))}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {calculateTotal(student)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {editingRow === actualIndex ? (
-                            <button
-                              onClick={() => handleSaveClick(index)}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              Save
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleEditClick(index)}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        )}
-        </>
+                                {editingRow === actualIndex ? (
+                                  <select
+                                    value={
+                                      student[col.qname] === null
+                                        ? ""
+                                        : student[col.qname]
+                                    }
+                                    onChange={(e) =>
+                                      handleInputChange(e, index, col.qname)
+                                    }
+                                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  >
+                                    <option value="">NULL</option>
+                                    {[...Array(col.marks + 1).keys()].map(
+                                      (i) => (
+                                        <option key={i} value={i}>
+                                          {i}
+                                        </option>
+                                      )
+                                    )}
+                                  </select>
+                                ) : student[col.qname] !== null ? (
+                                  student[col.qname]
+                                ) : (
+                                  "N/A"
+                                )}
+                              </td>
+                            ))}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {calculateTotal(student)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {editingRow === actualIndex ? (
+                                <button
+                                  onClick={() => handleSaveClick(index)}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                >
+                                  Save
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleEditClick(index)}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
         {/* Pagination Controls */}
         {selectedCourse && selectedYear && (
@@ -846,150 +922,170 @@ const handleFileUpload = (event) => {
       </div>
       {filteredData.length > 0 && (
         <>
-      {/* New container for Total Students Passed */}
-      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <h1 className="text-lg font-semibold mb-4">
-          Total Students Passed Each Question
-        </h1>
-        <div className="mb-4">
-          <label
-            htmlFor="total-student-passed"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Total Students Passed with &gt;= PERCENTAGE %
-          </label>
-          <input
-        id="total-student-passed"
-        type="text"
-        value={attainmentData.passedPercentage}
-        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-        className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-      />
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                  Type
-                </th>
-                {questionColumns.map((col) => (
-                  <th
-                    key={col.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    {col.qname}
-                  </th>
-                ))}
-              </tr>
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                  &nbsp;
-                </th>
-                {questionColumns.map((col) => (
-                  <th
-                    key={col.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
-                  >
-                    {col.coname}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                  {display} {attainmentData.passedPercentage} {"%"}
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((count, index) => (
-                  <td
-                    key={index}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                  >
-                    {count}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                  Students Attempted Per Question
-                </td>
-                {getTotalStudentsAttempted().map((count, index) => (
-                  <td
-                    key={index}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                  >
-                    {count}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                  CO Attainment
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((passedCount, index) => {
-                  const attemptedCount = getTotalStudentsAttempted()[index];
-                  const attainment = attemptedCount
-                    ? ((passedCount / attemptedCount) * 100).toFixed(2)
-                    : 0;
-                  return (
-                    <td
-                      key={index}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                    >
-                      {attainment} %
-                    </td>
-                  );
-                })}
-              </tr>
-            
-              {/* Dynamic Rows for COs */}
-              {distinctConames.map((coName) => {
-                const coColumns = questionColumns
-                  .map((col, index) => ({ ...col, index })) // include index for mapping
-                  .filter((col) => col.coname === coName); // filter by CO name
-
-                const coAverage = coColumns.length
-                  ? (
-                      coColumns.reduce((sum, col) => {
-                        const attainmentValue =
-                          getTotalStudentsPassedPerQuestion(
-                            attainmentData.passedPercentage
-                          )[col.index];
-                        const attemptedCount =
-                          getTotalStudentsAttempted()[col.index];
-                        const attainment = attemptedCount
-                          ? (attainmentValue / attemptedCount) * 100
-                          : 0;
-                        return sum + attainment;
-                      }, 0) / coColumns.length
-                    ).toFixed(2)
-                  : 0;
-
-                return (
-                  <tr key={coName}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                      {coName} Average
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                      colSpan={questionColumns.length}
-                    >
-                      {coAverage} %
-                    </td>
+          {/* New container for Total Students Passed */}
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-lg font-semibold">
+                Total Students Passed Each Question
+              </h1>
+              <button
+                onClick={() =>
+                  handle_Attenment(
+                    distinctConames,
+                    questionColumns,
+                    attainmentData,
+                    userCourseId
+                  )
+                }
+                className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+              >
+                Update Attainment
+              </button>
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="total-student-passed"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Total Students Passed with &gt;= PERCENTAGE %
+              </label>
+              <input
+                id="total-student-passed"
+                type="text"
+                value={attainmentData.passedPercentage}
+                onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+                className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              {message && (
+                <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
+                  {message}
+                </div>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    {questionColumns.map((col) => (
+                      <th
+                        key={col.id}
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        {col.qname}
+                      </th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      </>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                      &nbsp;
+                    </th>
+                    {questionColumns.map((col) => (
+                      <th
+                        key={col.id}
+                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                      >
+                        {col.coname}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      {display} {attainmentData.passedPercentage} {"%"}
+                    </td>
+                    {getTotalStudentsPassedPerQuestion(
+                      attainmentData.passedPercentage
+                    ).map((count, index) => (
+                      <td
+                        key={index}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                      >
+                        {count}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      Students Attempted Per Question
+                    </td>
+                    {getTotalStudentsAttempted().map((count, index) => (
+                      <td
+                        key={index}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                      >
+                        {count}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                      CO Attainment
+                    </td>
+                    {getTotalStudentsPassedPerQuestion(
+                      attainmentData.passedPercentage
+                    ).map((passedCount, index) => {
+                      const attemptedCount = getTotalStudentsAttempted()[index];
+                      const attainment = attemptedCount
+                        ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                        : 0;
+                      return (
+                        <td
+                          key={index}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                        >
+                          {attainment} %
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {/* Dynamic Rows for COs */}
+                  {distinctConames.map((coName) => {
+                    const coColumns = questionColumns
+                      .map((col, index) => ({ ...col, index })) // include index for mapping
+                      .filter((col) => col.coname === coName); // filter by CO name
+
+                    const coAverage = coColumns.length
+                      ? (
+                          coColumns.reduce((sum, col) => {
+                            const attainmentValue =
+                              getTotalStudentsPassedPerQuestion(
+                                attainmentData.passedPercentage
+                              )[col.index];
+                            const attemptedCount =
+                              getTotalStudentsAttempted()[col.index];
+                            const attainment = attemptedCount
+                              ? (attainmentValue / attemptedCount) * 100
+                              : 0;
+                            return sum + attainment;
+                          }, 0) / coColumns.length
+                        ).toFixed(2)
+                      : 0;
+
+                    return (
+                      <tr key={coName}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                          {coName} Average
+                        </td>
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
+                          colSpan={questionColumns.length}
+                        >
+                          {coAverage} %
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
       {/* Section to display Total Students Attempted each question
           <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">

@@ -403,3 +403,104 @@ export const upload_Ia2_questions = async (req, res) => {
 
 
 
+
+export const Ia1_Attenmaint = async (req, res) => {
+  const { coAverages, userCourseId } = req.body;
+
+  console.log(coAverages, userCourseId);
+
+  try {
+    for (const { coName, coAverage } of coAverages) {
+      // Check if the coname and usercourse_id combination already exists
+      const sql = "SELECT id_attainment FROM ia1_attainment WHERE coname = ? AND usercourse_id = ?";
+      db.query(sql, [coName, userCourseId], (error, results) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).json({ error: error.message });
+        }
+
+        if (results.length > 0) {
+          // If exists, update the attainment value
+          const sql1 = "UPDATE ia1_attainment SET attainment = ? WHERE id_attainment = ?";
+          db.query(sql1, [parseFloat(coAverage), results[0].id_attainment], (error, result) => {
+            if (error) {
+              console.log(error);
+              return res.status(500).json({ error: error.message });
+            }
+            console.log(`Updated attainment for ${coName}`);
+          });
+        } else {
+          // If doesn't exist, insert a new record
+          const sql2 = "INSERT INTO ia1_attainment (coname, attainment, usercourse_id) VALUES (?, ?, ?)";
+          db.query(sql2, [coName, parseFloat(coAverage), userCourseId], (error, results1) => {
+            if (error) {
+              console.log(error);
+              return res.status(500).json({ error: error.message });
+            }
+            console.log(`Inserted new attainment for ${coName}`);
+          });
+        }
+      });
+    }
+
+    console.log('CO averages inserted/updated successfully');
+    res.status(200).json({ message: 'CO averages inserted/updated successfully' });
+  } catch (error) {
+    console.error('Error inserting/updating CO averages:', error);
+    res.status(500).json({ error: 'Error inserting/updating CO averages' });
+  }
+};
+
+
+
+
+export const Ia2_Attenmaint = async (req, res) => {
+  const { coAverages, userCourseId } = req.body;
+
+  console.log(coAverages, userCourseId);
+
+  try {
+    for (const { coName, coAverage } of coAverages) {
+      // Check if the coname and usercourse_id combination already exists
+      const sql = "SELECT id_attainment FROM ia2_attainment WHERE coname = ? AND usercourse_id = ?";
+      db.query(sql, [coName, userCourseId], (error, results) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).json({ error: error.message });
+        }
+
+        if (results.length > 0) {
+          // If exists, update the attainment value
+          const sql1 = "UPDATE ia2_attainment SET attainment = ? WHERE id_attainment = ?";
+          db.query(sql1, [parseFloat(coAverage), results[0].id_attainment], (error, result) => {
+            if (error) {
+              console.log(error);
+              return res.status(500).json({ error: error.message });
+            }
+            console.log(`Updated attainment for ${coName}`);
+          });
+        } else {
+          // If doesn't exist, insert a new record
+          const sql2 = "INSERT INTO ia2_attainment (coname, attainment, usercourse_id) VALUES (?, ?, ?)";
+          db.query(sql2, [coName, parseFloat(coAverage), userCourseId], (error, results1) => {
+            if (error) {
+              console.log(error);
+              return res.status(500).json({ error: error.message });
+            }
+            console.log(`Inserted new attainment for ${coName}`);
+          });
+        }
+      });
+    }
+
+    console.log('CO averages inserted/updated successfully');
+    res.status(200).json({ message: 'CO averages inserted/updated successfully' });
+  } catch (error) {
+    console.error('Error inserting/updating CO averages:', error);
+    res.status(500).json({ error: 'Error inserting/updating CO averages' });
+  }
+};
+
+
+
+
