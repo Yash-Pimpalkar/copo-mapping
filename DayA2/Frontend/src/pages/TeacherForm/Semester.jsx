@@ -109,6 +109,7 @@ const Semester = ({ uid }) => {
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
+  let t ;
 
   // const handleFileDownload = () => {
   //   const worksheet = XLSX.utils.json_to_sheet(SemData);
@@ -469,6 +470,7 @@ const Semester = ({ uid }) => {
         <h1 className="text-lg font-semibold mb-4">
           Total Students Passed Each Question
         </h1>
+      
         <div className="mb-4">
           <label
             htmlFor="total-student-passed"
@@ -489,6 +491,7 @@ const Semester = ({ uid }) => {
   <h1 className="text-lg font-semibold mb-4">
     Student Statistics
   </h1>
+  <h1> {attainmentData.passedPercentage} % of Max Marks: {(maxLimit)} =  {  t=((maxLimit * attainmentData.passedPercentage) / 100) }   </h1>
   <table className="min-w-full divide-y divide-gray-200">
   <thead className="bg-blue-500 text-white">
     <tr>
@@ -504,7 +507,7 @@ const Semester = ({ uid }) => {
         Students passed with {attainmentData.passedPercentage} %
       </td>
       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-        {SemData.filter((student) => student.marks >= attainmentData.passedPercentage).length}
+        {SemData.filter((student) => student.marks >= ((maxLimit * attainmentData.passedPercentage) / 100)).length}
       </td>
     </tr>
     <tr className="bg-white">
@@ -520,28 +523,36 @@ const Semester = ({ uid }) => {
 </table>
 {userCourse.length > 0 && (
   <table className="min-w-full divide-y divide-gray-200">
-    <thead className="bg-blue-500 text-white">
-      <tr>
-        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">CO Name</th>
-        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Total Passed</th>
-        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Total Students</th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-gray-200 bg-white">
+  <thead className="bg-blue-500 text-white">
+    <tr>
+      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Details</th>
       {userCourse.map((course) => (
-        <tr key={course.idcos}>
-          {/* CO Name */}
-          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{course.co_name}</td>
-          {/* Total Passed */}
-          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-            {SemData.filter((student) => student.marks >= attainmentData.passedPercentage).length}
-          </td>
-          {/* Total Students */}
-          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{SemData.length}</td>
-        </tr>
+        <th key={course.idcos} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+          {course.co_name}
+        </th>
       ))}
-    </tbody>
-  </table>
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-200 bg-white">
+    <tr>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Total Passed</td>
+      {userCourse.map((course) => (
+        <td key={course.idcos} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+          {SemData.filter((student) => student.marks >= ( (maxLimit * attainmentData.passedPercentage) / 100)).length}
+        </td>
+      ))}
+    </tr>
+    <tr>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Total Students</td>
+      {userCourse.map((course) => (
+        <td key={course.idcos} className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+          {SemData.length}
+        </td>
+      ))}
+    </tr>
+  </tbody>
+</table>
+
 )}
 
 
