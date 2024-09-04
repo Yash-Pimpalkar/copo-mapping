@@ -372,7 +372,7 @@ const Semester = ({ uid }) => {
             </button>
           </div>
         </div>
-
+        {filteredData.length > 0 && (
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -393,7 +393,7 @@ const Semester = ({ uid }) => {
               </th>
             </tr>
           </thead>
-
+        
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredData.slice(startIndex, endIndex).map((student, index) => {
               const actualIndex = index + startIndex; // Adjust index to match actual data index
@@ -457,7 +457,9 @@ const Semester = ({ uid }) => {
               );
             })}
           </tbody>
+       
         </table>
+        )}
         {totalPages > 0 && (
           <Pagination
             currentPage={currentPage}
@@ -466,6 +468,7 @@ const Semester = ({ uid }) => {
           />
         )}
       </div>
+      {filteredData.length > 0 && (
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
         <h1 className="text-lg font-semibold mb-4">
           Total Students Passed Each Question
@@ -605,6 +608,7 @@ const Semester = ({ uid }) => {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 };
