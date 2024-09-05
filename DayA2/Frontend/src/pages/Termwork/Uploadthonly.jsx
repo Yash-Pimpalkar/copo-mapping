@@ -116,7 +116,7 @@ const Uploadthonly = ({ uid }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Upload IA1</h1>
+      <h1 className="text-2xl font-bold mb-4">Upload Theory</h1>
 
       <div className="mb-4">
         <label htmlFor="course-select" className="block text-sm font-medium text-gray-700">
