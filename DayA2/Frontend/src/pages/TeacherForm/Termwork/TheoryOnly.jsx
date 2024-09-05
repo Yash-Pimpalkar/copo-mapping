@@ -134,8 +134,8 @@ const TheoryOnly = ({ user_courseid }) => {
     };
 
     return (
-        <div className="overflow-x-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
+        <div className="p-6 bg-gray-100 min-h-screen">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold my-6">
                 Theory Only
             </h1>
             <div className='container mx-auto bg-white shadow-lg rounded-lg p-6'>

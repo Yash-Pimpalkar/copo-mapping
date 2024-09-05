@@ -16,11 +16,22 @@ const TheoryAssg = ({ user_courseid }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [COsData, setCOsData] = useState([]);
-    const questionColumns = getQuestionColumns();
 
     const [attainmentData, setAttainmentData] = useState({
         passedPercentage: 50,
     });
+
+    // Get unique question columns from COsData
+    const getQuestionColumns = () => {
+        return COsData.map((data) => ({
+            id: data.idtable_ia,
+            qname: data.qname,
+            coname: data.coname,
+            marks: data.marks,
+        }));
+    };
+
+    const questionColumns = getQuestionColumns();
 
 
     //function to calculate no of student attempted the per question
@@ -200,16 +211,6 @@ const TheoryAssg = ({ user_courseid }) => {
         } finally {
             setLoading(false);
         }
-    };
-
-    // Get unique question columns from COsData
-    const getQuestionColumns = () => {
-        return COsData.map((data) => ({
-            id: data.idtable_ia,
-            qname: data.qname,
-            coname: data.coname,
-            marks: data.marks,
-        }));
     };
 
     // Handle file download

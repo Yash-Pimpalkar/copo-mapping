@@ -27,6 +27,12 @@ import Termwork from './pages/TeacherForm/Termwork';
 import NotFound from './component/PageNotfound/NotFound';
 import TheoryOnly from './pages/TeacherForm/Termwork/TheoryOnly';
 import TheoryAssg from './pages/TeacherForm/Termwork/theo+assign';
+import Uploadthassign from './pages/Termwork/Uploadth+assign';
+import Uploadpurepract from './pages/Termwork/Uploadpurepract';
+import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
+import Uploadprinternal from './pages/Termwork/Uploadprinternal';
+import Uploadpr10 from './pages/Termwork/Uploadpr10+10(mini)+5';
+import Uploadthonly from './pages/Termwork/Uploadthonly';
 
 function App() {
   const [token, setToken] = useState("");
@@ -80,6 +86,12 @@ function App() {
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
               <Route path='/theoryonly' element={<TheoryOnly uid={user_id}/>}/>
               <Route path='/theoryassg' element={<TheoryAssg uid={user_id}/>}/>
+              <Route path='/uploadtheoryassg' element={<Uploadthassign uid={user_id}/>}/>
+              <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
+              <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
+              <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>
+              <Route path='/uploadpr10' element={<Uploadpr10 uid={user_id}/>}/>
+              <Route path='/uploadthonly' element={<Uploadthonly uid={user_id}/>}/>
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>

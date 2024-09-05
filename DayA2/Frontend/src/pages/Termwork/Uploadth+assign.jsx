@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import LoadingButton from "../../component/Loading/Loading";
 
-const Uploadth+assign = ({ uid }) => {
+const Uploadthassign = ({ uid }) => {
   const [courses, setCourses] = useState([]);
   const [distinctCourses, setDistinctCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -240,4 +240,4 @@ const Uploadth+assign = ({ uid }) => {
   );
 };
 
-export default UploadIa1;
+export default Uploadthassign;

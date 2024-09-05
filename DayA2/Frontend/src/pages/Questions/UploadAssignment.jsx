@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
-import LoadingButton from "../../component/Loading/Loading";
 
-const UploadPrhavminipro = ({ uid }) => {
+const UploadAssignment = ({ uid }) => {
   const [courses, setCourses] = useState([]);
   const [distinctCourses, setDistinctCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -11,13 +10,10 @@ const UploadPrhavminipro = ({ uid }) => {
   const [formData, setFormData] = useState({});
   const [questions, setQuestions] = useState([]);
   const [userCourseId, setUserCourseId] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        setLoading(true);
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
@@ -30,8 +26,6 @@ const UploadPrhavminipro = ({ uid }) => {
         setDistinctCourses(distinct);
       } catch (error) {
         console.error('Error fetching course data:', error);
-      }finally{
-        setLoading(false);
       }
     };
 
@@ -92,6 +86,8 @@ const UploadPrhavminipro = ({ uid }) => {
       acc[key] = {
         qname: data.qname || '',
         coname: data.coname || '',
+        poname: data.poname || '',
+        psoname: data.psoname || '',
         marks: parseInt(data.marks, 10) || 0, // Convert marks to number
         usercourseid: userCourseId
       };
@@ -99,24 +95,18 @@ const UploadPrhavminipro = ({ uid }) => {
     }, {});
 
     try {
-      setLoading(true);
-      console.log(formattedData);
-      await api.post("/api/ia/create", {
-        formDataWithUserCourseId: formattedData,
-      });
-      alert("Data submitted successfully");
-      setError(null);
+      console.log(formattedData)
+      await api.post('/api/ia1/create', { formDataWithUserCourseId: formattedData });
+      alert('Data submitted successfully');
     } catch (error) {
       console.error('Error submitting data:', error);
-      setError(error.response?.data?.error || "Failed to submit data"); 
-    }finally{
-      setLoading(false);
+      alert('Failed to submit data');
     }
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Upload IA1</h1>
+      <h1 className="text-2xl font-bold mb-4">Upload Assignment</h1>
 
       <div className="mb-4">
         <label htmlFor="course-select" className="block text-sm font-medium text-gray-700">
@@ -185,12 +175,9 @@ const UploadPrhavminipro = ({ uid }) => {
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div className="col-span-1">
                     <label className="block text-sm font-medium text-gray-700 uppercase">Index</label>
-                    <input
-                      type="text"
-                      value={question.qid}
-                      readOnly
-                      className="mt-1 block w-full border border-gray-300 rounded-md bg-gray-100 text-gray-500"
-                    />
+                    <div className="mt-1 text-gray-500">
+                      {question.qid}
+                    </div>
                   </div>
                   <div className="col-span-1">
                     <label className="block text-sm font-medium text-gray-700 uppercase">Question Name</label>
@@ -223,11 +210,6 @@ const UploadPrhavminipro = ({ uid }) => {
               </div>
             ))}
           </div>
-          {error && (
-            <div className="mt-4 text-red-600 text-center font-medium">
-              {error}
-            </div>
-          )}
           <button
             type="submit"
             className="mt-4 py-2 px-4 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
@@ -240,4 +222,4 @@ const UploadPrhavminipro = ({ uid }) => {
   );
 };
 
-export default UploadPrhavminipro;
+export default UploadAssignment;
