@@ -70,19 +70,20 @@ const TheoryOnly = ({ user_courseid }) => {
     };
 
     const updateMarks = async (changes) => {
-        try {
-            setLoading(true);
-            const response = await api.put("/api/ia/", changes);
-            if (response.ok) {
-                console.log("Marks updated successfully");
-            } else {
-                console.error("Failed to update marks");
-            }
-        } catch (error) {
-            console.error("Error updating marks:", error);
-        } finally {
-            setLoading(false);
+      console.log(changes);
+      try {
+        setLoading(true);
+        const response = await api.put("/api/ia/", changes);
+        if (response.ok) {
+          console.log("Marks updated successfully");
+        } else {
+          console.error("Failed to update marks");
         }
+      } catch (error) {
+        console.error("Error updating marks:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     const renderRows = () => {
