@@ -148,12 +148,12 @@ export default function Navbar() {
   ];
    
   const TermworkNavigation = [
-    { name:"Upload Theory only", href:"", userType: [2]},
-    { name:"Upload Theory+Assignment", href:"", userType: [2]},
-    { name:"Upload Practical Internal", href:"", userType: [2]},
-    { name:"Upload Pract hav MiniPro", href:"", userType: [2]},
-    { name:"Upload Pure Practical", href:"", userType: [2]},
-    { name:"Upload Pracical 10+10(mini)+5", href:"", userType: [2]},
+    { name:"Upload Theory only", href:"uploadthonly", userType: [2]},
+    { name:"Upload Theory+Assignment", href:"uploadtheoryassg", userType: [2]},
+    { name:"Upload Practical Internal", href:"uploadprinternal", userType: [2]},
+    { name:"Upload Pract hav MiniPro", href:"uploadprhavminipro", userType: [2]},
+    { name:"Upload Pure Practical", href:"uploadpurepract", userType: [2]},
+    { name:"Upload Pracical 10+10(mini)+5", href:"uploadpr10", userType: [2]},
   ];
 
   return (
