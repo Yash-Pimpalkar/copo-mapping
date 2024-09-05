@@ -266,6 +266,73 @@ const Semester = ({ uid }) => {
     XLSX.writeFile(workbook, "semester_data.xlsx");
   };
 
+  const [message, setMessage] = useState("");
+  function calculateCoAverages(userCourse, SemData, maxLimit, attainmentData) {
+    return userCourse.map((course) => {
+      // Calculate percentage of students who passed for each CO
+      const studentsPassed = SemData.filter(
+        (student) =>
+          student.marks >= (maxLimit * attainmentData.passedPercentage) / 100
+      ).length;
+      
+      const totalStudents = SemData.length;
+      const attainment = totalStudents
+        ? ((studentsPassed / totalStudents) * 100).toFixed(2)
+        : 0;
+  
+      return { coName: course.co_name, coAverage: attainment };
+    });
+  }
+
+  const handle_Attainment = (userCourse, SemData, maxLimit, attainmentData, userCourseId) => {
+    if (userCourseId) {
+      // Calculate CO averages
+      const coAverages = calculateCoAverages(userCourse, SemData, maxLimit, attainmentData);
+      console.log(coAverages);
+  
+      // Map over coAverages and calculate attainment for each CO
+      const coAveragesWithAttainment = coAverages.map((co) => {
+        let attainment;
+        const average = parseFloat(co.coAverage); // Convert coAverage to float
+  
+        // Determine attainment based on coAverage
+        if (average <= 40) {
+          attainment = 0;
+        } else if (average > 40 && average <= 60) {
+          attainment = 1;
+        } else if (average > 60 && average <= 70) {
+          attainment = 2;
+        } else {
+          attainment = 3;
+        }
+  
+        // Return the object with both coName, coAverage, and attainment
+        return {
+          coName: co.coName,
+          coAverage: co.coAverage,
+          attainment, // Include calculated attainment
+        };
+      });
+  
+      console.log(coAveragesWithAttainment); // Verify the structure
+  
+      // Post the data to the backend
+      api
+        .post("/api/sem/insert-co-averages", {
+          coAverages: coAveragesWithAttainment,
+          userCourseId,
+        })
+        .then((response) => {
+          setMessage(response.data.message);
+          console.log("Data inserted successfully:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error inserting data:", error);
+          setMessage("Error inserting data");
+        });
+    }
+  };
+  
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -470,9 +537,25 @@ const Semester = ({ uid }) => {
       </div>
       {filteredData.length > 0 && (
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <h1 className="text-lg font-semibold mb-4">
-          Total Students Passed Each Question
-        </h1>
+       <div className="flex justify-between items-center mb-4">
+    <h1 className="text-lg font-semibold">
+      Total Students Passed Each Question
+    </h1>
+    <button
+      onClick={() =>
+        handle_Attainment(
+          userCourse,
+          SemData,
+          maxLimit,
+          attainmentData,
+          userCourseId
+        )
+      }
+      className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+    >
+      Update Attainment
+    </button>
+  </div>
 
         <div className="mb-4">
           <label
@@ -489,11 +572,16 @@ const Semester = ({ uid }) => {
             className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          {message && (
+                <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
+                  {message}
+                </div>
+              )}
         </div>
         <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
           <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
           <h1>
-            {" "}
+
             {attainmentData.passedPercentage} % of Max Marks: {maxLimit} ={" "}
             {(t = (maxLimit * attainmentData.passedPercentage) / 100)}{" "}
           </h1>

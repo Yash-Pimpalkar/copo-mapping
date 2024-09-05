@@ -157,3 +157,66 @@ export const limit =(req,res)=>{
     res.status(200).json(result)
   })
 }
+
+
+export const Semester_Attainment = async (req, res) => {
+  const { coAverages, userCourseId } = req.body;  // Now includes userCourseId
+
+  console.log(coAverages, userCourseId);
+
+  try {
+    for (const { coName, coAverage } of coAverages) {
+      const parsedCoAverage = parseFloat(coAverage);
+
+      // Determine attainment based on coAverage
+      let attainment;
+      if (parsedCoAverage <= 40) {
+        attainment = 0;
+      } else if (parsedCoAverage > 40 && parsedCoAverage <= 60) {
+        attainment = 1;
+      } else if (parsedCoAverage > 60 && parsedCoAverage <= 70) {
+        attainment = 2;
+      } else {
+        attainment = 3;
+      }
+
+      // Check if the coname and usercourse_id combination already exists
+      const sql = "SELECT idSemester_attainment FROM semester_attainment WHERE coname = ? AND usercourse_id = ?";
+      db.query(sql, [coName, userCourseId], (error, results) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).json({ error: error.message });
+        }
+
+        if (results.length > 0) {
+          // If exists, update both Semester_attainment and attainment
+          const sql1 = "UPDATE semester_attainment SET Semester_attainment = ?, attainment = ? WHERE idSemester_attainment = ?";
+          db.query(sql1, [parsedCoAverage, attainment, results[0].idSemester_attainment], (error, result) => {
+            if (error) {
+              console.log(error);
+              return res.status(500).json({ error: error.message });
+            }
+            console.log(`Updated Semester attainment and attainment for ${coName}`);
+          });
+        } else {
+          // If doesn't exist, insert a new record with coname, Semester_attainment, attainment, and usercourse_id
+          const sql2 = "INSERT INTO semester_attainment (coname, Semester_attainment, attainment, usercourse_id) VALUES (?, ?, ?, ?)";
+          db.query(sql2, [coName, parsedCoAverage, attainment, userCourseId], (error, results1) => {
+            if (error) {
+              console.log(error);
+              return res.status(500).json({ error: error.message });
+            }
+            console.log(`Inserted new Semester attainment and attainment for ${coName}`);
+          });
+        }
+      });
+    }
+
+    console.log('Semester attainment and attainment inserted/updated successfully');
+    res.status(200).json({ message: 'Semester attainment and attainment inserted/updated successfully' });
+  } catch (error) {
+    console.error('Error inserting/updating Semester attainment and attainment:', error);
+    res.status(500).json({ error: 'Error inserting/updating Semester attainment and attainment' });
+  }
+};
+
