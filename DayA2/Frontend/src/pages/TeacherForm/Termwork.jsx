@@ -1,146 +1,117 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import CourseSelector from "../../component/CourseSelector/CourseSelector";
 import api from "../../api";
-import LoadingButton from "../../component/Loading/Loading";
 
-const Termwork = () => {
-  const [selectedCheckbox, setSelectedCheckbox] = useState(null);
-  const [formData, setFormData] = useState({});
-  const [questions, setQuestions] = useState([]);
-  const [numQuestions, setNumQuestions] = useState(0);
-  const [courses, setCourses] = useState([]);
-  const [distinctCourses, setDistinctCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
+const Termwork = ({ uid }) => {
+  const [selectedCheckbox, setSelectedCheckbox] = useState(null); // to store the index of selected checkbox
   const [userCourseId, setUserCourseId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [checkboxLabels, setCheckboxLabels] = useState([]);
 
-  const handleCourseChange = (event) => {
-    const selectedCourse = event.target.value;
-    setSelectedCourse(selectedCourse);
-    setSelectedYear("");
-    setQuestions([]);
-    setFormData({});
-    setUserCourseId(
-      courses.find((course) => course.course_name === selectedCourse)
-        ?.usercourse_id || null
-    );
-  };
+  // Fetch termwork labels and selected tw_id once the userCourseId is selected
+  useEffect(() => {
+    if (userCourseId) {
+      const fetchTermworkLabels = async () => {
+        try {
+          const response = await api.get(`/api/termwork/checkboxlabels/${userCourseId}`);
+          const { labels, selectedTwid } = response.data;
+          
+          // Find the index of the selected checkbox based on selectedTwid
+          const selectedIndex = labels.findIndex(label => label.twid === selectedTwid);
+          setCheckboxLabels(labels);
+          setSelectedCheckbox(selectedIndex !== -1 ? selectedIndex : null); // Set to selected index or null if not found
+        } catch (error) {
+          console.error("Error fetching termwork labels:", error);
+        }
+      };
 
-  const handleYearChange = (event) => {
-    const selectedYear = event.target.value;
-    setSelectedYear(selectedYear);
-    setQuestions([]);
-    setFormData({});
-  };
-
-  const handleNumQuestionsChange = (event) => {
-    const num = Math.min(parseInt(event.target.value, 10) || 0, 10); // Limit to max 10 questions
-    setNumQuestions(num);
-    setQuestions(
-      Array.from({ length: num }, (_, index) => ({
-        qid: index + 1,
-        qname: "",
-        coname: "",
-        marks: 0,
-      }))
-    );
-  };
+      fetchTermworkLabels();
+    }
+  }, [userCourseId]);
 
   const handleCheckboxChange = (index) => {
-    setSelectedCheckbox(index); // Set the selected checkbox index
+    setSelectedCheckbox(index);
   };
 
-  const checkboxLabels = [
-    "Theory only",
-    "Theory + Assignment -Maths",
-    "PR Internal (TW ONLY)",
-    "Practical having Mini Project",
-    "Practical (10 + 10 + 5)",
-    "Practical (10 + 10 (Mini)+5)",
-  ];
+  const handleSubmit = async () => {
+    if (!userCourseId || selectedCheckbox === null) {
+      alert("Please select a course and a termwork option.");
+      return;
+    }
+
+    const selectedTermwork = checkboxLabels[selectedCheckbox];
+    try {
+      // Check if userCourseId exists in termwork_table
+      const response = await api.post("/api/termwork/submit", {
+        userCourseId,
+        tw_id: selectedTermwork.twid,
+      });
+
+      if (response.data.success) {
+        alert("Termwork saved successfully!");
+      } else if (response.data.updated) {
+        alert("Termwork updated successfully!");
+      } else {
+        alert("Failed to save or update termwork.");
+      }
+    } catch (error) {
+      console.error("Error submitting termwork:", error);
+      alert("Error submitting termwork.");
+    }
+  };
 
   return (
-    <>
-      <h1 className="pt-4 text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-r from-blue-50 to-blue-100 p-6">
+      {/* Heading */}
+      <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-8">
         Termwork
       </h1>
-      <div className="mb-4 px-4">
-        <label
-          htmlFor="course-select"
-          className="block text-sm font-medium text-gray-700 p-2"
-        >
-          Select a Course
-        </label>
-        <select
-          id="course-select"
-          className="block w-full p-8 py-3 px-4 border border-gray-300 bg-white text-black rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          value={selectedCourse}
-          onChange={handleCourseChange}
-        >
-          <option value="">Select a course</option>
-          {distinctCourses.map((course, index) => (
-            <option key={index} value={course.course_name}>
-              {course.course_name}
-            </option>
-          ))}
-        </select>
+
+      {/* Course Selector Card */}
+      <div className="w-full max-w-lg md:max-w-2xl lg:max-w-3xl mb-8">
+        <div className="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+          <CourseSelector uid={uid} onUserCourseIdChange={setUserCourseId} />
+        </div>
       </div>
 
-      {selectedCourse && (
-        <div className="mb-4 px-4">
-          <label
-            htmlFor="year-select"
-            className="block text-sm font-medium text-gray-700 p-2"
+      {/* Display checkbox labels only if userCourseId is selected and labels are available */}
+      {userCourseId && checkboxLabels.length > 0 && (
+        <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg md:max-w-2xl lg:max-w-3xl space-y-6 border border-gray-200">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            Select Termwork
+          </h2>
+          <div className="space-y-4">
+            {checkboxLabels.map((labelData, index) => (
+              <label
+                key={labelData.twid} // Using twid as key
+                className={`flex items-center p-3 rounded-lg cursor-pointer transition-all ${
+                  selectedCheckbox === index
+                    ? "bg-blue-100 border border-blue-500 shadow-sm"
+                    : "bg-gray-50 hover:bg-gray-100"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCheckbox === index}
+                  onChange={() => handleCheckboxChange(index)}
+                  className="form-checkbox h-5 w-5 text-blue-600 rounded-md border-gray-300 focus:ring-0"
+                />
+                <span className="ml-3 text-lg text-gray-800">
+                  {labelData.twbody} {/* Display the label from the database */}
+                </span>
+              </label>
+            ))}
+          </div>
+
+          {/* Submit button */}
+          <button
+            onClick={handleSubmit}
+            className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
-            Select Academic Year
-          </label>
-          <select
-            id="year-select"
-            className="block w-full p-8 py-3 px-4 border border-gray-300 bg-white text-black rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            value={selectedYear}
-            onChange={handleYearChange}
-          >
-            <option value="">Select an academic year</option>
-            {courses
-              .filter((course) => course.course_name === selectedCourse)
-              .map((course) => (
-                <option key={course.usercourse_id} value={course.academic_year}>
-                  {course.academic_year}
-                </option>
-              ))}
-          </select>
+            Submit
+          </button>
         </div>
       )}
-
-      {selectedCourse && selectedYear && (
-        <>
-          
-
-          <div className="flex items-center justify-center bg-gray-100 p-4 sm:p-6 lg:p-8">
-            <div className="bg-white p-6 rounded shadow-md w-full max-w-lg md:max-w-2xl lg:max-w-3xl">
-              <div className="flex flex-col space-y-4">
-                {checkboxLabels.map((label, index) => (
-                  <label key={index} className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedCheckbox === index} // Only one checkbox can be selected
-                      onChange={() => handleCheckboxChange(index)}
-                      className="form-checkbox h-5 w-5 accent-blue-600"
-                    />
-                    <span className="text-xl text-black-700">{label}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="z flex justify-center mt-4">
-                <button className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </>
+    </div>
   );
 };
 
