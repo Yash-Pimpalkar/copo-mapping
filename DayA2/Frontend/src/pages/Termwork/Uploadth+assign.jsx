@@ -1,242 +1,411 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../api';
+import React, { useState, useEffect } from "react";
+import api from "../../api";
 import LoadingButton from "../../component/Loading/Loading";
+import CourseSelector from "../../component/CourseSelector/CourseSelector";
 
 const Uploadthassign = ({ uid }) => {
-  const [courses, setCourses] = useState([]);
-  const [distinctCourses, setDistinctCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
-  const [numQuestions, setNumQuestions] = useState(0);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [termworkData, setTermworkData] = useState([]);
+  const [keysWithValueOne, setKeysWithValueOne] = useState([]);
   const [formData, setFormData] = useState({});
-  const [questions, setQuestions] = useState([]);
-  const [userCourseId, setUserCourseId] = useState(null);
+  const [numAssignments, setNumAssignments] = useState({});
+  const [numCOs, setNumCOs] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submittingKey, setSubmittingKey] = useState(null);
+  const [multipleCOs, setMultipleCOs] = useState({});
+
+  // Map of key names to human-readable form types
+  const formNames = {
+    exid: "Experiment",
+    assignid: "Assignment",
+    attid: "Attendance",
+    gd: "Group Discussion",
+    mini: "Mini Project",
+    major: "Major Project",
+    scpid: "Science Lab",
+  };
 
   useEffect(() => {
-    const fetchCourseData = async () => {
+    const fetchTermworkData = async () => {
+      if (!selectedCourseId) return;
+
       try {
         setLoading(true);
-        const res = await api.get(`/api/copo/${uid}`);
-        setCourses(res.data);
+        const res = await api.get(
+          `/api/termwork/gettermworkdata/${selectedCourseId}`
+        );
+        setTermworkData(res.data);
 
-        const distinct = Array.from(new Set(res.data.map(course => course.course_name)))
-          .map(course_name => ({
-            course_name,
-            academic_year: res.data.find(course => course.course_name === course_name).academic_year
-          }));
+        const newKeysWithValueOne = res.data.flatMap((item) =>
+          Object.entries(item)
+            .filter(([key, value]) => value === 1 && key !== "th_only_id")
+            .map(([key]) => key)
+        );
 
-        setDistinctCourses(distinct);
+        setKeysWithValueOne(newKeysWithValueOne);
       } catch (error) {
-        console.error('Error fetching course data:', error);
-      }finally{
+        console.error("Error fetching termwork data:", error);
+        setError("Failed to fetch termwork data.");
+      } finally {
         setLoading(false);
       }
     };
 
-    if (uid) {
-      fetchCourseData();
-    }
-  }, [uid]);
+    fetchTermworkData();
+  }, [selectedCourseId]);
 
-  const handleCourseChange = (event) => {
-    const selectedCourse = event.target.value;
-    setSelectedCourse(selectedCourse);
-    setSelectedYear('');
-    setQuestions([]);
-    setFormData({});
-    setUserCourseId(
-      courses.find(course => course.course_name === selectedCourse)?.usercourse_id || null
-    );
-  };
-
-  const handleYearChange = (event) => {
-    const selectedYear = event.target.value;
-    setSelectedYear(selectedYear);
-    setQuestions([]);
+  const handleCourseSelect = (usercourse_id) => {
+    setSelectedCourseId(usercourse_id);
+    setTermworkData([]);
+    setKeysWithValueOne([]);
     setFormData({});
   };
 
-  const handleNumQuestionsChange = (event) => {
-    const num = Math.min(parseInt(event.target.value, 10) || 0, 10); // Limit to max 10 questions
-    setNumQuestions(num);
-    setQuestions(Array.from({ length: num }, (_, index) => ({
-      qid: index + 1,
-      qname: '',
-      coname: '',
-      marks: 0
-    })));
-  };
-
-  const handleFormChange = (index, field, value) => {
-    setFormData(prev => ({
+  const handleNumAssignmentsChange = (key, value) => {
+    setNumAssignments((prev) => ({
       ...prev,
-      [index]: {
-        ...prev[index],
-        [field]: value.toUpperCase() // Convert input to uppercase
-      }
+      [key]: parseInt(value, 10) || 0,
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleFormChange = (key, index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [index]: {
+          ...(prev[key]?.[index] || {}),
+          [field]: value.toUpperCase(), // Convert to uppercase
+        },
+      },
+    }));
+  };
 
-    if (!userCourseId) {
-      alert('Please select a valid course and academic year.');
+  const handleMultipleCOChange = (key, value) => {
+    setMultipleCOs((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleNumCOsChange = (key, index, value) => {
+    setNumCOs((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [index]: parseInt(value, 10) || 0,
+      },
+    }));
+  };
+  const handleFormSubmit = async (key) => {
+    // Check if a course is selected
+    if (!selectedCourseId) {
+      alert("Please select a valid course and academic year.");
       return;
     }
-
-    // Format data
-    const formattedData = Object.entries(formData).reduce((acc, [key, data]) => {
-      acc[key] = {
-        qname: data.qname || '',
-        coname: data.coname || '',
-        marks: parseInt(data.marks, 10) || 0, // Convert marks to number
-        usercourseid: userCourseId
-      };
-      return acc;
-    }, {});
-
+  
+    // Find the relevant term work entry by key
+    const termworkEntry = termworkData.find((item) => item[key] === 1);
+    if (!termworkEntry) {
+      alert("No matching term work entry found.");
+      return;
+    }
+  
+    // Validate form data for this particular form
+    const formDataForKey = formData[key] || [];
+    const numAssignmentsForKey = numAssignments[key] || 0;
+    let isFormValid = true;
+  
+    // Check if all required fields are filled
+    if (!formDataForKey.maxMarks || numAssignmentsForKey <= 0) {
+      isFormValid = false;
+    } else {
+      for (let index = 0; index < numAssignmentsForKey; index++) {
+        const data = formDataForKey[index] || {};
+        
+        if (!data.assignname || (multipleCOs[key] === 'no' && !data.coName)) {
+          isFormValid = false;
+          break;
+        }
+  
+        if (multipleCOs[key] === 'yes') {
+          const numCOsForIndex = numCOs[key]?.[index] || 0;
+          for (let coIndex = 0; coIndex < numCOsForIndex; coIndex++) {
+            if (!data[`coName_${coIndex}`]) {
+              isFormValid = false;
+              break;
+            }
+          }
+        }
+      }
+    }
+  
+    if (!isFormValid) {
+      alert("Please fill in all required fields for this form before submitting.");
+      return;
+    }
+  
+    // Prepare data to submit
+    const dataToSubmit = {
+      usercourseid: selectedCourseId,
+      twid: termworkEntry.twid, // Include twid
+      twbody: termworkEntry.twbody, // Include twbody
+      maxMarks: formDataForKey.maxMarks,
+      numAssignments: numAssignmentsForKey,
+      multipleCOs: multipleCOs[key],
+      ...Object.entries(formDataForKey).reduce((acc, [index, data]) => ({
+        ...acc,
+        [`${formNames[key].toLowerCase()}_${index}`]: {
+          ...data,
+          coNames: multipleCOs[key] === 'yes' ? Object.keys(data).filter(key => key.startsWith('coName_')).map(key => data[key]) : undefined
+        },
+      }), {}),
+    };
+  
+    // Log the data array with the formNames key, twid, and twbody
+    console.log(`Data to be submitted for ${formNames[key]}:`, dataToSubmit);
+  
     try {
       setLoading(true);
-      console.log(formattedData);
-      await api.post("/api/ia/create", {
-        formDataWithUserCourseId: formattedData,
-      });
-      alert("Data submitted successfully");
+      setSubmittingKey(key);
+  
+      await api.post("/api/ia/create", dataToSubmit);
+  
+      alert("Data submitted successfully for " + formNames[key]);
       setError(null);
     } catch (error) {
-      console.error('Error submitting data:', error);
-      setError(error.response?.data?.error || "Failed to submit data"); 
-    }finally{
+      console.error("Error submitting data:", error);
+      setError(error.response?.data?.error || "Failed to submit data");
+    } finally {
       setLoading(false);
+      setSubmittingKey(null);
     }
+  };
+  
+
+  const handleMaxMarksChange = (key, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [field]: value.toUpperCase(), // Convert to uppercase
+      },
+    }));
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Upload IA1</h1>
-
-      <div className="mb-4">
-        <label htmlFor="course-select" className="block text-sm font-medium text-gray-700">
-          Select a Course
-        </label>
-        <select
-          id="course-select"
-          className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          value={selectedCourse}
-          onChange={handleCourseChange}
-        >
-          <option value="">Select a course</option>
-          {distinctCourses.map((course, index) => (
-            <option key={index} value={course.course_name}>
-              {course.course_name}
-            </option>
+    <h1 className="text-2xl font-bold mb-4">Upload Term Work</h1>
+  
+    <CourseSelector uid={uid} onUserCourseIdChange={handleCourseSelect} />
+  
+    {termworkData.length > 0 && (
+      <div className="mt-4">
+        <h2 className="text-xl font-semibold">Term Work Data:</h2>
+        <ul>
+          {termworkData.map((item) => (
+            <li key={item.twid} className="mt-2">
+              {item.twbody}
+            </li>
           ))}
-        </select>
+        </ul>
       </div>
-
-      {selectedCourse && (
-        <div className="mb-4">
-          <label htmlFor="year-select" className="block text-sm font-medium text-gray-700">
-            Select Academic Year
-          </label>
-          <select
-            id="year-select"
-            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            value={selectedYear}
-            onChange={handleYearChange}
-          >
-            <option value="">Select an academic year</option>
-            {courses
-              .filter(course => course.course_name === selectedCourse)
-              .map(course => (
-                <option key={course.usercourse_id} value={course.academic_year}>
-                  {course.academic_year}
-                </option>
-              ))}
-          </select>
-        </div>
-      )}
-
-      {selectedCourse && selectedYear && (
-        <div className="mb-4">
-          <label htmlFor="num-questions" className="block text-sm font-medium text-gray-700">
-            Number of Questions (Max 10)
-          </label>
-          <input
-            id="num-questions"
-            type="number"
-            value={numQuestions}
-            onChange={handleNumQuestionsChange}
-            min="0"
-            max="10"
-            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-      )}
-
-      {questions.length > 0 && (
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {questions.map((question, index) => (
-              <div key={question.qid} className="p-4 border rounded-md shadow-sm">
-                <div className="grid grid-cols-4 gap-4 mb-4">
-                  <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Index</label>
-                    <input
-                      type="text"
-                      value={question.qid}
-                      readOnly
-                      className="mt-1 block w-full border border-gray-300 rounded-md bg-gray-100 text-gray-500"
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Question/Tutorial Name</label>
-                    <input
-                      type="text"
-                      value={formData[index]?.qname || question.qname || ''}
-                      onChange={(e) => handleFormChange(index, 'qname', e.target.value)}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">CO Name</label>
-                    <input
-                      type="text"
-                      value={formData[index]?.coname || question.coname || ''}
-                      onChange={(e) => handleFormChange(index, 'coname', e.target.value)}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Max Marks</label>
-                    <input
-                      type="number"
-                      value={formData[index]?.marks || question.marks || ''}
-                      onChange={(e) => handleFormChange(index, 'marks', e.target.value)}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                    />
-                  </div>
-                </div>
+    )}
+  
+    {keysWithValueOne.length > 0 && (
+      <div className="mt-4">
+        {keysWithValueOne.map((key) => (
+          <div key={key} className="mb-4">
+            <h3 className="text-lg font-medium text-gray-800">
+              {formNames[key]} Form
+            </h3>
+  
+            <label
+              htmlFor={`num-assignments-${key}`}
+              className="block text-sm font-medium text-gray-700"
+            >
+              Number of {formNames[key]} (Max 10)
+            </label>
+            <input
+              id={`num-assignments-${key}`}
+              type="text"
+              value={numAssignments[key] || ""}
+              onChange={(e) =>
+                handleNumAssignmentsChange(key, e.target.value)
+              }
+              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              style={{ textTransform: "uppercase" }} // Apply uppercase transformation
+            />
+            <label
+              htmlFor={`max-marks-${key}`}
+              className="block text-sm font-medium text-gray-700 mt-4"
+            >
+              Max Marks for {formNames[key]}
+            </label>
+            <input
+              id={`max-marks-${key}`}
+              type="text"
+              value={formData[key]?.maxMarks || ""}
+              onChange={(e) =>
+                handleMaxMarksChange(key, "maxMarks", e.target.value)
+              }
+              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              style={{ textTransform: "uppercase" }} // Apply uppercase transformation
+            />
+  
+            <fieldset className="mt-4">
+              <legend className="block text-sm font-medium text-gray-700">
+                Is there multiple COs for each question?
+              </legend>
+              <div className="mt-2 space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name={`multipleCOs-${key}`}
+                    value="yes"
+                    checked={multipleCOs[key] === "yes"}
+                    onChange={(e) =>
+                      handleMultipleCOChange(key, e.target.value)
+                    }
+                    className="form-radio"
+                  />
+                  <span className="ml-2">Yes</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name={`multipleCOs-${key}`}
+                    value="no"
+                    checked={multipleCOs[key] === "no"}
+                    onChange={(e) =>
+                      handleMultipleCOChange(key, e.target.value)
+                    }
+                    className="form-radio"
+                  />
+                  <span className="ml-2">No</span>
+                </label>
               </div>
-            ))}
+            </fieldset>
+  
+            {/* Conditional Rendering of Assignment Section */}
+            {numAssignments[key] > 0 && formData[key]?.maxMarks ? (
+              <div className="mt-4 space-y-4">
+                {Array.from({ length: numAssignments[key] }).map((_, index) => (
+                  <div key={index} className="p-4 border rounded-md shadow-sm">
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="col-span-1">
+                        <label className="block text-sm text-center font-medium text-gray-700 uppercase">
+                          Index
+                        </label>
+                        <div className="text-center">{index + 1}</div>
+                      </div>
+                      <div className="col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 uppercase">
+                          {formNames[key]} Question Name
+                        </label>
+                        <input
+                              type="text"
+                              value={formData[key]?.[index]?.assignname || `${formNames[key]} ${index + 1}`}
+                              onChange={(e) =>
+                                handleFormChange(key, index, "assignname", e.target.value)
+                              }
+                              className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+                              style={{ textTransform: "uppercase" }} // Apply uppercase transformation
+                            />
+                      </div>
+                      {multipleCOs[key] === "yes" ? (
+                        <>
+                          <div className="col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 uppercase">
+                              How many COs for this question?
+                            </label>
+                            <input
+                              type="text"
+                              value={numCOs[key]?.[index] || ""}
+                              onChange={(e) =>
+                                handleNumCOsChange(
+                                  key,
+                                  index,
+                                  e.target.value
+                                )
+                              }
+                              className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+                              style={{ textTransform: "uppercase" }} // Apply uppercase transformation
+                            />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 uppercase">
+                              Enter the CO Names
+                            </label>
+                            <div className="grid grid-cols-3 gap-2 mt-1">
+                              {Array.from({
+                                length: numCOs[key]?.[index] || 1,
+                              }).map((_, coIndex) => (
+                                <input
+                                  key={coIndex}
+                                  type="text"
+                                  value={
+                                    formData[key]?.[index]?.[`coName_${coIndex}`] ||
+                                    ""
+                                  }
+                                  onChange={(e) =>
+                                    handleFormChange(
+                                      key,
+                                      index,
+                                      `coName_${coIndex}`,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="px-2 py-2  w-full border border-gray-300 rounded-md shadow-sm"
+                                  style={{ textTransform: "uppercase" }} // Apply uppercase transformation
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 uppercase">
+                            CO Name
+                          </label>
+                          <input
+                            type="text"
+                            value={formData[key]?.[index]?.coName || ""}
+                            onChange={(e) =>
+                              handleFormChange(
+                                key,
+                                index,
+                                "coName",
+                                e.target.value
+                              )
+                            }
+                            className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+                            style={{ textTransform: "uppercase" }} // Apply uppercase transformation
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+  
+            <button
+              onClick={() => handleFormSubmit(key)}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              disabled={loading || submittingKey === key}
+            >
+              {submittingKey === key ? <LoadingButton /> : "Submit"}
+            </button>
+  
+            {error && <p className="text-red-600">{error}</p>}
           </div>
-          {error && (
-            <div className="mt-4 text-red-600 text-center font-medium">
-              {error}
-            </div>
-          )}
-          <button
-            type="submit"
-            className="mt-4 py-2 px-4 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
-          >
-            Submit
-          </button>
-        </form>
-      )}
-    </div>
+        ))}
+      </div>
+    )}
+  </div>
+  
   );
 };
 

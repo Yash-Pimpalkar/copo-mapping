@@ -63,7 +63,45 @@ export const fetchTermworkLabels = (req, res) => {
       }
     });
   };
+
+
+
+  export const getTermworkData = (req, res) => {
+    const { usercourseid } = req.params;
+     console.log(usercourseid)
+    // Check if there's a TW ID in the termwork_table for the given usercourse_id
+    const sqlTermwork = 'SELECT tw_id FROM termwork_table WHERE usercourseid = ?';
+    db.query(sqlTermwork, [usercourseid], (error, termworkResult) => {
+      if (error) {
+        console.error('Error fetching termwork ID:', error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
   
+      // If no TW ID exists, return an error
+      console.log(termworkResult)
+      if (!termworkResult.length || !termworkResult[0].tw_id) {
+        return res.status(400).json({ error: "Term work not selected" });
+      }
+  
+      const twid = termworkResult[0].tw_id;
+      console.log(twid)
+      // Fetch the corresponding data from termworkbase_table using the twid
+      const sqlTermworkBase = 'SELECT * FROM termworkbase WHERE twid = ?';
+      db.query(sqlTermworkBase, twid, (error, termworkBaseResult) => {
+        if (error) {
+          console.error('Error fetching termwork base data:', error);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+  
+        if (!termworkBaseResult.length) {
+          return res.status(404).json({ error: "No termwork data found for the given TW ID" });
+        }
+     console.log(termworkBaseResult)
+        // Send the termwo rk base data to the frontend
+        res.status(200).json(termworkBaseResult);
+      });
+    });
+  };
   
 
   

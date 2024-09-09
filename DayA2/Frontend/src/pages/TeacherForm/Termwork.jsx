@@ -62,24 +62,24 @@ const Termwork = ({ uid }) => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-r from-blue-50 to-blue-100 p-6">
       {/* Heading */}
-      <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-8">
+      <h1 className="text-3xl md:text-4xl font-bold text-blue-800 mb-6">
         Termwork
       </h1>
 
       {/* Course Selector Card */}
-      <div className="w-full max-w-lg md:max-w-2xl lg:max-w-3xl mb-8">
-        <div className="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+      <div className="w-full max-w-lg md:max-w-2xl lg:max-w-3xl mb-6">
+        <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
           <CourseSelector uid={uid} onUserCourseIdChange={setUserCourseId} />
         </div>
       </div>
 
       {/* Display checkbox labels only if userCourseId is selected and labels are available */}
       {userCourseId && checkboxLabels.length > 0 && (
-        <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg md:max-w-2xl lg:max-w-3xl space-y-6 border border-gray-200">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+        <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-lg md:max-w-2xl lg:max-w-3xl space-y-4 border border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Select Termwork
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-2">
             {checkboxLabels.map((labelData, index) => (
               <label
                 key={labelData.twid} // Using twid as key
@@ -93,9 +93,9 @@ const Termwork = ({ uid }) => {
                   type="checkbox"
                   checked={selectedCheckbox === index}
                   onChange={() => handleCheckboxChange(index)}
-                  className="form-checkbox h-5 w-5 text-blue-600 rounded-md border-gray-300 focus:ring-0"
+                  className="form-checkbox h-4 w-4 text-blue-600 rounded-md border-gray-300 focus:ring-0"
                 />
-                <span className="ml-3 text-lg text-gray-800">
+                <span className="ml-2 text-sm text-gray-800">
                   {labelData.twbody} {/* Display the label from the database */}
                 </span>
               </label>
@@ -105,7 +105,7 @@ const Termwork = ({ uid }) => {
           {/* Submit button */}
           <button
             onClick={handleSubmit}
-            className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className="mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
             Submit
           </button>
