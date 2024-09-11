@@ -14,6 +14,8 @@ import copoRoute from "./routes/coporoutes.js"
 import IaRoute from "./routes/upload_ia1_routes.js"
 import SemRoute from "./routes/Upload_sem.js"
 import TermworkRoute from "./routes/termwork.js"
+import UploadTermworkRoute from "./routes/upload_TW.js"
+
 const port = 8081;
 
 app.use(cors())
@@ -31,6 +33,9 @@ app.use("/api/copo",copoRoute)
 app.use("/api/ia",IaRoute)
 app.use("/api/sem",SemRoute)
 app.use("/api/termwork",TermworkRoute)
+app.use("/api/tw/upload",UploadTermworkRoute);
+
+
 app.listen(port, () => {
     console.log("Server is Running on PORT :", port);
   });
