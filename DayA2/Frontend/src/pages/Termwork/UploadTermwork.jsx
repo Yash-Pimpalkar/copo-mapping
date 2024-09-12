@@ -21,7 +21,7 @@ const Uploadthassign = ({ uid }) => {
     assignid: "Assignment",
     attid: "Attendance",
     gd: "Group Discussion",
-    mini: "Mini Project",
+    mini_id: "Mini Project",
     major: "Major Project",
     scpid: "Science Lab",
   };

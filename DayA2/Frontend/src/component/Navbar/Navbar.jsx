@@ -130,9 +130,10 @@ export default function Navbar() {
     { name: "IA1", href: "/ia1", userTypes: [2] },
     { name: "IA2", href: "/ia2", userTypes: [2] },
     { name: "Semester", href: "/semester", userTypes: [2] },
-    { name: "Practical", href: "/practical", userTypes: [2] },
+    // { name: "Practical", href: "/practical", userTypes: [2] },
     { name: "Termwork", href: "/termwork", userTypes: [2] },
-    { name: "Assignment", href: "/assg", userTypes: [2] },
+    { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
+    // { name: "Assignment", href: "/assg", userTypes: [2] },
     { name: "copo", href: "/coposhow", userTypes: [2] },
   ];
 
