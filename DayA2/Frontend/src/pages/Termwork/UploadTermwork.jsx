@@ -22,10 +22,9 @@ const Uploadthassign = ({ uid }) => {
     attid: "Attendance",
     gd: "Group Discussion",
     mini_id: "Mini Project",
-    major: "Major Project",
-    scprid: "Science Lab",
-    ppt_id: "PPT",
-    report_id: "Report"
+    scprid: "SCILab / Mini Project",
+    ppt_id : "PPT" ,
+    report_id: "Report",
   };
 
   useEffect(() => {
@@ -120,7 +119,7 @@ const Uploadthassign = ({ uid }) => {
     const numAssignmentsForKey = numAssignments[key] || 0;
 
     // Validation logic for Attendance Form
-    if (key === "attid" || key === 'report_id' || key === 'ppt_id') {
+    if (key === "attid" || key === 'report_id' || key === 'ppt_id' || key === 'sciprid') {
       // Only validate maxMarks for Attendance
       if (!formDataForKey.maxMarks) {
         alert(`Please enter Max Marks for ${formNames[key]}`);
@@ -216,27 +215,27 @@ const Uploadthassign = ({ uid }) => {
         <div className="mt-4">
           {keysWithValueOne.map((key) => (
             <div key={key} className="mb-4">
-              {key === 'attid' || key === 'report_id' || key === 'ppt_id' ? (
-                <>
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {formNames[key]} Form
-                  </h3>
-                  <label
-                    htmlFor={`max-marks-${key}`}
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Max Marks for {formNames[key]}
-                  </label>
-                  <input
-                    id={`max-marks-${key}`}
-                    type="text"
-                    value={formData[key]?.maxMarks || ""}
-                    onChange={(e) =>
-                      handleMaxMarksChange(key, "maxMarks", e.target.value)
-                    }
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    style={{ textTransform: "uppercase" }}
-                  />
+              {key === 'attid' || key ==='scprid' ||key ==='ppt_id' || key ==='report_id' ? (
+          <>
+            <h3 className="text-lg font-medium text-gray-800">
+              {formNames[key]} Form
+            </h3>
+            <label
+              htmlFor={`max-marks-${key}`}
+              className="block text-sm font-medium text-gray-700"
+            >
+              Max Marks for {formNames[key]}
+            </label>
+            <input
+              id={`max-marks-${key}`}
+              type="text"
+              value={formData[key]?.maxMarks || ""}
+              onChange={(e) =>
+                handleMaxMarksChange(key, "maxMarks", e.target.value)
+              }
+              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              style={{ textTransform: "uppercase" }}
+            />
 
                   <button
                     onClick={() => handleFormSubmit(key)}
