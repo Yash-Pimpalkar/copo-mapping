@@ -712,7 +712,56 @@ export const upload_tw_questions = async (req, res) => {
     console.error(error);
     return res.status(500).json({ error: "An error occurred while checking usercourseid." });
   }
-} 
+}  else if (dataToSubmit.formDataForKey === "Attendance") {
+  const { usercourseid, maxMarks } = dataToSubmit;
+
+  try {
+    // 1. Check if `usercourseid` already exists in `upload_attendance`
+    const checkQuery = `SELECT * FROM upload_attendance WHERE usecourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res.status(400).json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    db.beginTransaction(async (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Error starting transaction" });
+      }
+
+      try {
+        // 2. Insert into `upload_attendance` table
+        const insertAttendanceQuery = `
+          INSERT INTO upload_attendance (usecourseid, maxmarks)
+          VALUES (?, ?)
+        `;
+        await db.promise().query(insertAttendanceQuery, [usercourseid, maxMarks]);
+
+        // Commit the transaction if the query was successful
+        db.commit((commitErr) => {
+          if (commitErr) {
+            db.rollback(() => {
+              return res.status(500).json({ error: "Error committing transaction" });
+            });
+          } else {
+            return res.status(200).json({ message: "Attendance data uploaded successfully!" });
+          }
+        });
+      } catch (error) {
+        // Rollback the transaction in case of an error
+        db.rollback(() => {
+          console.error(error);
+          return res.status(500).json({ error: "An error occurred during the upload process." });
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+  }
+}
   
   
   
