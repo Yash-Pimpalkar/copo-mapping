@@ -24,11 +24,9 @@ const Uploadthassign = ({ uid }) => {
     mini_id: "Mini Project",
     scprid: "SCILab / Mini Project",
     ppt_id : "PPT" ,
+    miniproid: "Mini Project",
     report_id: "Report",
-    logbookid: "Logbook",
-    review1id: "Review 1",
-    review2id: "Review 2",
-    proreportid: "Project Report",
+
   };
 
   useEffect(() => {
@@ -110,21 +108,91 @@ const Uploadthassign = ({ uid }) => {
       alert("Please select a valid course and academic year.");
       return;
     }
-
+  
     // Find the relevant term work entry by key
     const termworkEntry = termworkData.find((item) => item[key] === 1);
     if (!termworkEntry) {
       alert("No matching term work entry found.");
       return;
     }
-
+  
     // Prepare data to submit
-    const formDataForKey = formData[key] || [];
+    const formDataForKey = formData[key] || {};
     const numAssignmentsForKey = numAssignments[key] || 0;
-
-    // Validation logic for Attendance Form
-    if (key === "attid" || key === 'report_id' || key === 'ppt_id' || key === 'sciprid' || key === 'logbookid' || key === 'review1id' || key === 'review2id'|| key === 'proreportid') {
-      // Only validate maxMarks for Attendance
+  
+    // Custom validation for Mini Project (miniproid)
+    if (key === "miniproid") {
+      const { logbookMaxMarks, review1MaxMarks, review2MaxMarks, projectReportMaxMarks } = formDataForKey;
+  
+      if (!logbookMaxMarks || !review1MaxMarks || !review2MaxMarks || !projectReportMaxMarks) {
+        alert(`Please complete all required fields for the Mini Project:
+          - Logbook Max Marks
+          - Review 1 Max Marks
+          - Review 2 Max Marks
+          - Project Report Max Marks`);
+        return;
+      }
+  
+      // Prepare assignments and coNames for mini project
+      const assignments = Array.from({ length: numAssignmentsForKey }).map((_, index) => {
+        // Extract CO names for the assignment
+        const coNames = Array.from({ length: numCOs[key]?.[index] || 0 }).map((_, coIndex) => {
+          return (formDataForKey[`coName_${coIndex}`] || "").toUpperCase();
+        }).filter(Boolean); // Ensure empty CO names are removed
+      
+        // Return structured data for this assignment
+        return {
+          assignname: formDataForKey[`assignname_${index}`] || `Assignment ${index + 1}`,
+          coNames
+        };
+      });
+  
+      // Prepare CO names for the entire mini project
+      const coNames = Object.keys(formDataForKey)
+      .filter((key) => key.startsWith("coName_"))
+      .map((key) => formDataForKey[key].toUpperCase())
+      .filter(Boolean); 
+      // Construct data to submit for mini project
+      const dataToSubmit = {
+        usercourseid: selectedCourseId,
+        formDataForKey: formNames[key],
+        twid: termworkEntry.twid, // Include twid
+        twbody: termworkEntry.twbody, // Include twbody
+        logbookMaxMarks,
+        review1MaxMarks,
+        review2MaxMarks,
+        projectReportMaxMarks,
+        assignments,
+        coNames, // Include coNames array at the top-level for the mini project
+      };
+  
+      // Log the mini project data to console
+      console.log(`Data to be submitted for Mini Project:`, dataToSubmit);
+  
+      // Proceed to API call
+      try {
+        setLoading(true);
+        setSubmittingKey(key);
+  
+        // API call to submit data
+        await api.post("/api/tw/upload/", dataToSubmit);
+  
+        alert("Data submitted successfully for " + formNames[key]);
+        setError(null);
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        setError(error.response?.data?.error || "Failed to submit data");
+      } finally {
+        setLoading(false);
+        setSubmittingKey(null);
+      }
+  
+      return; // Exit early since mini project data is submitted
+    }
+  
+    // Validation logic for Attendance, Report, PPT, and SCILab forms
+    else if (key === "attid" || key === 'report_id' || key === 'ppt_id' || key === 'scprid') {
+      // Only validate maxMarks for these forms
       if (!formDataForKey.maxMarks) {
         alert(`Please enter Max Marks for ${formNames[key]}`);
         return;
@@ -136,7 +204,7 @@ const Uploadthassign = ({ uid }) => {
         return;
       }
     }
-
+  
     // Construct dataToSubmit for each question with coName arrays
     const dataToSubmit = {
       usercourseid: selectedCourseId,
@@ -148,32 +216,32 @@ const Uploadthassign = ({ uid }) => {
       questions: key !== "attid" ? Object.entries(formDataForKey).reduce((acc, [index, data]) => {
         // Collect valid coNames into the array for each question row
         const coNames = Object.keys(data)
-          .filter((key) => key.startsWith(`coName_`)) // Collect coName_X fields
+          .filter((key) => key.startsWith("coName_")) // Collect coName_X fields
           .map((key) => data[key]) // Map them to their values
           .filter((coName) => coName); // Only include valid coNames
-
+  
         // Only push the question row if it has valid coNames
         if (coNames.length > 0) {
           acc.push({
-            question: `${formNames[key].toUpperCase()} ${parseInt(index) + 1}`,// Question identifier
+            question: `${formNames[key].toUpperCase()} ${parseInt(index) + 1}`, // Question identifier
             coNames, // Array of coNames for this question
           });
         }
-
+  
         return acc;
       }, []) : undefined, // Skip questions for attendance
     };
-
+  
     // Log the cleaned-up data to console
     console.log(`Data to be submitted for ${formNames[key]}:`, dataToSubmit);
-
+  
     try {
       setLoading(true);
       setSubmittingKey(key);
-
+  
       // API call to submit data
       await api.post("/api/tw/upload/", dataToSubmit);
-
+  
       alert("Data submitted successfully for " + formNames[key]);
       setError(null);
     } catch (error) {
@@ -184,7 +252,34 @@ const Uploadthassign = ({ uid }) => {
       setSubmittingKey(null);
     }
   };
+  
+  
 
+  const handleInputChange = (form, field, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [form]: {
+        ...prevData[form],
+        [field]: value,
+      },
+    }));
+  };
+  const handleCOCountChange = (key, value) => {
+    setNumCOs(prevCOs => ({
+      ...prevCOs,
+      [key]: value
+    }));
+  };
+  
+  const handleCONameChange = (key, coIndex, value) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [key]: {
+        ...prevData[key],
+        [`coName_${coIndex}`]: value
+      }
+    }));
+  };
 
   const handleMaxMarksChange = (key, field, value) => {
     setFormData((prev) => ({
@@ -225,7 +320,8 @@ const Uploadthassign = ({ uid }) => {
                   {formNames[key]} Form
                 </h3>
     
-                {key === 'attid' || key === 'scprid' || key === 'ppt_id' || key === 'report_id' || key === 'logbookid' || key === 'review1id' || key === 'review2id' || key === 'proreportid' ? (
+                {key === 'attid' || key === 'scprid' || key === 'ppt_id' || key === 'report_id' 
+                ? (
                   <>
                     <label
                       htmlFor={`max-marks-${key}`}
@@ -249,6 +345,104 @@ const Uploadthassign = ({ uid }) => {
                       {submittingKey === key ? <LoadingButton /> : "Submit"}
                     </button>
                   </>
+                ) : key === 'miniproid'
+                ? (
+                  <>
+                  <label
+                    htmlFor="max-marks-logbook"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Max Marks for Logbook
+                  </label>
+                  <input
+                    id="max-marks-logbook"
+                    type="text"
+                    value={formData[key]?.logbookMaxMarks || ""}
+                    onChange={(e) => handleInputChange(key, "logbookMaxMarks", e.target.value)}
+                    className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm"
+                  />
+              
+                  <label
+                    htmlFor="max-marks-review1"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Max Marks for Review 1
+                  </label>
+                  <input
+                    id="max-marks-review1"
+                    type="text"
+                    value={formData[key]?.review1MaxMarks || ""}
+                    onChange={(e) => handleInputChange(key, "review1MaxMarks", e.target.value)}
+                    className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm"
+                  />
+              
+                  <label
+                    htmlFor="max-marks-review2"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Max Marks for Review 2
+                  </label>
+                  <input
+                    id="max-marks-review2"
+                    type="text"
+                    value={formData[key]?.review2MaxMarks || ""}
+                    onChange={(e) => handleInputChange(key, "review2MaxMarks", e.target.value)}
+                    className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm"
+                  />
+              
+                  <label
+                    htmlFor="max-marks-projectReport"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Max Marks for Project Report
+                  </label>
+                  <input
+                    id="max-marks-projectReport"
+                    type="text"
+                    value={formData[key]?.projectReportMaxMarks || ""}
+                    onChange={(e) => handleInputChange(key, "projectReportMaxMarks", e.target.value)}
+                    className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm"
+                  />
+              
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      How many COs for this question?
+                    </label>
+                    <input
+                      type="text"
+                      value={numCOs[key] || ""}
+                      onChange={(e) => handleCOCountChange(key, e.target.value)}
+                      className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm uppercase"
+                    />
+                  </div>
+              
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Enter the CO Names
+                    </label>
+                    {numCOs[key] > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-1">
+                        {Array.from({ length: parseInt(numCOs[key], 10) || 1 }).map((_, coIndex) => (
+                          <input
+                            key={coIndex}
+                            type="text"
+                            value={formData[key]?.[`coName_${coIndex}`] || ""}
+                            onChange={(e) => handleCONameChange(key, coIndex, e.target.value)}
+                            className="px-2 py-2 w-full border border-gray-300 rounded-md shadow-sm uppercase"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+              
+                  <button
+                    onClick={() => handleFormSubmit(key)}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 w-full"
+                    disabled={loading || submittingKey === key}
+                  >
+                    {submittingKey === key ? <LoadingButton /> : "Submit"}
+                  </button>
+                </>
                 ) : (
                   <>
                     <label
