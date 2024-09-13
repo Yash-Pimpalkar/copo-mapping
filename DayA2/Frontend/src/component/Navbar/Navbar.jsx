@@ -133,6 +133,7 @@ export default function Navbar() {
     // { name: "Practical", href: "/practical", userTypes: [2] },
     { name: "Termwork", href: "/termwork", userTypes: [2] },
     { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
+    { name: "Oral/Practical", href: "", userTypes:[2]},
     // { name: "Assignment", href: "/assg", userTypes: [2] },
     { name: "copo", href: "/coposhow", userTypes: [2] },
   ];

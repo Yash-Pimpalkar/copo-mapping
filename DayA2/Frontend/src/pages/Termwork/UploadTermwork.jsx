@@ -26,6 +26,8 @@ const Uploadthassign = ({ uid }) => {
     ppt_id : "PPT" ,
     miniproid: "Mini Project",
     report_id: "Report",
+    tradeid : "Trade",
+    journalid: "Journal",
 
   };
 
@@ -162,6 +164,7 @@ const Uploadthassign = ({ uid }) => {
         review1MaxMarks,
         review2MaxMarks,
         projectReportMaxMarks,
+        // journal,
         assignments,
         coNames, // Include coNames array at the top-level for the mini project
       };
@@ -443,6 +446,64 @@ const Uploadthassign = ({ uid }) => {
                     {submittingKey === key ? <LoadingButton /> : "Submit"}
                   </button>
                 </>
+
+
+                ) : key === 'journalid'
+                ? (
+                  <>
+                  <label
+                    htmlFor="max-marks-journal"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Max Marks for Journal 
+                  </label>
+                  <input
+                    id="max-marks-journal"
+                    type="number"
+                    value={formData[key]?.journal || ""}
+                    onChange={(e) => handleInputChange(key, "journal", e.target.value)}
+                    className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm"
+                  />
+                   <div>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      How many COs for this question?
+                    </label>
+                    <input
+                      type="text"
+                      value={numCOs[key] || ""}
+                      onChange={(e) => handleCOCountChange(key, e.target.value)}
+                      className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm uppercase"
+                    />
+                  </div>
+              
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Enter the CO Names
+                    </label>
+                    {numCOs[key] > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-1">
+                        {Array.from({ length: parseInt(numCOs[key], 10) || 1 }).map((_, coIndex) => (
+                          <input
+                            key={coIndex}
+                            type="text"
+                            value={formData[key]?.[`coName_${coIndex}`] || ""}
+                            onChange={(e) => handleCONameChange(key, coIndex, e.target.value)}
+                            className="px-2 py-2 w-full border border-gray-300 rounded-md shadow-sm uppercase"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleFormSubmit(key)}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 w-full"
+                    disabled={loading || submittingKey === key}
+                  >
+                    {submittingKey === key ? <LoadingButton /> : "Submit"}
+                  </button>
+                </>
+
+
                 ) : (
                   <>
                     <label
