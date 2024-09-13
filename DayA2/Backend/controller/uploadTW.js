@@ -396,7 +396,329 @@ export const upload_tw_questions = async (req, res) => {
       console.error(error);
       return res.status(500).json({ error: "An error occurred while checking usercourseid." });
     }
-  } else {
+
+  //logbook//
+  } else if (dataToSubmit.formDataForKey === "Logbook") {
+    try {
+      const { usercourseid, maxMarks, numlogbook, logbookDetails } = dataToSubmit;                             //dicey
+      // Assuming `logbookDetails` contains details similar to `questions` in the original code.
+
+      // 1. Check if `usercourseid` already exists in `upload_ppt`
+      const checkQuery = `SELECT * FROM upload_logbook WHERE usercourseid = ?`;
+      const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+      if (checkResult.length > 0) {
+        // If usercourseid exists, return an error message
+        return res.status(400).json({ error: "Data already exists for this usercourseid." });
+      }
+
+      // Begin a transaction
+      db.beginTransaction(async (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Error starting transaction" });
+        }
+
+        try {
+          // 2. Insert into `logbook` table
+          const insertlogbookQuery = `
+                  INSERT INTO logbook (usercourseid, maxmarks, nooflogbook)
+                  VALUES (?, ?, ?)
+                `;
+          const [logbookResult] = await db.promise().query(insertlogbookQuery, [usercourseid, maxMarks, numlogbook]);
+
+          // Retrieve the inserted `ppt_id`
+          const logbookid = logbookResult.insertId;
+
+          // 3. Insert each detail into `ppt_details` and get `ppt_idq`
+          for (let logbookDetail of logbookDetails) {
+            const { title, coNames } = logbookDetail;
+
+            // Insert into `ppt_details` with `ppt_id`
+            const insertlogbookDetailQuery = `
+                      INSERT INTO logbookdetails (logbooktitle, logbookid)
+                      VALUES (?, ?)
+                    `;
+            const [logbookDetailResult] = await db.promise().query(insertlogbookDetailQuery, [title, logbookid]);
+
+            // Retrieve the inserted `logbookidq`
+            const logbookidq = logbookDetailResult.insertId;
+
+            // 4. Insert each CO name into `co_ppt` for the corresponding `logbookidq`
+            for (let coName of coNames) {
+              const insertCologbookQuery = `
+                          INSERT INTO co_logbook (coname, co_id)
+                          VALUES (?, ?)
+                        `;
+              await db.promise().query(insertCologbookQuery, [coName, logbookidq]);
+            }
+          }
+
+          // Commit the transaction if all queries were successful
+          db.commit((commitErr) => {
+            if (commitErr) {
+              db.rollback(() => {
+                return res.status(500).json({ error: "Error committing transaction" });
+              });
+            } else {
+              return res.status(200).json({ message: "Logbook data uploaded successfully!" });
+            }
+          });
+        } catch (error) {
+          // Rollback the transaction in case of an error
+          db.rollback(() => {
+            console.error(error);
+            return res.status(500).json({ error: "An error occurred during the upload process." });
+          });
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+    }
+
+  //Review 1
+  } else if (dataToSubmit.formDataForKey === "Review 1") {
+  try {
+    const { usercourseid, maxMarks, numreview1, review1Details } = dataToSubmit;                             //dicey
+    // Assuming `reviewDetails` contains details similar to `questions` in the original code.
+
+    // 1. Check if `usercourseid` already exists in `upload_ppt`
+    const checkQuery = `SELECT * FROM review1 WHERE usercourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res.status(400).json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    db.beginTransaction(async (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Error starting transaction" });
+      }
+
+      try {
+        // 2. Insert into `logbook` table
+        const insertreview1Query = `
+                INSERT INTO review1 (usercourseid, maxmarks, noofreview1)
+                VALUES (?, ?, ?)
+              `;
+        const [review1Result] = await db.promise().query(insertreview1Query, [usercourseid, maxMarks, numreview1]);
+
+        // Retrieve the inserted `review1id`
+        const review1id = review1Result.insertId;
+
+        // 3. Insert each detail into `review1details` and get `review1idq`
+        for (let review1Detail of review1Details) {
+          const { title, coNames } = review1Detail;
+
+          // Insert into `review1details` with `review1id`
+          const insertreview1DetailQuery = `
+                    INSERT INTO review1details (review1title, review1id)
+                    VALUES (?, ?)
+                  `;
+          const [review1DetailResult] = await db.promise().query(insertreview1DetailQuery, [title, review1id]);
+
+          // Retrieve the inserted `review1idq`
+          const review1idq = review1DetailResult.insertId;
+
+          // 4. Insert each CO name into `co_review1` for the corresponding `review1idq`
+          for (let coName of coNames) {
+            const insertCoreview1Query = `
+                        INSERT INTO co_review1 (coname, co_id)
+                        VALUES (?, ?)
+                      `;
+            await db.promise().query(insertCoreview1Query, [coName, review1idq]);
+          }
+        }
+
+        // Commit the transaction if all queries were successful
+        db.commit((commitErr) => {
+          if (commitErr) {
+            db.rollback(() => {
+              return res.status(500).json({ error: "Error committing transaction" });
+            });
+          } else {
+            return res.status(200).json({ message: "Review1 data uploaded successfully!" });
+          }
+        });
+      } catch (error) {
+        // Rollback the transaction in case of an error
+        db.rollback(() => {
+          console.error(error);
+          return res.status(500).json({ error: "An error occurred during the upload process." });
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+  }
+
+//Review2
+} else if (dataToSubmit.formDataForKey === "Review 2") {
+  try {
+    const { usercourseid, maxMarks, numreview2, review2Details } = dataToSubmit;                             //dicey
+    // Assuming `review2Details` contains details similar to `questions` in the original code.
+
+    // 1. Check if `usercourseid` already exists in `upload_ppt`
+    const checkQuery = `SELECT * FROM review2 WHERE usercourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res.status(400).json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    db.beginTransaction(async (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Error starting transaction" });
+      }
+
+      try {
+        // 2. Insert into `Review 2` table
+        const insertreview2Query = `
+                INSERT INTO review2 (usercourseid, maxmarks, noofreview2)
+                VALUES (?, ?, ?)
+              `;
+        const [review2Result] = await db.promise().query(insertreview2Query, [usercourseid, maxMarks, numreview2]);
+
+        // Retrieve the inserted `review1id`
+        const review2id = review2Result.insertId;
+
+        // 3. Insert each detail into `review2details` and get `review2idq`
+        for (let review2Detail of review2Details) {
+          const { title, coNames } = review2Detail;
+
+          // Insert into `review2details` with `review2id`
+          const insertreview2DetailQuery = `
+                    INSERT INTO review2details (review2title, review2id)
+                    VALUES (?, ?)
+                  `;
+          const [review2DetailResult] = await db.promise().query(insertreview2DetailQuery, [title, review2id]);
+
+          // Retrieve the inserted `review2idq`
+          const review2idq = review2DetailResult.insertId;
+
+          // 4. Insert each CO name into `co_review2` for the corresponding `review2idq`
+          for (let coName of coNames) {
+            const insertCoreview2Query = `
+                        INSERT INTO co_review2 (coname, co_id)
+                        VALUES (?, ?)
+                      `;
+            await db.promise().query(insertCoreview2Query, [coName, review2idq]);
+          }
+        }
+
+        // Commit the transaction if all queries were successful
+        db.commit((commitErr) => {
+          if (commitErr) {
+            db.rollback(() => {
+              return res.status(500).json({ error: "Error committing transaction" });
+            });
+          } else {
+            return res.status(200).json({ message: "Review2 data uploaded successfully!" });
+          }
+        });
+      } catch (error) {
+        // Rollback the transaction in case of an error
+        db.rollback(() => {
+          console.error(error);
+          return res.status(500).json({ error: "An error occurred during the upload process." });
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+  }
+
+//Project Report 
+} else if (dataToSubmit.formDataForKey === "Project Report") {
+  try {
+    const { usercourseid, maxMarks, numproreport, proreportDetails } = dataToSubmit;                             //dicey
+    // Assuming `proreportDetails` contains details similar to `questions` in the original code.
+
+    // 1. Check if `usercourseid` already exists in `proreport`
+    const checkQuery = `SELECT * FROM proreport WHERE usercourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res.status(400).json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    db.beginTransaction(async (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Error starting transaction" });
+      }
+
+      try {
+        // 2. Insert into `proreport` table
+        const insertproreportQuery = `
+                INSERT INTO proreport (usercourseid, maxmarks, noofproreport)
+                VALUES (?, ?, ?)
+              `;
+        const [proreportResult] = await db.promise().query(insertproreportQuery, [usercourseid, maxMarks, numproreport]);
+
+        // Retrieve the inserted `proreport`
+        const proreportid = proreportResult.insertId;
+
+        // 3. Insert each detail into `proreportdetails` and get `proreportidq`
+        for (let proreportDetail of proreportDetails) {
+          const { title, coNames } = proreportDetail;
+
+          // Insert into `proreportdetails` with `proreportid`
+          const insertproreportDetailQuery = `
+                    INSERT INTO proreportdetails (proreporttitle, proreportid)
+                    VALUES (?, ?)
+                  `;
+          const [proreportDetailResult] = await db.promise().query(insertproreportDetailQuery, [title, proreportid]);
+
+          // Retrieve the inserted `proreportidq`
+          const proreportidq = proreportDetailResult.insertId;
+
+          // 4. Insert each CO name into `co_review2` for the corresponding `review2idq`
+          for (let coName of coNames) {
+            const insertCoproreportQuery = `
+                        INSERT INTO co_proreport (coname, co_id)
+                        VALUES (?, ?)
+                      `;
+            await db.promise().query(insertCoproreportQuery, [coName, proreportidq]);
+          }
+        }
+
+        // Commit the transaction if all queries were successful
+        db.commit((commitErr) => {
+          if (commitErr) {
+            db.rollback(() => {
+              return res.status(500).json({ error: "Error committing transaction" });
+            });
+          } else {
+            return res.status(200).json({ message: "Project Report data uploaded successfully!" });
+          }
+        });
+      } catch (error) {
+        // Rollback the transaction in case of an error
+        db.rollback(() => {
+          console.error(error);
+          return res.status(500).json({ error: "An error occurred during the upload process." });
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+  }
+} 
+  
+  
+  
+  
+  
+  else {
     return res.status(400).json({ error: "Invalid formDataForKey provided." });
   }
 };
