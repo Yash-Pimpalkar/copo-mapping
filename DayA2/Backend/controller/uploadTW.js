@@ -397,86 +397,6 @@ export const upload_tw_questions = async (req, res) => {
       return res.status(500).json({ error: "An error occurred while checking usercourseid." });
     }
 
-  //logbook//
-  // } else if (dataToSubmit.formDataForKey === "Logbook") {
-  //   try {
-  //     const { usercourseid, maxMarks, numlogbook, logbookDetails } = dataToSubmit;                             //dicey
-  //     // Assuming `logbookDetails` contains details similar to `questions` in the original code.
-
-  //     // 1. Check if `usercourseid` already exists in `upload_ppt`
-  //     const checkQuery = `SELECT * FROM upload_logbook WHERE usercourseid = ?`;
-  //     const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
-
-  //     if (checkResult.length > 0) {
-  //       // If usercourseid exists, return an error message
-  //       return res.status(400).json({ error: "Data already exists for this usercourseid." });
-  //     }
-
-  //     // Begin a transaction
-  //     db.beginTransaction(async (err) => {
-  //       if (err) {
-  //         return res.status(500).json({ error: "Error starting transaction" });
-  //       }
-
-  //       try {
-  //         // 2. Insert into `logbook` table
-  //         const insertlogbookQuery = `
-  //                 INSERT INTO logbook (usercourseid, maxmarks, nooflogbook)
-  //                 VALUES (?, ?, ?)
-  //               `;
-  //         const [logbookResult] = await db.promise().query(insertlogbookQuery, [usercourseid, maxMarks, numlogbook]);
-
-  //         // Retrieve the inserted `ppt_id`
-  //         const logbookid = logbookResult.insertId;
-
-  //         // 3. Insert each detail into `ppt_details` and get `ppt_idq`
-  //         for (let logbookDetail of logbookDetails) {
-  //           const { title, coNames } = logbookDetail;
-
-  //           // Insert into `ppt_details` with `ppt_id`
-  //           const insertlogbookDetailQuery = `
-  //                     INSERT INTO logbookdetails (logbooktitle, logbookid)
-  //                     VALUES (?, ?)
-  //                   `;
-  //           const [logbookDetailResult] = await db.promise().query(insertlogbookDetailQuery, [title, logbookid]);
-
-  //           // Retrieve the inserted `logbookidq`
-  //           const logbookidq = logbookDetailResult.insertId;
-
-  //           // 4. Insert each CO name into `co_ppt` for the corresponding `logbookidq`
-  //           for (let coName of coNames) {
-  //             const insertCologbookQuery = `
-  //                         INSERT INTO co_logbook (coname, co_id)
-  //                         VALUES (?, ?)
-  //                       `;
-  //             await db.promise().query(insertCologbookQuery, [coName, logbookidq]);
-  //           }
-  //         }
-
-  //         // Commit the transaction if all queries were successful
-  //         db.commit((commitErr) => {
-  //           if (commitErr) {
-  //             db.rollback(() => {
-  //               return res.status(500).json({ error: "Error committing transaction" });
-  //             });
-  //           } else {
-  //             return res.status(200).json({ message: "Logbook data uploaded successfully!" });
-  //           }
-  //         });
-  //       } catch (error) {
-  //         // Rollback the transaction in case of an error
-  //         db.rollback(() => {
-  //           console.error(error);
-  //           return res.status(500).json({ error: "An error occurred during the upload process." });
-  //         });
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error(error);
-  //     return res.status(500).json({ error: "An error occurred while checking usercourseid." });
-  //   }
-
- 
 }  else if (dataToSubmit.formDataForKey === "Attendance") {
   const { usercourseid, maxMarks } = dataToSubmit;
 
@@ -530,43 +450,53 @@ export const upload_tw_questions = async (req, res) => {
 //MiniProject 
 
 }else if (dataToSubmit.formDataForKey === "Mini Project") {
-  const { usercourseid, logbookmarks, review1marks, review2marks, proreportmarks } = dataToSubmit;
+  const { usercourseid, logbookMaxMarks, review1MaxMarks, review2MaxMarks, projectReportMaxMarks, coNames } = dataToSubmit;
+
+try {
+  // 1. Check if `usercourseid` already exists in `upload_miniproject`
+  const checkQuery = `SELECT * FROM upload_miniproject WHERE usercourseid = ?`;
+  const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+  if (checkResult.length > 0) {
+    return res.status(400).json({ error: "Data already exists for this usercourseid." });
+  }
+
+  // Begin a transaction
+  await db.promise().beginTransaction();
 
   try {
-    // 1. Check if `usercourseid` already exists in `upload_miniproject`
-    const checkQuery = `SELECT * FROM upload_miniproject WHERE usercourseid = ?`;
-    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+    // 2. Insert into `upload_miniproject`
+    const insertminiprojectQuery = `
+      INSERT INTO upload_miniproject (usercourseid, logbookmarks, review1marks, review2marks, proreportmarks)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    const [insertResult] = await db.promise().query(insertminiprojectQuery, [usercourseid,  logbookMaxMarks, review1MaxMarks, review2MaxMarks, projectReportMaxMarks]);
 
-    if (checkResult.length > 0) {
-      // If usercourseid exists, return an error message
-      return res.status(400).json({ error: "Data already exists for this usercourseid." });
+    // 3. Get the last inserted ID (`miniproid`)
+    const miniproid = insertResult.insertId;
+
+    // 4. Insert into `co_miniproject` for each CO name
+    const insertCOQuery = `INSERT INTO co_miniproject (coname, co_id) VALUES (?, ?)`;
+
+    for (const coname of coNames) {
+      await db.promise().query(insertCOQuery, [coname, miniproid]);
     }
 
-    // Begin a transaction using async/await
-    await db.promise().beginTransaction();
+    // Commit the transaction
+    await db.promise().commit();
 
-    try {
-      // 2. Insert into `upload_miniproject` table
-      const insertminiprojectQuery = `
-        INSERT INTO upload_miniproject (usercourseid, logbookmarks, review1marks, review2marks, proreportmarks)
-        VALUES (?, ?, ?, ?, ?)
-      `;
-      await db.promise().query(insertminiprojectQuery, [usercourseid, logbookmarks, review1marks, review2marks, proreportmarks]);
-
-      // Commit the transaction if the query was successful
-      await db.promise().commit();
-      return res.status(200).json({ message: "Mini Project data uploaded successfully!" });
-    } catch (error) {
-      // Rollback the transaction in case of an error
-      await db.promise().rollback();
-      console.error(error);
-      return res.status(500).json({ error: "An error occurred during the upload process." });
-    }
+    return res.status(200).json({ message: "Mini Project data and COs uploaded successfully!" });
   } catch (error) {
+    // Rollback the transaction if something goes wrong
+    await db.promise().rollback();
     console.error(error);
-    return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+    return res.status(500).json({ error: "An error occurred during the upload process." });
   }
-  
+} catch (error) {
+  console.error(error);
+  return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+}
+
   
 
   
