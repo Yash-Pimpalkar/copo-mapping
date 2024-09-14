@@ -29,7 +29,7 @@ CREATE TABLE `review2` (
   `miniprojectid` int DEFAULT NULL,
   PRIMARY KEY (`review2id`),
   KEY `sid_idx` (`sid`),
-  KEY `miniprojectd_idx` (`miniprojectid`),
+  KEY `miniprojectidd_idx` (`miniprojectid`),
   CONSTRAINT `miniprojectidd` FOREIGN KEY (`miniprojectid`) REFERENCES `upload_miniproject` (`miniproid`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `sidz` FOREIGN KEY (`sid`) REFERENCES `copo_students_details` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-14  1:23:22
+-- Dump completed on 2024-09-14 11:49:20

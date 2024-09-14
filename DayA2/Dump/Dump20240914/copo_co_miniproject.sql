@@ -23,13 +23,13 @@ DROP TABLE IF EXISTS `co_miniproject`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `co_miniproject` (
-  `idco_miniproject` int NOT NULL,
+  `idco_miniproject` int NOT NULL AUTO_INCREMENT,
   `coname` varchar(255) DEFAULT NULL,
   `co_id` int DEFAULT NULL,
   PRIMARY KEY (`idco_miniproject`),
   KEY `co_id_idx` (`co_id`),
   CONSTRAINT `co_id` FOREIGN KEY (`co_id`) REFERENCES `upload_miniproject` (`miniproid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,6 +38,7 @@ CREATE TABLE `co_miniproject` (
 
 LOCK TABLES `co_miniproject` WRITE;
 /*!40000 ALTER TABLE `co_miniproject` DISABLE KEYS */;
+INSERT INTO `co_miniproject` VALUES (1,'CO1',6),(2,'CO2',6);
 /*!40000 ALTER TABLE `co_miniproject` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-14  1:23:24
+-- Dump completed on 2024-09-14 11:49:23

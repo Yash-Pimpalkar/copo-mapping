@@ -38,7 +38,7 @@ CREATE TABLE `termwork_table` (
 
 LOCK TABLES `termwork_table` WRITE;
 /*!40000 ALTER TABLE `termwork_table` DISABLE KEYS */;
-INSERT INTO `termwork_table` VALUES (1,8,3),(2,4,2),(3,7,1),(4,4,7),(5,8,8);
+INSERT INTO `termwork_table` VALUES (1,4,3),(2,4,2),(3,7,1),(4,4,7),(5,4,8);
 /*!40000 ALTER TABLE `termwork_table` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-14  1:23:21
+-- Dump completed on 2024-09-14 11:49:22

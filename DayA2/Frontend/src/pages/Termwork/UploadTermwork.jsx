@@ -298,12 +298,12 @@ const Uploadthassign = ({ uid }) => {
       <div className="container mx-auto p-4 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6 text-center">Upload Term Work</h1>
     
-        <div className="mb-6">
+        <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200 mb-4">
           <CourseSelector uid={uid} onUserCourseIdChange={handleCourseSelect} />
         </div>
     
         {termworkData.length > 0 && (
-          <div className="bg-gray-100 p-4 rounded-md shadow-md mb-6">
+          <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200 mb-4">
             <h2 className="text-xl font-semibold mb-2">Term Work Data:</h2>
             <ul className="list-disc pl-5 space-y-2">
               {termworkData.map((item) => (

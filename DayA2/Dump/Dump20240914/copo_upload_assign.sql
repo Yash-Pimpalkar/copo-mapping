@@ -39,7 +39,7 @@ CREATE TABLE `upload_assign` (
 
 LOCK TABLES `upload_assign` WRITE;
 /*!40000 ALTER TABLE `upload_assign` DISABLE KEYS */;
-INSERT INTO `upload_assign` VALUES (2,3,4,20),(3,2,2,5),(4,7,2,10),(5,8,2,10);
+INSERT INTO `upload_assign` VALUES (2,3,4,20),(3,3,2,5),(4,3,2,10),(5,3,2,10);
 /*!40000 ALTER TABLE `upload_assign` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-14  1:23:22
+-- Dump completed on 2024-09-14 11:49:21

@@ -30,9 +30,9 @@ CREATE TABLE `upload_miniproject` (
   `review2marks` int DEFAULT NULL,
   `proreportmarks` int DEFAULT NULL,
   PRIMARY KEY (`miniproid`),
-  KEY `usercourseidk_idx` (`usercourseid`),
-  CONSTRAINT `usercourseidk` FOREIGN KEY (`usercourseid`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `usercourseidxxxxx_idx` (`usercourseid`),
+  CONSTRAINT `usercourseidxxxxx` FOREIGN KEY (`usercourseid`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `upload_miniproject` (
 
 LOCK TABLES `upload_miniproject` WRITE;
 /*!40000 ALTER TABLE `upload_miniproject` DISABLE KEYS */;
-INSERT INTO `upload_miniproject` VALUES (1,3,NULL,NULL,NULL,NULL),(2,7,NULL,NULL,NULL,NULL),(3,8,NULL,NULL,NULL,NULL);
+INSERT INTO `upload_miniproject` VALUES (6,3,15,15,15,15);
 /*!40000 ALTER TABLE `upload_miniproject` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-14  1:23:21
+-- Dump completed on 2024-09-14 11:49:21
