@@ -496,6 +496,142 @@ try {
   console.error(error);
   return res.status(500).json({ error: "An error occurred while checking usercourseid." });
 }
+
+//trade 
+} else if (dataToSubmit.formDataForKey === "Trade") {
+  const { usercourseid, maxMarks, numAssignments, questions, coNames } = dataToSubmit;
+
+  try {
+    // 1. Check if `usercourseid` already exists in `upload_trade`
+    const checkQuery = `SELECT * FROM upload_trade WHERE usercourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res
+        .status(400)
+        .json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    await db.promise().beginTransaction();
+
+    try {
+      // 2. Insert into `upload_trade` table
+      const insertTradeQuery = `
+        INSERT INTO upload_trade (usercourseid, nooftrade, marks)
+        VALUES (?, ?, ?)
+      `;
+      const [tradeResult] = await db.promise().query(insertTradeQuery, [usercourseid, numAssignments, maxMarks]);
+
+      // Retrieve the inserted `tradeid`
+      const tradeid = tradeResult.insertId;
+
+      // 3. Insert each question into `question_trade` and get `trade_idq`
+      for (let questionObj of questions) {
+        const { question, coNames } = questionObj;
+
+        // Insert into `question_trade` with `tradeid`
+        const insertQuestionQuery = `
+          INSERT INTO question_trade (tradename, tradeid)
+          VALUES (?, ?)
+        `;
+        const [questionResult] = await db.promise().query(insertQuestionQuery, [question, tradeid]);
+
+        // Retrieve the inserted `trade_idq`
+        const trade_idq = questionResult.insertId;
+
+        // 4. Insert each CO name into `co_trade` for the corresponding `trade_idq`
+        for (let coName of coNames) {
+          const insertCoTradeQuery = `
+            INSERT INTO co_trade (coname, co_id)
+            VALUES (?, ?)
+          `;
+          await db.promise().query(insertCoTradeQuery, [coName, trade_idq]);
+        }
+      }
+
+      // Commit the transaction if all queries were successful
+      await db.promise().commit();
+      return res
+        .status(200)
+        .json({ message: "Data uploaded successfully!" });
+    } catch (error) {
+      // Rollback the transaction in case of an error
+      await db.promise().rollback();
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "An error occurred during the upload process." });
+    }
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while checking usercourseid." });
+  }
+
+  //journal
+ } else if (dataToSubmit.formDataForKey === "Journal") {
+  const { usercourseid, marks, coNames } = dataToSubmit;
+
+  try {
+    // 1. Check if `usercourseid` already exists in `upload_journal`
+    const checkQuery = `SELECT * FROM upload_journal WHERE usercourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res
+        .status(400)
+        .json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    await db.promise().beginTransaction();
+
+    try {
+      // 2. Insert into `upload_journal` table
+      const insertJournalQuery = `
+        INSERT INTO upload_journal (usercourseid, maxmarks)
+        VALUES (?, ?)
+      `;
+      const [journalResult] = await db.promise().query(insertJournalQuery, [usercourseid, marks]);
+
+      // Retrieve the inserted `journalid`
+      const journalid = journalResult.insertId;
+
+      // 3. Insert each CO name into `co_journal` for the corresponding `journalid`
+      for (let coName of coNames) {
+        const insertCoJournalQuery = `
+          INSERT INTO co_journal (coname, co_id)
+          VALUES (?, ?)
+        `;
+        await db.promise().query(insertCoJournalQuery, [coName, journalid]);
+      }
+
+      // Commit the transaction if all queries were successful
+      await db.promise().commit();
+      return res
+        .status(200)
+        .json({ message: "Data uploaded successfully!" });
+
+    } catch (error) {
+      // Rollback the transaction in case of an error
+      await db.promise().rollback();
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "An error occurred during the upload process." });
+    }
+
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while checking usercourseid." });
+  }
+
   
  } else {
     return res.status(400).json({ error: "Invalid formDataForKey provided." });
