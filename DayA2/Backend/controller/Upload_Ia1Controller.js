@@ -77,7 +77,16 @@ FROM copo_students_details csd
 JOIN semester s ON csd.sid = s.sid
 JOIN user_course uc ON csd.branch = uc.branch AND s.sem = uc.semester
 JOIN semester_marks ia ON uc.usercourse_id = ia.usercourseid
-WHERE uc.usercourse_id IS NOT NULL`
+WHERE uc.usercourse_id IS NOT NULL
+
+INSERT INTO table_oral (sid, oralid)
+SELECT DISTINCT csd.sid, ia.oralid
+FROM copo_students_details csd
+JOIN semester s ON csd.sid = s.sid
+JOIN user_course uc ON csd.branch = uc.branch AND s.sem = uc.semester
+JOIN oral_marks ia ON uc.usercourse_id = ia.usercourseid
+WHERE uc.usercourse_id IS NOT NULL;
+`
 
 }
 

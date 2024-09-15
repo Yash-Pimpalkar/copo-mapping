@@ -133,7 +133,7 @@ export default function Navbar() {
     // { name: "Practical", href: "/practical", userTypes: [2] },
     { name: "Termwork", href: "/termwork", userTypes: [2] },
     { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
-    { name: "Oral/Practical", href: "", userTypes:[2]},
+    { name: "Oral/Practical", href: "/oralpractical", userTypes: [2] },
     // { name: "Assignment", href: "/assg", userTypes: [2] },
     { name: "copo", href: "/coposhow", userTypes: [2] },
   ];
@@ -147,11 +147,12 @@ export default function Navbar() {
     { name: "Upload Ia2", href: "/uploadia2", userType: [2] },
     { name: "Upload Sem", href: "/uploadsem", userType: [2] },
     { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
+    { name: "Upload Oral", href: "/uploadoral", userType: [2] },
   ];
    
   const TermworkNavigation = [
     // { name:"Upload Theory only", href:"uploadthonly", userType: [2]},
-    // { name:"Upload Theory+Assignment", href:"uploadtheoryassg", userType: [2]},
+    { name:"Upload Theory+Assignment", href:"/theoryassg", userType: [2]},
     // { name:"Upload Practical Internal", href:"uploadprinternal", userType: [2]},
     // { name:"Upload Pract hav MiniPro", href:"uploadprhavminipro", userType: [2]},
     // { name:"Upload Pure Practical", href:"uploadpurepract", userType: [2]},

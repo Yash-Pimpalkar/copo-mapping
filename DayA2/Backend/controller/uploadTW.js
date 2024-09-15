@@ -496,9 +496,6 @@ try {
   console.error(error);
   return res.status(500).json({ error: "An error occurred while checking usercourseid." });
 }
-
-  
-
   
  } else {
     return res.status(400).json({ error: "Invalid formDataForKey provided." });

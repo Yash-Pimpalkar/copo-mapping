@@ -148,6 +148,11 @@ const Uploadthassign = ({ uid }) => {
           coNames
         };
       });
+
+      const journal = formDataForKey.journal;                               //dicey
+      const trade = formDataForKey.trade;
+
+      
   
       // Prepare CO names for the entire mini project
       const coNames = Object.keys(formDataForKey)
@@ -164,7 +169,8 @@ const Uploadthassign = ({ uid }) => {
         review1MaxMarks,
         review2MaxMarks,
         projectReportMaxMarks,
-        // journal,
+        journal,
+        trade,
         assignments,
         coNames, // Include coNames array at the top-level for the mini project
       };
@@ -200,9 +206,11 @@ const Uploadthassign = ({ uid }) => {
         alert(`Please enter Max Marks for ${formNames[key]}`);
         return;
       }
+
+      
     } else {
       // Validation logic for other forms (non-attendance)
-      if (!formDataForKey.maxMarks || numAssignmentsForKey === 0) {
+      if (!formDataForKey.maxMarks ||  numAssignmentsForKey === 0  ) {
         alert(`Please complete all required fields for ${formNames[key]}`);
         return;
       }
@@ -469,7 +477,7 @@ const Uploadthassign = ({ uid }) => {
                       How many COs for this question?
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       value={numCOs[key] || ""}
                       onChange={(e) => handleCOCountChange(key, e.target.value)}
                       className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm uppercase"

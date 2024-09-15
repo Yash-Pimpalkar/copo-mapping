@@ -80,7 +80,7 @@ WHERE
 `;
     db.query(sql,userCourseId,(error,results)=>{
       if(error){
-        console.error('Error fetching IA data:', error);
+        console.error('Error fetching Semester data:', error);
         res.status(500).send('Server error');
       }
       res.status(200).json(results);
@@ -196,7 +196,7 @@ export const Semester_Attainment = async (req, res) => {
               console.log(error);
               return res.status(500).json({ error: error.message });
             }
-            console.log(`Updated Semester attainment and attainment for ${coName}`);
+            console.log(`Updated Semester Attainment and attainment for ${coName}`);
           });
         } else {
           // If doesn't exist, insert a new record with coname, Semester_attainment, attainment, and usercourse_id
