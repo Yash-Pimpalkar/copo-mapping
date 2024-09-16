@@ -149,8 +149,20 @@ const Uploadthassign = ({ uid }) => {
         };
       });
 
-      const journal = formDataForKey.journal;                               //dicey
+      const journal = formDataForKey.journal;   
       const trade = formDataForKey.trade;
+
+      // if(key === "journal"){
+      //   const {marks} = formDataForKey;
+
+      //   if(!marks){
+      //     alert('Please complete this field');
+      //     return;
+      //   }
+      //   const coNames = Array.from({ length: numCOs[key]?.[index] || 0 }).map((_, coIndex) => {
+      //     return (formDataForKey[`coName_${coIndex}`] || "").toUpperCase();
+      //   }).filter(Boolean); // Ensure empty CO names are removed
+      // }
 
       
   
@@ -207,15 +219,56 @@ const Uploadthassign = ({ uid }) => {
         return;
       }
 
-      
-    } else {
-      // Validation logic for other forms (non-attendance)
-      if (!formDataForKey.maxMarks ||  numAssignmentsForKey === 0  ) {
-        alert(`Please complete all required fields for ${formNames[key]}`);
-        return;
+       
+    } else if (key === "journalid") {
+      const { maxMarks } = formDataForKey;
+      if (!maxMarks) {
+      alert('Please complete the "Max Marks" field for Journal');
+      return;
       }
-    }
-  
+
+  // Validate CO Names
+  const coNames = Array.from({ length: numCOs[key] || 0 }).map((_, coIndex) => {
+    return (formDataForKey[`coName_${coIndex}`] || "").toUpperCase();
+  }).filter(Boolean);
+
+  if (coNames.length === 0) {
+    alert('Please complete the CO Names for the Journal');
+    return;
+  }
+
+  // Prepare data to submit for Journal
+  const dataToSubmit = {
+    usercourseid: selectedCourseId,
+    maxMarks,
+    coNames, // Include CO Names in the data
+    journalData: formDataForKey.journal,
+    formDataForKey: formNames[key] // You can structure this according to your backend needs
+  };
+
+  // Log the journal data to console
+  console.log("Data to be submitted for Journal:", dataToSubmit);
+
+  // API call to submit journal data
+  try {
+    setLoading(true);
+    setSubmittingKey(key);
+
+    await api.post("/api/tw/upload/", dataToSubmit);
+
+    alert("Journal data submitted successfully");
+    setError(null);
+  } catch (error) {
+    console.error("Error submitting journal data:", error);
+    setError(error.response?.data?.error || "Failed to submit journal data");
+  } finally {
+    setLoading(false);
+    setSubmittingKey(null);
+  }
+
+  return;
+} 
+
     // Construct dataToSubmit for each question with coName arrays
     const dataToSubmit = {
       usercourseid: selectedCourseId,
@@ -467,9 +520,9 @@ const Uploadthassign = ({ uid }) => {
                   </label>
                   <input
                     id="max-marks-journal"
-                    type="number"
-                    value={formData[key]?.journal || ""}
-                    onChange={(e) => handleInputChange(key, "journal", e.target.value)}
+                    type="text"
+                    value={formData[key]?.maxMarks || ""}
+                    onChange={(e) => handleInputChange(key, "maxMarks", e.target.value)}
                     className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm"
                   />
                    <div>
@@ -477,7 +530,7 @@ const Uploadthassign = ({ uid }) => {
                       How many COs for this question?
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       value={numCOs[key] || ""}
                       onChange={(e) => handleCOCountChange(key, e.target.value)}
                       className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm uppercase"

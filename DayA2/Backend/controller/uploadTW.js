@@ -74,7 +74,7 @@ import { connection as db } from "../config/dbConfig.js";
 export const upload_tw_questions = async (req, res) => {
   const dataToSubmit = req.body;
   console.log(dataToSubmit);
-
+  console.log(dataToSubmit.formDataForKey)
   if (dataToSubmit.formDataForKey === "Experiment") {
     const { usercourseid, maxMarks, numAssignments, questions } = dataToSubmit;
 
@@ -573,8 +573,8 @@ try {
 
   //journal
  } else if (dataToSubmit.formDataForKey === "Journal") {
-  const { usercourseid, marks, coNames } = dataToSubmit;
-
+  const { usercourseid, maxMarks, coNames } = dataToSubmit;
+  console.log(usercourseid,maxMarks,coNames)
   try {
     // 1. Check if `usercourseid` already exists in `upload_journal`
     const checkQuery = `SELECT * FROM upload_journal WHERE usercourseid = ?`;
@@ -596,7 +596,7 @@ try {
         INSERT INTO upload_journal (usercourseid, maxmarks)
         VALUES (?, ?)
       `;
-      const [journalResult] = await db.promise().query(insertJournalQuery, [usercourseid, marks]);
+      const [journalResult] = await db.promise().query(insertJournalQuery, [usercourseid, maxMarks]);
 
       // Retrieve the inserted `journalid`
       const journalid = journalResult.insertId;
