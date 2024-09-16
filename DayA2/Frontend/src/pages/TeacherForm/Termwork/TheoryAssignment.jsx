@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../../api';
-
+import LoadingButton from '../../../component/Loading/Loading';
 const TheoryAssignment = ({ userCourseId }) => {
   const [TwAssignMentData, setTwAssignmentData] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -54,7 +54,7 @@ const TheoryAssignment = ({ userCourseId }) => {
   };
 
   if (!TwAssignMentData || TwAssignMentData.length === 0) {
-    return <p>Loading...</p>; // Show loading or fallback content
+    return <LoadingButton /> // Show loading or fallback content
   }
 
   // Extract assignment keys dynamically from the first student object
