@@ -26,7 +26,7 @@ import AssignCourse from './component/Admin/UserSelection/AssignCourse';
 import Termwork from './pages/TeacherForm/Termwork';
 import NotFound from './component/PageNotfound/NotFound';
 import TheoryOnly from './pages/TeacherForm/Termwork/TheoryOnly';
-import TheoryAssignment from './pages/TeacherForm/Termwork/theo+assign';
+import TheoryAssignment from './pages/TeacherForm/Termwork/TheoryAssignment';
 import UploadTermwork from './pages/Termwork/UploadTermwork';
 import Oral from './pages/TeacherForm/Oral';
 import UploadOral from './pages/Questions/UploadOral';

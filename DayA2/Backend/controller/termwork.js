@@ -102,6 +102,77 @@ export const fetchTermworkLabels = (req, res) => {
       });
     });
   };
-  
 
+
+
+  
+  export const getTermworkAssignment = (req, res) => {
+    const { usercourseid } = req.params;
+    
+    const uc=parseInt(usercourseid);
+    // Execute the stored procedure
+    const sql = `CALL GetAssignmentMarks(?)`
+    db.query(sql, uc, (error, results) => {
+      if (error) {
+        console.error('Error executing the stored procedure:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+      // console.log(results)
+      // Handle the results of the stored procedure
+      res.status(200).json({
+        message: 'Assignment marks retrieved successfully',
+        data: results[1] // assuming the results are returned in the first index
+      });
+    });
+  };
+
+
+  export const getAssignmentsAndCOs = async (req, res) => {
+    const { usercourseid } = req.params;
+  
+    if (!usercourseid) {
+      return res.status(400).json({ error: 'usercourseid is required' });
+    }
+  
+    try {
+      const sql = `
+      SELECT
+    ua.usercourseid,
+    ua.maxmarks,
+    qa.assign_id AS assign_idq,
+    qa.assignment_name AS question_name,
+    GROUP_CONCAT(ca.coname ORDER BY ca.co_id) AS conames
+FROM
+    upload_assign ua
+JOIN
+    question_assignment qa ON ua.assignid = qa.assign_id
+LEFT JOIN
+    co_ass ca ON qa.assign_idq = ca.co_id
+WHERE
+    ua.usercourseid = ?
+GROUP BY
+    ua.usercourseid, ua.maxmarks, qa.assign_id, qa.assignment_name;
+
+      `;
+  
+      db.query(sql, [usercourseid], (error, results) => {
+        if (error) {
+          console.error('Error executing the query:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+  
+        // Format the results so that `conames` is split into an array (optional, depending on how you want the data)
+        const formattedResults = results.map(row => ({
+          ...row,
+          conames: row.conames ? row.conames.split(',') : []
+        }));
+          console.log(formattedResults)
+        res.status(200).json(formattedResults);
+      });
+    } catch (error) {
+      console.error('Error fetching assignments and COs:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
   
