@@ -31,6 +31,7 @@ import UploadTermwork from './pages/Termwork/UploadTermwork';
 import Oral from './pages/TeacherForm/Oral';
 import UploadOral from './pages/Questions/UploadOral';
 import PraticalOral from './pages/TeacherForm/PraticalOral';
+import TermworkTable from "./pages/TeacherForm/Termwork/TermworkTable"
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
 // import Uploadprinternal from './pages/Termwork/Uploadprinternal';
@@ -88,7 +89,7 @@ function App() {
               <Route path='/uploadsem' element={<UploadSem  uid={user_id}/>} />
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
               <Route path='/theoryonly' element={<TheoryOnly uid={user_id}/>}/>
-              <Route path='/theoryassg' element={<TheoryAssignment uid={user_id}/>}/>
+              <Route path='/theoryassg' element={<TermworkTable uid={user_id}/>}/>
               <Route path='/uploadtermwork' element={<UploadTermwork uid={user_id}/>}/>
               <Route path='/uploadoral' element={<UploadOral uid={user_id}/>}/>
               <Route path='/oralpractical' element={<PraticalOral uid={user_id}/>}/>
