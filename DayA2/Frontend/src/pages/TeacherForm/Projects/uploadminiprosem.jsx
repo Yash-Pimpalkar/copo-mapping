@@ -122,7 +122,7 @@ const UploadMiniproSem = ({ uid }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Upload Miniproject</h1>
+      <h1 className="text-2xl font-bold mb-4">Upload Mini Project</h1>
 
       {/* Select Course */}
       <div className="mb-4">
@@ -269,13 +269,12 @@ const UploadMiniproSem = ({ uid }) => {
             </div>
           )}
 
-          <LoadingButton
+            <button
             type="submit"
-            loading={loading}
-            className="mt-4 py-2 px-4 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700"
+            className="mt-4 py-2 px-4 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
           >
             Submit
-          </LoadingButton>
+          </button>
         </form>
       )}
     </div>
