@@ -136,37 +136,49 @@ export const fetchTermworkLabels = (req, res) => {
   
     try {
       const sql = `
-      SELECT
-    ua.usercourseid,
-    ua.maxmarks,
-    qa.assign_id AS assign_idq,
-    qa.assignment_name AS question_name,
-    GROUP_CONCAT(ca.coname ORDER BY ca.co_id) AS conames
-FROM
-    upload_assign ua
-JOIN
-    question_assignment qa ON ua.assignid = qa.assign_id
-LEFT JOIN
-    co_ass ca ON qa.assign_idq = ca.co_id
-WHERE
-    ua.usercourseid = ?
-GROUP BY
-    ua.usercourseid, ua.maxmarks, qa.assign_id, qa.assignment_name;
-
+        SELECT
+          ua.usercourseid,
+          ua.maxmarks,
+          qa.assign_id AS assign_id,
+          qa.assignment_name AS question_name,
+          qa.assign_idq AS question_id,   -- Ensure this is 'question_id'
+          GROUP_CONCAT(ca.coname ORDER BY ca.co_id) AS conames
+        FROM
+          upload_assign ua
+        JOIN
+          question_assignment qa ON ua.assignid = qa.assign_id
+        LEFT JOIN
+          co_ass ca ON qa.assign_idq = ca.co_id
+        WHERE
+          ua.usercourseid = ?
+        GROUP BY
+          ua.usercourseid, ua.maxmarks, qa.assign_id, qa.assign_idq, qa.assignment_name;
       `;
   
+      // Execute the query
       db.query(sql, [usercourseid], (error, results) => {
         if (error) {
           console.error('Error executing the query:', error);
           return res.status(500).json({ error: 'Internal server error' });
         }
   
-        // Format the results so that `conames` is split into an array (optional, depending on how you want the data)
+        // Log the raw results to ensure the query works correctly
+        console.log('Raw results from SQL query:', results);
+  
+        // Format the results, making sure to map 'assign_idq' to 'question_id'
         const formattedResults = results.map(row => ({
-          ...row,
+          usercourseid: row.usercourseid,
+          maxmarks: row.maxmarks,
+          assign_id: row.assign_id,
+          question_name: row.question_name,
+          question_id: row.question_id,  // Make sure this is being mapped correctly
           conames: row.conames ? row.conames.split(',') : []
         }));
-          console.log(formattedResults)
+  
+        // Log the formatted results to verify the transformation
+        console.log('Formatted results:', formattedResults);
+  
+        // Return the formatted results as JSON
         res.status(200).json(formattedResults);
       });
     } catch (error) {
@@ -174,5 +186,56 @@ GROUP BY
       res.status(500).json({ error: 'Internal server error' });
     }
   };
-  
-  
+
+
+// assuming you have a database config file for MySQL
+
+// Update Assignments
+export const updateAssignments = async (req, res) => {
+  const { sid, assignments } = req.body;
+  console.log(sid, assignments);
+
+  if (!sid || !assignments || !Array.isArray(assignments)) {
+    return res.status(400).json({ message: 'Invalid input data' });
+  }
+
+  try {
+    let completedUpdates = 0; // Counter for completed updates
+    const totalAssignments = assignments.length; // Total number of assignments to update
+
+    // Loop through each assignment and update the database
+    for (const assignment of assignments) {
+      const { question_id, value } = assignment;
+
+      if (!question_id || value == null) {
+        return res.status(400).json({ message: 'Invalid assignment data' });
+      }
+
+      // Query to update the specific record based on assignid (question_id) and sid
+      const updateQuery = `
+        UPDATE mainassign 
+        SET marks = ? 
+        WHERE assignid = ? 
+          AND sid = ?
+      `;
+
+      // Execute the update query
+      db.query(updateQuery, [value, question_id, sid], (error, results) => {
+        if (error) {
+          console.error('Error executing the query:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        completedUpdates++; // Increment the completed updates count
+
+        // Once all updates are complete, send the response
+        if (completedUpdates === totalAssignments) {
+          res.status(200).json({ message: 'Assignments updated successfully' });
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error updating assignments:', error);
+    return res.status(500).json({ message: 'An error occurred while updating assignments' });
+  }
+};
