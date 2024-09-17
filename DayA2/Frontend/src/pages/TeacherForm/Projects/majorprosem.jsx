@@ -5,6 +5,6 @@ import React, { useEffect, useState } from "react";
 // import LoadingButton from "../../../component/Loading/Loading";
 
 const MajorproSem = ({ uid }) => {
-
+    
 };
 export default MajorproSem;
