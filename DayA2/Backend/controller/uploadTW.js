@@ -167,6 +167,102 @@ export const upload_tw_questions = async (req, res) => {
         .status(500)
         .json({ error: "An error occurred while checking usercourseid." });
     }
+
+  // MiniProject for 10 + 10(mini) +5
+  }else if (dataToSubmit.formDataForKey === "MiniProject") {
+    const { usercourseid, maxMarks, numAssignments, questions } = dataToSubmit;
+
+    try {
+      // 1. Check if `usercourseid` already exists in `upload_exp`
+      const checkQuery = `SELECT * FROM upload_minipro WHERE usercourseid = ?`;
+      const [checkResult] = await db
+        .promise()
+        .query(checkQuery, [usercourseid]);
+
+      if (checkResult.length > 0) {
+        // If usercourseid exists, return an error message
+        return res
+          .status(400)
+          .json({ error: "Data already exists for this usercourseid." });
+      }
+
+      // Begin a transaction
+      db.beginTransaction(async (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Error starting transaction" });
+        }
+
+        try {
+          // 2. Insert into `upload_minipro` table
+          const insertminiProQuery = `
+            INSERT INTO upload_minipro (usercourseid, noofminipro, maxmarks)
+            VALUES (?, ?, ?)
+          `;
+          const [miniProResult] = await db
+            .promise()
+            .query(insertminiProQuery, [usercourseid, numAssignments, maxMarks]);
+
+          // Retrieve the inserted `miniproid`
+          const miniProid = miniProResult.insertId;
+
+          // 3. Insert each question into `questions_minipro` and get `minipro_id`
+          for (let questionObj of questions) {
+            const { question, coNames } = questionObj;
+
+            // Insert into `question_exp` with `expid`
+            const insertQuestionQuery = `
+              INSERT INTO questions_minipro (miniproname, minipro_id)
+              VALUES (?, ?)
+            `;
+            const [questionResult] = await db
+              .promise()
+              .query(insertQuestionQuery, [question, miniProid]);
+
+            // Retrieve the inserted `exp_idq`
+            const miniPro_idq = questionResult.insertId;
+
+            // 4. Insert each CO name into `co_exp` for the corresponding `exp_idq`
+            for (let coName of coNames) {
+              const insertCominiProQuery = `
+                INSERT INTO co_minipro (coname, co_id)
+                VALUES (?, ?)
+              `;
+              await db.promise().query(insertCominiProQuery, [coName, miniPro_idq]);
+            }
+          }
+
+          // Commit the transaction if all queries were successful
+          db.commit((commitErr) => {
+            if (commitErr) {
+              db.rollback(() => {
+                return res
+                  .status(500)
+                  .json({ error: "Error committing transaction" });
+              });
+            } else {
+              return res
+                .status(200)
+                .json({ message: "Data uploaded successfully!" });
+            }
+          });
+        } catch (error) {
+          // Rollback the transaction in case of an error
+          db.rollback(() => {
+            console.error(error);
+            return res
+              .status(500)
+              .json({ error: "An error occurred during the upload process." });
+          });
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while checking usercourseid." });
+    }
+
+
   } else if (dataToSubmit.formDataForKey === "Assignment") {
     try {
       const { usercourseid, maxMarks, numAssignments, questions } = dataToSubmit;
@@ -447,7 +543,58 @@ export const upload_tw_questions = async (req, res) => {
     return res.status(500).json({ error: "An error occurred while checking usercourseid." });
   }
 
-//MiniProject 
+//scilab
+}else if (dataToSubmit.formDataForKey === "SCILab / Mini Project") {
+  const { usercourseid, maxMarks } = dataToSubmit;
+
+  try {
+    // 1. Check if `usercourseid` already exists in `upload_attendance`
+    const checkQuery = `SELECT * FROM uploadscilabpract WHERE usercourseid = ?`;
+    const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
+
+    if (checkResult.length > 0) {
+      // If usercourseid exists, return an error message
+      return res.status(400).json({ error: "Data already exists for this usercourseid." });
+    }
+
+    // Begin a transaction
+    db.beginTransaction(async (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Error starting transaction" });
+      }
+
+      try {
+        // 2. Insert into `upload_attendance` table
+        const insertAttendanceQuery = `
+          INSERT INTO uploadscilabpract (usercourseid, maxmarks)
+          VALUES (?, ?)
+        `;
+        await db.promise().query(insertAttendanceQuery, [usercourseid, maxMarks]);
+
+        // Commit the transaction if the query was successful
+        db.commit((commitErr) => {
+          if (commitErr) {
+            db.rollback(() => {
+              return res.status(500).json({ error: "Error committing transaction" });
+            });
+          } else {
+            return res.status(200).json({ message: "Scilab/Mini roject data uploaded successfully!" });
+          }
+        });
+      } catch (error) {
+        // Rollback the transaction in case of an error
+        db.rollback(() => {
+          console.error(error);
+          return res.status(500).json({ error: "An error occurred during the upload process." });
+        });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "An error occurred while checking usercourseid." });
+  }
+
+//MiniProject for subjects like rospl in IT
 
 }else if (dataToSubmit.formDataForKey === "Mini Project") {
   const { usercourseid, logbookMaxMarks, review1MaxMarks, review2MaxMarks, projectReportMaxMarks, coNames } = dataToSubmit;
