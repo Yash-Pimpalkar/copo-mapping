@@ -31,7 +31,13 @@ import UploadTermwork from './pages/Termwork/UploadTermwork';
 import Oral from './pages/TeacherForm/Oral';
 import UploadOral from './pages/Questions/UploadOral';
 import PraticalOral from './pages/TeacherForm/PraticalOral';
-import TermworkTable from "./pages/TeacherForm/Termwork/TermworkTable"
+import TermworkTable from "./pages/TeacherForm/Termwork/TermworkTable";
+import UploadMajorproSem from "./pages/TeacherForm/Projects/uploadmajorprosem";
+import UploadMiniproSem from "./pages/TeacherForm/Projects/uploadminiprosem";
+import MiniproSem from "./pages/TeacherForm/Projects/miniprosem";
+import MajorproSem from "./pages/TeacherForm/Projects/majorprosem"
+
+
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
 // import Uploadprinternal from './pages/Termwork/Uploadprinternal';
@@ -93,6 +99,10 @@ function App() {
               <Route path='/uploadtermwork' element={<UploadTermwork uid={user_id}/>}/>
               <Route path='/uploadoral' element={<UploadOral uid={user_id}/>}/>
               <Route path='/oralpractical' element={<PraticalOral uid={user_id}/>}/>
+              <Route path='/UploadMajorproSem' element={<UploadMajorproSem uid={user_id}/>}/>
+              <Route path='/Uploadminiprosem' element={<UploadMiniproSem uid={user_id}/>}/>
+              <Route path='/MiniproSem' element={<MiniproSem uid={user_id}/>}/>
+              <Route path='/MajorproSem' element={<MajorproSem uid={user_id}/>}/>
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>

@@ -167,7 +167,7 @@ const UploadIa2 = ({ uid }) => {
           </label>
           <input
             id="num-questions"
-            type="number"
+            type="text"
             value={numQuestions}
             onChange={handleNumQuestionsChange}
             min="0"

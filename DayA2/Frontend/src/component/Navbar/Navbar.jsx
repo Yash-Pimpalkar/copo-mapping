@@ -159,6 +159,13 @@ export default function Navbar() {
     // { name:"Upload Pracical 10+10(mini)+5", href:"uploadpr10", userType: [2]},
   ];
 
+  const ProjectNavigation = [
+    { name:"Upload Major Project", href:"/uploadmajorprosem ", userType: [2]},
+    { name:"Upload Mini Project", href:"/uploadminiprosem ", userType: [2]},
+    { name:"Major Project", href:"/majorprosem ", userType: [2]},
+    { name:"Mini Project", href:"/miniprosem ", userType: [2]},
+  ];
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -276,6 +283,29 @@ export default function Navbar() {
                           </MenuButton>
                           <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                             {TermworkNavigation.map((item) => (
+                              <MenuItem key={item.name}>
+                                {({ active }) => (
+                                  <NavLink
+                                    to={item.href}
+                                    className={classNames(
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
+                                    )}
+                                  >
+                                    {item.name}
+                                  </NavLink>
+                                )}
+                              </MenuItem>
+                            ))}
+                          </MenuItems>
+                        </Menu>
+
+                        <Menu as="div" className="relative">
+                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                            Projects
+                          </MenuButton>
+                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                            {ProjectNavigation.map((item) => (
                               <MenuItem key={item.name}>
                                 {({ active }) => (
                                   <NavLink

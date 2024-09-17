@@ -169,7 +169,7 @@ export const upload_tw_questions = async (req, res) => {
     }
 
   // MiniProject for 10 + 10(mini) +5
-  }else if (dataToSubmit.formDataForKey === "MiniProject") {
+  } else if (dataToSubmit.formDataForKey === "MiniProject") {
     const { usercourseid, maxMarks, numAssignments, questions } = dataToSubmit;
 
     try {
