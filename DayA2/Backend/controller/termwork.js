@@ -239,3 +239,4 @@ export const updateAssignments = async (req, res) => {
     return res.status(500).json({ message: 'An error occurred while updating assignments' });
   }
 };
+
