@@ -275,7 +275,7 @@ const UploadMiniproSem = ({ uid }) => {
                 key={index}
                 type="text"
                 value={coNames[index] || ''}
-                onChange={(e) => handleCONameChange(index, e.target.value)}
+                onChange={(e) => handleCONameChange(index, e.target.value.toUpperCase())}
                 className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none"
                 // placeholder={`CO ${index + 1} Name`}
                 required

@@ -4,80 +4,64 @@ import { connection as db } from "../config/dbConfig.js";
 export const upload_MiniProject_Questions = async (req, res) => {
   const { formDataWithUserCourseId, coData } = req.body;
 
-  console.log(formDataWithUserCourseId);
+  console.log("Received formDataWithUserCourseId:", formDataWithUserCourseId);
 
-  // Validate input
   if (!formDataWithUserCourseId || typeof formDataWithUserCourseId !== 'object') {
     return res.status(400).json({ error: 'Invalid form data' });
   }
 
-  // Validate CO data
   if (!coData || !Array.isArray(coData)) {
     return res.status(400).json({ error: 'Invalid CO data' });
   }
 
-  // Extract data and ensure it's in array format
-  const dataArray = Object.values(formDataWithUserCourseId);
-
-  // Check if dataArray is empty
-  if (dataArray.length === 0) {
-    return res.status(400).json({ error: 'No data to insert' });
-  }
-
-  const { usercourseid } = dataArray[0];
+  const { usercourseid, logbookmarks, review1marks, review2marks, proreportmarks } = formDataWithUserCourseId;
 
   try {
-    // Check if usercourseid already exists in the upload_miniprosem table
     const checkQuery = 'SELECT * FROM upload_miniprosem WHERE usercourseid = ?';
     db.query(checkQuery, [usercourseid], (error, results) => {
       if (error) {
-        console.error('Error checking existing usercourseid:', error);
+        console.error('Error checking existing usercourseid:', error.message);
         return res.status(500).json({ error: error.message });
       }
 
       if (results.length > 0) {
-        // If usercourseid already exists, return an error
         return res.status(400).json({ error: 'UserCourse ID already exists' });
-      } else {
-        // Insert into upload_miniprosem
-        const insertQuery = `
-          INSERT INTO upload_miniprosem (usercourseid, logbookmarks, review1marks, review2marks, proreportmarks) 
-          VALUES (?, ?, ?, ?, ?)
-        `;
+      }
 
-        const { logbookmarks, review1marks, review2marks, proreportmarks } = dataArray[0];
-        db.query(insertQuery, [usercourseid, logbookmarks, review1marks, review2marks, proreportmarks], (error, result) => {
+      const insertQuery = `
+        INSERT INTO upload_miniprosem (usercourseid, logbookmarks, review1marks, review2marks, proreportmarks) 
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      db.query(insertQuery, [usercourseid, parseInt(logbookmarks, 10), parseInt(review1marks, 10), parseInt(review2marks, 10), parseInt(proreportmarks, 10)], (error, result) => {
+        if (error) {
+          console.error('Error inserting data into upload_miniprosem:', error.message);
+          return res.status(500).json({ error: error.message });
+        }
+
+        const miniprosemid = result.insertId;
+
+        const coInsertQuery = `
+          INSERT INTO co_miniprosem (coname, co_id) 
+          VALUES ?
+        `;
+        const coValues = coData.map(co => [co.coname, miniprosemid]);
+
+        db.query(coInsertQuery, [coValues], (error, coResult) => {
           if (error) {
-            console.error('Error inserting data into upload_miniprosem:', error);
+            console.error('Error inserting data into co_miniprosem:', error.message);
             return res.status(500).json({ error: error.message });
           }
 
-          const miniprosemid = result.insertId; // Capture the auto-incremented miniprosemid
-
-          // Insert COs into co_miniprosem
-          const coInsertQuery = `
-            INSERT INTO co_miniprosem (coname, co_id) 
-            VALUES ?
-          `;
-
-          const coValues = coData.map(co => [co.coname, miniprosemid]);
-
-          db.query(coInsertQuery, [coValues], (error, coResult) => {
-            if (error) {
-              console.error('Error inserting data into co_miniprosem:', error);
-              return res.status(500).json({ error: error.message });
-            }
-
-            res.status(201).json({ message: 'Data submitted successfully' });
-          });
+          res.status(201).json({ message: 'Data submitted successfully' });
         });
-      }
+      });
     });
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('Unexpected error:', error.message);
     return res.status(500).json({ error: 'An unexpected error occurred' });
   }
 };
+
 
 
   

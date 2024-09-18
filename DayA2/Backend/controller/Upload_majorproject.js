@@ -1,62 +1,70 @@
 import { connection as db } from "../config/dbConfig.js";
 
+
 export const upload_MajorProject_Questions = async (req, res) => {
-  const { formDataWithUserCourseId } = req.body;
+  const { formDataWithUserCourseId, coData } = req.body;
 
-//   console.log('Received data:', formDataWithUserCourseId);
+  console.log("Received formDataWithUserCourseId:", formDataWithUserCourseId);
 
-  // Validate input
   if (!formDataWithUserCourseId || typeof formDataWithUserCourseId !== 'object') {
-    return res.status(400).json({ error: 'Invalid data' });
+    return res.status(400).json({ error: 'Invalid form data' });
   }
 
-
-  // Extract data and ensure it's in array format
-  const dataArray = Object.values(formDataWithUserCourseId);
-
-  console.log(dataArray.length)
-  // Check if dataArray is empty
-  if (dataArray.length == 0) {
-    return res.status(400).json({ error: 'No data to insert' });
+  if (!coData || !Array.isArray(coData)) {
+    return res.status(400).json({ error: 'Invalid CO data' });
   }
 
-  // Extract usercourseid from the first entry (assuming all entries have the same usercourseid)
-  const { usercourseid } = dataArray[0];
-//   console.log(usercourseid)
+  const { usercourseid, logbookmarks, review1marks, review2marks, proreportmarks } = formDataWithUserCourseId;
 
   try {
-    // Check if usercourseid already exists
     const checkQuery = 'SELECT * FROM upload_majorprosem WHERE usercourseid = ?';
     db.query(checkQuery, [usercourseid], (error, results) => {
       if (error) {
-        console.log('Error checking existing usercourseid:', error);
+        console.error('Error checking existing usercourseid:', error.message);
         return res.status(500).json({ error: error.message });
       }
 
       if (results.length > 0) {
-        // If usercourseid already exists, return an error
         return res.status(400).json({ error: 'UserCourse ID already exists' });
-      } else {
-        // Prepare the SQL query and values for batch insertion
-        const insertQuery = 'INSERT INTO semester_marks (co_count, usercourseid, max_marks) VALUES ?';
-        const values = dataArray.map(({ cocount, usercourseid, marks }) => [cocount, usercourseid, marks]);
+      }
 
-        // Perform the batch insert
-        db.query(insertQuery, [values], (error, result) => {
+      const insertQuery = `
+        INSERT INTO upload_majorprosem (usercourseid, logbookmarks, review1marks, review2marks, proreportmarks) 
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      db.query(insertQuery, [usercourseid, parseInt(logbookmarks, 10), parseInt(review1marks, 10), parseInt(review2marks, 10), parseInt(proreportmarks, 10)], (error, result) => {
+        if (error) {
+          console.error('Error inserting data into upload_majorprosem:', error.message);
+          return res.status(500).json({ error: error.message });
+        }
+
+        const majorprosemid = result.insertId;
+
+        const coInsertQuery = `
+          INSERT INTO co_majorprosem (coname, co_id) 
+          VALUES ?
+        `;
+        const coValues = coData.map(co => [co.coname, majorprosemid]);
+
+        db.query(coInsertQuery, [coValues], (error, coResult) => {
           if (error) {
-            console.error('Error inserting data:', error);
+            console.error('Error inserting data into co_majorprosem:', error.message);
             return res.status(500).json({ error: error.message });
           }
 
           res.status(201).json({ message: 'Data submitted successfully' });
         });
-      }
+      });
     });
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('Unexpected error:', error.message);
     return res.status(500).json({ error: 'An unexpected error occurred' });
   }
 };
+
+
+
+  
 
 
 export const showMajorProjectData = async (req, res) => {
