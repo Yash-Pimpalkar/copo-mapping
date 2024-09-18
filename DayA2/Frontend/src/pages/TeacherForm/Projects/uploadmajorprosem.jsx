@@ -109,7 +109,7 @@ const UploadMajorproSem = ({ uid }) => {
       };
 
       // Send the data to the API
-      await api.post("/api/majorproject/create", dataToSubmit);
+      await api.post("/api/uplaodmajorproject/create", dataToSubmit);
       alert('Data submitted successfully');
       setError(null);
     } catch (error) {

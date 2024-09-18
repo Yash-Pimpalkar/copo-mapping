@@ -1,35 +1,37 @@
 import { connection as db } from "../config/dbConfig.js";
 
-export const upload_MiniProject_Questions = async (req, res) => {
-  const { formDataWithUserCourseId } = req.body;
 
-//   console.log('Received data:', formDataWithUserCourseId);
+export const upload_MiniProject_Questions = async (req, res) => {
+  const { formDataWithUserCourseId, coData } = req.body;
+
+  console.log(formDataWithUserCourseId);
 
   // Validate input
   if (!formDataWithUserCourseId || typeof formDataWithUserCourseId !== 'object') {
-    return res.status(400).json({ error: 'Invalid data' });
+    return res.status(400).json({ error: 'Invalid form data' });
   }
 
+  // Validate CO data
+  if (!coData || !Array.isArray(coData)) {
+    return res.status(400).json({ error: 'Invalid CO data' });
+  }
 
   // Extract data and ensure it's in array format
   const dataArray = Object.values(formDataWithUserCourseId);
 
-  console.log(dataArray.length)
   // Check if dataArray is empty
-  if (dataArray.length == 0) {
+  if (dataArray.length === 0) {
     return res.status(400).json({ error: 'No data to insert' });
   }
 
-  // Extract usercourseid from the first entry (assuming all entries have the same usercourseid)
   const { usercourseid } = dataArray[0];
-//   console.log(usercourseid)
 
   try {
-    // Check if usercourseid already exists
-    const checkQuery = 'SELECT * FROM semester_marks WHERE usercourseid = ?';
+    // Check if usercourseid already exists in the upload_miniprosem table
+    const checkQuery = 'SELECT * FROM upload_miniprosem WHERE usercourseid = ?';
     db.query(checkQuery, [usercourseid], (error, results) => {
       if (error) {
-        console.log('Error checking existing usercourseid:', error);
+        console.error('Error checking existing usercourseid:', error);
         return res.status(500).json({ error: error.message });
       }
 
@@ -37,18 +39,37 @@ export const upload_MiniProject_Questions = async (req, res) => {
         // If usercourseid already exists, return an error
         return res.status(400).json({ error: 'UserCourse ID already exists' });
       } else {
-        // Prepare the SQL query and values for batch insertion
-        const insertQuery = 'INSERT INTO semester_marks (co_count, usercourseid, max_marks) VALUES ?';
-        const values = dataArray.map(({ cocount, usercourseid, marks }) => [cocount, usercourseid, marks]);
+        // Insert into upload_miniprosem
+        const insertQuery = `
+          INSERT INTO upload_miniprosem (usercourseid, logbookmarks, review1marks, review2marks, proreportmarks) 
+          VALUES (?, ?, ?, ?, ?)
+        `;
 
-        // Perform the batch insert
-        db.query(insertQuery, [values], (error, result) => {
+        const { logbookmarks, review1marks, review2marks, proreportmarks } = dataArray[0];
+        db.query(insertQuery, [usercourseid, logbookmarks, review1marks, review2marks, proreportmarks], (error, result) => {
           if (error) {
-            console.error('Error inserting data:', error);
+            console.error('Error inserting data into upload_miniprosem:', error);
             return res.status(500).json({ error: error.message });
           }
 
-          res.status(201).json({ message: 'Data submitted successfully' });
+          const miniprosemid = result.insertId; // Capture the auto-incremented miniprosemid
+
+          // Insert COs into co_miniprosem
+          const coInsertQuery = `
+            INSERT INTO co_miniprosem (coname, co_id) 
+            VALUES ?
+          `;
+
+          const coValues = coData.map(co => [co.coname, miniprosemid]);
+
+          db.query(coInsertQuery, [coValues], (error, coResult) => {
+            if (error) {
+              console.error('Error inserting data into co_miniprosem:', error);
+              return res.status(500).json({ error: error.message });
+            }
+
+            res.status(201).json({ message: 'Data submitted successfully' });
+          });
         });
       }
     });
@@ -57,6 +78,9 @@ export const upload_MiniProject_Questions = async (req, res) => {
     return res.status(500).json({ error: 'An unexpected error occurred' });
   }
 };
+
+
+  
 
 
 export const showMiniProjectData = async (req, res) => {

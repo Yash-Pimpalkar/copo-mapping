@@ -37,8 +37,8 @@ app.use("/api/sem",SemRoute)
 app.use("/api/termwork",TermworkRoute)
 app.use("/api/tw/upload",UploadTermworkRoute)
 app.use("/api/oral",UploadOralRoute)
-app.use("api/uploadmajorproject",UploadMajorProjectRoute)
-app.use("api/uploadminorproject",UploadMiniProjectRoute);
+app.use("/api/uploadmajorproject",UploadMajorProjectRoute)
+app.use("/api/uploadminiprosem",UploadMiniProjectRoute);
 
 
 

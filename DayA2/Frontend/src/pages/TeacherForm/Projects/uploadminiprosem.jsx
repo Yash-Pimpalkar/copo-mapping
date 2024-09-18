@@ -10,10 +10,10 @@ const UploadMiniproSem = ({ uid }) => {
   const [numCOs, setNumCOs] = useState(0);
   const [coNames, setCoNames] = useState([]);
   const [formData, setFormData] = useState({
-    logbookMarks: '',
-    review1Marks: '',
-    review2Marks: '',
-    projectReportMarks: '',
+    logbookmarks: '',
+    review1marks: '',
+    review2marks: '',
+    proreportmarks: '',
   });
   const [userCourseId, setUserCourseId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -85,10 +85,18 @@ const UploadMiniproSem = ({ uid }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const { logbookMarks, review1Marks, review2Marks, projectReportMarks } = formData;
+    const { logbookmarks, review1marks, review2marks, proreportmarks } = formData;
+    console.log("User Course ID:", userCourseId);
+    console.log("Selected Year:", selectedYear);
+    console.log("Logbook Marks:", logbookmarks);
+    console.log("Review 1 Marks:", review1marks);
+    console.log("Review 2 Marks:", review2marks);
+    console.log("Project Report Marks:", proreportmarks);
+    console.log("Number of COs:", numCOs);
+    console.log("CO Names:", coNames);
 
     // Check if all required fields are filled
-    if (!userCourseId || !selectedYear || !logbookMarks || !review1Marks || !review2Marks || !projectReportMarks || numCOs === 0 || coNames.some(co => !co)) {
+    if (!userCourseId || !selectedYear || !logbookmarks || !review1marks || !review2marks || !proreportmarks || numCOs === 0 || coNames.some(co => !co)) {
       alert('Please fill in all fields.');
       return;
     }
@@ -98,18 +106,31 @@ const UploadMiniproSem = ({ uid }) => {
 
       // Prepare data to submit
       const dataToSubmit = {
-        logbookMarks: parseInt(logbookMarks, 10),
-        review1Marks: parseInt(review1Marks, 10),
-        review2Marks: parseInt(review2Marks, 10),
-        projectReportMarks: parseInt(projectReportMarks, 10),
+        usercourseid: userCourseId,
+        logbookmarks: parseInt(logbookmarks, 10),
+        review1marks: parseInt(review1marks, 10),
+        review2marks: parseInt(review2marks, 10),
+        proreportmarks: parseInt(proreportmarks, 10),
         numCOs,
         coNames,
-        userCourseId: userCourseId,
-        academicYear: selectedYear,
+        // usercourseid: userCourseId,
+        // academicYear: selectedYear,
       };
 
+      // Prepare coData as an array of objects
+      const coData = coNames.map((name) => ({ coname: name }));
+
       // Send the data to the API
-      await api.post("/api/miniproject/create", dataToSubmit);
+      console.log(userCourseId)
+      console.log(logbookmarks)
+      console.log(review1marks)
+      console.log(review2marks)
+      console.log(proreportmarks)
+      console.log(coNames)
+      await api.post("/api/uploadminiprosem/create", 
+        { formDataWithUserCourseId: dataToSubmit, coData }
+      );
+      console.error('Error submitting data:', error);
       alert('Data submitted successfully');
       setError(null);
     } catch (error) {
@@ -172,14 +193,14 @@ const UploadMiniproSem = ({ uid }) => {
       {selectedCourse && selectedYear && (
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="logbookMarks" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="logbookmarks" className="block text-sm font-medium text-gray-700">
               Max Marks for Logbook
             </label>
             <input
-              id="logbookMarks"
-              name="logbookMarks"
+              id="logbookmarks"
+              name="logbookmarks"
               type="text"
-              value={formData.logbookMarks}
+              value={formData.logbookmarks}
               onChange={handleInputChange}
               className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none"
               required
@@ -187,14 +208,14 @@ const UploadMiniproSem = ({ uid }) => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="review1Marks" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="review1marks" className="block text-sm font-medium text-gray-700">
               Max Marks for Review 1
             </label>
             <input
-              id="review1Marks"
-              name="review1Marks"
+              id="review1marks"
+              name="review1marks"
               type="text"
-              value={formData.review1Marks}
+              value={formData.review1marks}
               onChange={handleInputChange}
               className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none"
               required
@@ -202,14 +223,14 @@ const UploadMiniproSem = ({ uid }) => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="review2Marks" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="review2marks" className="block text-sm font-medium text-gray-700">
               Max Marks for Review 2
             </label>
             <input
-              id="review2Marks"
-              name="review2Marks"
+              id="review2marks"
+              name="review2marks"
               type="text"
-              value={formData.review2Marks}
+              value={formData.review2marks}
               onChange={handleInputChange}
               className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none"
               required
@@ -217,14 +238,14 @@ const UploadMiniproSem = ({ uid }) => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="projectReportMarks" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="proreportmarks" className="block text-sm font-medium text-gray-700">
               Max Marks for Project Report
             </label>
             <input
-              id="projectReportMarks"
-              name="projectReportMarks"
+              id="proreportmarks"
+              name="proreportmarks"
               type="text"
-              value={formData.projectReportMarks}
+              value={formData.proreportmarks}
               onChange={handleInputChange}
               className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none"
               required

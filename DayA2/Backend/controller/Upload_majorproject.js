@@ -26,7 +26,7 @@ export const upload_MajorProject_Questions = async (req, res) => {
 
   try {
     // Check if usercourseid already exists
-    const checkQuery = 'SELECT * FROM semester_marks WHERE usercourseid = ?';
+    const checkQuery = 'SELECT * FROM upload_majorprosem WHERE usercourseid = ?';
     db.query(checkQuery, [usercourseid], (error, results) => {
       if (error) {
         console.log('Error checking existing usercourseid:', error);
