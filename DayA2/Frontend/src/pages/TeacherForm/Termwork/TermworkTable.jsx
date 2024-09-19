@@ -3,6 +3,7 @@ import CourseSelector from "../../../component/CourseSelector/CourseSelector";
 import api from "../../../api";
 import TheoryOnly from "./TheoryOnly";
 import TheoryAssignment from "./TheoryAssignment";
+import Experiment from "./Experiment";
 
 const TermworkTable = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
@@ -65,6 +66,12 @@ const TermworkTable = ({ uid }) => {
           ) : twdata[0].twid === 2 ? (
             <>{/* Render alternative content if needed */}
              <TheoryAssignment userCourseId={userCourseId} />
+   
+            
+            </>
+          ) : twdata[0].twid === 3 ? (
+            <>{/* Render alternative content if needed */}
+             <Experiment userCourseId={userCourseId}  />
    
             
             </>

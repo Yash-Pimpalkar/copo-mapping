@@ -36,6 +36,7 @@ import UploadMajorproSem from "./pages/TeacherForm/Projects/uploadmajorprosem";
 import UploadMiniproSem from "./pages/TeacherForm/Projects/uploadminiprosem";
 import MiniproSem from "./pages/TeacherForm/Projects/miniprosem";
 import MajorproSem from "./pages/TeacherForm/Projects/majorprosem"
+import Experiment from './pages/TeacherForm/Termwork/Experiment';
 
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
@@ -103,6 +104,7 @@ function App() {
               <Route path='/Uploadminiprosem' element={<UploadMiniproSem uid={user_id}/>}/>
               <Route path='/MiniproSem' element={<MiniproSem uid={user_id}/>}/>
               <Route path='/MajorproSem' element={<MajorproSem uid={user_id}/>}/>
+              <Route path='/Experiment' element={<Experiment uid={user_id}/>}/>
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>

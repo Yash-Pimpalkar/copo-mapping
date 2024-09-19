@@ -193,50 +193,156 @@ export const fetchTermworkLabels = (req, res) => {
 // Update Assignments
 export const updateAssignments = async (req, res) => {
   const { sid, assignments } = req.body;
-  console.log(sid, assignments);
 
-  if (!sid || !assignments || !Array.isArray(assignments)) {
+  // Check if the input is for a single student or multiple students
+  let studentAssignmentsData = [];
+
+  if (sid && Array.isArray(assignments)) {
+    // Single student case
+    studentAssignmentsData = [{ sid, assignments }];
+    console.log("Single student case:", JSON.stringify(studentAssignmentsData[0].assignments, null, 2));
+  } else if (Array.isArray(assignments) && assignments.length > 0 && assignments[0].sid) {
+    // Multiple students case
+    studentAssignmentsData = assignments;
+    console.log("Multiple students case:", JSON.stringify(studentAssignmentsData, null, 2));
+  } else {
     return res.status(400).json({ message: 'Invalid input data' });
   }
 
   try {
-    let completedUpdates = 0; // Counter for completed updates
-    const totalAssignments = assignments.length; // Total number of assignments to update
+    // Array to store promises for database queries
+    const updatePromises = [];
 
-    // Loop through each assignment and update the database
-    for (const assignment of assignments) {
-      const { question_id, value } = assignment;
+    // Loop through each student's assignment data
+    for (const studentData of studentAssignmentsData) {
+      const { sid, assignments: studentAssignments } = studentData;
 
-      if (!question_id || value == null) {
-        return res.status(400).json({ message: 'Invalid assignment data' });
+      // Validate student ID
+      if (!sid || typeof sid !== 'number') {
+        return res.status(400).json({ message: 'Invalid or missing student ID (sid)' });
       }
 
-      // Query to update the specific record based on assignid (question_id) and sid
-      const updateQuery = `
-        UPDATE mainassign 
-        SET marks = ? 
-        WHERE assignid = ? 
-          AND sid = ?
-      `;
+      // Loop through each assignment and prepare the query promises
+      for (const assignment of studentAssignments) {
+        const { question_id, value } = assignment;
 
-      // Execute the update query
-      db.query(updateQuery, [value, question_id, sid], (error, results) => {
-        if (error) {
-          console.error('Error executing the query:', error);
-          return res.status(500).json({ error: 'Internal server error' });
+        if (!question_id) {
+          return res.status(400).json({ message: `Invalid assignment data for student ID: ${sid}` });
         }
 
-        completedUpdates++; // Increment the completed updates count
+        console.log(`Preparing query for student ${sid}, question_id ${question_id}, value ${value}`);
 
-        // Once all updates are complete, send the response
-        if (completedUpdates === totalAssignments) {
-          res.status(200).json({ message: 'Assignments updated successfully' });
-        }
-      });
+        // Create a promise for each query
+        const updatePromise = new Promise((resolve, reject) => {
+          const updateQuery = `
+            UPDATE mainassign 
+            SET marks = ? 
+            WHERE assignid = ? 
+              AND sid = ?
+          `;
+
+          // Handle `null` values for the marks field in SQL
+          const queryValue = value === null ? null : value;
+
+          // Execute the query
+          db.query(updateQuery, [queryValue, question_id, sid], (error, results) => {
+            if (error) {
+              console.error(`Error executing query for sid ${sid}, question_id ${question_id}:`, error);
+              reject(error);  // Reject the promise if there is an error
+            } else {
+              console.log(`Query successful for sid ${sid}, question_id ${question_id}, value ${queryValue}`);
+              resolve(results);  // Resolve the promise if the query succeeds
+            }
+          });
+        });
+
+        // Add the promise to the array
+        updatePromises.push(updatePromise);
+      }
     }
+
+    // Wait for all promises to complete
+    await Promise.all(updatePromises);
+
+    // If all updates succeed, send a success response
+    res.status(200).json({ message: 'Assignments updated successfully' });
   } catch (error) {
     console.error('Error updating assignments:', error);
     return res.status(500).json({ message: 'An error occurred while updating assignments' });
   }
 };
+
+
+
+// export const updateAssignments = async (req, res) => {
+//   const { assignments } = req.body; // Extract the assignments from the request body
+
+//   // Validate if assignments are provided
+//   if (!assignments || !Array.isArray(assignments)) {
+//     return res.status(400).json({ message: 'Invalid assignments data' });
+//   }
+
+//   try {
+//     let completedUpdates = 0; // Counter for completed updates
+//     const totalAssignments = assignments.length; // Total number of assignments to update
+
+//     // Iterate through each student's assignment data
+//     for (const studentData of assignments) {
+//       const { sid, assignments: studentAssignments } = studentData;
+
+//       // Validate student ID
+//       if (!sid || typeof sid !== 'number') {
+//         return res.status(400).json({ message: 'Invalid or missing student ID (sid)' });
+//       }
+
+//       // Validate if studentAssignments is an array
+//       if (!studentAssignments || !Array.isArray(studentAssignments)) {
+//         return res.status(400).json({ message: 'Invalid assignments data for student ID: ' + sid });
+//       }
+
+//       // Clean and format each student's assignments
+//       const cleanAssignments = studentAssignments.map(({ question_id, value }) => ({
+//         question_id,
+//         value: isNaN(value) ? null : value, // Convert NaN to null
+//       }));
+
+//       // Loop through each assignment for the current student and update the database
+//       for (const assignment of cleanAssignments) {
+//         const { question_id, value } = assignment;
+
+//         // Validate if question_id is provided for each assignment
+//         if (!question_id) {
+//           return res.status(400).json({ message: `Invalid assignment data, missing question_id for student ID: ${sid}` });
+//         }
+
+//         // SQL query to update the assignment for the student
+//         const updateQuery = `
+//           UPDATE mainassign 
+//           SET marks = ? 
+//           WHERE assignid = ? 
+//             AND sid = ?
+//         `;
+
+//         // Execute the update query
+//         db.query(updateQuery, [value, question_id, sid], (error, results) => {
+//           if (error) {
+//             console.error('Error executing the query:', error);
+//             return res.status(500).json({ error: 'Internal server error' });
+//           }
+
+//           completedUpdates++; // Increment the completed updates count
+
+//           // Check if all updates have been completed
+//           if (completedUpdates === totalAssignments) {
+//             res.status(200).json({ message: 'Assignments updated successfully' });
+//           }
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Error updating assignments:', error);
+//     return res.status(500).json({ message: 'An error occurred while updating assignments' });
+//   }
+// };
+
 
