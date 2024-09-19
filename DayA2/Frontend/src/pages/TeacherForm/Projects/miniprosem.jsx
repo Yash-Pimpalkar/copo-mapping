@@ -66,16 +66,17 @@ const MiniproSem = ({ uid }) => {
   }, [userCourseId]);
   console.log(maxLimit);
   console.log(userCourse);
+  
   const calculateTotal = (student) => {
     // Calculate average of review1_marks and review2_marks
-    const avgReviews = (student.review1_marks && student.review2_marks)
-      ? (parseInt(student.review1_marks) + parseInt(student.review2_marks)) / 2
+    const avgReviews = (student.review1marks != null && student.review2marks != null)
+      ? (parseInt(student.review1marks) + parseInt(student.review2marks)) / 2
       : 0;
   
     return (
-      parseFloat(student.logbook_marks || 0) +
+      parseInt(parseInt(student.logbookmarks || 0) +
       avgReviews +  // Add the calculated average of reviews
-      parseFloat(student.project_report_quality || 0)
+      parseInt(student.proreportmarks || 0))
     );
   };
   
@@ -138,11 +139,11 @@ const MiniproSem = ({ uid }) => {
   setEditedMarks({
     ...editedMarks,
     [index]: {
-      logbook_marks: MiniproData[index].logbook_marks,
-      review1_marks: MiniproData[index].review1_marks,
-      review2_marks: MiniproData[index].review2_marks,
-      project_report_quality: MiniproData[index].project_report_quality,
-      avg_reviews: MiniproData[index].avg_reviews,
+      logbookmarks: MiniproData[index].logbookmarks,
+      review1marks: MiniproData[index].review1marks,
+      review2marks: MiniproData[index].review2marks,
+      proreportmarks: MiniproData[index].proreportmarks,
+      avgReviews: MiniproData[index].avgReviews,
     },
   });
 };
@@ -169,17 +170,17 @@ const MiniproSem = ({ uid }) => {
 
 const handleSaveClick = async (index) => {
     const actualIndex = index;
-    const semId = MiniproData[actualIndex].sem_id;
+    const mainminiprosemid = MiniproData[actualIndex].miniproid;
     const updatedData = editedMarks[index];
   
     try {
       await api.put("/api/uploadminiprosem/", {
-        sem_id: semId,
-        logbook_marks: updatedData.logbook_marks,
-        review1_marks: updatedData.review1_marks,
-        review2_marks: updatedData.review2_marks,
-        project_report_quality: updatedData.project_report_quality,
-        avg_reviews: updatedData.avg_reviews,
+        mainminiprosemid:mainminiprosemid ,
+        logbookmarks: updatedData.logbookmarks,
+        review1marks: updatedData.review1marks,
+        review2marks: updatedData.review2marks,
+        proreportmarks: updatedData.proreportmarks,
+        // avgReviews: updatedData.avgReviews,
       });
   
       SetMiniprodata((prevData) =>
@@ -277,58 +278,80 @@ const handleMarksChange = (event, index, field) => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
+  
     reader.onload = async (e) => {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
+      
       let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-      // Assuming the first row contains headers
       const headers = jsonData[0];
-      const rows = jsonData.slice(1); // Skip header row
-
+      const rows = jsonData.slice(1);
+  
       const validatedData = rows.map((row) => {
-        const student = {};
-        headers.forEach((header, index) => {
-          student[header] = row[index];
-        });
-        return student;
+        return {
+          mainminiprosemid: row[headers.indexOf("Minipro Id")],
+          stud_clg_id: row[headers.indexOf("Student ID")],
+          student_name: row[headers.indexOf("Student Name")],
+          logbookmarks: row[headers.indexOf("Logbook Marks")],
+          review1marks: row[headers.indexOf("Review1 Marks")],
+          review2marks: row[headers.indexOf("Review2 Marks")],
+          proreportmarks: row[headers.indexOf("Project Report Quality")],
+        };
       });
-
+  
       try {
-        console.log(validatedData);
-        await api.put("/api/sem/", validatedData);
+        console.log(validatedData); 
+        await api.put("/api/uploadminiprosem/", validatedData); 
         SetMiniprodata(validatedData);
-        alert("File is uploaded");
+        alert("File uploaded successfully!");
         window.location.reload();
       } catch (error) {
-        console.error("Error updating marks:", error);
+        console.error("Error uploading file:", error);
+        alert("Failed to upload file. Please try again.");
       }
     };
+  
     reader.readAsArrayBuffer(file);
+};
 
-  };
+  
+
+  
 
   const handleFileDownload = () => {
-    const formattedData = MiniproData.map((student) => ({
-      sem_id: student.sem_id,
-      stud_clg_id: student.stud_clg_id,
-      student_name: student.student_name,
-      marks: student.marks,
-    }));
-
-    const headers = ["sem_id", "Student ID", "Student Name", "Marks"];
+    const formattedData = MiniproData.map((student) => {
+      const avgReviews = (student.review1marks && student.review2marks)
+        ? parseInt((parseInt(student.review1marks, 10) + parseInt(student.review2marks, 10)) / 2, 10)
+        : 0;
+  
+      const total = parseInt(parseInt(student.logbookmarks, 10) + avgReviews + parseInt(student.proreportmarks, 10));
+  
+      return {
+        mainminiprosemid: student.mainminiprosemid,
+        stud_clg_id: student.stud_clg_id,
+        student_name: student.student_name,
+        logbookmarks: student.logbookmarks,
+        review1marks: student.review1marks,
+        review2marks: student.review2marks,
+        avgReviews: avgReviews,
+        proreportmarks: student.proreportmarks,
+        total: total,
+      };
+    });
+  
+    const headers = ["Minipro Id", "Student ID", "Student Name", "Logbook Marks", "Review1 Marks", "Review2 Marks", "Avg of Reviews", "Project Report Quality", "Total"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
-
+  
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "SemesterData");
-    XLSX.writeFile(workbook, "semester_data.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Miniproject Data");
+    XLSX.writeFile(workbook, "Miniproject data.xlsx");
   };
-
+  
   const [message, setMessage] = useState("");
-  function calculateCoAverages(userCourse, SemData, maxLimit, attainmentData) {
+  function calculateCoAverages(userCourse, MiniproData, maxLimit, attainmentData) {
     return userCourse.map((course) => {
       // Calculate percentage of students who passed for each CO
       const studentsPassed = MiniproData.filter(
@@ -542,8 +565,8 @@ const handleMarksChange = (event, index, field) => {
     const actualIndex = index + startIndex; // Adjust index to match actual data index
 
     // Calculate average of review1_marks and review2_marks
-    const avgReviews = (student.review1_marks && student.review2_marks)
-      ? (parseInt(student.review1_marks) + parseInt(student.review2_marks)) / 2
+    const avgReviews = (student.review1marks && student.review2marks)
+      ? parseInt((parseInt(student.review1marks, 10) + parseInt(student.review2marks, 10)) / 2, 10)
       : 0;
 
     return (
@@ -562,17 +585,17 @@ const handleMarksChange = (event, index, field) => {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {editingRow === actualIndex ? (
             <input
-              type="number"
+              type="text"
               value={
-                editedMarks[actualIndex]?.logbook_marks || student.logbook_marks
+                editedMarks[actualIndex]?.logbookmarks || student.logbookmarks
               }
               onChange={(event) =>
-                handleMarksChange(event, actualIndex, "logbook_marks")
+                handleMarksChange(event, actualIndex, "logbookmarks")
               }
               className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           ) : (
-            student.logbook_marks
+            student.logbookmarks
           )}
         </td>
 
@@ -580,17 +603,17 @@ const handleMarksChange = (event, index, field) => {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {editingRow === actualIndex ? (
             <input
-              type="number"
+              type="text"
               value={
-                editedMarks[actualIndex]?.review1_marks || student.review1_marks
+                editedMarks[actualIndex]?.review1marks || student.review1marks
               }
               onChange={(event) =>
-                handleMarksChange(event, actualIndex, "review1_marks")
+                handleMarksChange(event, actualIndex, "review1marks")
               }
               className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           ) : (
-            student.review1_marks
+            student.review1marks
           )}
         </td>
 
@@ -598,45 +621,45 @@ const handleMarksChange = (event, index, field) => {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {editingRow === actualIndex ? (
             <input
-              type="number"
+              type="text"
               value={
-                editedMarks[actualIndex]?.review2_marks || student.review2_marks
+                editedMarks[actualIndex]?.review2marks || student.review2marks
               }
               onChange={(event) =>
-                handleMarksChange(event, actualIndex, "review2_marks")
+                handleMarksChange(event, actualIndex, "review2marks")
               }
               className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           ) : (
-            student.review2_marks
+            student.review2marks
           )}
         </td>
 
         {/* Automatically Calculated Average of Reviews */}
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          {avgReviews.toFixed(2)} {/* Display calculated average */}
+          {avgReviews} {/* Display calculated average */}
         </td>
 
         {/* Project Report Quality */}
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {editingRow === actualIndex ? (
             <input
-              type="number"
+              type="text"
               value={
-                editedMarks[actualIndex]?.project_report_quality ||
-                student.project_report_quality
+                editedMarks[actualIndex]?.proreportmarks||
+                student.proreportmarks
               }
               onChange={(event) =>
                 handleMarksChange(
                   event,
                   actualIndex,
-                  "project_report_quality"
+                  "proreportmarks"
                 )
               }
               className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           ) : (
-            student.project_report_quality
+            student.proreportmarks
           )}
         </td>
 
