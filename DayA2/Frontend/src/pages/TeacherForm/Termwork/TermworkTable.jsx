@@ -77,7 +77,7 @@ const TermworkTable = ({ uid }) => {
           <Experiment userCourseId={userCourseId} />
         ) : twdata[0].twid === 8 ? (
           <Experiment userCourseId={userCourseId} />
-        ) : twdata[0].twid === 9 ? (
+        ) : twdata[0].twid == 9 ? (
           <TheoryAssignment userCourseId={userCourseId} />
         ) : null}
       </>

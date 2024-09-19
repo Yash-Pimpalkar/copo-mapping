@@ -273,6 +273,27 @@ export const updateAssignments = async (req, res) => {
 };
 
 
+export const getExperimentData = (req, res) => {
+  const { usercourseid } = req.params;
+  
+  const uc = parseInt(usercourseid);
+  // Execute the stored procedure for experiment marks
+  const sql = `CALL GetExperimentMarks(?)`; // Replace with your actual stored procedure name
+  db.query(sql, uc, (error, results) => {
+    if (error) {
+      console.error('Error executing the stored procedure:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    // Handle the results of the stored procedure
+    res.status(200).json({
+      message: 'Experiment marks retrieved successfully',
+      data: results[1] // assuming the results are returned in the first index
+    });
+  });
+};
+
+
+
 
 // export const updateAssignments = async (req, res) => {
 //   const { assignments } = req.body; // Extract the assignments from the request body
@@ -346,3 +367,146 @@ export const updateAssignments = async (req, res) => {
 // };
 
 
+// Update Experiments
+export const updateExperiments = async (req, res) => {
+  const { sid, experiments } = req.body;
+
+  // Check if the input is for a single student or multiple students
+  let studentExperimentsData = [];
+
+  if (sid && Array.isArray(experiments)) {
+    // Single student case
+    studentExperimentsData = [{ sid, experiments }];
+    console.log("Single student case:", JSON.stringify(studentExperimentsData[0].experiments, null, 2));
+  } else if (Array.isArray(experiments) && experiments.length > 0 && experiments[0].sid) {
+    // Multiple students case
+    studentExperimentsData = experiments;
+    console.log("Multiple students case:", JSON.stringify(studentExperimentsData, null, 2));
+  } else {
+    return res.status(400).json({ message: 'Invalid input data' });
+  }
+
+  try {
+    // Array to store promises for database queries
+    const updatePromises = [];
+
+    // Loop through each student's experiment data
+    for (const studentData of studentExperimentsData) {
+      const { sid, experiments: studentExperiments } = studentData;
+
+      // Validate student ID
+      if (!sid || typeof sid !== 'number') {
+        return res.status(400).json({ message: 'Invalid or missing student ID (sid)' });
+      }
+
+      // Loop through each experiment and prepare the query promises
+      for (const experiment of studentExperiments) {
+        const { expid, marks } = experiment;
+
+        if (!expid) {
+          return res.status(400).json({ message: `Invalid experiment data for student ID: ${sid}` });
+        }
+
+        console.log(`Preparing query for student ${sid}, expid ${expid}, marks ${marks}`);
+
+        // Create a promise for each query
+        const updatePromise = new Promise((resolve, reject) => {
+          const updateQuery = `
+            UPDATE mainexp 
+            SET marks = ? 
+            WHERE expid = ? 
+              AND sid = ?
+          `;
+
+          // Handle `null` values for the marks field in SQL
+          const queryValue = marks === null ? null : marks;
+
+          // Execute the query
+          db.query(updateQuery, [queryValue, expid, sid], (error, results) => {
+            if (error) {
+              console.error(`Error executing query for sid ${sid}, expid ${expid}:`, error);
+              reject(error);  // Reject the promise if there is an error
+            } else {
+              console.log(`Query successful for sid ${sid}, expid ${expid}, marks ${queryValue}`);
+              resolve(results);  // Resolve the promise if the query succeeds
+            }
+          });
+        });
+
+        // Add the promise to the array
+        updatePromises.push(updatePromise);
+      }
+    }
+
+    // Wait for all promises to complete
+    await Promise.all(updatePromises);
+
+    // If all updates succeed, send a success response
+    res.status(200).json({ message: 'Experiments updated successfully' });
+  } catch (error) {
+    console.error('Error updating experiments:', error);
+    return res.status(500).json({ message: 'An error occurred while updating experiments' });
+  }
+};
+
+
+
+export const getExperimentAndCOs = async (req, res) => {
+  const { usercourseid } = req.params;
+
+  if (!usercourseid) {
+    return res.status(400).json({ error: 'usercourseid is required' });
+  }
+
+  try {
+    const sql = `
+      SELECT
+        ue.usercourseid,
+        ue.maxmarks,
+        qe.exp_id AS exp_id,
+        qe.expname AS question_name,
+        qe.exp_idq AS question_id,  -- Ensure this is 'question_id'
+        GROUP_CONCAT(co.coname ORDER BY co.co_id) AS conames
+      FROM
+        upload_exp ue
+      JOIN
+        question_exp qe ON ue.expid = qe.exp_id
+      LEFT JOIN
+        co_exp co ON qe.exp_idq = co.co_id
+      WHERE
+        ue.usercourseid = ?
+      GROUP BY
+        ue.usercourseid, ue.maxmarks, qe.exp_id, qe.exp_idq, qe.expname;
+    `;
+
+    // Execute the query
+    db.query(sql, [usercourseid], (error, results) => {
+      if (error) {
+        console.error('Error executing the query:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      // Log the raw results to ensure the query works correctly
+      console.log('Raw results from SQL query:', results);
+
+      // Format the results
+      const formattedResults = results.map(row => ({
+        usercourseid: row.usercourseid,
+        maxmarks: row.maxmarks,
+        exp_id: row.exp_id,
+        question_name: row.question_name,
+        question_id: row.question_id,  // Make sure this is being mapped correctly
+        conames: row.conames ? row.conames.split(',') : []
+      }));
+
+      // Log the formatted results to verify the transformation
+      console.log('Formatted results:', formattedResults);
+
+      // Return the formatted results as JSON
+      res.status(200).json(formattedResults);
+    });
+  } catch (error) {
+    console.error('Error fetching experiments and COs:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
