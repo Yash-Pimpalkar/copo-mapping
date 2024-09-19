@@ -123,7 +123,7 @@ const Experiment = ({ userCourseId }) => {
     };
 
     try {
-      await api.put('/api/experiment/update', formattedData);
+      await api.put('/api/termwork/experiment/update', formattedData);
       const response = await api.get(`/api/termwork/getExperimentData/${userCourseId}`);
       setExperimentData(response.data.data);
     } catch (error) {

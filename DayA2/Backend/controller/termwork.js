@@ -370,7 +370,7 @@ export const getExperimentData = (req, res) => {
 // Update Experiments
 export const updateExperiments = async (req, res) => {
   const { sid, experiments } = req.body;
-
+  console.log(sid,experiments)
   // Check if the input is for a single student or multiple students
   let studentExperimentsData = [];
 
@@ -401,13 +401,14 @@ export const updateExperiments = async (req, res) => {
 
       // Loop through each experiment and prepare the query promises
       for (const experiment of studentExperiments) {
-        const { expid, marks } = experiment;
+        const { question_id, value } = experiment;
 
-        if (!expid) {
-          return res.status(400).json({ message: `Invalid experiment data for student ID: ${sid}` });
+        if (!question_id) {
+          return res.status(400).json({ message: `Invalid Experiment data for student ID: ${sid}` });
         }
 
-        console.log(`Preparing query for student ${sid}, expid ${expid}, marks ${marks}`);
+        console.log(`Preparing query for student ${sid}, question_id ${question_id}, value ${value}`);
+
 
         // Create a promise for each query
         const updatePromise = new Promise((resolve, reject) => {
@@ -419,19 +420,20 @@ export const updateExperiments = async (req, res) => {
           `;
 
           // Handle `null` values for the marks field in SQL
-          const queryValue = marks === null ? null : marks;
+          const queryValue = value === null ? null : value;
 
           // Execute the query
-          db.query(updateQuery, [queryValue, expid, sid], (error, results) => {
+          db.query(updateQuery, [queryValue, question_id, sid], (error, results) => {
             if (error) {
-              console.error(`Error executing query for sid ${sid}, expid ${expid}:`, error);
+              console.error(`Error executing query for sid ${sid}, question_id ${question_id}:`, error);
               reject(error);  // Reject the promise if there is an error
             } else {
-              console.log(`Query successful for sid ${sid}, expid ${expid}, marks ${queryValue}`);
+              console.log(`Query successful for sid ${sid}, question_id ${question_id}, value ${queryValue}`);
               resolve(results);  // Resolve the promise if the query succeeds
             }
           });
         });
+
 
         // Add the promise to the array
         updatePromises.push(updatePromise);
