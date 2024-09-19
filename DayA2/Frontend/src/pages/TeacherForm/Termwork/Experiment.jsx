@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Experiment = () => {
+const Experiment = ({uid}) => {
   return (
     <div>Experiment</div>
   )

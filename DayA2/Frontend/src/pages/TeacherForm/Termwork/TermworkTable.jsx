@@ -61,22 +61,26 @@ const TermworkTable = ({ uid }) => {
 
       {twdata && twdata.length > 0 && (
         <>
-          {twdata[0].twid === 1 ? (
-            <TheoryOnly />
-          ) : twdata[0].twid === 2 ? (
-            <>{/* Render alternative content if needed */}
-             <TheoryAssignment userCourseId={userCourseId} />
-   
-            
-            </>
-          ) : twdata[0].twid === 3 ? (
-            <>{/* Render alternative content if needed */}
-             <Experiment userCourseId={userCourseId}  />
-   
-            
-            </>
-          ) : null}
-        </>
+        {twdata[0].twid === 1 ? (
+          <TheoryOnly />
+        ) : twdata[0].twid === 2 ? (
+          <TheoryAssignment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 3 ? (
+          <Experiment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 4 ? (
+          <Experiment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 5 ? (
+          <Experiment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 6 ? (
+          <Experiment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 7 ? (
+          <Experiment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 8 ? (
+          <Experiment userCourseId={userCourseId} />
+        ) : twdata[0].twid === 9 ? (
+          <TheoryAssignment userCourseId={userCourseId} />
+        ) : null}
+      </>
       )}
     </div>
   );

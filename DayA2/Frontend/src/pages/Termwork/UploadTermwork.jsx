@@ -287,7 +287,7 @@ const Uploadthassign = ({ uid }) => {
         // Only push the question row if it has valid coNames
         if (coNames.length > 0) {
           acc.push({
-            question: `${formNames[key].toUpperCase()} ${parseInt(index) + 1}`, // Question identifier
+            question: `${formNames[key].toUpperCase()}${parseInt(index) + 1}`, // Question identifier
             coNames, // Array of coNames for this question
           });
         }
