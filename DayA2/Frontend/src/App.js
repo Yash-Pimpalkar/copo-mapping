@@ -37,7 +37,10 @@ import UploadMiniproSem from "./pages/TeacherForm/Projects/uploadminiprosem";
 import MiniproSem from "./pages/TeacherForm/Projects/miniprosem";
 import MajorproSem from "./pages/TeacherForm/Projects/majorprosem"
 import Experiment from './pages/TeacherForm/Termwork/Experiment';
-
+import Tworalresult from './pages/Results/tworalresult';
+import Tcstyperesult from './pages/Results/tcstyperesult';
+import IntaTWUniv from './pages/Results/mathsintatwuniv';
+import TWOnly from './pages/Results/physicsonlytw';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -105,6 +108,10 @@ function App() {
               <Route path='/MiniproSem' element={<MiniproSem uid={user_id}/>}/>
               <Route path='/MajorproSem' element={<MajorproSem uid={user_id}/>}/>
               <Route path='/Experiment' element={<Experiment uid={user_id}/>}/>
+              <Route path='/Tworalresult' element={<Tworalresult uid={user_id}/>}/>
+              <Route path='/Tcstyperesult' element={<Tcstyperesult uid={user_id}/>}/>
+              <Route path='/Intatwuniv' element={<IntaTWUniv uid={user_id}/>}/>
+              <Route path='/Twonly' element={<TWOnly uid={user_id}/>}/>
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>
