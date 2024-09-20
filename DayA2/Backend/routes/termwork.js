@@ -1,5 +1,5 @@
 import express from "express";
-import { fetchTermworkLabels, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, submitTermworkId, updateAssignments, updateExperiments } from "../controller/termwork.js";
+import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, showAttendanceData, submitTermworkId, updateAssignments, updateExperiments } from "../controller/termwork.js";
 const router =express.Router();
 
 
@@ -16,5 +16,10 @@ router.get('/getexperiment/:usercourseid', getExperimentAndCOs);
 
 // Route to update experiments
 router.put('/experiment/update', updateExperiments);
+
+
+router.get("/show/attendance/:uid",showAttendanceData)
+router.put("/attendance/update",AttendanceUpload);
+router.get("/attendance/limit/:uid",AttendanceLimit);
 
 export default router;
