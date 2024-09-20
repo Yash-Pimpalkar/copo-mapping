@@ -4,18 +4,17 @@ import api from "../../../api";
 import TheoryOnly from "./TheoryOnly";
 import TheoryAssignment from "./TheoryAssignment";
 import Experiment from "./Experiment";
+import Attendance from "./Attendance";
 
 const TermworkTable = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [twdata, setTwData] = useState(null);
   const [keysWithValueOne, setKeysWithValueOne] = useState([]);
-   
+  const [currentComponent, setCurrentComponent] = useState("TheoryAssignment");
   useEffect(() => {
     const fetchTermworkLabels = async () => {
       try {
-        const response = await api.get(
-          `/api/termwork/gettermworkdata/${userCourseId}`
-        );
+        const response = await api.get(`/api/termwork/gettermworkdata/${userCourseId}`);
         setTwData(response.data);
 
         const newKeysWithValueOne = response.data.flatMap((item) =>
@@ -78,7 +77,29 @@ const TermworkTable = ({ uid }) => {
         ) : twdata[0].twid === 8 ? (
           <Experiment userCourseId={userCourseId} />
         ) : twdata[0].twid == 9 ? (
-          <TheoryAssignment userCourseId={userCourseId} />
+          <>
+          {currentComponent === "TheoryAssignment" ? (
+            <>
+              <TheoryAssignment userCourseId={userCourseId} />
+              <button
+                onClick={() => setCurrentComponent("Attendance")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Next: Show Attendance
+              </button>
+            </>
+          ) : (
+            <>
+              <Attendance uid={userCourseId} />
+              <button
+                onClick={() => setCurrentComponent("TheoryAssignment")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Back to Theory Assignment
+              </button>
+            </>
+          )}
+          </>
         ) : null}
       </>
       )}
