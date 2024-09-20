@@ -232,7 +232,7 @@ const Experiment = ({ userCourseId }) => {
           }));
 
         try {
-          await api.put("/api/experiment/update", {
+       api.put("/api/termwork/experiment/update", {
             experiments: formattedData,
           });
           setLoading(false);
