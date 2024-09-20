@@ -10,7 +10,7 @@ const Attendance = ({ uid }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [maxLimit, setMaxLimit] = useState(100); // Adjust this as needed
+  const [maxLimit, setMaxLimit] = useState(0); // Adjust this as needed
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -18,6 +18,8 @@ const Attendance = ({ uid }) => {
       try {
         const res = await api.get(`/api/termwork/show/attendance/${uid}`);
         setAttendanceData(res.data);
+        const res1=await api.get(`/api/termwork/attendance/limit/${uid}`);
+        setMaxLimit(res1.data[0].maxmarks);
       } catch (error) {
         console.error("Error fetching attendance data:", error);
       }
@@ -27,7 +29,7 @@ const Attendance = ({ uid }) => {
       fetchAttendanceData();
     }
   }, [uid]);
-
+console.log(maxLimit)
   const filteredData = attendanceData.filter((item) => {
     const query = searchQuery.toUpperCase();
     return (
