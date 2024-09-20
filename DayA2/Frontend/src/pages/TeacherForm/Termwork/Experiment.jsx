@@ -41,6 +41,7 @@ const Experiment = ({ userCourseId }) => {
       fetchExperimentData();
     }
   }, [userCourseId]);
+  
   const fetchExperimentData = async () => {
     try {
       const response = await api.get(
@@ -191,11 +192,39 @@ const Experiment = ({ userCourseId }) => {
 
   // Export to Excel
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(experimentData);
+    // Create a deep copy of the data to avoid mutating the original array
+    const sortedExperimentData = experimentData.map(student => {
+      const sortedStudentData = {};
+      
+      // First, copy the student identification info like sid, stud_clg_id, student_name
+      sortedStudentData.sid = student.sid;
+      sortedStudentData.stud_clg_id = student.stud_clg_id;
+      sortedStudentData.student_name = student.student_name;
+      
+      // Extract and sort the experiment fields
+      const experimentKeys = Object.keys(student)
+        .filter(key => key.startsWith('EXPERIMENT'))  // Only get the keys that are experiments
+        .sort((a, b) => {
+          const aNumber = parseInt(a.replace('EXPERIMENT', ''));
+          const bNumber = parseInt(b.replace('EXPERIMENT', ''));
+          return aNumber - bNumber;  // Sort in ascending order based on the number
+        });
+  
+      // Add sorted experiment data back to the object
+      experimentKeys.forEach(key => {
+        sortedStudentData[key] = student[key];
+      });
+  
+      return sortedStudentData;
+    });
+  
+    // Export the sorted data to Excel
+    const worksheet = XLSX.utils.json_to_sheet(sortedExperimentData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Experiments");
     XLSX.writeFile(workbook, "ExperimentsData.xlsx");
   };
+  
 
  // Import from Excel and upload to the backend
  const importFromExcel = (event) => {
@@ -232,7 +261,7 @@ const Experiment = ({ userCourseId }) => {
           }));
 
         try {
-       api.put("/api/termwork/experiment/update", {
+      await  api.put("/api/termwork/experiment/update", {
             experiments: formattedData,
           });
           setLoading(false);
@@ -247,7 +276,7 @@ const Experiment = ({ userCourseId }) => {
       reader.readAsArrayBuffer(file);
     }
   };
-
+  console.log(experimentData)
   const handle_Attenment = (experimentKeys, attainmentData, userCourseId) => {
     console.log("Attainment updated:", experimentKeys, attainmentData);
 
