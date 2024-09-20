@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../../api';
-import Pagination from '../../../component/Pagination/Pagination';
-import * as XLSX from 'xlsx'; // For Excel download and upload
-import LoadingButton from '../../../component/Loading/Loading';
+import React, { useEffect, useState } from "react";
+import api from "../../../api";
+import Pagination from "../../../component/Pagination/Pagination";
+import * as XLSX from "xlsx"; // For Excel download and upload
+import LoadingButton from "../../../component/Loading/Loading";
 
 const Experiment = ({ userCourseId }) => {
   const [experimentData, setExperimentData] = useState([]);
@@ -11,20 +11,29 @@ const Experiment = ({ userCourseId }) => {
   const [dataPerPage] = useState(10); // Number of rows per page
   const [editMode, setEditMode] = useState(null);
   const [editedValues, setEditedValues] = useState({});
-  const [searchTerm, setSearchTerm] = useState(''); // Search term for students
+  const [searchTerm, setSearchTerm] = useState(""); // Search term for students
   const [loading, setLoading] = useState(false);
 
+  // New State for Attainment Calculation
+  const [attainmentData, setAttainmentData] = useState({
+    passedPercentage: 50, // Default to 50% passing criteria
+  });
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  
   useEffect(() => {
     const fetchExperimentData = async () => {
       try {
-        const response = await api.get(`/api/termwork/getexperimentdata/${userCourseId}`);
-        const response1 = await api.get(`/api/termwork/getexperiment/${userCourseId}`);
+        const response = await api.get(
+          `/api/termwork/getexperimentdata/${userCourseId}`
+        );
+        const response1 = await api.get(
+          `/api/termwork/getexperiment/${userCourseId}`
+        );
         setExperimentData(response.data.data);
         setQuestionData(response1.data);
       } catch (error) {
-        console.error('Error fetching experiment data:', error);
+        console.error("Error fetching experiment data:", error);
       }
     };
 
@@ -34,12 +43,16 @@ const Experiment = ({ userCourseId }) => {
   }, [userCourseId]);
   const fetchExperimentData = async () => {
     try {
-      const response = await api.get(`/api/experiment/getExperimentData/${userCourseId}`);
-      const response1 = await api.get(`/api/experiment/getQuestions/${userCourseId}`);
+      const response = await api.get(
+        `/api/experiment/getExperimentData/${userCourseId}`
+      );
+      const response1 = await api.get(
+        `/api/experiment/getQuestions/${userCourseId}`
+      );
       setExperimentData(response.data.data);
       setQuestionData(response1.data);
     } catch (error) {
-      console.error('Error fetching experiment data:', error);
+      console.error("Error fetching experiment data:", error);
     }
   };
 
@@ -47,23 +60,27 @@ const Experiment = ({ userCourseId }) => {
   const getExperimentKeys = () => {
     if (experimentData && experimentData.length > 0) {
       return Object.keys(experimentData[0]).filter((key) =>
-        key.startsWith('EXPERIMENT')
+        key.startsWith("EXPERIMENT")
       );
     }
     return [];
   };
 
   const experimentKeys = getExperimentKeys();
- 
+
   // Find the corresponding `conames` for each `experimentKey` from `questionData`
   const getCOName = (experimentKey) => {
-    const question = questionData.find(q => q.question_name === experimentKey);
-    return question ? question.conames.join(', ') : '';
+    const question = questionData.find(
+      (q) => q.question_name === experimentKey
+    );
+    return question ? question.conames.join(", ") : "";
   };
 
   // Get the maximum marks for an experiment
   const getMaxMarks = (experimentKey) => {
-    const question = questionData.find(q => q.question_name === experimentKey);
+    const question = questionData.find(
+      (q) => q.question_name === experimentKey
+    );
     return question ? question.maxmarks : 100;
   };
 
@@ -112,7 +129,8 @@ const Experiment = ({ userCourseId }) => {
     const updatedExperiments = experimentKeys.map((key) => {
       const value = editedValues[key];
       return {
-        question_id: questionData.find(q => q.question_name === key)?.question_id,
+        question_id: questionData.find((q) => q.question_name === key)
+          ?.question_id,
         value: value === null ? null : parseInt(value, 10),
       };
     });
@@ -123,11 +141,13 @@ const Experiment = ({ userCourseId }) => {
     };
 
     try {
-      await api.put('/api/termwork/experiment/update', formattedData);
-      const response = await api.get(`/api/termwork/getExperimentData/${userCourseId}`);
+      await api.put("/api/termwork/experiment/update", formattedData);
+      const response = await api.get(
+        `/api/termwork/getExperimentData/${userCourseId}`
+      );
       setExperimentData(response.data.data);
     } catch (error) {
-      console.error('Error saving experiment data:', error);
+      console.error("Error saving experiment data:", error);
     }
 
     setEditMode(null);
@@ -173,50 +193,54 @@ const Experiment = ({ userCourseId }) => {
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(experimentData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Experiments');
-    XLSX.writeFile(workbook, 'ExperimentsData.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Experiments");
+    XLSX.writeFile(workbook, "ExperimentsData.xlsx");
   };
 
-  // Import from Excel and upload to the backend
-  const importFromExcel = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setLoading(true);
+ // Import from Excel and upload to the backend
+ const importFromExcel = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    setLoading(true); // Start loading
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         const headers = jsonData[0];
         const rows = jsonData.slice(1);
 
-        const formattedData = rows.map((row) => {
-          const student = {};
-          headers.forEach((header, index) => {
-            student[header] = row[index];
-          });
-          return student;
-        }).map((student) => ({
-          sid: student.sid,
-          experiments: Object.keys(student)
-            .filter(key => key.startsWith('EXPERIMENT'))
-            .map(key => ({
-              question_id: getQuestionIdFromExperimentKey(key),
-              value: student[key] === '' ? null : parseInt(student[key], 10),
-            })),
-        }));
+        const formattedData = rows
+          .map((row) => {
+            const student = {};
+            headers.forEach((header, index) => {
+              student[header] = row[index];
+            });
+            return student;
+          })
+          .map((student) => ({
+            sid: student.sid,
+            experiments: Object.keys(student)
+              .filter((key) => key.startsWith("EXPERIMENT"))
+              .map((key) => ({
+                question_id: getQuestionIdFromExperimentKey(key),
+                value: student[key] === "" ? null : parseInt(student[key], 10),
+              })),
+          }));
 
         try {
-          await api.put('/api/experiment/update', { experiments: formattedData });
+          await api.put("/api/experiment/update", {
+            experiments: formattedData,
+          });
           setLoading(false);
           fetchExperimentData();
-          alert('Excel data imported and experiments updated successfully.');
+          alert("Excel data imported and experiments updated successfully.");
         } catch (error) {
           setLoading(false);
-          console.error('Error uploading experiment data:', error);
+          console.error("Error uploading experiment data:", error);
         }
       };
 
@@ -224,9 +248,49 @@ const Experiment = ({ userCourseId }) => {
     }
   };
 
+  const handle_Attenment = (experimentKeys, attainmentData, userCourseId) => {
+    console.log("Attainment updated:", experimentKeys, attainmentData);
+
+    // Assuming experimentKeys and attainmentData are used to calculate attainment
+    // You can implement any calculations, updates, or API calls here
+
+    // Display a success message after updating the attainment
+    setMessage("Attainment data has been updated successfully.");
+  };
+  // Get total students passed per question based on percentage criteria
+  const getTotalStudentsPassedPerQuestion = (percentage) => {
+    return experimentKeys.map((experimentKey) => {
+      return filteredData.filter(
+        (student) =>
+          student[experimentKey] !== null &&
+          student[experimentKey] >=
+            (getMaxMarks(experimentKey) * percentage) / 100
+      ).length;
+    });
+  };
+  // Get total students attempted per question
+  const getTotalStudentsAttempted = () => {
+    return experimentKeys.map((experimentKey) => {
+      return filteredData.filter((student) => student[experimentKey] !== null)
+        .length;
+    });
+  };
+
+  // Handle input change for percentage criteria
+  const handleAttainmentChange = (e, field) => {
+    const { value } = e.target;
+    if (value >= 0 && value <= 100) {
+      setAttainmentData((prev) => ({ ...prev, [field]: value }));
+      setError("");
+    } else {
+      setError("Percentage must be between 0 and 100");
+    }
+  };
   // Helper function to map experiment key (e.g., EXPERIMENT1) to question_id
   const getQuestionIdFromExperimentKey = (experimentKey) => {
-    const question = questionData.find(q => q.question_name === experimentKey);
+    const question = questionData.find(
+      (q) => q.question_name === experimentKey
+    );
     return question ? question.question_id : null;
   };
 
@@ -235,7 +299,12 @@ const Experiment = ({ userCourseId }) => {
       {/* Container for Export, Import and Search Bar */}
       <div className="mb-4 flex justify-between items-center">
         {/* File Upload */}
-        <input type="file" accept=".xlsx, .xls" onChange={importFromExcel} className="border px-4 py-2 rounded-md" />
+        <input
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={importFromExcel}
+          className="border px-4 py-2 rounded-md"
+        />
 
         {/* Search Bar */}
         <input
@@ -247,7 +316,10 @@ const Experiment = ({ userCourseId }) => {
         />
 
         {/* Download Excel Button */}
-        <button onClick={exportToExcel} className="bg-green-500 text-white px-4 py-2 rounded-md">
+        <button
+          onClick={exportToExcel}
+          className="bg-green-500 text-white px-4 py-2 rounded-md"
+        >
           Download Excel
         </button>
       </div>
@@ -260,19 +332,39 @@ const Experiment = ({ userCourseId }) => {
       <table className="min-w-full border-collapse border border-gray-400">
         <thead>
           <tr>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">Index</th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">Student ID</th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">Student Name</th>
-            <th className="border border-gray-300 px-4 py-2" colSpan={experimentKeys.length}>Experiments</th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">Total</th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">Action</th>
+            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+              Index
+            </th>
+            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+              Student ID
+            </th>
+            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+              Student Name
+            </th>
+            <th
+              className="border border-gray-300 px-4 py-2"
+              colSpan={experimentKeys.length}
+            >
+              Experiments
+            </th>
+            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+              Total
+            </th>
+            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+              Action
+            </th>
           </tr>
           <tr>
             {experimentKeys.map((experimentKey, index) => (
-              <th key={experimentKey} className="border border-gray-300 px-4 py-2">
+              <th
+                key={experimentKey}
+                className="border border-gray-300 px-4 py-2"
+              >
                 {index + 1}
                 <br />
-                <span className="text-sm text-white">{getCOName(experimentKey)}</span>
+                <span className="text-sm text-white">
+                  {getCOName(experimentKey)}
+                </span>
               </th>
             ))}
           </tr>
@@ -281,10 +373,17 @@ const Experiment = ({ userCourseId }) => {
           {currentData.map((student, index) => (
             <tr key={index}>
               <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.stud_clg_id}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
+              <td className="border border-gray-300 px-4 py-2">
+                {student.stud_clg_id}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {student.student_name}
+              </td>
               {experimentKeys.map((experimentKey) => (
-                <td key={experimentKey} className="border border-gray-300 px-4 py-2">
+                <td
+                  key={experimentKey}
+                  className="border border-gray-300 px-4 py-2"
+                >
                   {editMode === student.sid ? (
                     <input
                       type="text"
@@ -293,15 +392,21 @@ const Experiment = ({ userCourseId }) => {
                           ? editedValues[experimentKey]
                           : student[experimentKey]
                       }
-                      onChange={(event) => handleInputChange(event, experimentKey)}
+                      onChange={(event) =>
+                        handleInputChange(event, experimentKey)
+                      }
                       className="w-24 border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
+                  ) : student[experimentKey] !== null ? (
+                    student[experimentKey]
                   ) : (
-                    student[experimentKey] !== null ? student[experimentKey] : ''
+                    ""
                   )}
                 </td>
               ))}
-              <td className="border border-gray-300 px-4 py-2">{calculateTotal(student)}</td>
+              <td className="border border-gray-300 px-4 py-2">
+                {calculateTotal(student)}
+              </td>
               <td className="border border-gray-300 px-4 py-2">
                 {editMode === student.sid ? (
                   <>
@@ -340,6 +445,116 @@ const Experiment = ({ userCourseId }) => {
           onPageChange={handlePageChange}
         />
       )}
+
+      {/* New Section for Total Students Passed Each Question */}
+      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-lg font-semibold">
+            Total Students Passed Each Question
+          </h1>
+          <button
+            onClick={() =>
+              handle_Attenment(experimentKeys, attainmentData, userCourseId)
+            }
+            className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+          >
+            Update Attainment
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="total-student-passed"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Total Students Passed with &gt;= PERCENTAGE %
+          </label>
+          <input
+            id="total-student-passed"
+            type="number"
+            min="0"
+            max="100"
+            value={attainmentData.passedPercentage}
+            onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+            className="border px-4 py-2 rounded-md"
+          />
+        </div>
+
+        <table className="min-w-full border-collapse border border-gray-400">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">Type</th>
+              <th
+                className="border border-gray-300 px-4 py-2"
+                colSpan={experimentKeys.length}
+              >
+                Experiments
+              </th>
+            </tr>
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">CO Name</th>
+              {experimentKeys.map((experimentKey, index) => (
+                <th
+                  key={experimentKey}
+                  className="border border-gray-300 px-4 py-2"
+                >
+                  {index + 1}
+                  <br />
+                  <span className="text-sm text-white">
+                    {getCOName(experimentKey)}
+                  </span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">
+                Total Students Passed
+              </td>
+              {getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              ).map((count, index) => (
+                <td key={index} className="border border-gray-300 px-4 py-2">
+                  {count}
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">
+                Total Students Attempted
+              </td>
+              {getTotalStudentsAttempted().map((count, index) => (
+                <td key={index} className="border border-gray-300 px-4 py-2">
+                  {count}
+                </td>
+              ))}
+            </tr>
+            {/* CO Attainment */}
+            <tr>
+              <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                CO Attainment
+              </td>
+              {getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              ).map((passedCount, index) => {
+                const attemptedCount = getTotalStudentsAttempted()[index];
+                const attainment = attemptedCount
+                  ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                  : 0;
+                return (
+                  <td
+                    key={index}
+                    className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+                  >
+                    {attainment} %
+                  </td>
+                );
+              })}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
