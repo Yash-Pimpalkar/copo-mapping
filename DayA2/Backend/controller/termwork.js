@@ -512,3 +512,101 @@ export const getExperimentAndCOs = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
+
+export const showAttendanceData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      a.att_id,
+      a.attend_id,
+      a.sid,
+      a.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_atten AS a
+    INNER JOIN 
+      upload_attendance AS u ON a.attend_id = u.attid
+    INNER JOIN 
+      copo_students_details AS c ON a.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching attendance data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+
+
+export const AttendanceUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_atten SET marks = ? WHERE att_id = ?';
+  const queryValues = updates.map(update => {
+    const marks = parseInt(update.marks, 10);
+    return [
+      isNaN(marks) ? null : marks,  // Use null if marks is NaN
+      update.att_id
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Attendance marks updated successfully');
+  } catch (error) {
+    console.error('Error updating attendance marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+
+export const AttendanceLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_attendance WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+
