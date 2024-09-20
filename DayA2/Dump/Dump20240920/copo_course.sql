@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -39,7 +39,7 @@ CREATE TABLE `course` (
 
 LOCK TABLES `course` WRITE;
 /*!40000 ALTER TABLE `course` DISABLE KEYS */;
-INSERT INTO `course` VALUES (1,'CSC701','Machine Leaning','2024-07-23 16:21:53.442'),(2,'CSC702','Big data Anylytics','2024-07-23 16:21:53.442'),(3,'CSDC7011','Machine Vision','2024-07-23 16:32:08.758'),(4,'CSDC7012','Quantum Computing','2024-07-23 16:32:08.758'),(5,'CSC501','tcs','2024-07-26 16:00:09.693'),(8,'CSC708','demo2','2024-08-01 10:50:23.631'),(9,'CSC705','demo1','2024-08-02 14:13:27.986'),(10,'CSC706','demo','2024-08-02 14:13:27.986'),(12,'CSC712','demo4','2024-09-19 00:01:30.831');
+INSERT INTO `course` VALUES (1,'CSC701','Machine Leaning','2024-07-23 16:21:53.442'),(2,'CSC702','Big data Anylytics','2024-07-23 16:21:53.442'),(3,'CSDC7011','Machine Vision','2024-07-23 16:32:08.758'),(4,'CSDC7012','Quantum Computing','2024-07-23 16:32:08.758'),(5,'CSC501','tcs','2024-07-26 16:00:09.693'),(8,'CSC708','demo2','2024-08-01 10:50:23.631'),(9,'CSC705','demo1','2024-08-02 14:13:27.986'),(10,'CSC706','demo','2024-08-02 14:13:27.986'),(11,'ITM601','MiniProject','2024-09-18 00:40:46.263'),(12,'ITP 801','Major project ','2024-09-18 00:42:35.809');
 /*!40000 ALTER TABLE `course` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:13
+-- Dump completed on 2024-09-20 10:36:12

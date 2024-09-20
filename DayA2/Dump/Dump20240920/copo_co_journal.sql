@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `co_journal` (
   PRIMARY KEY (`idco_journal`),
   KEY `coidkk_idx` (`co_id`),
   CONSTRAINT `coidkk` FOREIGN KEY (`co_id`) REFERENCES `upload_journal` (`journalid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,6 +38,7 @@ CREATE TABLE `co_journal` (
 
 LOCK TABLES `co_journal` WRITE;
 /*!40000 ALTER TABLE `co_journal` DISABLE KEYS */;
+INSERT INTO `co_journal` VALUES (1,'CO1',1),(2,'CO2',1),(3,'CO4',2),(4,'CO3',2);
 /*!40000 ALTER TABLE `co_journal` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:07
+-- Dump completed on 2024-09-20 10:36:10

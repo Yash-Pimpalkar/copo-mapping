@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -37,7 +37,7 @@ CREATE TABLE `oral_marks` (
 
 LOCK TABLES `oral_marks` WRITE;
 /*!40000 ALTER TABLE `oral_marks` DISABLE KEYS */;
-INSERT INTO `oral_marks` VALUES (1,2,25,4),(2,3,25,4);
+INSERT INTO `oral_marks` VALUES (1,2,25,4),(2,3,23,4);
 /*!40000 ALTER TABLE `oral_marks` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:14
+-- Dump completed on 2024-09-20 10:36:12

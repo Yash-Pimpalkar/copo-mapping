@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `termwork_table` (
   PRIMARY KEY (`tid`),
   KEY `_dx3_idx` (`usercourseid`),
   CONSTRAINT `_dx3` FOREIGN KEY (`usercourseid`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `termwork_table` (
 
 LOCK TABLES `termwork_table` WRITE;
 /*!40000 ALTER TABLE `termwork_table` DISABLE KEYS */;
-INSERT INTO `termwork_table` VALUES (1,9,3),(2,4,2),(3,1,1),(4,4,7),(5,4,8),(6,3,9);
+INSERT INTO `termwork_table` VALUES (1,9,3),(2,2,2),(3,4,1),(4,4,7),(5,4,8);
 /*!40000 ALTER TABLE `termwork_table` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:11
+-- Dump completed on 2024-09-20 10:36:10

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `question_exp` (
   PRIMARY KEY (`exp_idq`),
   KEY `exp_idxxx_idx` (`exp_id`),
   CONSTRAINT `exp_idxxx` FOREIGN KEY (`exp_id`) REFERENCES `upload_exp` (`expid`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `question_exp` (
 
 LOCK TABLES `question_exp` WRITE;
 /*!40000 ALTER TABLE `question_exp` DISABLE KEYS */;
-INSERT INTO `question_exp` VALUES (1,'EXPERIMENT 1',1),(2,'EXPERIMENT 2',1),(3,'EXPERIMENT 3',1),(4,'EXPERIMENT1',2),(5,'EXPERIMENT2',2),(6,'EXPERIMENT3',2),(7,'EXPERIMENT4',2),(8,'EXPERIMENT5',2),(9,'EXPERIMENT6',2),(10,'EXPERIMENT7',2),(11,'EXPERIMENT8',2),(12,'EXPERIMENT9',2),(13,'EXPERIMENT10',2);
+INSERT INTO `question_exp` VALUES (1,'EXPERIMENT 1',1),(2,'EXPERIMENT 2',1),(3,'EXPERIMENT 3',1);
 /*!40000 ALTER TABLE `question_exp` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:09
+-- Dump completed on 2024-09-20 10:36:14

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `question_assignment` (
   PRIMARY KEY (`assign_idq`),
   KEY `assign_id_idx` (`assign_id`),
   CONSTRAINT `assign_id` FOREIGN KEY (`assign_id`) REFERENCES `upload_assign` (`assignid`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `question_assignment` (
 
 LOCK TABLES `question_assignment` WRITE;
 /*!40000 ALTER TABLE `question_assignment` DISABLE KEYS */;
-INSERT INTO `question_assignment` VALUES (12,'ASSIGNMENT1',2),(13,'ASSIGNMENT2',2),(14,'ASSIGNMENT3',2),(15,'ASSIGNMENT4',2),(16,'ASSIGNMENT5',2),(17,'ASSIGNMENT6',2);
+INSERT INTO `question_assignment` VALUES (12,'ASSIGNMENT 1',2),(13,'ASSIGNMENT 2',2),(14,'ASSIGNMENT 3',2),(15,'ASSIGNMENT 4',2),(16,'ASSIGNMENT 5',2),(17,'ASSIGNMENT 6',2),(18,'ASSIGNMENT 1',3),(19,'ASSIGNMENT 2',3),(20,'ASSIGNMENT1',4),(21,'ASSIGNMENT2',4),(22,'ASSIGNMENT3',4),(23,'ASSIGNMENT4',4),(24,'ASSIGNMENT5',4),(25,'ASSIGNMENT6',4);
 /*!40000 ALTER TABLE `question_assignment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:15
+-- Dump completed on 2024-09-20 10:36:13

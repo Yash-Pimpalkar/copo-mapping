@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -35,7 +35,7 @@ CREATE TABLE `user_course` (
   KEY `course_idx_idx` (`course_id`),
   CONSTRAINT `course_idx` FOREIGN KEY (`course_id`) REFERENCES `course` (`courseid`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `user_idx` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +44,7 @@ CREATE TABLE `user_course` (
 
 LOCK TABLES `user_course` WRITE;
 /*!40000 ALTER TABLE `user_course` DISABLE KEYS */;
-INSERT INTO `user_course` VALUES (1,5,1,7,'2023-2024','Comps',4),(2,5,2,5,'2023-2024','Comps',4),(3,5,5,5,'2023-2024','Comps',4),(6,6,8,6,'2023-2024','Comps',4),(7,5,1,7,'2024-2025','Comps',4),(8,5,9,7,'2024-2025','Comps',4),(9,5,12,5,'2024-2025','Comps',4);
+INSERT INTO `user_course` VALUES (1,5,1,7,'2023-2024','Comps',4),(2,5,2,5,'2023-2024','Comps',4),(3,5,5,5,'2023-2024','Comps',4),(6,6,8,6,'2023-2024','Comps',4),(7,5,1,7,'2024-2025','Comps',4),(8,5,9,7,'2024-2025','Comps',4),(9,5,11,6,'2023-2024','IT',6),(10,5,12,7,'2024-2025','IT',6);
 /*!40000 ALTER TABLE `user_course` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -57,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:13
+-- Dump completed on 2024-09-20 10:36:11

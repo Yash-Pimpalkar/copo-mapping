@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `co_ass` (
   PRIMARY KEY (`idco_ass`),
   KEY `co_id_ass_idx` (`co_id`),
   CONSTRAINT `co_id_ass` FOREIGN KEY (`co_id`) REFERENCES `question_assignment` (`assign_idq`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `co_ass` (
 
 LOCK TABLES `co_ass` WRITE;
 /*!40000 ALTER TABLE `co_ass` DISABLE KEYS */;
-INSERT INTO `co_ass` VALUES (1,'CO1',12),(2,'CO1',13),(3,'CO2',14),(4,'CO2',15),(5,'CO3',16),(6,'CO4',17),(7,'CO2',12);
+INSERT INTO `co_ass` VALUES (1,'CO1',12),(2,'CO1',13),(3,'CO2',14),(4,'CO2',15),(5,'CO3',16),(6,'CO4',17),(7,'CO2',12),(8,'CO1',18),(9,'CO2',19),(10,'CO1',20),(11,'CO2',20),(12,'CO1',21),(13,'CO1',21),(14,'CO1',22),(15,'CO2',22),(16,'CO2',22),(17,'CO1',23),(18,'CO2',23),(19,'CO3',24),(20,'CO2',24),(21,'CO4',25),(22,'CO1',25);
 /*!40000 ALTER TABLE `co_ass` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:07
+-- Dump completed on 2024-09-20 10:36:10

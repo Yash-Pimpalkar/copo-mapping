@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `co_exp` (
   PRIMARY KEY (`idco_exp`),
   KEY `co_id_exp_idx` (`co_id`),
   CONSTRAINT `co_id_exp` FOREIGN KEY (`co_id`) REFERENCES `question_exp` (`exp_idq`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `co_exp` (
 
 LOCK TABLES `co_exp` WRITE;
 /*!40000 ALTER TABLE `co_exp` DISABLE KEYS */;
-INSERT INTO `co_exp` VALUES (1,'CO3',1),(2,'CO3',1),(3,'CO1',2),(4,'CO3',2),(5,'CO3',2),(6,'CO2',3),(7,'CO1',4),(8,'CO2',5),(9,'CO3',6),(10,'CO4',7),(11,'CO5',8),(12,'CO1',9),(13,'CO2',10),(14,'CO3',11),(15,'CO4',12),(16,'CO5',13);
+INSERT INTO `co_exp` VALUES (1,'CO3',1),(2,'CO3',1),(3,'CO1',2),(4,'CO3',2),(5,'CO3',2),(6,'CO2',3);
 /*!40000 ALTER TABLE `co_exp` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:07
+-- Dump completed on 2024-09-20 10:36:10

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: copo
 -- ------------------------------------------------------
--- Server version	8.0.37
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -31,7 +31,7 @@ CREATE TABLE `cos` (
   PRIMARY KEY (`idcos`),
   KEY `usercourse_idx_idx` (`usercourse_id`),
   CONSTRAINT `usercourse_idx` FOREIGN KEY (`usercourse_id`) REFERENCES `user_course` (`usercourse_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `cos` (
 
 LOCK TABLES `cos` WRITE;
 /*!40000 ALTER TABLE `cos` DISABLE KEYS */;
-INSERT INTO `cos` VALUES (1,1,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-25 21:38:58'),(2,1,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-07-25 21:38:58'),(3,1,'CO3','To demonstrate ensemble techniques to combine predictions from different models. ','2024-07-25 21:38:58'),(4,1,'CO4','To demonstrate the dimensionality reduction techniques.','2024-07-25 21:38:58'),(5,3,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-26 16:01:01'),(10,6,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-08-01 10:51:07'),(11,6,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-08-01 10:51:07'),(12,6,'CO3','sdvkaj','2024-08-01 10:51:07'),(13,6,'CO4','asfasf','2024-08-01 10:51:07'),(14,8,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-08-02 14:14:13'),(15,8,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-08-02 14:14:13'),(16,8,'CO3','5bcnbcc','2024-08-02 14:14:13'),(17,8,'CO4','jhjhc','2024-08-02 14:14:13'),(18,3,'CO2','sdj',NULL),(19,3,'CO3','sddfs',NULL),(20,3,'CO4','sdfsdlka',NULL),(21,9,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-09-19 00:02:48'),(22,9,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-09-19 00:02:48'),(23,9,'CO3','q234','2024-09-19 00:02:48'),(24,9,'CO4','234','2024-09-19 00:02:48'),(25,9,'CO5','aksdjka','2024-09-19 00:02:48');
+INSERT INTO `cos` VALUES (1,1,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-25 21:38:58'),(2,1,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-07-25 21:38:58'),(3,1,'CO3','To demonstrate ensemble techniques to combine predictions from different models. ','2024-07-25 21:38:58'),(4,1,'CO4','To demonstrate the dimensionality reduction techniques.','2024-07-25 21:38:58'),(5,3,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-07-26 16:01:01'),(10,6,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-08-01 10:51:07'),(11,6,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-08-01 10:51:07'),(12,6,'CO3','sdvkaj','2024-08-01 10:51:07'),(13,6,'CO4','asfasf','2024-08-01 10:51:07'),(14,8,'CO1','To acquire fundamental knowledge of developing machine learning models.','2024-08-02 14:14:13'),(15,8,'CO2','To select, apply and evaluate an appropriate machine learning model for the given ','2024-08-02 14:14:13'),(16,8,'CO3','5bcnbcc','2024-08-02 14:14:13'),(17,8,'CO4','jhjhc','2024-08-02 14:14:13'),(18,3,'CO2','sdj',NULL),(19,3,'CO3','sddfs',NULL),(20,3,'CO4','sdfsdlka',NULL),(21,9,'CO1','SKHFSKJFH','2024-09-18 00:41:40'),(22,9,'CO2','SKFHSKJD','2024-09-18 00:41:40'),(23,9,'CO3','HFKJSD','2024-09-18 00:41:40'),(24,9,'CO4',',SFHDSKJ','2024-09-18 00:41:40'),(25,9,'CO5','JKFHDSKJ','2024-09-18 00:41:40'),(26,9,'CO6','SDJFHD','2024-09-18 00:41:40');
 /*!40000 ALTER TABLE `cos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -70,4 +70,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-20  9:51:12
+-- Dump completed on 2024-09-20 10:36:14
