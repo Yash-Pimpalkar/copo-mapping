@@ -64,114 +64,150 @@ export const upload_MajorProject_Questions = async (req, res) => {
 
 
 
-  
+
 
 
 export const showMajorProjectData = async (req, res) => {
-    const userCourseId = req.params.uid;
-   
-    const sql=`SELECT 
-    s.sem_id,
-    s.semid,
-    s.sid,
-    s.marks,
+  const userCourseId = req.params.uid;
+
+  const sql = `SELECT 
+    mp.mainmajorprosemid,
+    mp.sid,
+    mp.logbookmarks,
+    mp.review1marks,
+    mp.review2marks,
+    mp.proreportmarks,
+    mp.majorprosemid,
     c.student_name,
     c.stud_clg_id
 FROM 
-    table_sem AS s
+    main_majorprosem AS mp
 INNER JOIN 
-    semester_marks AS m ON s.semid = m.semid
+    upload_majorprosem AS m ON mp.majorprosemid = m.majorprosemid
 INNER JOIN 
-    copo_students_details AS c ON s.sid = c.sid
+    copo_students_details AS c ON mp.sid = c.sid
 WHERE 
     m.usercourseid = ?;
-`;
-    db.query(sql,userCourseId,(error,results)=>{
-      if(error){
-        console.error('Error fetching Semester data:', error);
-        res.status(500).send('Server error');
+    `;
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching Major Project data:', error);
+      res.status(500).send('Server error');
+    }
+    res.status(200).json(results);
+  })
+
+};
+
+export const MajorProjectUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+  console.log(typeof updates);
+
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the select query to fetch existing values
+  const selectSql = 'SELECT * FROM main_majorprosem WHERE mainmajorprosemid = ?';
+  const updateSql = 'UPDATE main_majorprosem SET logbookmarks = ?, review1marks = ?, review2marks = ?, proreportmarks = ? WHERE mainmajorprosemid = ?';
+
+  const queryValues = await Promise.all(
+    updates.map(async (update) => {
+      const mainmajorprosemid = update.mainmajorprosemid;
+
+      if (!mainmajorprosemid) {
+        console.error('Error: mainmajorprosemid is missing.');
+        return;
       }
-      res.status(200).json(results);
+
+      // Fetch the current values from the database
+      const currentData = await new Promise((resolve, reject) => {
+        db.query(selectSql, [mainmajorprosemid], (error, results) => {
+          if (error) {
+            console.error('Database fetch error:', error);
+            return reject(error);
+          }
+          resolve(results[0]);
+        });
+      });
+
+      if (!currentData) {
+        console.error(`No record found with mainmajorprosemid: ${mainmajorprosemid}`);
+        return;
+      }
+
+      // Use the current value if no new value is provided
+      const logbookmarks = update.logbookmarks !== undefined ? parseInt(update.logbookmarks, 10) : currentData.logbookmarks;
+      const review1marks = update.review1marks !== undefined ? parseInt(update.review1marks, 10) : currentData.review1marks;
+      const review2marks = update.review2marks !== undefined ? parseInt(update.review2marks, 10) : currentData.review2marks;
+      const proreportmarks = update.proreportmarks !== undefined ? parseInt(update.proreportmarks, 10) : currentData.proreportmarks;
+
+      return [
+        logbookmarks,
+        review1marks,
+        review2marks,
+        proreportmarks,
+        mainmajorprosemid
+      ];
     })
-    
-  };
+  );
 
-  export const MajorProjectUpload = async (req, res) => {
-    let updates = req.body;
-    console.log('Received updates:', updates);
-    console.log(typeof updates);
 
-    // Convert to an array if updates is an object
-    if (typeof updates === 'object' && !Array.isArray(updates)) {
-        updates = [updates];
-    }
+  try {
+    await Promise.all(queryValues.map((values) => {
+      return new Promise((resolve, reject) => {
+        console.log(`Executing query: ${updateSql} with values: ${values}`);
+        db.query(updateSql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          console.log('Query result:', results);
+          resolve(results);
+        });
+      });
+    }));
 
-    // Validate input format
-    if (!Array.isArray(updates) || updates.length === 0) {
-        return res.status(400).send('Invalid input');
-    }
-
-    // Prepare the query and values
-    const sql = 'UPDATE table_sem SET marks = ? WHERE sem_id = ?';
-    const queryValues = updates.map(update => {
-        const marks = parseInt(update.Marks, 10);
-    
-        return [
-            isNaN(marks) ? null : marks,  // Use null or a default value if marks is NaN
-            update.sem_id
-        ];
-    });
-    
-    
-
-    // Log the queryValues for debugging
-    console.log('Query Values:', queryValues);
-
-    try {
-        // Use Promise.all to handle multiple queries in parallel
-        await Promise.all(queryValues.map(values => {
-            return new Promise((resolve, reject) => {
-                console.log(`Executing query: ${sql} with values: ${values}`);
-                db.query(sql, values, (error, results) => {
-                    if (error) {
-                        console.error('Database query error:', error); // More detailed error logging
-                        return reject(error);
-                    }
-                    console.log('Query result:', results); // Log results of the query
-                    resolve(results);
-                });
-            });
-        }));
-
-        // Send success response after all updates are complete
-        res.status(200).json('Marks updated successfully');
-    } catch (error) {
-        console.error('Error updating marks:', error);
-        res.status(500).json('Server error');
-    }
+    res.status(200).json('Marks updated successfully');
+  } catch (error) {
+    console.error('Error updating marks:', error);
+    res.status(500).json('Server error');
+  }
 };
 
 
-export const limit =(req,res)=>{
+export const limit = (req, res) => {
   const userCourseId = req.params.uid;
-  const checkQuery = 'SELECT * FROM semester_marks WHERE usercourseid = ?'; 
-  db.query(checkQuery,userCourseId,(Err,result)=>{
-    if(Err){
-      console.log(Err)
+  const sql = 'SELECT logbookmarks, review1marks, review2marks, proreportmarks FROM upload_majorprosem WHERE usercourseid = ?;';
+  db.query(sql, [userCourseId], (err, results) => {
+    if (err) {
+      console.error('Error fetching limits:', err);
+      return res.status(500).json({ message: 'Error fetching data from database' });
     }
-    res.status(200).json(result)
-  })
-}
+    console.log(userCourseId);
+    console.log('Query results:', results); 
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No limits found for the provided userCourseId' });
+    }
+    res.status(200).json(results);
+  });
+};
+
 
 
 export const MajorProject_Attainment = async (req, res) => {
   const { coAverages, userCourseId } = req.body;  // Now includes userCourseId
 
-  console.log(coAverages, userCourseId);
+  console.log("Coaverage: ",coAverages);
 
   try {
     for (const { coName, coAverage } of coAverages) {
-      const parsedCoAverage = parseFloat(coAverage);
+      const parsedCoAverage = coAverage;
 
       // Determine attainment based on coAverage
       let attainment;
@@ -186,7 +222,7 @@ export const MajorProject_Attainment = async (req, res) => {
       }
 
       // Check if the coname and usercourse_id combination already exists
-      const sql = "SELECT idSemester_attainment FROM semester_attainment WHERE coname = ? AND usercourse_id = ?";
+      const sql = "SELECT idmajorpro_attainment FROM majorpro_attainment WHERE coname = ? AND usercourse_id = ?";
       db.query(sql, [coName, userCourseId], (error, results) => {
         if (error) {
           console.log(error);
@@ -194,9 +230,9 @@ export const MajorProject_Attainment = async (req, res) => {
         }
 
         if (results.length > 0) {
-          // If exists, update both Semester_attainment and attainment
-          const sql1 = "UPDATE semester_attainment SET Semester_attainment = ?, attainment = ? WHERE idSemester_attainment = ?";
-          db.query(sql1, [parsedCoAverage, attainment, results[0].idSemester_attainment], (error, result) => {
+          // If exists, update both Majorpro_attainment and attainment
+          const sql1 = "UPDATE majorpro_attainment SET Majorpro_attainment = ?, attainment = ? WHERE idmajorpro_attainment = ?";
+          db.query(sql1, [parsedCoAverage, attainment, results[0].idmajorpro_attainment], (error, result) => {
             if (error) {
               console.log(error);
               return res.status(500).json({ error: error.message });
@@ -205,23 +241,44 @@ export const MajorProject_Attainment = async (req, res) => {
           });
         } else {
           // If doesn't exist, insert a new record with coname, Semester_attainment, attainment, and usercourse_id
-          const sql2 = "INSERT INTO semester_attainment (coname, Semester_attainment, attainment, usercourse_id) VALUES (?, ?, ?, ?)";
+          const sql2 = "INSERT INTO majorpro_attainment (coname, Majorpro_attainment, attainment, usercourse_id) VALUES (?, ?, ?, ?)";
           db.query(sql2, [coName, parsedCoAverage, attainment, userCourseId], (error, results1) => {
             if (error) {
               console.log(error);
               return res.status(500).json({ error: error.message });
             }
-            console.log(`Inserted new Semester attainment and attainment for ${coName}`);
+            console.log(`Inserted new Major Project attainment and attainment for ${coName}`);
           });
         }
       });
     }
 
-    console.log('Semester attainment and attainment inserted/updated successfully');
-    res.status(200).json({ message: 'Semester attainment and attainment inserted/updated successfully' });
+    console.log('Major Project attainment and attainment inserted/updated successfully');
+    res.status(200).json({ message: 'Major Project attainment and attainment inserted/updated successfully' });
   } catch (error) {
-    console.error('Error inserting/updating Semester attainment and attainment:', error);
-    res.status(500).json({ error: 'Error inserting/updating Semester attainment and attainment' });
+    console.error('Error inserting/updating Major Project attainment and attainment:', error);
+    res.status(500).json({ error: 'Error inserting/updating Major Project attainment and attainment' });
   }
 };
+
+
+export const Co_majorprosem = async (req, res) => {
+  const { uid } = req.params;
+
+  try{
+    const sql = "SELECT s.idco_majorprosem, s.coname FROM co_majorprosem AS s INNER JOIN upload_majorprosem AS u ON s.co_id = u.majorprosemid WHERE usercourseid = ?";
+
+    db.query(sql, uid, (error, results) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(results);
+    })
+  }catch (error) {
+    console.error('Error inserting/updating Major Project attainment and attainment:', error);
+    res.status(500).json({ error: 'Error inserting/updating Major Project attainment and attainment' });
+  }
+}
 
