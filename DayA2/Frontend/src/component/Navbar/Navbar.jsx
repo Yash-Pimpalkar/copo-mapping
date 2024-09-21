@@ -148,6 +148,7 @@ export default function Navbar() {
     { name: "Upload Sem", href: "/uploadsem", userType: [2] },
     { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
     { name: "Upload Oral", href: "/uploadoral", userType: [2] },
+    { name: "Upload Oral(PCE)", href: "/uploadoralpce", userType: [2] },
   ];
    
   const TermworkNavigation = [
