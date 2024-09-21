@@ -18,6 +18,7 @@ import UploadTermworkRoute from "./routes/upload_TW.js"
 import UploadOralRoute from "./routes/Upload_oral.js"
 import UploadMajorProjectRoute from "./routes/Upload_majorproject.js"
 import UploadMiniProjectRoute from "./routes/Upload_miniproject.js";
+import ResultRoute from "./routes/Result.js"
 const port = 8081;
 
 app.use(cors())
@@ -39,6 +40,7 @@ app.use("/api/tw/upload",UploadTermworkRoute)
 app.use("/api/oral",UploadOralRoute)
 app.use("/api/uploadmajorprosem",UploadMajorProjectRoute)
 app.use("/api/uploadminiprosem",UploadMiniProjectRoute);
+app.use("/api/result",ResultRoute);
 
 
 

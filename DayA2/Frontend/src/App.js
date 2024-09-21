@@ -41,6 +41,7 @@ import Tworalresult from './pages/Results/tworalresult';
 import Tcstyperesult from './pages/Results/tcstyperesult';
 import IntaTWUniv from './pages/Results/mathsintatwuniv';
 import TWOnly from './pages/Results/physicsonlytw';
+import MainResult from './pages/Results/mainresult';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -112,6 +113,7 @@ function App() {
               <Route path='/Tcstyperesult' element={<Tcstyperesult uid={user_id}/>}/>
               <Route path='/Intatwuniv' element={<IntaTWUniv uid={user_id}/>}/>
               <Route path='/Twonly' element={<TWOnly uid={user_id}/>}/>
+              <Route path='/Mainresult' element={<MainResult uid={user_id}/>}/>
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>

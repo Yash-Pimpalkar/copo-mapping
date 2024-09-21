@@ -139,7 +139,7 @@ export default function Navbar() {
   ];
 
   const resultNavigation = [
-    { name: "Results", href: "/results", userTypes: [2] },
+    { name: "Results", href: "/mainresult", userTypes: [2] },
   ];
 
   const questionNavigation = [

@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import api from "../../api"; // Ensure this is set up to point to your API
 
-const Tcstyperesult = () => {
-  const loData = [
-    { lo: 'ITL501.1', ia1: 3, ia2: 0, inta: 3, univ: 2, indirect: 2.47, direct: 2.40, total: 2.89 },
-    { lo: 'ITL501.2', ia1: 3, ia2: 0,inta: 3, univ: 2, indirect: 2.44, direct: 2.40, total: 2.89 },
-    { lo: 'ITL501.3', ia1: 3, ia2: 0,inta: 3, univ: 2, indirect: 2.36, direct: 2.40, total: 2.87 },
-    { lo: 'ITL501.4', ia1: 0, ia2: 3, inta: 3, univ: 2, indirect: 2.39, direct: 2.40, total: 2.88 },
-    { lo: 'ITL501.5', ia1: 0, ia2: 3, inta: 3, univ: 2, indirect: 2.29, direct: 2.40, total: 2.86 },
-    
-  ];
+const Tcstyperesult = ({ uid }) => {
+  const [userCourseId, setUserCourseId] = useState(null);
+  const [loData, setLoData] = useState([]);
+  
+  useEffect(() => {
+  const fetchCosData = async (uid) => {
+    console.log(uid)
+    console.log(uid)
+    try {
+      const response = await api.get(`/api/result/ia1attaiment/tcstyperesult/${uid}`); // Fixed the query
+      console.log("Fetched COS data:", response.data); // Log the fetched data
+      setLoData(response.data); // Assuming you want to set co_name here
+    } catch (error) {
+      console.error("Error fetching COS data", error);
+    }
+  }
+  if (uid) {
+    fetchCosData(uid);
+  }
+},[uid])
+
+  console.log(loData);
 
   const poPsoData = [
     { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
@@ -20,6 +34,8 @@ const Tcstyperesult = () => {
   return (
     <div className="p-4">
       {/* Course Attainment Table */}
+      {/* {loData.length > 0 && ( */}
+      <>
       <h1 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">TCS TYPE IA1 AND IA2 Attainment</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 mb-4 text-sm md:text-base">
@@ -46,14 +62,14 @@ const Tcstyperesult = () => {
           </thead>
           <tbody>
             {/* Data Rows */}
-            {loData.map((item, index) => (
+            {loData.map((item,index) => (
               <tr key={index}>
-                <td className="border border-gray-300 p-2 text-center">{item.lo}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.ia1}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.ia2}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.inta}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.univ}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.lo}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.direct}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
@@ -146,6 +162,8 @@ const Tcstyperesult = () => {
           </tbody>
         </table>
       </div>
+      </>
+      {/* )} */}
     </div>
   );
 };
