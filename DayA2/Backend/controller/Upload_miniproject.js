@@ -87,12 +87,12 @@ export const showMiniProjectData = async (req, res) => {
   INNER JOIN 
       copo_students_details AS c ON mp.sid = c.sid
   WHERE 
-      um.usercourseid IS NOT NULL;
+      um.usercourseid = ?;
   `;
 
   db.query(sql, userCourseId, (error, results) => {
       if (error) {
-          console.error('Error fetching Semester data:', error);
+          console.error('Error fetching Miniproject data:', error);
           res.status(500).send('Server error');
       }
       res.status(200).json(results);
@@ -159,24 +159,91 @@ export const MiniProjectUpload = async (req, res) => {
 
 export const limit =(req,res)=>{
   const userCourseId = req.params.uid;
-  const checkQuery = 'SELECT * FROM upload_miniprosem WHERE usercourseid = ?'; 
-  db.query(checkQuery,userCourseId,(Err,result)=>{
-    if(Err){
-      console.log(Err)
+  const sql = 'SELECT logbookmarks, review1marks, review2marks, proreportmarks FROM upload_miniprosem WHERE usercourseid = ?;';
+  db.query(sql, [userCourseId], (err, results) => {
+    if (err) {
+      console.error('Error fetching limits:', err);
+      return res.status(500).json({ message: 'Error fetching data from database' });
     }
-    res.status(200).json(result)
-  })
+    console.log(userCourseId);
+    console.log('Query results:', results); 
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No limits found for the provided userCourseId' });
+    }
+    res.status(200).json(results);
+  });
 }
 
+
+// export const MiniProject_Attainment = async (req, res) => {
+//   const { coAverages, userCourseId } = req.body;  // Now includes userCourseId
+
+//   console.log(coAverages, userCourseId);
+
+//   try {
+//     for (const { coName, coAverage } of coAverages) {
+//       const parsedCoAverage = parseFloat(coAverage);
+
+//       // Determine attainment based on coAverage
+//       let attainment;
+//       if (parsedCoAverage <= 40) {
+//         attainment = 0;
+//       } else if (parsedCoAverage > 40 && parsedCoAverage <= 60) {
+//         attainment = 1;
+//       } else if (parsedCoAverage > 60 && parsedCoAverage <= 70) {
+//         attainment = 2;
+//       } else {
+//         attainment = 3;
+//       }
+
+//       // Check if the coname and usercourse_id combination already exists
+//       const sql = "SELECT idSemester_attainment FROM semester_attainment WHERE coname = ? AND usercourse_id = ?";
+//       db.query(sql, [coName, userCourseId], (error, results) => {
+//         if (error) {
+//           console.log(error);
+//           return res.status(500).json({ error: error.message });
+//         }
+
+//         if (results.length > 0) {
+//           // If exists, update both Semester_attainment and attainment
+//           const sql1 = "UPDATE semester_attainment SET Semester_attainment = ?, attainment = ? WHERE idSemester_attainment = ?";
+//           db.query(sql1, [parsedCoAverage, attainment, results[0].idSemester_attainment], (error, result) => {
+//             if (error) {
+//               console.log(error);
+//               return res.status(500).json({ error: error.message });
+//             }
+//             console.log(`Updated MiniProject Attainment and attainment for ${coName}`);
+//           });
+//         } else {
+//           // If doesn't exist, insert a new record with coname, Semester_attainment, attainment, and usercourse_id
+//           const sql2 = "INSERT INTO semester_attainment (coname, Semester_attainment, attainment, usercourse_id) VALUES (?, ?, ?, ?)";
+//           db.query(sql2, [coName, parsedCoAverage, attainment, userCourseId], (error, results1) => {
+//             if (error) {
+//               console.log(error);
+//               return res.status(500).json({ error: error.message });
+//             }
+//             console.log(`Inserted new Semester attainment and attainment for ${coName}`);
+//           });
+//         }
+//       });
+//     }
+
+//     console.log('Semester attainment and attainment inserted/updated successfully');
+//     res.status(200).json({ message: 'Semester attainment and attainment inserted/updated successfully' });
+//   } catch (error) {
+//     console.error('Error inserting/updating Semester attainment and attainment:', error);
+//     res.status(500).json({ error: 'Error inserting/updating Semester attainment and attainment' });
+//   }
+// };
 
 export const MiniProject_Attainment = async (req, res) => {
   const { coAverages, userCourseId } = req.body;  // Now includes userCourseId
 
-  console.log(coAverages, userCourseId);
+  console.log("Coaverage: ",coAverages);
 
   try {
     for (const { coName, coAverage } of coAverages) {
-      const parsedCoAverage = parseFloat(coAverage);
+      const parsedCoAverage = coAverage;
 
       // Determine attainment based on coAverage
       let attainment;
@@ -191,7 +258,7 @@ export const MiniProject_Attainment = async (req, res) => {
       }
 
       // Check if the coname and usercourse_id combination already exists
-      const sql = "SELECT idSemester_attainment FROM semester_attainment WHERE coname = ? AND usercourse_id = ?";
+      const sql = "SELECT idminipro_attainment FROM minipro_attainment WHERE coname = ? AND usercourse_id = ?";
       db.query(sql, [coName, userCourseId], (error, results) => {
         if (error) {
           console.log(error);
@@ -199,34 +266,56 @@ export const MiniProject_Attainment = async (req, res) => {
         }
 
         if (results.length > 0) {
-          // If exists, update both Semester_attainment and attainment
-          const sql1 = "UPDATE semester_attainment SET Semester_attainment = ?, attainment = ? WHERE idSemester_attainment = ?";
-          db.query(sql1, [parsedCoAverage, attainment, results[0].idSemester_attainment], (error, result) => {
+          // If exists, update both Minipro_attainment and attainment
+          const sql1 = "UPDATE minipro_attainment SET Minipro_attainment = ?, attainment = ? WHERE idminipro_attainment = ?";
+          db.query(sql1, [parsedCoAverage, attainment, results[0].idminipro_attainment], (error, result) => {
             if (error) {
               console.log(error);
               return res.status(500).json({ error: error.message });
             }
-            console.log(`Updated MajorProject Attainment and attainment for ${coName}`);
+            console.log(`Updated Miniproject Attainment and attainment for ${coName}`);
           });
         } else {
           // If doesn't exist, insert a new record with coname, Semester_attainment, attainment, and usercourse_id
-          const sql2 = "INSERT INTO semester_attainment (coname, Semester_attainment, attainment, usercourse_id) VALUES (?, ?, ?, ?)";
+          const sql2 = "INSERT INTO minipro_attainment (coname, Minipro_attainment, attainment, usercourse_id) VALUES (?, ?, ?, ?)";
           db.query(sql2, [coName, parsedCoAverage, attainment, userCourseId], (error, results1) => {
             if (error) {
               console.log(error);
               return res.status(500).json({ error: error.message });
             }
-            console.log(`Inserted new Semester attainment and attainment for ${coName}`);
+            console.log(`Inserted new Mini Project attainment and attainment for ${coName}`);
           });
         }
       });
     }
 
-    console.log('Semester attainment and attainment inserted/updated successfully');
-    res.status(200).json({ message: 'Semester attainment and attainment inserted/updated successfully' });
+    console.log('Mini Project attainment and attainment inserted/updated successfully');
+    res.status(200).json({ message: 'Mini Project attainment and attainment inserted/updated successfully' });
   } catch (error) {
-    console.error('Error inserting/updating Semester attainment and attainment:', error);
-    res.status(500).json({ error: 'Error inserting/updating Semester attainment and attainment' });
+    console.error('Error inserting/updating Mini Project attainment and attainment:', error);
+    res.status(500).json({ error: 'Error inserting/updating Mini Project attainment and attainment' });
   }
 };
+
+
+export const Co_miniprosem = async (req, res) => {
+  const { uid } = req.params;
+
+  try{
+    const sql = "SELECT s.idco_miniprosem, s.coname FROM co_miniprosem AS s INNER JOIN upload_miniprosem AS u ON s.co_id = u.miniprosemid WHERE usercourseid = ?";
+
+    db.query(sql, uid, (error, results) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(results);
+    })
+  }catch (error) {
+    console.error('Error inserting/updating Mini Project attainment and attainment:', error);
+    res.status(500).json({ error: 'Error inserting/updating Mini Project attainment and attainment' });
+  }
+}
+
 
