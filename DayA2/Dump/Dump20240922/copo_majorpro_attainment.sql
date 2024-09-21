@@ -16,30 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `co_majorprosem`
+-- Table structure for table `majorpro_attainment`
 --
 
-DROP TABLE IF EXISTS `co_majorprosem`;
+DROP TABLE IF EXISTS `majorpro_attainment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `co_majorprosem` (
-  `idco_majorprosem` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `majorpro_attainment` (
+  `idmajorpro_attainment` int NOT NULL AUTO_INCREMENT,
   `coname` varchar(225) DEFAULT NULL,
-  `co_id` int DEFAULT NULL,
-  PRIMARY KEY (`idco_majorprosem`),
-  KEY `co_id_idx` (`co_id`),
-  CONSTRAINT `co_idx` FOREIGN KEY (`co_id`) REFERENCES `upload_majorprosem` (`majorprosemid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Majorpro_attainment` float DEFAULT NULL,
+  `attainment` int DEFAULT NULL,
+  `usercourse_id` int DEFAULT NULL,
+  PRIMARY KEY (`idmajorpro_attainment`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `co_majorprosem`
+-- Dumping data for table `majorpro_attainment`
 --
 
-LOCK TABLES `co_majorprosem` WRITE;
-/*!40000 ALTER TABLE `co_majorprosem` DISABLE KEYS */;
-INSERT INTO `co_majorprosem` VALUES (4,'CO1',1),(5,'CO2',1),(6,'CO3',1);
-/*!40000 ALTER TABLE `co_majorprosem` ENABLE KEYS */;
+LOCK TABLES `majorpro_attainment` WRITE;
+/*!40000 ALTER TABLE `majorpro_attainment` DISABLE KEYS */;
+INSERT INTO `majorpro_attainment` VALUES (1,'CO1',61.41,2,10),(2,'CO2',61.41,2,10),(3,'CO3',61.41,2,10);
+/*!40000 ALTER TABLE `majorpro_attainment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-22  1:44:52
+-- Dump completed on 2024-09-22  1:45:08
