@@ -498,7 +498,7 @@ export const upload_tw_questions = async (req, res) => {
 
   try {
     // 1. Check if `usercourseid` already exists in `upload_attendance`
-    const checkQuery = `SELECT * FROM upload_attendance WHERE usecourseid = ?`;
+    const checkQuery = `SELECT * FROM upload_attendance WHERE usercourseid = ?`;
     const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
 
     if (checkResult.length > 0) {
@@ -515,7 +515,7 @@ export const upload_tw_questions = async (req, res) => {
       try {
         // 2. Insert into `upload_attendance` table
         const insertAttendanceQuery = `
-          INSERT INTO upload_attendance (usecourseid, maxmarks)
+          INSERT INTO upload_attendance (usercourseid, maxmarks)
           VALUES (?, ?)
         `;
         await db.promise().query(insertAttendanceQuery, [usercourseid, maxMarks]);

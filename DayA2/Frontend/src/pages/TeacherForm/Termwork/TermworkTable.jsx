@@ -5,6 +5,7 @@ import TheoryOnly from "./TheoryOnly";
 import TheoryAssignment from "./TheoryAssignment";
 import Experiment from "./Experiment";
 import Attendance from "./Attendance";
+import SciLab from "./Scilab";
 
 const TermworkTable = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
@@ -63,7 +64,45 @@ const TermworkTable = ({ uid }) => {
         {twdata[0].twid === 1 ? (
           <TheoryOnly />
         ) : twdata[0].twid === 2 ? (
-          <TheoryAssignment userCourseId={userCourseId} />
+          <>
+          {currentComponent === "TheoryAssignment" ? (
+            <>
+              <TheoryAssignment userCourseId={userCourseId} />
+              <button
+                onClick={() => setCurrentComponent("Attendance")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Next: Show Attendance
+              </button>
+            </>
+          ) : currentComponent === "Attendance" ? (
+            <>
+              <Attendance uid={userCourseId} />
+              <button
+                onClick={() => setCurrentComponent("Scilab")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Next: Show Scilab
+              </button>
+              <button
+                onClick={() => setCurrentComponent("TheoryAssignment")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded ml-2"
+              >
+                Back to Theory Assignment
+              </button>
+            </>
+          ) : (
+            <>
+              <SciLab userCourseId={userCourseId} />
+              <button
+                onClick={() => setCurrentComponent("Attendance")}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Back to Attendance
+              </button>
+            </>
+          )}
+        </>
         ) : twdata[0].twid === 3 ? (
           <Experiment userCourseId={userCourseId} />
         ) : twdata[0].twid === 4 ? (

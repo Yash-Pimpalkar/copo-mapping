@@ -3,34 +3,34 @@ import api from '../../../api';
 import * as XLSX from 'xlsx';
 import Pagination from '../../../component/Pagination/Pagination';
 
-const Attendance = ({ uid }) => {
-  const [attendanceData, setAttendanceData] = useState([]);
+const GroupDiscussion = ({ uid }) => {
+  const [gdData, setGdData] = useState([]);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [maxLimit, setMaxLimit] = useState(0); // Adjust this as needed
+  const [maxLimit, setMaxLimit] = useState(0); 
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchAttendanceData = async () => {
+    const fetchGdData = async () => {
       try {
-        const res = await api.get(`/api/termwork/show/attendance/${uid}`);
-        setAttendanceData(res.data);
-        const res1=await api.get(`/api/termwork/attendance/limit/${uid}`);
+        const res = await api.get(`/api/termwork/show/gd/${uid}`);
+        setGdData(res.data);
+        const res1 = await api.get(`/api/termwork/gd/limit/${uid}`);
         setMaxLimit(res1.data[0].maxmarks);
       } catch (error) {
-        console.error("Error fetching attendance data:", error);
+        console.error("Error fetching GD data:", error);
       }
     };
 
     if (uid) {
-      fetchAttendanceData();
+      fetchGdData();
     }
   }, [uid]);
-console.log(maxLimit)
-  const filteredData = attendanceData.filter((item) => {
+
+  const filteredData = gdData.filter((item) => {
     const query = searchQuery.toUpperCase();
     return (
       item.student_name?.toUpperCase().includes(query) ||
@@ -54,7 +54,7 @@ console.log(maxLimit)
       let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
       const headers = jsonData[0];
-      const rows = jsonData.slice(1); // Skip header row
+      const rows = jsonData.slice(1); 
 
       const validatedData = rows.map((row) => {
         const student = {};
@@ -65,49 +65,49 @@ console.log(maxLimit)
       });
 
       try {
-        await api.put("/api/termwork/attendance/update", validatedData);
-        setAttendanceData(validatedData);
+        await api.put("/api/termwork/gd/update", validatedData);
+        setGdData(validatedData);
         alert("File is uploaded");
         window.location.reload();
       } catch (error) {
-        console.error("Error updating marks:", error);
+        console.error("Error updating GD marks:", error);
       }
     };
     reader.readAsArrayBuffer(file);
   };
 
   const handleFileDownload = () => {
-    const formattedData = attendanceData.map((student) => ({
-      att_id: student.att_id,
+    const formattedData = gdData.map((student) => ({
+      gdid: student.gdid,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["att_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["gdid", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "AttendanceData");
-    XLSX.writeFile(workbook, "attendance_data.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "GDData");
+    XLSX.writeFile(workbook, "gd_data.xlsx");
   };
 
   const handleEditClick = (index) => {
     setEditingRow(index);
     setEditedMarks({
       ...editedMarks,
-      [index]: attendanceData[index].marks,
+      [index]: gdData[index].marks,
     });
   };
-// console.log(attendanceData)
+
   const handleSaveClick = async (index) => {
-    const att_id = attendanceData[index].att_id;
+    const gdid = gdData[index].gdid;
     const marks = editedMarks[index];
 
     try {
-      await api.put("/api/termwork/attendance/update", { att_id: att_id, Marks: marks });
-      setAttendanceData((prevData) =>
+      await api.put("/api/termwork/gd/update", { gdid: gdid, marks: marks });
+      setGdData((prevData) =>
         prevData.map((item, idx) =>
           idx === index ? { ...item, marks } : item
         )
@@ -233,4 +233,4 @@ console.log(maxLimit)
   );
 };
 
-export default Attendance;
+export default GroupDiscussion;

@@ -3,34 +3,34 @@ import api from '../../../api';
 import * as XLSX from 'xlsx';
 import Pagination from '../../../component/Pagination/Pagination';
 
-const Attendance = ({ uid }) => {
-  const [attendanceData, setAttendanceData] = useState([]);
+const SciLab = ({ uid }) => {
+  const [sciLabData, setSciLabData] = useState([]);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [maxLimit, setMaxLimit] = useState(0); // Adjust this as needed
+  const [maxLimit, setMaxLimit] = useState(0);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchAttendanceData = async () => {
+    const fetchSciLabData = async () => {
       try {
-        const res = await api.get(`/api/termwork/show/attendance/${uid}`);
-        setAttendanceData(res.data);
-        const res1=await api.get(`/api/termwork/attendance/limit/${uid}`);
+        const res = await api.get(`/api/termwork/show/scilab/${uid}`);
+        setSciLabData(res.data);
+        const res1 = await api.get(`/api/termwork/scilab/limit/${uid}`);
         setMaxLimit(res1.data[0].maxmarks);
       } catch (error) {
-        console.error("Error fetching attendance data:", error);
+        console.error("Error fetching SciLab data:", error);
       }
     };
 
     if (uid) {
-      fetchAttendanceData();
+      fetchSciLabData();
     }
   }, [uid]);
-console.log(maxLimit)
-  const filteredData = attendanceData.filter((item) => {
+
+  const filteredData = sciLabData.filter((item) => {
     const query = searchQuery.toUpperCase();
     return (
       item.student_name?.toUpperCase().includes(query) ||
@@ -65,56 +65,56 @@ console.log(maxLimit)
       });
 
       try {
-        await api.put("/api/termwork/attendance/update", validatedData);
-        setAttendanceData(validatedData);
+        await api.put("/api/termwork/scilab/update", validatedData);
+        setSciLabData(validatedData);
         alert("File is uploaded");
         window.location.reload();
       } catch (error) {
-        console.error("Error updating marks:", error);
+        console.error("Error updating SciLab marks:", error);
       }
     };
     reader.readAsArrayBuffer(file);
   };
 
   const handleFileDownload = () => {
-    const formattedData = attendanceData.map((student) => ({
-      att_id: student.att_id,
+    const formattedData = sciLabData.map((student) => ({
+      sciid: student.sciid,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["att_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["sciid", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "AttendanceData");
-    XLSX.writeFile(workbook, "attendance_data.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SciLabData");
+    XLSX.writeFile(workbook, "scilab_data.xlsx");
   };
 
   const handleEditClick = (index) => {
     setEditingRow(index);
     setEditedMarks({
       ...editedMarks,
-      [index]: attendanceData[index].marks,
+      [index]: sciLabData[index].marks,
     });
   };
-// console.log(attendanceData)
+
   const handleSaveClick = async (index) => {
-    const att_id = attendanceData[index].att_id;
+    const sciid = sciLabData[index].sciid;
     const marks = editedMarks[index];
 
     try {
-      await api.put("/api/termwork/attendance/update", { att_id: att_id, Marks: marks });
-      setAttendanceData((prevData) =>
+      await api.put("/api/termwork/scilab/update", { sciid: sciid, Marks: marks });
+      setSciLabData((prevData) =>
         prevData.map((item, idx) =>
           idx === index ? { ...item, marks } : item
         )
       );
       setEditingRow(null);
     } catch (error) {
-      console.error("Error saving marks:", error);
+      console.error("Error saving SciLab marks:", error);
     }
   };
 
@@ -145,8 +145,8 @@ console.log(maxLimit)
   };
 
   return (
-    <div className="overflow-x-auto  min-h-screen">
-      {/* Container for Export, Import and Search Bar */}
+    <div className="overflow-x-auto min-h-screen">
+      {/* Container for Export, Import, and Search Bar */}
       <div className="mb-4 flex justify-between items-center bg-white shadow-lg rounded-lg p-4">
         {/* File Upload */}
         <input
@@ -233,4 +233,4 @@ console.log(maxLimit)
   );
 };
 
-export default Attendance;
+export default SciLab;

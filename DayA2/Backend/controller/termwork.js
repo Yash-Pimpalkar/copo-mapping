@@ -565,9 +565,9 @@ export const AttendanceUpload = async (req, res) => {
   // Prepare the query and values
   const sql = 'UPDATE main_atten SET marks = ? WHERE att_id = ?';
   const queryValues = updates.map(update => {
-    const marks = parseInt(update.marks, 10);
+    const Marks = parseInt(update.Marks, 10);
     return [
-      isNaN(marks) ? null : marks,  // Use null if marks is NaN
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
       update.att_id
     ];
   });
@@ -599,6 +599,192 @@ export const AttendanceUpload = async (req, res) => {
 export const AttendanceLimit = (req, res) => {
   const userCourseId = req.params.uid;
   const checkQuery = 'SELECT * FROM upload_attendance WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+
+
+
+export const showGdData = async (req, res) => {
+  const userCourseId = req.params.uid;
+
+  const sql = `
+    SELECT 
+      m.Gd_id,
+      m.gdd_id,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_gd AS m
+    INNER JOIN 
+      upload_gd AS u ON m.gdd_id = u.gdid
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching GD data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const GdUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_gd SET marks = ? WHERE Gd_id = ?';
+  const queryValues = updates.map(update => {
+    const marks = parseInt(update.marks, 10);
+    return [
+      isNaN(marks) ? null : marks,  // Use null if marks is NaN
+      update.Gd_id
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('GD marks updated successfully');
+  } catch (error) {
+    console.error('Error updating GD marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const GdLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_gd WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+
+
+export const showSciLabData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      m.sciid,
+      m.scipract_id,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_scipract AS m
+    INNER JOIN 
+      uploadscilabpract AS u ON m.scipract_id = u.scipractid
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching Scilab practical data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+
+export const SciLabUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_scipract SET marks = ? WHERE sciid = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.sciid
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Scilab practical marks updated successfully');
+  } catch (error) {
+    console.error('Error updating Scilab practical marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const SciLabLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM uploadscilabpract WHERE usercourseid = ?';
 
   db.query(checkQuery, userCourseId, (Err, result) => {
     if (Err) {
