@@ -1,5 +1,5 @@
 import express from "express";
-import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showSciLabData, submitTermworkId, updateAssignments, updateExperiments } from "../controller/termwork.js";
+import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, JournalLimit, JournalUpload, MajorProjectLimit, MajorProjectUpload, MiniProjectLimit, MiniProjectUpload, PPTLimit, PPTUpload, ReportLimit, ReportUpload, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showJournalData, showMajorProjectData, showMiniProjectData, showPPTData, showReportData, showSciLabData, showTradeData, submitTermworkId, TradeLimit, TradeUpload, updateAssignments, updateExperiments } from "../controller/termwork.js";
 const router =express.Router();
 
 // main termwork
@@ -32,6 +32,39 @@ router.get("/gd/limit/:uid", GdLimit);
 router.get("/show/scilab/:uid", showSciLabData);
 router.put("/scilab/update", SciLabUpload);
 router.get("/scilab/limit/:uid", SciLabLimit);
+
+
+//jornal Route 
+router.get("/show/journal/:uid", showJournalData);
+router.put("/journal/update", JournalUpload);
+router.get("/journal/limit/:uid", JournalLimit);
+
+// majot project
+router.get("/show/majorpro/:uid", showMajorProjectData);
+router.put("/majorpro/update", MajorProjectUpload);
+router.get("/majorpro/limit/:uid", MajorProjectLimit);
+
+// mini project
+router.get("/show/minipro/:uid", showMiniProjectData);
+router.put("/minipro/update", MiniProjectUpload);
+router.get("/minipro/limit/:uid", MiniProjectLimit);
+
+// ppt 
+router.get("/show/ppt/:uid", showPPTData);
+router.put("/ppt/update", PPTUpload);
+router.get("/ppt/limit/:uid", PPTLimit);
+
+// report
+
+router.get("/show/report/:uid", showReportData);
+router.put("/report/update", ReportUpload);
+router.get("/report/limit/:uid", ReportLimit);
+
+
+// trade
+router.get("/show/trade/:uid", showTradeData);
+router.put("/trade/update", TradeUpload);
+router.get("/trade/limit/:uid", TradeLimit);
 
 
 

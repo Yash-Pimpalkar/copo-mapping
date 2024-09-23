@@ -796,3 +796,547 @@ export const SciLabLimit = (req, res) => {
   });
 };
 
+
+export const showJournalData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      j.journalid,
+      j.journal1_id,
+      j.sid,
+      j.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_journal AS j
+    INNER JOIN 
+      upload_journal AS u ON j.journal1_id = u.journalid
+    INNER JOIN 
+      copo_students_details AS c ON j.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching journal data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const JournalUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_journal SET marks = ? WHERE journalid = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.journalid
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Journal marks updated successfully');
+  } catch (error) {
+    console.error('Error updating journal marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const JournalLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_journal WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+
+
+export const showMajorProjectData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      m.majorpro_id,
+      m.majorid,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_majorpro AS m
+    INNER JOIN 
+      upload_majorpro AS u ON m.majorid = u.majorid
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching major project data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const MajorProjectUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_majorpro SET marks = ? WHERE majorpro_id = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.majorpro_id
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Major project marks updated successfully');
+  } catch (error) {
+    console.error('Error updating major project marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const MajorProjectLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_majorpro WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+
+export const showMiniProjectData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      m.miniproid,
+      m.miniid,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_minipro AS m
+    INNER JOIN 
+      upload_minipro AS u ON m.miniid = u.miniid
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching mini project data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const MiniProjectUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_minipro SET marks = ? WHERE miniproid = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.miniproid
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Mini project marks updated successfully');
+  } catch (error) {
+    console.error('Error updating mini project marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const MiniProjectLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_minipro WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+export const showPPTData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      m.id,
+      m.ppt_id,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_ppt AS m
+    INNER JOIN 
+      upload_ppt AS u ON m.ppt_id = u.ppt_id
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching PPT data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const PPTUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_ppt SET marks = ? WHERE id = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.id
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('PPT marks updated successfully');
+  } catch (error) {
+    console.error('Error updating PPT marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const PPTLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_ppt WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+export const showReportData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      m.id,
+      m.report_id,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_report AS m
+    INNER JOIN 
+      upload_report AS u ON m.report_id = u.report_id
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching report data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const ReportUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_report SET marks = ? WHERE id = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.id
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Report marks updated successfully');
+  } catch (error) {
+    console.error('Error updating report marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const ReportLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_report WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
+export const showTradeData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      m.tradeid,
+      m.trade_id,
+      m.sid,
+      m.marks,
+      c.student_name,
+      c.stud_clg_id
+    FROM 
+      main_trade AS m
+    INNER JOIN 
+      upload_trade AS u ON m.trade_id = u.tradeid
+    INNER JOIN 
+      copo_students_details AS c ON m.sid = c.sid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching trade data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+export const TradeUpload = async (req, res) => {
+  let updates = req.body;
+  console.log('Received updates:', updates);
+
+  // Convert to an array if updates is an object
+  if (typeof updates === 'object' && !Array.isArray(updates)) {
+    updates = [updates];
+  }
+
+  // Validate input format
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).send('Invalid input');
+  }
+
+  // Prepare the query and values
+  const sql = 'UPDATE main_trade SET marks = ? WHERE tradeid = ?';
+  const queryValues = updates.map(update => {
+    const Marks = parseInt(update.Marks, 10);
+    return [
+      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      update.tradeid
+    ];
+  });
+
+  // Log queryValues for debugging
+  console.log('Query Values:', queryValues);
+
+  try {
+    // Handle multiple queries in parallel
+    await Promise.all(queryValues.map(values => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, values, (error, results) => {
+          if (error) {
+            console.error('Database query error:', error);
+            return reject(error);
+          }
+          resolve(results);
+        });
+      });
+    }));
+
+    res.status(200).json('Trade marks updated successfully');
+  } catch (error) {
+    console.error('Error updating trade marks:', error);
+    res.status(500).json('Server error');
+  }
+};
+export const TradeLimit = (req, res) => {
+  const userCourseId = req.params.uid;
+  const checkQuery = 'SELECT * FROM upload_trade WHERE usercourseid = ?';
+
+  db.query(checkQuery, userCourseId, (Err, result) => {
+    if (Err) {
+      console.log(Err);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+};
