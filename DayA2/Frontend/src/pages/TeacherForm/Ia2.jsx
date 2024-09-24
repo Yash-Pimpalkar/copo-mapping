@@ -612,9 +612,16 @@ const Ia2 = ({ uid }) => {
       );
       console.log(coAverages);
 
+      const categorization = calculateCategorization(
+        distinctConames,
+        questionColumns,
+        attainmentData
+      );  
+
       api
-        .post("/api/ia/ia2/insert-co-averages", {
+        .post("/api/ia/insert-co-averages", {
           coAverages,
+          categorization,
           userCourseId,
         })
         .then((response) => {
@@ -626,6 +633,38 @@ const Ia2 = ({ uid }) => {
           setMessage("Error inserting data");
         });
     }
+  };
+
+  const calculateCategorization = (distinctConames, questionColumns, attainmentData) => {
+    return distinctConames.map((coName) => {
+      const coColumns = questionColumns
+        .map((col, index) => ({ ...col, index }))
+        .filter((col) => col.coname === coName);
+  
+      const coAverage = coColumns.length
+        ? (
+            coColumns.reduce((sum, col) => {
+              const attainmentValue = getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              )[col.index];
+              const attemptedCount = getTotalStudentsAttempted()[col.index];
+              const attainment = attemptedCount
+                ? (attainmentValue / attemptedCount) * 100
+                : 0;
+              return sum + attainment;
+            }, 0) / coColumns.length
+          ).toFixed(2)
+        : 0;
+  
+      // Return categorization based on CO average
+      return coAverage < 40
+        ? 0
+        : coAverage <= 60
+        ? 1
+        : coAverage <= 70
+        ? 2
+        : 3;
+    });
   };
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -1083,6 +1122,76 @@ const Ia2 = ({ uid }) => {
                   })}
                 </tbody>
               </table>
+              <table className="min-w-full divide-y divide-gray-200">
+  <thead className="bg-gray-50">
+    <tr>
+      <th
+        scope="col"
+        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+      >
+        CO Name
+      </th>
+      <th
+        scope="col"
+        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+      >
+        CO Average
+      </th>
+      <th
+        scope="col"
+        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+      >
+        Categorization
+      </th>
+    </tr>
+  </thead>
+  <tbody className="bg-white divide-y divide-gray-200">
+    {distinctConames.map((coName) => {
+      const coColumns = questionColumns
+        .map((col, index) => ({ ...col, index })) // include index for mapping
+        .filter((col) => col.coname === coName); // filter by CO name
+
+      const coAverage = coColumns.length
+        ? (
+            coColumns.reduce((sum, col) => {
+              const attainmentValue = getTotalStudentsPassedPerQuestion(
+                attainmentData.passedPercentage
+              )[col.index];
+              const attemptedCount = getTotalStudentsAttempted()[col.index];
+              const attainment = attemptedCount
+                ? (attainmentValue / attemptedCount) * 100
+                : 0;
+              return sum + attainment;
+            }, 0) / coColumns.length
+          ).toFixed(2)
+        : 0;
+
+      // Calculate categorization based on the CO average
+      const categorization = coAverage < 40
+        ? 0
+        : coAverage <= 60
+        ? 1
+        : coAverage <= 70
+        ? 2
+        : 3;
+
+      return (
+        <tr key={coName}>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {coName}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {coAverage} %
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {categorization}
+          </td>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
             </div>
           </div>
         </>

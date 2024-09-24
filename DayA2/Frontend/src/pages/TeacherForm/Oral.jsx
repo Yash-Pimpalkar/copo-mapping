@@ -693,7 +693,10 @@ const Oral = ({ uid }) => {
                                     ))}
                                 </tbody>
                             </table>
+                            
                         )}
+
+
                     </div>
                 </div>
             )}

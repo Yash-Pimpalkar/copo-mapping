@@ -692,8 +692,11 @@ const Semester = ({ uid }) => {
               </tr>
             ))}
           </tbody>
-        </table>        
+          
+        </table>   
+             
           )}
+          
         </div>
       </div>
       )}
