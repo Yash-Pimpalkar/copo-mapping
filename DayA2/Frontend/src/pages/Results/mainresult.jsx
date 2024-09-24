@@ -5,6 +5,7 @@ import Tcstyperesult from "./tcstyperesult";
 import IntaTWUniv from './mathsintatwuniv'; 
 import TWOnly from './physicsonlytw'; 
 import Tworalresult from './tworalresult'; 
+import PureTheoryResult from "./puretheoryresult";
 
 const Mainresult = ({ uid }) => {
   // State for userCourseId, coming from CourseSelector
@@ -61,8 +62,10 @@ const Mainresult = ({ uid }) => {
           <div>
       {Termworkdata !== null && (
         <>
-          {Termworkdata === 1 || Termworkdata === 9 ? (
+          {Termworkdata === 9 ? (
             <Tcstyperesult uid={userCourseId} />
+          ) : Termworkdata === 1 ? (
+            <PureTheoryResult uid={userCourseId}/>
           ) : Termworkdata === 2 ? (
             <IntaTWUniv uid={userCourseId}/>
           ) : Termworkdata === 3 || Termworkdata === 8 || Termworkdata === 5 || Termworkdata === 6 || Termworkdata === 12 ? (

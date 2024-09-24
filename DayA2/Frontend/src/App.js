@@ -41,6 +41,7 @@ import Tworalresult from './pages/Results/tworalresult';
 import Tcstyperesult from './pages/Results/tcstyperesult';
 import IntaTWUniv from './pages/Results/mathsintatwuniv';
 import TWOnly from './pages/Results/physicsonlytw';
+import PureTheoryResult from './pages/Results/puretheoryresult';
 import MainResult from './pages/Results/mainresult';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
@@ -113,6 +114,7 @@ function App() {
               <Route path='/Tcstyperesult' element={<Tcstyperesult uid={user_id}/>}/>
               <Route path='/Intatwuniv' element={<IntaTWUniv uid={user_id}/>}/>
               <Route path='/Twonly' element={<TWOnly uid={user_id}/>}/>
+              <Route path='/PureTheoryResult' element={<PureTheoryResult uid={user_id}/>}/>
               <Route path='/Mainresult' element={<MainResult uid={user_id}/>}/>
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
@@ -132,7 +134,8 @@ function App() {
             // Handle other user types if needed
             <>
         <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} /> //Redirect to default route or error page
+        <Route path="/register" element={<Register />} /> 
+      
         </>
           )
         ) : (

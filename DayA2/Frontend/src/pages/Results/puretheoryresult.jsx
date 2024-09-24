@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api"; // Ensure this is set up to point to your API
 
-const Tcstyperesult = ({ uid }) => {
+const PureTheoryResult = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [loData, setLoData] = useState([]);
   
@@ -36,15 +36,15 @@ const Tcstyperesult = ({ uid }) => {
       {/* Course Attainment Table */}
       {/* {loData.length > 0 && ( */}
       <>
-      <h1 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">TCS TYPE IA1 AND IA2 Attainment</h1>
+      <h1 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">PURE THEORY RESULT</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 mb-4 text-sm md:text-base">
           <thead>
             <tr>
-              <th className='border border-gray-300 p-2' colSpan={12}>Lab Course Attainment</th>
+              <th className='border border-gray-300 p-2' colSpan={10}>Lab Course Attainment</th>
             </tr>
             <tr>
-              <th className="border border-gray-300 p-2 text-center" colSpan={7}>
+              <th className="border border-gray-300 p-2 text-center" colSpan={5}>
                 Direct Course Attainment Calculations
               </th>
               <th className="border border-gray-300 p-2 text-center" rowSpan={2} colSpan={2}>Indirect Course Attainment Calculation</th>
@@ -57,8 +57,6 @@ const Tcstyperesult = ({ uid }) => {
               <th className="border border-gray-300 p-2 text-center">IA1</th>
               <th className="border border-gray-300 p-2 text-center">IA2</th>
               <th className="border border-gray-300 p-2 text-center">INTA</th>
-              <th className="border border-gray-300 p-2 text-center">ASSIGNMENTS</th>
-              <th className="border border-gray-300 p-2 text-center">AVERAGE</th>
               <th className="border border-gray-300 p-2 text-center">UNIV</th>
             </tr>
           </thead>
@@ -69,7 +67,6 @@ const Tcstyperesult = ({ uid }) => {
                 <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.ia1}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.ia2}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.assign}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.inta}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.univ}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
@@ -82,41 +79,41 @@ const Tcstyperesult = ({ uid }) => {
 
             {/* Attainment, Weightage Rows */}
             <tr>
-              <td className="border border-gray-300 p-2 text-center" colSpan={5}>AVERAGE</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={3}>Attainment</td>
               <td className="border border-gray-300 p-2 text-center">3.00</td>
               <td className="border border-gray-300 p-2 text-center">3.00</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={4}>Final Indirect Course Attainment</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={4}>2.38</td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 text-center" colSpan={5}>Weightage</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={3}>Weightage</td>
               <td className="border border-gray-300 p-2 text-center">60%</td>
               <td className="border border-gray-300 p-2 text-center">40%</td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 text-center" colSpan={5}>Direct Total Attainment</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={3}>Direct Total Attainment</td>
               <td className="border border-gray-300 p-2 text-center">1.80</td>
               <td className="border border-gray-300 p-2 text-center">1.20</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Final Direct Course Attainment</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={4}>3.00</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={2}>3.00</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Weightage</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={4}>80%</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={2}>80%</td>
               <td className="border border-gray-300 p-2 text-center" colSpan={2}>20%</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Total Attainment</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={4}>2.40</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={2}>2.40</td>
               <td className="border border-gray-300 p-2 text-center" colSpan={2}>0.48</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>
                 <strong>Course Attainment:</strong>
               </td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={6}>
+              <td className="border border-gray-300 p-2 text-center" colSpan={4}>
                  2.88
               </td>
             </tr>
@@ -171,4 +168,4 @@ const Tcstyperesult = ({ uid }) => {
   );
 };
 
-export default Tcstyperesult;
+export default PureTheoryResult;
