@@ -1083,43 +1083,7 @@ const Ia2 = ({ uid }) => {
                     })}
                   </tr>
 
-                  {/* Dynamic Rows for COs */}
-                  {distinctConames.map((coName) => {
-                    const coColumns = questionColumns
-                      .map((col, index) => ({ ...col, index })) // include index for mapping
-                      .filter((col) => col.coname === coName); // filter by CO name
-
-                    const coAverage = coColumns.length
-                      ? (
-                          coColumns.reduce((sum, col) => {
-                            const attainmentValue =
-                              getTotalStudentsPassedPerQuestion(
-                                attainmentData.passedPercentage
-                              )[col.index];
-                            const attemptedCount =
-                              getTotalStudentsAttempted()[col.index];
-                            const attainment = attemptedCount
-                              ? (attainmentValue / attemptedCount) * 100
-                              : 0;
-                            return sum + attainment;
-                          }, 0) / coColumns.length
-                        ).toFixed(2)
-                      : 0;
-
-                    return (
-                      <tr key={coName}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
-                          {coName} Average
-                        </td>
-                        <td
-                          className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
-                          colSpan={questionColumns.length}
-                        >
-                          {coAverage} %
-                        </td>
-                      </tr>
-                    );
-                  })}
+              
                 </tbody>
               </table>
               <table className="min-w-full divide-y divide-gray-200">
