@@ -619,7 +619,7 @@ const Ia2 = ({ uid }) => {
       );  
 
       api
-        .post("/api/ia/insert-co-averages", {
+        .post("/api/ia/ia2/insert-co-averages", {
           coAverages,
           categorization,
           userCourseId,

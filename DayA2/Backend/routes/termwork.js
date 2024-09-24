@@ -39,7 +39,7 @@ router.get("/show/journal/:uid", showJournalData);
 router.put("/journal/update", JournalUpload);
 router.get("/journal/limit/:uid", JournalLimit);
 
-// majot project
+// major project
 router.get("/show/majorpro/:uid", showMajorProjectData);
 router.put("/majorpro/update", MajorProjectUpload);
 router.get("/majorpro/limit/:uid", MajorProjectLimit);

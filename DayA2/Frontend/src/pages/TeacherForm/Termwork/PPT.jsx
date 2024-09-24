@@ -3,34 +3,33 @@ import api from '../../../api';
 import * as XLSX from 'xlsx';
 import Pagination from '../../../component/Pagination/Pagination';
 
-const Report = ({ uid }) => {
-  const [reportData, setReportData] = useState([]);
+const PPT = ({ uid }) => {
+  const [pptData, setPptData] = useState([]);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [maxLimit, setMaxLimit] = useState(0); // Adjust this as needed
-  const [message, setMessage] = useState("");
+  const [maxLimit, setMaxLimit] = useState(0);
 
   useEffect(() => {
-    const fetchReportData = async () => {
+    const fetchPptData = async () => {
       try {
-        const res = await api.get(`/api/termwork/show/report/${uid}`);
-        setReportData(res.data);
-        const res1 = await api.get(`/api/termwork/report/limit/${uid}`);
+        const res = await api.get(`/api/termwork/show/ppt/${uid}`);
+        setPptData(res.data);
+        const res1 = await api.get(`/api/termwork/ppt/limit/${uid}`);
         setMaxLimit(res1.data[0].maxmarks);
       } catch (error) {
-        console.error("Error fetching report data:", error);
+        console.error("Error fetching PPT data:", error);
       }
     };
 
     if (uid) {
-      fetchReportData();
+      fetchPptData();
     }
   }, [uid]);
 
-  const filteredData = reportData.filter((item) => {
+  const filteredData = pptData.filter((item) => {
     const query = searchQuery.toUpperCase();
     return (
       item.student_name?.toUpperCase().includes(query) ||
@@ -65,19 +64,19 @@ const Report = ({ uid }) => {
       });
 
       try {
-        await api.put("/api/termwork/report/update", validatedData);
-        setReportData(validatedData);
+        await api.put("/api/termwork/ppt/update", validatedData);
+        setPptData(validatedData);
         alert("File is uploaded");
         window.location.reload();
       } catch (error) {
-        console.error("Error updating report:", error);
+        console.error("Error updating PPT data:", error);
       }
     };
     reader.readAsArrayBuffer(file);
   };
 
   const handleFileDownload = () => {
-    const formattedData = reportData.map((student) => ({
+    const formattedData = pptData.map((student) => ({
       att_id: student.att_id,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
@@ -89,25 +88,25 @@ const Report = ({ uid }) => {
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ReportData");
-    XLSX.writeFile(workbook, "report_data.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "PPTData");
+    XLSX.writeFile(workbook, "ppt_data.xlsx");
   };
 
   const handleEditClick = (index) => {
     setEditingRow(index);
     setEditedMarks({
       ...editedMarks,
-      [index]: reportData[index].marks,
+      [index]: pptData[index].marks,
     });
   };
 
   const handleSaveClick = async (index) => {
-    const att_id = reportData[index].att_id;
+    const att_id = pptData[index].att_id;
     const marks = editedMarks[index];
 
     try {
-      await api.put("/api/termwork/report/update", { att_id: att_id, Marks: marks });
-      setReportData((prevData) =>
+      await api.put("/api/termwork/ppt/update", { att_id: att_id, Marks: marks });
+      setPptData((prevData) =>
         prevData.map((item, idx) =>
           idx === index ? { ...item, marks } : item
         )
@@ -128,17 +127,17 @@ const Report = ({ uid }) => {
 
     if (value === "") {
       setEditedMarks((prev) => ({ ...prev, [index]: null }));
-      return; 
+      return;
     }
 
     if (value > maxLimit) {
       alert(`Value should not be greater than ${maxLimit}`);
-      return; 
+      return;
     }
 
     if (value < 0) {
       alert("Value should not be less than 0");
-      return; 
+      return;
     }
 
     setEditedMarks((prev) => ({ ...prev, [index]: value }));
@@ -233,4 +232,4 @@ const Report = ({ uid }) => {
   );
 };
 
-export default Report;
+export default PPT;
