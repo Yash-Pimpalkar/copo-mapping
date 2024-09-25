@@ -483,7 +483,7 @@ const Ia2 = ({ uid }) => {
     ];
 
     // Add dynamic rows for CO averages
-    const coAverageRows = ["CO1", "CO2"].map((coName) => {
+    const coAverageRows = distinctConames.map((coName) => {
       const coColumns = questionColumns
         .map((col, index) => ({ ...col, index })) // include index for mapping
         .filter((col) => col.coname === coName); // filter by CO name

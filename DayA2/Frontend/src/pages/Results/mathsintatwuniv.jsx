@@ -1,14 +1,172 @@
-import React from 'react';
+import React, { useEffect, useState} from 'react';
+import api from "../../api";
 
-const IntaTWUniv = () => {
-  const loData = [
-    { lo: 'ITL501.1', ia1: 3, ia2: 0, inta: 3, tw: 3, univ: 0, indirect: 2.47, direct: 2.40, total: 2.89 },
-    { lo: 'ITL501.2', ia1: 3, ia2: 0,inta: 3,tw: 3, univ: 0, indirect: 2.44, direct: 2.40, total: 2.89 },
-    { lo: 'ITL501.3', ia1: 3, ia2: 0,inta: 3,tw: 3, univ: 0, indirect: 2.36, direct: 2.40, total: 2.87 },
-    { lo: 'ITL501.4', ia1: 0, ia2: 3, inta: 3,tw: 3, univ: 0, indirect: 2.39, direct: 2.40, total: 2.88 },
-    { lo: 'ITL501.5', ia1: 0, ia2: 3, inta: 3, tw: 3, univ: 0, indirect: 2.29, direct: 2.40, total: 2.86 },
-    
-  ];
+const IntaTWUniv = ({uid}) => {
+  const [userCourseId, setUserCourseId] = useState(null);
+  const [loData, setLoData] = useState(() => JSON.parse(localStorage.getItem('loData')) || []);
+  const [univAverage, setUnivAverage] = useState(() => localStorage.getItem('univAverage') || 0);
+  const [intaAverage, setIntaAverage] = useState(() => localStorage.getItem('intaAverage') || 0);
+  const [DirectTotalAttainSixty, setDirectTotalAttainSixty] = useState(() => localStorage.getItem('DirectTotalAttainSixty') || 0);
+  const [DirectTotalAttainForty, setDirectTotalAttainForty] = useState(() => localStorage.getItem('DirectTotalAttainForty') || 0);
+  const [FinalDirectCourseAttainment, setFinalDirectCourseAttainment] = useState(() => localStorage.getItem('FinalDirectCourseAttainment') || 0);
+  const [FinalIndirectCourseAttainment, setFinalIndirectCourseAttainment] = useState(() => localStorage.getItem('FinalIndirectCourseAttainment') || 0);
+  const [TotalAttainmentEighty, setTotalAttainmentEighty] = useState(() => localStorage.getItem('TotalAttainmentEighty') || 0);
+  const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(() => localStorage.getItem('TotalAttainmentTwenty') || 0);
+  const [TotalAttainment, setTotalAttainment] = useState(() => localStorage.getItem('TotalAttainment') || 0);
+  
+  useEffect(() => {
+    const fetchCosData = async (uid) => {
+      console.log(uid);
+
+      try {
+        // Make all API requests concurrently using Promise.all
+        const [response1, response2, response3, response4] = await Promise.all([
+          api.get(`/api/result/ia1attainment/ia1/${uid}`),
+          api.get(`/api/result/ia2attainment/ia2/${uid}`),
+          api.get(`/api/result/ia2attainment/inta/${uid}`),
+          api.get(`/api/result/ia2attainment/univ/${uid}`) // Adding the correct endpoint for INT attainment
+        ]);
+
+        // Log the fetched data from all three requests
+        console.log("Fetched IA1 COS data:", response1.data);
+        console.log("Fetched IA2 COS data:", response2.data);
+        console.log("Fetched INTA COS data:", response3.data);
+        console.log("Fetched UNIV COS data:", response4.data)
+
+        const ia1Data = response1.data || [];
+        const ia2Data = response2.data || [];
+        const intaData = response3.data || [];
+        const univData = response4.data || [];
+
+        // Create a dictionary (map) for IA1, IA2, and INT data using 'coname' as the key
+        const ia1Map = ia1Data.reduce((acc, ia1Item) => {
+          acc[ia1Item.coname] = ia1Item.ia1_attainment; // Storing IA1 attainment
+          return acc;
+        }, {});
+
+        const ia2Map = ia2Data.reduce((acc, ia2Item) => {
+          acc[ia2Item.coname] = ia2Item.ia2_attainment; // Storing IA2 attainment
+          return acc;
+        }, {});
+
+        const intaMap = intaData.reduce((acc, intaItem) => {
+          acc[intaItem.coname] = intaItem.attainment; // Storing INT attainment
+          return acc;
+        }, {});
+
+        const univMap = univData.reduce((acc, univItem) => {
+            acc[univItem.coname] = univItem.attainment; // Storing INT attainment
+            return acc;
+          }, {});
+
+        // Combine all sets of data based on 'coname'
+        const combinedData = Array.from(
+          new Set([...ia1Data.map(item => item.coname), ...ia2Data.map(item => item.coname), ...intaData.map(item => item.coname), ...univData.map(item => item.coname)])
+        ).map((coname) => {
+          const intaAttainment = intaMap[coname] || 0;
+          const univAttainment = univMap[coname] || 0;
+          console.log(intaAttainment, univAttainment);
+          const directAttainment = ((((60 / 100) * intaAttainment) + ((40 / 100) * univAttainment)) * (80 / 100)); 
+          
+           
+          // Dummy indirect attainment value
+          const dummyIndirectAttainment = (coname) => {
+            return (Math.random() * 3).toFixed(2); 
+          };
+          const indirectAttainmentvalues = Number(dummyIndirectAttainment(coname));
+          
+
+          const indirectAttainment = (indirectAttainmentvalues * (20/100)).toFixed(2);    // separate indirect attainment column 
+          
+          const totalatt = parseFloat(directAttainment) + parseFloat(indirectAttainment);
+          
+
+          return {
+            coname,
+            ia1_attainment: ia1Map[coname] || 0,
+            ia2_attainment: ia2Map[coname] || 0,
+            attainment: intaAttainment,
+            univattainment: univMap[coname] || 0,
+            direct: directAttainment.toFixed(2),
+            indirect: indirectAttainmentvalues,
+            indirectatt: indirectAttainment,
+            total: totalatt
+          };
+        });
+   
+        const validUnivAttainments = combinedData
+          .filter(item => item.univattainment !== null && item.univattainment !== undefined)
+          .map(item => item.univattainment);
+        const univaverage = validUnivAttainments.length > 0
+          ? validUnivAttainments.reduce((sum, val) => sum + Number(val), 0) / validUnivAttainments.length
+          : 0;
+        setUnivAverage(univaverage.toFixed(1));
+        localStorage.setItem('univAverage', univaverage.toFixed(1));
+
+
+        const validIntaAttainments = combinedData
+          .filter(item => item.attainment !== null && item.attainment !== undefined)
+          .map(item => item.attainment);
+        const intaaverage = validIntaAttainments.length > 0
+          ? validIntaAttainments.reduce((sum, val) => sum + Number(val), 0) / validIntaAttainments.length
+          : 0;
+        setIntaAverage(intaaverage.toFixed(1));
+        localStorage.setItem('intaAverage', intaaverage.toFixed(1));
+  
+        const validFinalIndirectatt = combinedData
+          .filter(item => item.indirect !== null && item.indirect !== undefined)
+          .map(item => item.indirect);
+        const indirectaverage = validFinalIndirectatt.length > 0 
+          ? validFinalIndirectatt.reduce((sum, val) => sum + Number(val), 0) / validFinalIndirectatt.length
+          : 0;
+        setFinalIndirectCourseAttainment(indirectaverage.toFixed(1));
+        localStorage.setItem('FinalIndirectCourseAttainment', indirectaverage.toFixed(1));
+
+        // 60%
+        const directattainsixty = (60 / 100) * intaaverage;
+        setDirectTotalAttainSixty(directattainsixty.toFixed(1));
+        localStorage.setItem('DirectTotalAttainSixty', directattainsixty.toFixed(1));
+        
+        // 40%
+        const directattainforty = (40 / 100) * univaverage;
+        setDirectTotalAttainForty(directattainforty.toFixed(1));
+        localStorage.setItem('DirectTotalAttainForty', directattainforty.toFixed(1));
+        
+        // Total 60% and 40%
+        const finaldirectattainment = directattainsixty + directattainforty;
+        setFinalDirectCourseAttainment(finaldirectattainment.toFixed(1));
+        localStorage.setItem('FinalDirectCourseAttainment', finaldirectattainment.toFixed(1));
+
+        // Total on 80%
+        const totalattainmenteighty = (80 / 100) * finaldirectattainment;
+        setTotalAttainmentEighty(totalattainmenteighty.toFixed(2));
+        localStorage.setItem('TotalAttainmentEighty', totalattainmenteighty.toFixed(2));
+
+        //20%
+        const totalattainmenttwenty = (20 / 100) * indirectaverage;
+        setTotalAttainmentTwenty(totalattainmenttwenty.toFixed(2));
+        localStorage.setItem('TotalAttainmentTwenty', totalattainmenttwenty.toFixed(2));
+
+        //Total attainment of 80 and 20 (i.e course attainment)
+        const totalattainmentt = (totalattainmenteighty + totalattainmenttwenty);
+        setTotalAttainment(totalattainmentt.toFixed(2));
+        localStorage.setItem('TotalAttainment', totalattainmentt.toFixed(2));
+
+   
+        setLoData(combinedData);
+        localStorage.setItem('loData', JSON.stringify(combinedData));
+        
+      } catch (error) {
+        console.error("Error fetching COS data", error);
+      }
+    };
+  
+    if (uid) {
+      fetchCosData(uid);
+    }
+  }, [uid]);
+
+  console.log(loData);
 
   const poPsoData = [
     { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
@@ -49,24 +207,24 @@ const IntaTWUniv = () => {
             {/* Data Rows */}
             {loData.map((item, index) => (
               <tr key={index}>
-                <td className="border border-gray-300 p-2 text-center">{item.lo}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.ia1}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.ia2}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.inta}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.ia1_attainment}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.ia2_attainment}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.attainment}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.tw}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.univ}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.lo}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.univattainment}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.direct}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.total}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.indirectatt}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.total.toFixed(2) || 'NA'}</td>
               </tr>
             ))}
 
             {/* Attainment, Weightage Rows */}
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Attainment</td>
-              <td className="border border-gray-300 p-2 text-center">3.00</td>
+              <td className="border border-gray-300 p-2 text-center">{intaAverage}</td>
               <td className="border border-gray-300 p-2 text-center">3.00</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={2}>0.00</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={5}>Final Indirect Course Attainment</td>

@@ -482,8 +482,8 @@ export const Ia2_Attainment = async (req, res) => {
           console.log(error);
           return res.status(500).json({ error: error.message });
         }
-
         if (results.length > 0) {
+       
           // If exists, update the attainment value and ia2_attainment (categorization)
           const sql1 = "UPDATE ia2_attainment SET attainment = ?, ia2_attainment = ? WHERE id_attainment = ?";
           db.query(sql1, [parseFloat(coAverage), category, results[0].id_attainment], (error, result) => {
