@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { fetchTermwork, ia1, ia2, Inta, Univ} from "../controller/Result.js";
+import { fetchTermwork, ia1, ia2, Inta, Univ, Tw, Oral} from "../controller/Result.js";
 
 
 const router =express.Router();
@@ -11,6 +11,8 @@ router.get("/ia1attainment/ia1/:uid", ia1);
 router.get("/ia2attainment/ia2/:uid", ia2);
 router.get("/ia2attainment/inta/:uid", Inta);
 router.get("/ia2attainment/univ/:uid", Univ);
+router.get("/ia2attainment/tw/:uid", Tw);
+router.get("/ia2attainment/oral/:uid",Oral);
 
 
 export default router;

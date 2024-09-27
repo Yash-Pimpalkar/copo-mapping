@@ -1,14 +1,82 @@
-import React from 'react';
+import React, { useEffect, useState} from 'react';
+import api from "../../api";
 
-const TWOnly  = () => {
-  const loData = [
-    { lo: 'ITL501.1', tw: 3,  indirect: 2.47, direct: 2.40, total: 2.89 },
-    { lo: 'ITL501.2', tw: 3,  indirect: 2.44, direct: 2.40, total: 2.89 },
-    { lo: 'ITL501.3', tw: 3,  indirect: 2.36, direct: 2.40, total: 2.87 },
-    { lo: 'ITL501.4', tw: 3,  indirect: 2.39, direct: 2.40, total: 2.88 },
-    { lo: 'ITL501.5', tw: 3, indirect: 2.29, direct: 2.40, total: 2.86 },
-    { lo: 'ITL501.6', tw: 3,  indirect: 2.31, direct: 2.40, total: 2.86 },
-  ];
+const TWOnly  = ({uid}) => {
+  const [userCourseId, setUserCourseId] = useState(null);
+  const [loData, setLoData] = useState([]);
+  const [twAverage, settwAverage] = useState(0);
+  const [FinalIndirectCourseAttainment, setFinalIndirectCourseAttainment] = useState(0);
+  const [TotalAttainmentEighty, setTotalAttainmentEighty] = useState(0);
+  const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(0);
+  const [TotalAttainment, setTotalAttainment] = useState(0);
+  
+  useEffect(() => {
+    const fetchCosData = async (uid) => {
+      try {
+        // Make all API requests concurrently using Promise.all
+        const [ response1] = await Promise.all([
+          api.get(`/api/result/ia2attainment/tw/${uid}`),
+        ]);
+
+        const twData = response1.data || [];
+
+        const twMap = twData.reduce((acc, twItem) => {
+          acc[twItem.coname] = Number(twItem.attainment) || 0;
+          return acc;
+        }, {});
+
+        const combinedData = Array.from(
+          new Set([ ...twData.map(item => item.coname)])
+        ).map((coname) => {
+          const twattainment = twMap[coname] || 0;
+          // const directAttainment = ((((60 / 100) * twattainment) + ((40 / 100) * oralattainment)) * (80 / 100)).toFixed(2);
+          const directAttainment = ((80/100)*twattainment).toFixed(2);
+          //dummy data
+          const indirectAttainmentvalues = (Math.random() * 3) .toFixed(2);  // Example calculation
+          // const twattainment = (Math.random() * 3).toFixed(2);  // Dummy twattainment data
+
+          const indirectAttainment = (indirectAttainmentvalues * (20/100)).toFixed(2); ;
+          const totalAttainment = parseFloat(directAttainment) + parseFloat(indirectAttainment);
+
+          return {
+            coname,
+            twattainment: twattainment,
+            direct: directAttainment,
+            indirect: indirectAttainmentvalues,
+            indirectatt: indirectAttainment,
+            total: totalAttainment.toFixed(2),
+          };
+        });
+
+        const twAverage = combinedData
+          .filter(item => item.twattainment)
+          .reduce((sum, item) => sum + Number(item.twattainment), 0) / combinedData.length;
+
+        const finalIndirectAttainment = combinedData
+          .filter(item => item.indirect)
+          .reduce((sum, item) => sum + Number(item.indirect), 0) / combinedData.length;
+
+        const totalAttainmentEighty = (80 / 100) * twAverage;
+        const totalAttainmentTwenty = (20 / 100) * finalIndirectAttainment;
+        const finalTotalAttainment = totalAttainmentEighty + totalAttainmentTwenty;
+
+        settwAverage(twAverage.toFixed(2));
+        setFinalIndirectCourseAttainment(finalIndirectAttainment.toFixed(2));
+        setTotalAttainmentEighty(totalAttainmentEighty.toFixed(2));
+        setTotalAttainmentTwenty(totalAttainmentTwenty.toFixed(2));
+        setTotalAttainment(finalTotalAttainment.toFixed(2));
+        setLoData(combinedData);
+
+      } catch (error) {
+        console.error("Error fetching COS data", error);
+      }
+    };
+
+    if (uid) {
+      fetchCosData(uid);
+    }
+  }, [uid]);
+  console.log(loData);
 
   const poPsoData = [
     { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
@@ -47,12 +115,12 @@ const TWOnly  = () => {
             {/* Data Rows */}
             {loData.map((item, index) => (
               <tr key={index}>
-                <td className="border border-gray-300 p-2 text-center">{item.lo}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.tw}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.lo}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.twattainment}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.direct}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.indirectatt}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.total}</td>
               </tr>
             ))}
@@ -60,10 +128,9 @@ const TWOnly  = () => {
             {/* Attainment, Weightage Rows */}
             <tr>
               <td className="border border-gray-300 p-2 text-center">Attainment</td>
-              <td className="border border-gray-300 p-2 text-center">3.00</td>
-              {/* <td className="border border-gray-300 p-2 text-center">3.00</td> */}
+              <td className="border border-gray-300 p-2 text-center">{twAverage}</td>
               <td className="border border-gray-300 p-2 text-center">Final Indirect Course Attainment</td>
-              <td className="border border-gray-300 p-2 text-center">2.38</td>
+              <td className="border border-gray-300 p-2 text-center">{FinalIndirectCourseAttainment}</td>
             </tr>
             
             <tr>
@@ -73,15 +140,15 @@ const TWOnly  = () => {
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center">Total Attainment</td>
-              <td className="border border-gray-300 p-2 text-center">2.40</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={2}>0.48</td>
+              <td className="border border-gray-300 p-2 text-center">{TotalAttainmentEighty}</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={2}>{TotalAttainmentTwenty}</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center">
                 <strong>Course Attainment:</strong> 
               </td>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>
-                2.88
+                {TotalAttainment}
               </td>
             </tr>
           </tbody>

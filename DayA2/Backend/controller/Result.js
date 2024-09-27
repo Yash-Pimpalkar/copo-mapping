@@ -182,4 +182,96 @@ export const fetchTermwork = (req, res) => {
       return res.status(500).json({ error: "Error fetching COs data" });
     }
   };
+
+  export const Tw = async(req, res) => {
+    const userCourseId = req.params.uid;
+  
+    // Check if the userCourseId parameter is provided
+    if (!userCourseId) {
+      return res.status(400).json({ error: "usercourse id is required" });
+    }
+  
+    const sql = "SELECT * FROM termwork_attainment_table WHERE usercourseid = ? AND attainment IS NOT NULL";
+  
+    try {
+      // Wrap the query in a promise for async/await usage
+      const result = await new Promise((resolve, reject) => {
+        db.query(sql, [userCourseId], (error, result) => {
+          if (error) {
+            console.error('Error executing the query:', error);
+            reject(new Error('Internal server error'));
+          } else {
+            resolve(result);
+          }
+        });
+      });
+  
+      // Extract distinct CO names that have data in attainment
+      const uniqueConames = Array.from(new Set(result.map(row => row.coname)));
+  
+      // Create a map of coname -> attainment for the results from the database
+      const attainmentMap = {};
+      result.forEach(row => {
+        attainmentMap[row.coname] = row.attainment;
+      });
+  
+      // Dynamically generate the response based on the CO names
+      const response = uniqueConames.map(co => ({
+        coname: co,
+        attainment: attainmentMap[co] || null // Return null if attainment doesn't exist
+      }));
+  
+      return res.status(200).json(response);
+  
+    } catch (err) {
+      console.error("Error fetching COs data:", err.message);
+      return res.status(500).json({ error: "Error fetching COs data" });
+    }
+  };
+
+  export const Oral = async(req, res) => {
+    const userCourseId = req.params.uid;
+  
+    // Check if the userCourseId parameter is provided
+    if (!userCourseId) {
+      return res.status(400).json({ error: "usercourse id is required" });
+    }
+  
+    const sql = "SELECT * FROM oral_attainment WHERE usercourse_id = ? AND attainment IS NOT NULL";
+  
+    try {
+      // Wrap the query in a promise for async/await usage
+      const result = await new Promise((resolve, reject) => {
+        db.query(sql, [userCourseId], (error, result) => {
+          if (error) {
+            console.error('Error executing the query:', error);
+            reject(new Error('Internal server error'));
+          } else {
+            resolve(result);
+          }
+        });
+      });
+  
+      // Extract distinct CO names that have data in attainment
+      const uniqueConames = Array.from(new Set(result.map(row => row.coname)));
+  
+      // Create a map of coname -> attainment for the results from the database
+      const attainmentMap = {};
+      result.forEach(row => {
+        attainmentMap[row.coname] = row.attainment;
+      });
+  
+      // Dynamically generate the response based on the CO names
+      const response = uniqueConames.map(co => ({
+        coname: co,
+        attainment: attainmentMap[co] || null // Return null if attainment doesn't exist
+      }));
+  
+      return res.status(200).json(response);
+  
+    } catch (err) {
+      console.error("Error fetching COs data:", err.message);
+      return res.status(500).json({ error: "Error fetching COs data" });
+    }
+  };
   

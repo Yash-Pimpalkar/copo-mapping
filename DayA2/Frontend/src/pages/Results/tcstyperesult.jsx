@@ -3,17 +3,18 @@ import api from "../../api"; // Ensure this is set up to point to your API
 
 const Tcstyperesult = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
-  const [loData, setLoData] = useState(() => JSON.parse(localStorage.getItem('loData')) || []);
-  const [univAverage, setUnivAverage] = useState(() => localStorage.getItem('univAverage') || 0);
-  const [intaAverage, setIntaAverage] = useState(() => localStorage.getItem('intaAverage') || 0);
-  const [DirectTotalAttainSixty, setDirectTotalAttainSixty] = useState(() => localStorage.getItem('DirectTotalAttainSixty') || 0);
-  const [DirectTotalAttainForty, setDirectTotalAttainForty] = useState(() => localStorage.getItem('DirectTotalAttainForty') || 0);
-  const [FinalDirectCourseAttainment, setFinalDirectCourseAttainment] = useState(() => localStorage.getItem('FinalDirectCourseAttainment') || 0);
-  const [FinalIndirectCourseAttainment, setFinalIndirectCourseAttainment] = useState(() => localStorage.getItem('FinalIndirectCourseAttainment') || 0);
-  const [TotalAttainmentEighty, setTotalAttainmentEighty] = useState(() => localStorage.getItem('TotalAttainmentEighty') || 0);
-  const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(() => localStorage.getItem('TotalAttainmentTwenty') || 0);
-  const [TotalAttainment, setTotalAttainment] = useState(() => localStorage.getItem('TotalAttainment') || 0);
-  
+  const [loData, setLoData] = useState([]);
+  const [univAverage, setUnivAverage] = useState(0);
+  const [intaAverage, setIntaAverage] = useState(0);
+  const [Average, setAverage] = useState(0);
+  const [DirectTotalAttainSixty, setDirectTotalAttainSixty] = useState(0);
+  const [DirectTotalAttainForty, setDirectTotalAttainForty] = useState(0);
+  const [FinalDirectCourseAttainment, setFinalDirectCourseAttainment] = useState(0);
+  const [FinalIndirectCourseAttainment, setFinalIndirectCourseAttainment] = useState(0);
+  const [TotalAttainmentEighty, setTotalAttainmentEighty] = useState(0);
+  const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(0);
+  const [TotalAttainment, setTotalAttainment] = useState(0);
+  // const [AverageAttainment, setAverageAttainment] = useState(0);
   
 
   useEffect(() => {
@@ -21,17 +22,19 @@ const Tcstyperesult = ({ uid }) => {
       console.log(uid);
   
       try {
-        const [response1, response2, response3, response4] = await Promise.all([
+        const [response1, response2, response3, response4, response5] = await Promise.all([
           api.get(`/api/result/ia1attainment/ia1/${uid}`),
           api.get(`/api/result/ia2attainment/ia2/${uid}`),
           api.get(`/api/result/ia2attainment/inta/${uid}`),
-          api.get(`/api/result/ia2attainment/univ/${uid}`)
+          api.get(`/api/result/ia2attainment/univ/${uid}`),
+          api.get(`/api/result/ia2attainment/tw/${uid}`)
         ]);
   
         const ia1Data = response1.data || [];
         const ia2Data = response2.data || [];
         const intaData = response3.data || [];
         const univData = response4.data || [];
+        const twData = response5.data ||  [];
   
         const ia1Map = ia1Data.reduce((acc, ia1Item) => {
           acc[ia1Item.coname] = Number(ia1Item.ia1_attainment) || 0;
@@ -53,15 +56,21 @@ const Tcstyperesult = ({ uid }) => {
           return acc;
         }, {});
 
+        const twMap = twData.reduce((acc, twItem) => {
+          acc[twItem.coname] = Number(twItem.attainment) || 0;
+          return acc;
+        }, {});
+
   
         const combinedData = Array.from(
-          new Set([...ia1Data.map(item => item.coname), ...ia2Data.map(item => item.coname), ...intaData.map(item => item.coname), ...univData.map(item => item.coname)])
+          new Set([...ia1Data.map(item => item.coname), ...ia2Data.map(item => item.coname), ...intaData.map(item => item.coname), ...univData.map(item => item.coname),...twData.map(item => item.coname)])
         ).map((coname) => {
           const intaAttainment = intaMap[coname] || 0;
           const univAttainment = univMap[coname] || 0;
+          const twAttainment = twMap[coname] || 0;
           console.log(intaAttainment, univAttainment);
-          const directAttainment = ((((60 / 100) * intaAttainment) + ((40 / 100) * univAttainment)) * (80 / 100)); 
-          
+          const averageAttainment = ((intaAttainment + twAttainment) / 2).toFixed(2);
+          const directAttainment = ((((60 / 100) * averageAttainment) + ((40 / 100) * univAttainment)) * (80 / 100)); 
            
           // Dummy indirect attainment value
           const dummyIndirectAttainment = (coname) => {
@@ -80,7 +89,9 @@ const Tcstyperesult = ({ uid }) => {
             ia1_attainment: ia1Map[coname] || 0,
             ia2_attainment: ia2Map[coname] || 0,
             attainment: intaAttainment,
-            univattainment: univMap[coname] || 0,
+            univattainment: univAttainment,
+            twAttainment : twAttainment,
+            average : averageAttainment,
             direct: directAttainment.toFixed(2),
             indirect: indirectAttainmentvalues,
             indirectatt: indirectAttainment,
@@ -106,6 +117,14 @@ const Tcstyperesult = ({ uid }) => {
           : 0;
         setIntaAverage(intaaverage.toFixed(1));
         // localStorage.setItem('intaAverage', intaaverage.toFixed(1));
+
+        const validAttainments = combinedData
+          .filter(item => item.average !== null && item.average !== undefined)
+          .map(item => item.average);
+        const average = validAttainments.length > 0
+          ? validAttainments.reduce((sum, val) => sum + Number(val), 0) / validAttainments.length
+          : 0;
+        setAverage(average.toFixed(2));
   
         const validFinalIndirectatt = combinedData
           .filter(item => item.indirect !== null && item.indirect !== undefined)
@@ -117,7 +136,7 @@ const Tcstyperesult = ({ uid }) => {
         // localStorage.setItem('FinalIndirectCourseAttainment', indirectaverage.toFixed(1));
 
         // 60%
-        const directattainsixty = (60 / 100) * intaaverage;
+        const directattainsixty = (60 / 100) * average;
         setDirectTotalAttainSixty(directattainsixty.toFixed(1));
         // localStorage.setItem('DirectTotalAttainSixty', directattainsixty.toFixed(1));
         
@@ -209,8 +228,8 @@ const Tcstyperesult = ({ uid }) => {
                 <td className="border border-gray-300 p-2 text-center">{item.ia1_attainment}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.ia2_attainment}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.attainment}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.assign}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.avg}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.twAttainment}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.average}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.univattainment}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
@@ -223,10 +242,10 @@ const Tcstyperesult = ({ uid }) => {
             {/* Attainment, Weightage Rows */}
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={5}>AVERAGE</td>
-              <td className="border border-gray-300 p-2 text-center">3.00</td>
-              <td className="border border-gray-300 p-2 text-center">3.00</td>
+              <td className="border border-gray-300 p-2 text-center">{Average}</td>
+              <td className="border border-gray-300 p-2 text-center">{univAverage}</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={4}>Final Indirect Course Attainment</td>
-              <td className="border border-gray-300 p-2 text-center" rowSpan={4}>2.38</td>
+              <td className="border border-gray-300 p-2 text-center" rowSpan={4}>{FinalIndirectCourseAttainment}</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={5}>Weightage</td>
@@ -235,12 +254,12 @@ const Tcstyperesult = ({ uid }) => {
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={5}>Direct Total Attainment</td>
-              <td className="border border-gray-300 p-2 text-center">1.80</td>
-              <td className="border border-gray-300 p-2 text-center">1.20</td>
+              <td className="border border-gray-300 p-2 text-center">{DirectTotalAttainSixty}</td>
+              <td className="border border-gray-300 p-2 text-center">{DirectTotalAttainForty}</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Final Direct Course Attainment</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={4}>3.00</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={4}>{FinalDirectCourseAttainment}</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Weightage</td>
@@ -249,15 +268,15 @@ const Tcstyperesult = ({ uid }) => {
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>Total Attainment</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={4}>2.40</td>
-              <td className="border border-gray-300 p-2 text-center" colSpan={2}>0.48</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={4}>{TotalAttainmentEighty}</td>
+              <td className="border border-gray-300 p-2 text-center" colSpan={2}>{TotalAttainmentTwenty}</td>
             </tr>
             <tr>
               <td className="border border-gray-300 p-2 text-center" colSpan={3}>
                 <strong>Course Attainment:</strong>
               </td>
               <td className="border border-gray-300 p-2 text-center" colSpan={6}>
-                 2.88
+                 {TotalAttainment}
               </td>
             </tr>
           </tbody>
