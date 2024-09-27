@@ -1340,3 +1340,47 @@ export const TradeLimit = (req, res) => {
     }
   });
 };
+
+export const Termwork_Attainment = async (req, res) => {
+  const dataArray = req.body.data;
+
+  // Check if the dataArray exists and is an array
+  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+    return res.status(400).json({ message: "Invalid data format or empty array." });
+  }
+
+  try {
+    // Prepare the SQL query for bulk insert/update
+    const query = `
+      INSERT INTO termwork_attainment_table (coname, average_attainment, attainment, usercourseid)
+      VALUES ? 
+      ON DUPLICATE KEY UPDATE
+        average_attainment = VALUES(average_attainment),
+        attainment = VALUES(attainment);
+    `;
+
+    // Prepare values array for bulk insert
+    const values = dataArray.map(item => [
+      item.coname, 
+      parseFloat(item.average_attainment.replace('%', '')), 
+      item.attainment, 
+      item.usercourseid
+    ]);
+
+    // Use await with promise-based query method for bulk insertion
+    db.query(query, [values], (error, result) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).send('Server error');
+      }
+      return res.status(200).json({ message: 'Attainment data successfully inserted or updated.' });
+    });
+
+  } catch (error) {
+    console.error('Error inserting or updating attainment data:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+
+

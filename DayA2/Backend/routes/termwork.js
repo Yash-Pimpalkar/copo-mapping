@@ -1,5 +1,5 @@
 import express from "express";
-import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, JournalLimit, JournalUpload, MajorProjectLimit, MajorProjectUpload, MiniProjectLimit, MiniProjectUpload, PPTLimit, PPTUpload, ReportLimit, ReportUpload, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showJournalData, showMajorProjectData, showMiniProjectData, showPPTData, showReportData, showSciLabData, showTradeData, submitTermworkId, TradeLimit, TradeUpload, updateAssignments, updateExperiments } from "../controller/termwork.js";
+import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, JournalLimit, JournalUpload, MajorProjectLimit, MajorProjectUpload, MiniProjectLimit, MiniProjectUpload, PPTLimit, PPTUpload, ReportLimit, ReportUpload, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showJournalData, showMajorProjectData, showMiniProjectData, showPPTData, showReportData, showSciLabData, showTradeData, submitTermworkId, Termwork_Attainment, TradeLimit, TradeUpload, updateAssignments, updateExperiments } from "../controller/termwork.js";
 const router =express.Router();
 
 // main termwork
@@ -67,5 +67,6 @@ router.put("/trade/update", TradeUpload);
 router.get("/trade/limit/:uid", TradeLimit);
 
 
+router.put("/update-attainment",Termwork_Attainment)
 
 export default router;
