@@ -6,6 +6,8 @@ import IntaTWUniv from './mathsintatwuniv';
 import TWOnly from './physicsonlytw'; 
 import Tworalresult from './tworalresult'; 
 import PureTheoryResult from "./puretheoryresult";
+import Tworalresultmini from "./tworalresultmini";
+import Tworalresultmajor from "./tworalresultmajor";
 
 const Mainresult = ({ uid }) => {
   // State for userCourseId, coming from CourseSelector
@@ -72,7 +74,11 @@ const Mainresult = ({ uid }) => {
             <TWOnly uid={userCourseId} />
           ) : Termworkdata === 4 || Termworkdata === 7 || Termworkdata === 10 || Termworkdata === 11 ? (
             <Tworalresult uid={userCourseId} />
-          ) : null}
+          ) : Termworkdata == 13  ? (
+            <Tworalresultmini uid={userCourseId} />
+          ) : Termworkdata == 14  ? (
+            <Tworalresultmajor uid={userCourseId} />
+          ) :null}
         </>
       )}
     </div>

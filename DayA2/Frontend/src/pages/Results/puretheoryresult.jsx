@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api"; 
+import * as XLSX from 'xlsx';
+
 const PureTheoryResult = ({ uid }) => {
   // const [userCourseId, setUserCourseId] = useState(null);
   // const [loData, setLoData] = useState(() => JSON.parse(localStorage.getItem('loData')) || []);
@@ -25,6 +27,8 @@ const [TotalAttainmentEighty, setTotalAttainmentEighty] = useState(null); // Ini
 const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(null); // Initially null
 const [TotalAttainment, setTotalAttainment] = useState(null); // Initially null
 
+const [poPsoData, setPoPsoData] = useState([]);
+
 
   useEffect(() => {
     const fetchCosData = async (uid) => {
@@ -35,13 +39,22 @@ const [TotalAttainment, setTotalAttainment] = useState(null); // Initially null
           api.get(`/api/result/ia1attainment/ia1/${uid}`),
           api.get(`/api/result/ia2attainment/ia2/${uid}`),
           api.get(`/api/result/ia2attainment/inta/${uid}`),
-          api.get(`/api/result/ia2attainment/univ/${uid}`)
+          api.get(`/api/result/ia2attainment/univ/${uid}`),
+          // api.get(`/api/result/ia2attainment/popso/${uid}`)
         ]);
   
         const ia1Data = response1.data || [];
         const ia2Data = response2.data || [];
         const intaData = response3.data || [];
         const univData = response4.data || [];
+        api.get(`/api/result/ia2attainment/popso/${uid}`)
+        .then(response => {
+          console.log(response)
+          setPoPsoData(response.data); // Assuming the data is returned in the required format
+        })
+        .catch(error => {
+          console.error('Error fetching PO, PSO data:', error);
+        });
   
         const ia1Map = ia1Data.reduce((acc, ia1Item) => {
           acc[ia1Item.coname] = Number(ia1Item.ia1_attainment) || 0;
@@ -62,7 +75,6 @@ const [TotalAttainment, setTotalAttainment] = useState(null); // Initially null
           acc[univItem.coname] = Number(univItem.attainment) || 0;
           return acc;
         }, {});
-
   
         const combinedData = Array.from(
           new Set([...ia1Data.map(item => item.coname), ...ia2Data.map(item => item.coname), ...intaData.map(item => item.coname), ...univData.map(item => item.coname)])
@@ -169,17 +181,188 @@ const [TotalAttainment, setTotalAttainment] = useState(null); // Initially null
       fetchCosData(uid);
     }
   }, [uid]);
-
-
   console.log(loData);
 
-  const poPsoData = [
-    { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
-    { lo: 'ITL501.2', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
-    { lo: 'ITL501.3', po: [1.91, 1.91, 1.91, 1.87, 0.96, '-', '-', '-', '-', '-', 1.91, 1.91, 1.91] },
-    { lo: 'ITL501.4', po: [1.92, 1.92, 1.92, 1.92, 1.92, 0.96, '-', '-', '-', '-', '-', 1.92, 1.92, 1.92] },
-    { lo: 'ITL501.5', po: [2.86, 2.86, 2.86, 2.86, 2.86, 1.92, '-', '-', '-', '-', '-', 1.91, 2.86, 1.91] },
-  ];
+   // Move calculateAverage outside of the map function
+const calculateAverage = (values) => {
+  const validValues = values.filter(value => value !== null && value !== undefined);
+  if (validValues.length === 0) return '-'; // Return '-' if no valid values
+  const sum = validValues.reduce((acc, val) => acc + Number(val), 0);
+  return (sum / validValues.length).toFixed(2); // Calculate average
+};
+
+
+  const downloadExcel = () => {
+    // Define the headers for the Excel sheet
+    const headers = [
+      { coname: 'CO/LO',ia1_attainment:'IA1',ia2_attainment:'IA2', attainment:'INTA', univattainment:'UNIV', conameIndirect: 'Indirect CO/LO', indirect: 'Indirect', direct: 'Direct Attainment', indirectatt: 'Indirect Attainment', total: 'Total Attainment' }
+    ];
+  
+    // Combine headers and data for LO
+    const loDataForExport = [
+      ...headers,
+      ...loData.map((item) => ({
+        coname: item.coname,
+        ia1_attainment: item.ia1_attainment,
+        ia2_attainment: item.ia2_attainment,
+        attainment: item.attainment,
+        // average : item.average,
+        univattainment: item.univattainment,
+        // twAttainment: item.twAttainment,
+        conameIndirect: item.coname, // For the Indirect CO/LO column
+        indirect: item.indirect,
+        direct: item.direct,
+        indirectatt: item.indirectatt,
+        total: item.total,
+      }))
+    ];
+  
+    // Add the new table data with calculated attainment values
+    const additionalData = [
+      { coname: "Attainment", ia1_attainment:"", ia2_attainment:"", attainment: intaAverage,  univattainment:univAverage, conameIndirect: "Final Indirect Course Attainment", indirect: FinalIndirectCourseAttainment, direct:""},
+      { coname: "Weightage",  ia1_attainment:"", ia2_attainment:"", attainment: "60%", univattainment: "40%" , conameIndirect:"", indirect:"",direct:""},
+      { coname: "Direct Total Attainment", ia1_attainment:"", ia2_attainment:"", attainment: DirectTotalAttainSixty, univattainment: DirectTotalAttainForty, conameIndirect:"", indirect:"",direct :"" },
+      { coname: "Final Direct Course Attainment",ia1_attainment:"", ia2_attainment:"", attainment: FinalDirectCourseAttainment, univattainment:"", conameIndirect:"", indirect:"",direct:""},
+      { coname: "Weightage",ia1_attainment:"", ia2_attainment:"", attainment: "80%",  univattainment:"", conameIndirect: "20%", indirect: "" , direct:""},
+      { coname: "Total Attainment",ia1_attainment:"", ia2_attainment:"", attainment: TotalAttainmentEighty, univattainment:"" ,conameIndirect:TotalAttainmentTwenty,indirect: "",direct:""},
+      { coname: "Course Attainment", ia1_attainment:"", ia2_attainment:"",attainment: TotalAttainment,  univattainment:"" ,conameIndirect: "", indirect: "",direct:"" }
+    ];
+  
+    // Merge loDataForExport and additionalData for final export
+    const dataForExport = [
+      ...loDataForExport,
+      ...additionalData
+    ];
+  
+    // Create worksheet and workbook
+    const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+    const workbook = XLSX.utils.book_new();
+  
+    // Get dynamic lengths for the data
+const loDataLength = loDataForExport.length; // Length of the LO data
+const additionalDataLength = additionalData.length; // Length of the additional data
+
+// Define starting row for additional data (it starts after loDataForExport)
+const additionalDataStartRow = loDataLength + 1; // +1 for header row
+
+// Calculate dynamic row spans
+const indirectAttainmentRowSpan = 4; // Number of rows to merge for indirect attainment (adjust if needed)
+const directAttainmentStartRow = additionalDataStartRow + indirectAttainmentRowSpan; // Where direct attainment starts
+const totalAttainmentRow = directAttainmentStartRow + 2; // Where the final total attainment row will be (adjust if needed)
+
+// Now create the merges dynamically
+worksheet['!merges'] = [
+  {
+    s: { r: additionalDataStartRow, c: 0 }, // Dynamic average
+    e: { r: additionalDataStartRow, c: 2} // Dynamic end row
+
+  },
+  {
+    s: { r: additionalDataStartRow+1, c: 0 }, // Dynamic weightage
+    e: { r: additionalDataStartRow+1, c: 2}, // Dynamic end row
+
+  },
+  {
+    s: { r: additionalDataStartRow+2, c: 0 }, // Dynamic direct total attainment
+    e: { r: additionalDataStartRow+2, c: 2}, // Dynamic end row
+
+  },
+  {
+    s: { r: additionalDataStartRow+2, c: 6}, // direct total attainment
+    e: { r: additionalDataStartRow+2, c: 6}, // Dynamic end row
+
+  },
+  {
+    s: { r: additionalDataStartRow+3, c: 0 }, // Dynamic Final direct course attainment heading 
+    e: { r: additionalDataStartRow+3, c: 2}, // Dynamic end row
+
+  },
+  {
+    s: { r: additionalDataStartRow+3, c: 3}, // Dynamic Final direct course attainment value
+    e: { r: additionalDataStartRow+3, c: 4}, // Dynamic end row
+
+  },
+  // {
+  //   s: { r: additionalDataStartRow, c: 7 }, // Dynamic start for conameIndirect (row-spanned)
+  //   e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 7}, // Dynamic end row
+  // },
+  // {
+  //   s: { r: additionalDataStartRow, c: 8 }, // Dynamic start for indirect (column-spanned)
+  //   e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 8 }, // Dynamic end row
+  // },
+  {
+    s: { r: directAttainmentStartRow, c: 0 }, // Dynamic start for conameIndirect (row-spanned)
+    e: { r: directAttainmentStartRow, c: 2} // Dynamic end row
+
+  },
+  {
+    s: { r: directAttainmentStartRow+1, c: 0 }, // Dynamic start for conameIndirect (row-spanned)
+    e: { r: directAttainmentStartRow+1, c: 2} // Dynamic end row
+
+  },
+  {
+    s: { r: directAttainmentStartRow+2, c: 0 }, // Dynamic start for conameIndirect (row-spanned)
+    e: { r: directAttainmentStartRow+2, c: 2} // Dynamic end row
+
+  },
+  
+  // Merging for 'Final Indirect Course Attainment'
+  {
+    s: { r: additionalDataStartRow, c: 5 }, // Dynamic start for conameIndirect (row-spanned)
+    e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 5}, // Dynamic end row
+  },
+  {
+    s: { r: additionalDataStartRow, c: 6 }, // Dynamic start for indirect (column-spanned)
+    e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 6}, // Dynamic end row
+  },
+
+  // // Merging for 'Final Direct Course Attainment'
+  // {
+  //   s: { r: directAttainmentStartRow-1, c: 3 }, // finaldirectcourseattainment
+  //   e: { r: directAttainmentStartRow-1, c: 6 }, // Merge across columns
+  // },
+  {
+    s: { r: directAttainmentStartRow, c: 3 }, // 80
+    e: { r: directAttainmentStartRow, c: 4 }, // Merge across columns
+  },
+  {
+    s: { r: directAttainmentStartRow, c: 5 }, // 20
+    e: { r: directAttainmentStartRow, c: 6}, // Merge across columns
+  },
+  {
+    s: { r: directAttainmentStartRow + 1, c: 3 }, // total attainment of 80
+    e: { r: directAttainmentStartRow + 1, c: 4 }, // Merge 
+  },
+  {
+    s: { r: directAttainmentStartRow + 1, c: 5 }, // total attainment of 20
+    e: { r: directAttainmentStartRow + 1, c: 6 }, // Merge across columns
+  },
+  {
+    s: { r: directAttainmentStartRow + 1, c: 1 }, // heading
+    e: { r: directAttainmentStartRow + 1, c: 2 }, // Merge across columns
+  },
+
+  // Merging for 'Total Attainment'
+  {
+    s: { r: totalAttainmentRow, c: 3 }, // Start row for total attainment merge
+    e: { r: totalAttainmentRow, c: 6 }, // Merge across all columns
+  }
+];
+  
+    // Append the worksheet
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Course Attainment");
+    
+    // Write and download the Excel file
+    XLSX.writeFile(workbook, "IA1IA2INTAUNIV_Attainment.xlsx");
+  }; 
+
+  // const poPsoData = [
+  //   { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
+  //   { lo: 'ITL501.2', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
+  //   { lo: 'ITL501.3', po: [1.91, 1.91, 1.91, 1.87, 0.96, '-', '-', '-', '-', '-', 1.91, 1.91, 1.91] },
+  //   { lo: 'ITL501.4', po: [1.92, 1.92, 1.92, 1.92, 1.92, 0.96, '-', '-', '-', '-', '-', 1.92, 1.92, 1.92] },
+  //   { lo: 'ITL501.5', po: [2.86, 2.86, 2.86, 2.86, 2.86, 1.92, '-', '-', '-', '-', '-', 1.91, 2.86, 1.91] },
+  // ];
   return (
     <div className="p-4">
       {/* Course Attainment Table */}
@@ -268,6 +451,11 @@ const [TotalAttainment, setTotalAttainment] = useState(null); // Initially null
             </tr>
           </tbody>
         </table>
+        <div className="flex justify-center m-8">
+        <button onClick={downloadExcel} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ">
+        Download as Excel
+      </button>
+      </div>
       </div>
 
       {/* PO and PSO Attainment Table */}
@@ -292,22 +480,41 @@ const [TotalAttainment, setTotalAttainment] = useState(null); // Initially null
             </tr>
           </thead>
           <tbody>
-            {poPsoData.map((item, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 p-2">{item.lo}</td>
-                {item.po.map((value, i) => (
-                  <td key={i} className="border border-gray-300 p-2">{value}</td>
-                ))}
-              </tr>
-            ))}
 
+          {poPsoData.map((item, index) => {
+  const totalatt = parseFloat(loData[index]?.total) || 0;  // Access totalatt from loData
+  return (
+    <tr key={index}>
+      <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
+      {item.po.map((poValue, i) => (
+        <td key={i} className="border border-gray-300 p-2">
+          {poValue !== null ? (poValue * totalatt / 3).toFixed(2) : '-'}
+        </td>
+      ))}
+      {item.pso.map((psoValue, i) => (
+        <td key={i} className="border border-gray-300 p-2">
+          {psoValue !== null ? (psoValue * totalatt / 3).toFixed(2) : '-'}
+        </td>
+      ))}
+    </tr>
+  );
+})}
             {/* Average Row */}
             <tr>
-              <td className="border border-gray-300 p-2">AVG</td>
-              {[2.23, 2.23, 2.08, 2.39, 2.08, 0.96, '-', '-', '-', '-', '-', 1.92, 1.91, 1.60].map((avg, i) => (
-                <td key={i} className="border border-gray-300 p-2">{avg}</td>
-              ))}
-            </tr>
+  <td className="border border-gray-300 p-2">AVG</td>
+  
+  {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => (
+    <td key={i} className="border border-gray-300 p-2">
+      {calculateAverage(poPsoData.map(item => item.po[i]))}
+    </td>
+  ))}
+  
+  {poPsoData.length > 0 && poPsoData[0].pso.map((_, i) => (
+    <td key={i} className="border border-gray-300 p-2">
+      {calculateAverage(poPsoData.map(item => item.pso[i]))}
+    </td>
+  ))}
+</tr>
           </tbody>
         </table>
       </div>

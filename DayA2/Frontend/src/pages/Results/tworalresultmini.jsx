@@ -2,10 +2,10 @@ import React, { useEffect, useState} from 'react';
 import api from "../../api";
 import * as XLSX from 'xlsx';
 
-const Tworalresult = ({uid}) => {
+const Tworalresultmini = ({uid}) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [loData, setLoData] = useState([]);
-  const [twAverage, settwAverage] = useState(0);
+  const [miniproAverage, setminiproAverage] = useState(0);
   const [oralAverage, setoralAverage] = useState(0);
   const [DirectTotalAttainSixty, setDirectTotalAttainSixty] = useState(0);
   const [DirectTotalAttainForty, setDirectTotalAttainForty] = useState(0);
@@ -21,11 +21,11 @@ const Tworalresult = ({uid}) => {
       try {
         // Make all API requests concurrently using Promise.all
         const [ response1,response2] = await Promise.all([
-          api.get(`/api/result/ia2attainment/tw/${uid}`),
+          api.get(`/api/result/ia2attainment/minipro/${uid}`),
           api.get(`/api/result/ia2attainment/oral/${uid}`),
         ]);
 
-        const twData = response1.data || [];
+        const miniproData = response1.data || [];
         const oralData = response2.data || [];
         api.get(`/api/result/ia2attainment/popso/${uid}`)
         .then(response => {
@@ -36,8 +36,8 @@ const Tworalresult = ({uid}) => {
           console.error('Error fetching PO, PSO data:', error);
         });
 
-        const twMap = twData.reduce((acc, twItem) => {
-          acc[twItem.coname] = Number(twItem.attainment) || 0;
+        const miniproMap = miniproData.reduce((acc, miniproItem) => {
+          acc[miniproItem.coname] = Number(miniproItem.attainment) || 0;
           return acc;
         }, {});
 
@@ -47,11 +47,11 @@ const Tworalresult = ({uid}) => {
         }, {});
 
         const combinedData = Array.from(
-          new Set([ ...twData.map(item => item.coname),...oralData.map(item => item.coname)])
+          new Set([ ...miniproData.map(item => item.coname),...oralData.map(item => item.coname)])
         ).map((coname) => {
-          const twattainment = twMap[coname] || 0;
+          const miniproattainment = miniproMap[coname] || 0;
           const oralattainment = oralMap[coname] || 0;
-          const directAttainment = ((((60 / 100) * twattainment) + ((40 / 100) * oralattainment)) * (80 / 100)).toFixed(2);
+          const directAttainment = ((((60 / 100) * miniproattainment) + ((40 / 100) * oralattainment)) * (80 / 100)).toFixed(2);
 
           //dummy data
           const indirectAttainmentvalues = (Math.random() * 3) .toFixed(2);  // Example calculation
@@ -62,7 +62,7 @@ const Tworalresult = ({uid}) => {
 
           return {
             coname,
-            twattainment: twattainment,
+            miniproattainment: miniproattainment,
             oralattainment: oralattainment,
             indirect: indirectAttainmentvalues,
             direct: directAttainment,
@@ -71,9 +71,9 @@ const Tworalresult = ({uid}) => {
           };
         });
 
-        const twAverage = combinedData
-          .filter(item => item.twattainment)
-          .reduce((sum, item) => sum + Number(item.twattainment), 0) / combinedData.length;
+        const miniproAverage = combinedData
+          .filter(item => item.miniproattainment)
+          .reduce((sum, item) => sum + Number(item.miniproattainment), 0) / combinedData.length;
         
         const oralAverage = combinedData
           .filter(item => item.oralattainment)
@@ -85,7 +85,7 @@ const Tworalresult = ({uid}) => {
           .reduce((sum, item) => sum + Number(item.indirect), 0) / combinedData.length;
 
 
-        const directAttainSixty = (60 / 100) * twAverage;
+        const directAttainSixty = (60 / 100) * miniproAverage;
         const directAttainForty = (40 / 100) * oralAverage;
 
         const finalDirectAttainment = directAttainSixty + directAttainForty;
@@ -93,7 +93,7 @@ const Tworalresult = ({uid}) => {
         const totalAttainmentTwenty = (20 / 100) * finalIndirectAttainment;
         const finalTotalAttainment = totalAttainmentEighty + totalAttainmentTwenty;
 
-        settwAverage(twAverage.toFixed(2));
+        setminiproAverage(miniproAverage.toFixed(2));
         setoralAverage(oralAverage.toFixed(2))
         setFinalIndirectCourseAttainment(finalIndirectAttainment.toFixed(2));
         setDirectTotalAttainSixty(directAttainSixty.toFixed(2));
@@ -108,24 +108,26 @@ const Tworalresult = ({uid}) => {
         console.error("Error fetching COS data", error);
       }
     };
+
     if (uid) {
       fetchCosData(uid);
     }
   }, [uid]);
   console.log(loData);
+
    // Move calculateAverage outside of the map function
-  const calculateAverage = (values) => {
+const calculateAverage = (values) => {
   const validValues = values.filter(value => value !== null && value !== undefined);
   if (validValues.length === 0) return '-'; // Return '-' if no valid values
   const sum = validValues.reduce((acc, val) => acc + Number(val), 0);
   return (sum / validValues.length).toFixed(2); // Calculate average
 };
 
-
+  
   const downloadExcel = () => {
     // Define the headers for the Excel sheet
     const headers = [
-      { coname: 'CO/LO', twattainment: 'TW', oralattainment: 'OR', conameIndirect: 'Indirect CO/LO', indirect: 'Indirect', direct: 'Direct Attainment', indirectatt: 'Indirect Attainment', total: 'Total Attainment' }
+      { coname: 'CO/LO', miniproattainment: 'TW', oralattainment: 'OR', conameIndirect: 'Indirect CO/LO', indirect: 'Indirect', direct: 'Direct Attainment', indirectatt: 'Indirect Attainment', total: 'Total Attainment' }
     ];
   
     // Combine headers and data for LO
@@ -133,7 +135,7 @@ const Tworalresult = ({uid}) => {
       ...headers,
       ...loData.map((item) => ({
         coname: item.coname,
-        twattainment: item.twattainment,
+        miniproattainment: item.miniproattainment,
         oralattainment: item.oralattainment,
         conameIndirect: item.coname, // For the Indirect CO/LO column
         indirect: item.indirect,
@@ -145,13 +147,13 @@ const Tworalresult = ({uid}) => {
   
     // Add the new table data with calculated attainment values
     const additionalData = [
-      { coname: "Attainment", twattainment: twAverage, oralattainment: oralAverage, conameIndirect: "Final Indirect Course Attainment", indirect: FinalIndirectCourseAttainment },
-      { coname: "Weightage", twattainment: "60%", oralattainment: "40%" },
-      { coname: "Direct Total Attainment", twattainment: DirectTotalAttainSixty, oralattainment: DirectTotalAttainForty },
-      { coname: "Final Direct Course Attainment", twattainment: FinalDirectCourseAttainment, oralattainment: "", conameIndirect: "", indirect: "" },
-      { coname: "Weightage", twattainment: "80%", oralattainment: "", conameIndirect: "20%" },
-      { coname: "Total Attainment", twattainment: TotalAttainmentEighty, oralattainment: "",conameIndirect:TotalAttainmentTwenty},
-      { coname: "Course Attainment", twattainment: TotalAttainment, oralattainment: "", conameIndirect: "", indirect: "" }
+      { coname: "Attainment", miniproattainment: miniproAverage, oralattainment: oralAverage, conameIndirect: "Final Indirect Course Attainment", indirect: FinalIndirectCourseAttainment },
+      { coname: "Weightage", miniproattainment: "60%", oralattainment: "40%" },
+      { coname: "Direct Total Attainment", miniproattainment: DirectTotalAttainSixty, oralattainment: DirectTotalAttainForty },
+      { coname: "Final Direct Course Attainment", miniproattainment: FinalDirectCourseAttainment, oralattainment: "", conameIndirect: "", indirect: "" },
+      { coname: "Weightage", miniproattainment: "80%", oralattainment: "", conameIndirect: "20%" },
+      { coname: "Total Attainment", miniproattainment: TotalAttainmentEighty, oralattainment: "",conameIndirect:TotalAttainmentTwenty},
+      { coname: "Course Attainment", miniproattainment: TotalAttainment, oralattainment: "", conameIndirect: "", indirect: "" }
     ];
   
     // Merge loDataForExport and additionalData for final export
@@ -164,7 +166,7 @@ const Tworalresult = ({uid}) => {
     const worksheet = XLSX.utils.json_to_sheet(dataForExport);
     const workbook = XLSX.utils.book_new();
   
-    // Get dynamic lengths for the data
+   // Get dynamic lengths for the data
 const loDataLength = loDataForExport.length; // Length of the LO data
 const additionalDataLength = additionalData.length; // Length of the additional data
 
@@ -221,10 +223,9 @@ worksheet['!merges'] = [
     XLSX.utils.book_append_sheet(workbook, worksheet, "Course Attainment");
     
     // Write and download the Excel file
-    XLSX.writeFile(workbook, "TW_ORAL_Attainment.xlsx");
-  }; 
-
-
+    XLSX.writeFile(workbook, "TW_ORAL_MiniPro_Attainment.xlsx");
+  };  
+  
   return (
     <div className="p-4">
       {/* Course Attainment Table */}
@@ -255,7 +256,7 @@ worksheet['!merges'] = [
             {loData.map((item, index) => (
               <tr key={index}>
                 <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
-                <td className="border border-gray-300 p-2 text-center">{item.twattainment}</td>
+                <td className="border border-gray-300 p-2 text-center">{item.miniproattainment}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.oralattainment}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
                 <td className="border border-gray-300 p-2 text-center">{item.indirect}</td>
@@ -268,7 +269,7 @@ worksheet['!merges'] = [
             {/* Attainment, Weightage Rows */}
             <tr>
               <td className="border border-gray-300 p-2 text-center">Attainment</td>
-              <td className="border border-gray-300 p-2 text-center">{twAverage}</td>
+              <td className="border border-gray-300 p-2 text-center">{miniproAverage}</td>
               <td className="border border-gray-300 p-2 text-center">{oralAverage}</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={4}>Final Indirect Course Attainment</td>
               <td className="border border-gray-300 p-2 text-center" rowSpan={4}>{FinalIndirectCourseAttainment}</td>
@@ -314,7 +315,6 @@ worksheet['!merges'] = [
       </div>
       </div>
 
-      {/* PO and PSO Attainment Table */}
       <h2 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">PO, PSO Attainment</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm md:text-base">
@@ -336,9 +336,9 @@ worksheet['!merges'] = [
             </tr>
           </thead>
           <tbody>
-
-          {poPsoData.map((item, index) => {
-  const totalatt = parseFloat(loData[index]?.total) || 0;  // Access totalatt from loData
+         
+{poPsoData.map((item, index) => {
+  const totalatt = parseFloat(loData[index]?.total) || 0; // Access totalatt from loData
   return (
     <tr key={index}>
       <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
@@ -355,8 +355,9 @@ worksheet['!merges'] = [
     </tr>
   );
 })}
-            {/* Average Row */}
-            <tr>
+
+{/* Average Row */}
+<tr>
   <td className="border border-gray-300 p-2">AVG</td>
   
   {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => (
@@ -371,6 +372,7 @@ worksheet['!merges'] = [
     </td>
   ))}
 </tr>
+
           </tbody>
         </table>
       </div>
@@ -379,4 +381,4 @@ worksheet['!merges'] = [
 };
 
 
-export default Tworalresult;
+export default Tworalresultmini;

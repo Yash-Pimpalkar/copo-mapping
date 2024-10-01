@@ -1,5 +1,6 @@
 import React, { useEffect, useState} from 'react';
 import api from "../../api";
+import * as XLSX from 'xlsx';
 
 const TWOnly  = ({uid}) => {
   const [userCourseId, setUserCourseId] = useState(null);
@@ -9,7 +10,8 @@ const TWOnly  = ({uid}) => {
   const [TotalAttainmentEighty, setTotalAttainmentEighty] = useState(0);
   const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(0);
   const [TotalAttainment, setTotalAttainment] = useState(0);
-  
+  const [poPsoData, setPoPsoData] = useState([]);
+
   useEffect(() => {
     const fetchCosData = async (uid) => {
       try {
@@ -19,6 +21,14 @@ const TWOnly  = ({uid}) => {
         ]);
 
         const twData = response1.data || [];
+        api.get(`/api/result/ia2attainment/popso/${uid}`)
+        .then(response => {
+          console.log(response)
+          setPoPsoData(response.data); // Assuming the data is returned in the required format
+        })
+        .catch(error => {
+          console.error('Error fetching PO, PSO data:', error);
+        });
 
         const twMap = twData.reduce((acc, twItem) => {
           acc[twItem.coname] = Number(twItem.attainment) || 0;
@@ -78,14 +88,115 @@ const TWOnly  = ({uid}) => {
   }, [uid]);
   console.log(loData);
 
-  const poPsoData = [
-    { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
-    { lo: 'ITL501.2', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
-    { lo: 'ITL501.3', po: [1.91, 1.91, 1.91, 1.87, 0.96, '-', '-', '-', '-', '-', 1.91, 1.91, 1.91] },
-    { lo: 'ITL501.4', po: [1.92, 1.92, 1.92, 1.92, 1.92, 0.96, '-', '-', '-', '-', '-', 1.92, 1.92, 1.92] },
-    { lo: 'ITL501.5', po: [2.86, 2.86, 2.86, 2.86, 2.86, 1.92, '-', '-', '-', '-', '-', 1.91, 2.86, 1.91] },
-    { lo: 'ITL501.6', po: [2.86, 2.86, 2.86, 2.86, 2.86, 1.91, '-', '-', '-', '-', '-', 1.91, 2.86, 1.91] },
-  ];
+   // Move calculateAverage outside of the map function
+  const calculateAverage = (values) => {
+  const validValues = values.filter(value => value !== null && value !== undefined);
+  if (validValues.length === 0) return '-'; // Return '-' if no valid values
+  const sum = validValues.reduce((acc, val) => acc + Number(val), 0);
+  return (sum / validValues.length).toFixed(2); // Calculate average
+};
+
+
+  const downloadExcel = () => {
+    // Define the headers for the Excel sheet
+    const headers = [
+        { coname: 'CO/LO', twattainment: 'TW', conameIndirect: 'Indirect CO/LO', indirect: 'Indirect', direct: 'Direct Attainment', indirectatt: 'Indirect Attainment', total: 'Total Attainment' }
+    ];
+
+    // Combine headers and data for LO
+    const loDataForExport = [
+        ...headers,
+        ...loData.map((item) => ({
+            coname: item.coname,
+            twattainment: item.twattainment,
+            conameIndirect: item.coname, // For the Indirect CO/LO column
+            indirect: item.indirect,
+            direct: item.direct,
+            indirectatt: item.indirectatt,
+            total: item.total,
+        }))
+    ];
+
+    // Add the new table data with calculated attainment values
+    const additionalData = [
+        { coname: "Attainment", twattainment: twAverage, conameIndirect: "Final Indirect Course Attainment", indirect: FinalIndirectCourseAttainment },
+        { coname: "Weightage", twattainment: "80%", conameIndirect: "20%" },
+        { coname: "Total Attainment", twattainment: TotalAttainmentEighty, conameIndirect: TotalAttainmentTwenty },
+        { coname: "Course Attainment", twattainment: TotalAttainment, conameIndirect: "", indirect: "", direct: "" }
+    ];
+
+    // Merge loDataForExport and additionalData for final export
+    const dataForExport = [
+        ...loDataForExport,
+        ...additionalData
+    ];
+
+    // Create worksheet and workbook
+    const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+    const workbook = XLSX.utils.book_new();
+
+    // Get dynamic lengths for the data
+    const loDataLength = loDataForExport.length; // Length of the LO data
+    const additionalDataLength = additionalData.length; // Length of the additional data
+
+    // Define starting row for additional data (it starts after loDataForExport)
+    const additionalDataStartRow = loDataLength + 1; // +1 for header row
+
+    // Calculate dynamic row spans
+    // const indirectAttainmentRowSpan = 1; // Number of rows to merge for indirect attainment (adjust if needed)
+    const WeightageStartRow = additionalDataStartRow + 1; // Where direct attainment starts
+    const totalAttainmentRow = WeightageStartRow + 1; // Where the final total attainment row will be (adjust if needed)
+
+    // Create dynamic merges based on row lengths
+    worksheet['!merges'] = [
+
+        // Merging for 'Weightage'
+        {
+          s: { r: additionalDataStartRow, c: 1 }, // attainment
+          e: { r: additionalDataStartRow, c: 1 }, //merge
+      },
+        // {
+        //     s: { r: WeightageStartRow, c: 2 }, // Row for '80%' attainment merge
+        //     e: { r: WeightageStartRow, c: 2 }, // Merge across columns 1-2
+        // },
+        {
+            s: { r: WeightageStartRow, c: 2}, // Row for '20%' attainment merge
+            e: { r: WeightageStartRow, c: 3}, // Merge across columns 5-6
+        },
+
+        // Merging for 'Total Attainment'
+        // {
+        //     s: { r: totalAttainmentRow, c: 2 }, // Start row for total attainment merge
+        //     e: { r: totalAttainmentRow, c: 2 }, // Merge across all columns 1-6
+        // },
+        // Merging for 'Total Attainment'
+        {
+          s: { r: totalAttainmentRow, c: 2 }, // Start row for total attainment merge
+          e: { r: totalAttainmentRow, c: 3}, // Merge across all columns 1-6
+      },
+
+        // Merging for 'Course Attainment'
+        {
+            s: { r: totalAttainmentRow + 1, c: 1 }, // Start row for course attainment merge
+            e: { r: totalAttainmentRow + 1, c: 3 }, // Merge across all columns 2-4
+        }
+    ];
+
+    // Append the worksheet
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Course Attainment");
+
+    // Write and download the Excel file
+    XLSX.writeFile(workbook, "TW_Attainment.xlsx");
+};
+
+  // const poPsoData = [
+  //   { lo: 'ITL501.1', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
+  //   { lo: 'ITL501.2', po: [1.93, 1.93, 1.93, 1.93, 1.93, 0.96, '-', '-', '-', '-', '-', 1.93, 0.96, 0.96] },
+  //   { lo: 'ITL501.3', po: [1.91, 1.91, 1.91, 1.87, 0.96, '-', '-', '-', '-', '-', 1.91, 1.91, 1.91] },
+  //   { lo: 'ITL501.4', po: [1.92, 1.92, 1.92, 1.92, 1.92, 0.96, '-', '-', '-', '-', '-', 1.92, 1.92, 1.92] },
+  //   { lo: 'ITL501.5', po: [2.86, 2.86, 2.86, 2.86, 2.86, 1.92, '-', '-', '-', '-', '-', 1.91, 2.86, 1.91] },
+  //   { lo: 'ITL501.6', po: [2.86, 2.86, 2.86, 2.86, 2.86, 1.91, '-', '-', '-', '-', '-', 1.91, 2.86, 1.91] },
+  // ];
   return (
     <div className="p-4">
       {/* Course Attainment Table */}
@@ -153,6 +264,11 @@ const TWOnly  = ({uid}) => {
             </tr>
           </tbody>
         </table>
+        <div className="flex justify-center m-8">
+        <button onClick={downloadExcel} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ">
+        Download as Excel
+      </button>
+      </div>
       </div>
 
       {/* PO and PSO Attainment Table */}
@@ -177,27 +293,45 @@ const TWOnly  = ({uid}) => {
             </tr>
           </thead>
           <tbody>
-            {poPsoData.map((item, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 p-2">{item.lo}</td>
-                {item.po.map((value, i) => (
-                  <td key={i} className="border border-gray-300 p-2">{value}</td>
-                ))}
-              </tr>
-            ))}
 
+          {poPsoData.map((item, index) => {
+  const totalatt = parseFloat(loData[index]?.total) || 0;  // Access totalatt from loData
+  return (
+    <tr key={index}>
+      <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
+      {item.po.map((poValue, i) => (
+        <td key={i} className="border border-gray-300 p-2">
+          {poValue !== null ? (poValue * totalatt / 3).toFixed(2) : '-'}
+        </td>
+      ))}
+      {item.pso.map((psoValue, i) => (
+        <td key={i} className="border border-gray-300 p-2">
+          {psoValue !== null ? (psoValue * totalatt / 3).toFixed(2) : '-'}
+        </td>
+      ))}
+    </tr>
+  );
+})}
             {/* Average Row */}
             <tr>
-              <td className="border border-gray-300 p-2">AVG</td>
-              {[2.23, 2.23, 2.08, 2.39, 2.08, 0.96, '-', '-', '-', '-', '-', 1.92, 1.91, 1.60].map((avg, i) => (
-                <td key={i} className="border border-gray-300 p-2">{avg}</td>
-              ))}
-            </tr>
+  <td className="border border-gray-300 p-2">AVG</td>
+  
+  {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => (
+    <td key={i} className="border border-gray-300 p-2">
+      {calculateAverage(poPsoData.map(item => item.po[i]))}
+    </td>
+  ))}
+  
+  {poPsoData.length > 0 && poPsoData[0].pso.map((_, i) => (
+    <td key={i} className="border border-gray-300 p-2">
+      {calculateAverage(poPsoData.map(item => item.pso[i]))}
+    </td>
+  ))}
+</tr>
           </tbody>
         </table>
       </div>
     </div>
   );
 };
-
 export default TWOnly;
