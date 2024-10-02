@@ -332,7 +332,7 @@ const IntaTWUniv = ({ uid }) => {
         pso2: "PSO2",
       },
     ];
-  
+
     // Add data for the PSO sheet dynamically (example structure)
     const poPsoDataForExport = [
       ...headers2,
@@ -360,13 +360,13 @@ const IntaTWUniv = ({ uid }) => {
     // Create empty rows to separate sections
     const emptyRows = Array(2).fill({}); // Create 2 empty objects for spacing
 
-  // Combine Course Attainment and PSO Data
+    // Combine Course Attainment and PSO Data
     const finalDataForExport = [
-    ...dataForExport,
-    ...emptyRows,  // Add empty rows for spacing
-    ...headers2,
-    ...poPsoDataForExport,
-  ];
+      ...dataForExport,
+      ...emptyRows,  // Add empty rows for spacing
+      ...headers2,
+      ...poPsoDataForExport,
+    ];
 
 
     // Create worksheet and workbook
@@ -817,57 +817,48 @@ const IntaTWUniv = ({ uid }) => {
               <td className="border border-gray-300 p-2">AVG</td>
 
               {/* Calculate Average for PO Columns */}
-              {poPsoData.length > 0 &&
-                poPsoData[0].po.map((_, i) => {
-                  const totalatt = parseFloat(loData[i]?.total) || 0;
-                  // Get all values for the current PO column (from all rows above AVG)
-                  const poValues = poPsoData.map((item) => item.po[i]); // Extract all values from that PO column
-                  console.log("poValues", poValues)
-                  // Calculate the average for the current PO column
-                  const poSum = poValues.reduce(
-                    (acc, val) => acc + parseFloat(val),
-                    0,
-                  ); // Sum all values, ensure they are numbers
+              {poPsoData[0].po.map((_, i) => {
+                const poValues = poPsoData
+                  .map((item, index) => {
+                    const totalatt = parseFloat(loData[index]?.total) || 0;
+                    const poValue = item.po[i] !== null ? parseFloat(item.po[i]) : null;
+                    return poValue !== null ? (poValue * totalatt) / 3 : null;
+                  })
+                  .filter((value) => value !== null); // Filter out null values
 
-                  const meanpoValues = poValues.length;
-                  const poAverage = ((poSum * totalatt) / meanpoValues);
-                   // Divide sum by the number of values to get the average
+                const poSum = poValues.reduce((acc, val) => acc + val, 0);
+                const poAverage = poValues.length > 0 ? poSum / poValues.length : 0; // Use only the non-null values for average
 
-                  return (
-                    <td key={i} className="border border-gray-300 p-2">
-                      {poAverage.toFixed(2)}{" "}
-                      {/* Display average to 2 decimal places */}
-                    </td>
-                  );
-                })}
+                return (
+                  <td key={i} className="border border-gray-300 p-2">
+                    {poAverage.toFixed(2)}
+                  </td>
+                );
+              })}
 
               {/* Calculate Average for PSO Columns */}
-              {poPsoData.length > 0 &&
-                poPsoData[0].pso.map((_, i) => {
-                  const totalatt = parseFloat(loData[i]?.total) || 0;
-                  // Get all values for the current PSO column (from all rows above AVG)
-                  const psoValues = poPsoData.map((item) => item.pso[i]); // Extract all values from that PSO column
-                  console.log("psoValues", psoValues)
-                  // Calculate the average for the current PSO column
-                  const psoSum = psoValues.reduce(
-                    (acc, val) => acc + val,
-                    0,
-                  ); // Sum all values, ensure they are numbers
-                  const psoAverage = (psoSum * totalatt) / psoValues.length; 
-                  // console.log("psoValues",psoValues)// Divide sum by the number of values to get the average
+              {poPsoData[0].pso.map((_, i) => {
+                const psoValues = poPsoData
+                  .map((item, index) => {
+                    const totalatt = parseFloat(loData[index]?.total) || 0;
+                    const psoValue = item.pso[i] !== null ? parseFloat(item.pso[i]) : null;
+                    return psoValue !== null ? (psoValue * totalatt) / 3 : null;
+                  })
+                  .filter((value) => value !== null); // Filter out null values
 
-                  return (
-                    <td key={i} className="border border-gray-300 p-2">
-                      {psoAverage.toFixed(2)}{" "}
-                      {/* Display average to 2 decimal places */}
-                    </td>
-                  );
-                })}
+                const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
+                const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0; // Use only the non-null values for average
+
+                return (
+                  <td key={i} className="border border-gray-300 p-2">
+                    {psoAverage.toFixed(2)}
+                  </td>
+                );
+              })}
             </tr>
           </tbody>
         </table>
       </div>
-      {/* )} */}
     </div>
   );
 };

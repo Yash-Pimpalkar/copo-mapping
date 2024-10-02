@@ -30,7 +30,6 @@ import TheoryAssignment from './pages/TeacherForm/Termwork/TheoryAssignment';
 import UploadTermwork from './pages/Termwork/UploadTermwork';
 import Oral from './pages/TeacherForm/Oral';
 import UploadOral from './pages/Questions/UploadOral';
-import PraticalOral from './pages/TeacherForm/PraticalOral';
 import TermworkTable from "./pages/TeacherForm/Termwork/TermworkTable";
 import UploadMajorproSem from "./pages/TeacherForm/Projects/uploadmajorprosem";
 import UploadMiniproSem from "./pages/TeacherForm/Projects/uploadminiprosem";
@@ -43,6 +42,8 @@ import IntaTWUniv from './pages/Results/mathsintatwuniv';
 import TWOnly from './pages/Results/physicsonlytw';
 import PureTheoryResult from './pages/Results/puretheoryresult';
 import MainResult from './pages/Results/mainresult';
+import OralPCE from './pages/TeacherForm/OralPCE';
+import UploadPCE from './pages/Questions/UploadOralPCE';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -104,7 +105,9 @@ function App() {
               <Route path='/theoryassg' element={<TermworkTable uid={user_id}/>}/>
               <Route path='/uploadtermwork' element={<UploadTermwork uid={user_id}/>}/>
               <Route path='/uploadoral' element={<UploadOral uid={user_id}/>}/>
-              <Route path='/oralpractical' element={<PraticalOral uid={user_id}/>}/>
+              <Route path='/oralpractical' element={<Oral uid={user_id}/>}/>
+              <Route path='/uploadoralpce' element={<UploadPCE uid={user_id}/>}/>
+              <Route path='/oralpce' element={<OralPCE uid={user_id}/>}/>
               <Route path='/UploadMajorproSem' element={<UploadMajorproSem uid={user_id}/>}/>
               <Route path='/Uploadminiprosem' element={<UploadMiniproSem uid={user_id}/>}/>
               <Route path='/MiniproSem' element={<MiniproSem uid={user_id}/>}/>
