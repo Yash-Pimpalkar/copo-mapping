@@ -1,8 +1,8 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import api from "../../api";
 import * as XLSX from 'xlsx';
 
-const Tworalresult = ({uid}) => {
+const Tworalresult = ({ uid }) => {
   const [userCourseId, setUserCourseId] = useState(null);
   const [loData, setLoData] = useState([]);
   const [twAverage, settwAverage] = useState(0);
@@ -15,12 +15,12 @@ const Tworalresult = ({uid}) => {
   const [TotalAttainmentTwenty, setTotalAttainmentTwenty] = useState(0);
   const [TotalAttainment, setTotalAttainment] = useState(0);
   const [poPsoData, setPoPsoData] = useState([]);
-  
+
   useEffect(() => {
     const fetchCosData = async (uid) => {
       try {
         // Make all API requests concurrently using Promise.all
-        const [ response1,response2] = await Promise.all([
+        const [response1, response2] = await Promise.all([
           api.get(`/api/result/ia2attainment/tw/${uid}`),
           api.get(`/api/result/ia2attainment/oral/${uid}`),
         ]);
@@ -28,13 +28,13 @@ const Tworalresult = ({uid}) => {
         const twData = response1.data || [];
         const oralData = response2.data || [];
         api.get(`/api/result/ia2attainment/popso/${uid}`)
-        .then(response => {
-          console.log(response)
-          setPoPsoData(response.data); // Assuming the data is returned in the required format
-        })
-        .catch(error => {
-          console.error('Error fetching PO, PSO data:', error);
-        });
+          .then(response => {
+            console.log(response)
+            setPoPsoData(response.data); // Assuming the data is returned in the required format
+          })
+          .catch(error => {
+            console.error('Error fetching PO, PSO data:', error);
+          });
 
         const twMap = twData.reduce((acc, twItem) => {
           acc[twItem.coname] = Number(twItem.attainment) || 0;
@@ -47,17 +47,17 @@ const Tworalresult = ({uid}) => {
         }, {});
 
         const combinedData = Array.from(
-          new Set([ ...twData.map(item => item.coname),...oralData.map(item => item.coname)])
+          new Set([...twData.map(item => item.coname), ...oralData.map(item => item.coname)])
         ).map((coname) => {
           const twattainment = twMap[coname] || 0;
           const oralattainment = oralMap[coname] || 0;
           const directAttainment = ((((60 / 100) * twattainment) + ((40 / 100) * oralattainment)) * (80 / 100)).toFixed(2);
 
           //dummy data
-          const indirectAttainmentvalues = (Math.random() * 3) .toFixed(2);  // Example calculation
+          const indirectAttainmentvalues = (Math.random() * 3).toFixed(2);  // Example calculation
           // const twattainment = (Math.random() * 3).toFixed(2);  // Dummy twattainment data
 
-          const indirectAttainment = (indirectAttainmentvalues * (20/100)).toFixed(2); ;
+          const indirectAttainment = (indirectAttainmentvalues * (20 / 100)).toFixed(2);;
           const totalAttainment = parseFloat(directAttainment) + parseFloat(indirectAttainment);
 
           return {
@@ -74,7 +74,7 @@ const Tworalresult = ({uid}) => {
         const twAverage = combinedData
           .filter(item => item.twattainment)
           .reduce((sum, item) => sum + Number(item.twattainment), 0) / combinedData.length;
-        
+
         const oralAverage = combinedData
           .filter(item => item.oralattainment)
           .reduce((sum, item) => sum + Number(item.oralattainment), 0) / combinedData.length;
@@ -113,13 +113,13 @@ const Tworalresult = ({uid}) => {
     }
   }, [uid]);
   console.log(loData);
-   // Move calculateAverage outside of the map function
+  // Move calculateAverage outside of the map function
   const calculateAverage = (values) => {
-  const validValues = values.filter(value => value !== null && value !== undefined);
-  if (validValues.length === 0) return '-'; // Return '-' if no valid values
-  const sum = validValues.reduce((acc, val) => acc + Number(val), 0);
-  return (sum / validValues.length).toFixed(2); // Calculate average
-};
+    const validValues = values.filter(value => value !== null && value !== undefined);
+    if (validValues.length === 0) return '-'; // Return '-' if no valid values
+    const sum = validValues.reduce((acc, val) => acc + Number(val), 0);
+    return (sum / validValues.length).toFixed(2); // Calculate average
+  };
 
 
   const downloadExcel = () => {
@@ -127,7 +127,7 @@ const Tworalresult = ({uid}) => {
     const headers = [
       { coname: 'CO/LO', twattainment: 'TW', oralattainment: 'OR', conameIndirect: 'Indirect CO/LO', indirect: 'Indirect', direct: 'Direct Attainment', indirectatt: 'Indirect Attainment', total: 'Total Attainment' }
     ];
-  
+
     // Combine headers and data for LO
     const loDataForExport = [
       ...headers,
@@ -142,7 +142,7 @@ const Tworalresult = ({uid}) => {
         total: item.total,
       }))
     ];
-  
+
     // Add the new table data with calculated attainment values
     const additionalData = [
       { coname: "Attainment", twattainment: twAverage, oralattainment: oralAverage, conameIndirect: "Final Indirect Course Attainment", indirect: FinalIndirectCourseAttainment },
@@ -150,79 +150,79 @@ const Tworalresult = ({uid}) => {
       { coname: "Direct Total Attainment", twattainment: DirectTotalAttainSixty, oralattainment: DirectTotalAttainForty },
       { coname: "Final Direct Course Attainment", twattainment: FinalDirectCourseAttainment, oralattainment: "", conameIndirect: "", indirect: "" },
       { coname: "Weightage", twattainment: "80%", oralattainment: "", conameIndirect: "20%" },
-      { coname: "Total Attainment", twattainment: TotalAttainmentEighty, oralattainment: "",conameIndirect:TotalAttainmentTwenty},
+      { coname: "Total Attainment", twattainment: TotalAttainmentEighty, oralattainment: "", conameIndirect: TotalAttainmentTwenty },
       { coname: "Course Attainment", twattainment: TotalAttainment, oralattainment: "", conameIndirect: "", indirect: "" }
     ];
-  
+
     // Merge loDataForExport and additionalData for final export
     const dataForExport = [
       ...loDataForExport,
       ...additionalData
     ];
-  
+
     // Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(dataForExport);
     const workbook = XLSX.utils.book_new();
-  
+
     // Get dynamic lengths for the data
-const loDataLength = loDataForExport.length; // Length of the LO data
-const additionalDataLength = additionalData.length; // Length of the additional data
+    const loDataLength = loDataForExport.length; // Length of the LO data
+    const additionalDataLength = additionalData.length; // Length of the additional data
 
-// Define starting row for additional data (it starts after loDataForExport)
-const additionalDataStartRow = loDataLength + 1; // +1 for header row
+    // Define starting row for additional data (it starts after loDataForExport)
+    const additionalDataStartRow = loDataLength + 1; // +1 for header row
 
-// Calculate dynamic row spans
-const indirectAttainmentRowSpan = 4; // Number of rows to merge for indirect attainment (adjust if needed)
-const directAttainmentStartRow = additionalDataStartRow + indirectAttainmentRowSpan; // Where direct attainment starts
-const totalAttainmentRow = directAttainmentStartRow + 2; // Where the final total attainment row will be (adjust if needed)
+    // Calculate dynamic row spans
+    const indirectAttainmentRowSpan = 4; // Number of rows to merge for indirect attainment (adjust if needed)
+    const directAttainmentStartRow = additionalDataStartRow + indirectAttainmentRowSpan; // Where direct attainment starts
+    const totalAttainmentRow = directAttainmentStartRow + 2; // Where the final total attainment row will be (adjust if needed)
 
-// Now create the merges dynamically
-worksheet['!merges'] = [
-  // Merging for 'Final Indirect Course Attainment'
-  {
-    s: { r: additionalDataStartRow, c: 3 }, // Dynamic start for conameIndirect (row-spanned)
-    e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 3}, // Dynamic end row
-  },
-  {
-    s: { r: additionalDataStartRow, c: 4 }, // Dynamic start for indirect (column-spanned)
-    e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 4 }, // Dynamic end row
-  },
+    // Now create the merges dynamically
+    worksheet['!merges'] = [
+      // Merging for 'Final Indirect Course Attainment'
+      {
+        s: { r: additionalDataStartRow, c: 3 }, // Dynamic start for conameIndirect (row-spanned)
+        e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 3 }, // Dynamic end row
+      },
+      {
+        s: { r: additionalDataStartRow, c: 4 }, // Dynamic start for indirect (column-spanned)
+        e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 1, c: 4 }, // Dynamic end row
+      },
 
-  // Merging for 'Final Direct Course Attainment'
-  {
-    s: { r: directAttainmentStartRow-1, c: 1 }, // Start row for miniproattainment and oralattainment
-    e: { r: directAttainmentStartRow-1, c: 2 }, // Merge across columns
-  },
-  {
-    s: { r: directAttainmentStartRow, c: 1 }, // Start row for miniproattainment and oralattainment
-    e: { r: directAttainmentStartRow, c: 2 }, // Merge across columns
-  },
-  {
-    s: { r: directAttainmentStartRow, c: 3 }, // Start row for miniproattainment and oralattainment
-    e: { r: directAttainmentStartRow, c: 4 }, // Merge across columns
-  },
-  {
-    s: { r: directAttainmentStartRow + 1, c: 1 }, // Row for 80% miniproattainment
-    e: { r: directAttainmentStartRow + 1, c: 2 }, // Merge across columns
-  },
-  {
-    s: { r: directAttainmentStartRow + 1, c: 3 }, // Row for 20% oral attainment
-    e: { r: directAttainmentStartRow + 1, c: 4 }, // Merge across columns
-  },
+      // Merging for 'Final Direct Course Attainment'
+      {
+        s: { r: directAttainmentStartRow - 1, c: 1 }, // Start row for miniproattainment and oralattainment
+        e: { r: directAttainmentStartRow - 1, c: 2 }, // Merge across columns
+      },
+      {
+        s: { r: directAttainmentStartRow, c: 1 }, // Start row for miniproattainment and oralattainment
+        e: { r: directAttainmentStartRow, c: 2 }, // Merge across columns
+      },
+      {
+        s: { r: directAttainmentStartRow, c: 3 }, // Start row for miniproattainment and oralattainment
+        e: { r: directAttainmentStartRow, c: 4 }, // Merge across columns
+      },
+      {
+        s: { r: directAttainmentStartRow + 1, c: 1 }, // Row for 80% miniproattainment
+        e: { r: directAttainmentStartRow + 1, c: 2 }, // Merge across columns
+      },
+      {
+        s: { r: directAttainmentStartRow + 1, c: 3 }, // Row for 20% oral attainment
+        e: { r: directAttainmentStartRow + 1, c: 4 }, // Merge across columns
+      },
 
-  // Merging for 'Total Attainment'
-  {
-    s: { r: totalAttainmentRow, c: 1 }, // Start row for total attainment merge
-    e: { r: totalAttainmentRow, c: 4 }, // Merge across all columns
-  }
-];
-  
+      // Merging for 'Total Attainment'
+      {
+        s: { r: totalAttainmentRow, c: 1 }, // Start row for total attainment merge
+        e: { r: totalAttainmentRow, c: 4 }, // Merge across all columns
+      }
+    ];
+
     // Append the worksheet
     XLSX.utils.book_append_sheet(workbook, worksheet, "Course Attainment");
-    
+
     // Write and download the Excel file
     XLSX.writeFile(workbook, "TW_ORAL_Attainment.xlsx");
-  }; 
+  };
 
 
   return (
@@ -308,10 +308,10 @@ worksheet['!merges'] = [
           </tbody>
         </table>
         <div className="flex justify-center m-8">
-        <button onClick={downloadExcel} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ">
-        Download as Excel
-      </button>
-      </div>
+          <button onClick={downloadExcel} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ">
+            Download as Excel
+          </button>
+        </div>
       </div>
 
       {/* PO and PSO Attainment Table */}
@@ -337,40 +337,68 @@ worksheet['!merges'] = [
           </thead>
           <tbody>
 
-          {poPsoData.map((item, index) => {
-  const totalatt = parseFloat(loData[index]?.total) || 0;  // Access totalatt from loData
-  return (
-    <tr key={index}>
-      <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
-      {item.po.map((poValue, i) => (
-        <td key={i} className="border border-gray-300 p-2">
-          {poValue !== null ? (poValue * totalatt / 3).toFixed(2) : '-'}
-        </td>
-      ))}
-      {item.pso.map((psoValue, i) => (
-        <td key={i} className="border border-gray-300 p-2">
-          {psoValue !== null ? (psoValue * totalatt / 3).toFixed(2) : '-'}
-        </td>
-      ))}
-    </tr>
-  );
-})}
+            {poPsoData.map((item, index) => {
+              const totalatt = parseFloat(loData[index]?.total) || 0;  // Access totalatt from loData
+              return (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
+                  {item.po.map((poValue, i) => (
+                    <td key={i} className="border border-gray-300 p-2">
+                      {poValue !== null ? (poValue * totalatt / 3).toFixed(2) : '-'}
+                    </td>
+                  ))}
+                  {item.pso.map((psoValue, i) => (
+                    <td key={i} className="border border-gray-300 p-2">
+                      {psoValue !== null ? (psoValue * totalatt / 3).toFixed(2) : '-'}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
             {/* Average Row */}
             <tr>
-  <td className="border border-gray-300 p-2">AVG</td>
-  
-  {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => (
-    <td key={i} className="border border-gray-300 p-2">
-      {calculateAverage(poPsoData.map(item => item.po[i]))}
-    </td>
-  ))}
-  
-  {poPsoData.length > 0 && poPsoData[0].pso.map((_, i) => (
-    <td key={i} className="border border-gray-300 p-2">
-      {calculateAverage(poPsoData.map(item => item.pso[i]))}
-    </td>
-  ))}
-</tr>
+              <td className="border border-gray-300 p-2">AVG</td>
+
+              {/* Calculate Average for PO Columns */}
+              {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => {
+                const poValues = poPsoData
+                  .map((item, index) => {
+                    const totalatt = parseFloat(loData[index]?.total) || 0;
+                    const poValue = item.po[i] !== null ? parseFloat(item.po[i]) : null;
+                    return poValue !== null ? (poValue * totalatt) / 3 : null;
+                  })
+                  .filter((value) => value !== null); // Filter out null values
+
+                const poSum = poValues.reduce((acc, val) => acc + val, 0);
+                const poAverage = poValues.length > 0 ? poSum / poValues.length : 0; // Use only the non-null values for average
+
+                return (
+                  <td key={i} className="border border-gray-300 p-2">
+                    {poAverage.toFixed(2)}
+                  </td>
+                );
+              })}
+
+              {/* Calculate Average for PSO Columns */}
+              {poPsoData.length > 0 && poPsoData[0].pso.map((_, i) => {
+                const psoValues = poPsoData
+                  .map((item, index) => {
+                    const totalatt = parseFloat(loData[index]?.total) || 0;
+                    const psoValue = item.pso[i] !== null ? parseFloat(item.pso[i]) : null;
+                    return psoValue !== null ? (psoValue * totalatt) / 3 : null;
+                  })
+                  .filter((value) => value !== null); // Filter out null values
+
+                const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
+                const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0; // Use only the non-null values for average
+
+                return (
+                  <td key={i} className="border border-gray-300 p-2">
+                    {psoAverage.toFixed(2)}
+                  </td>
+                );
+              })}
+            </tr>
           </tbody>
         </table>
       </div>

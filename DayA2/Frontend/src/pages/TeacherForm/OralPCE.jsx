@@ -116,6 +116,7 @@ const OralPCE = ({ uid }) => {
         (student) => student[col.qname] !== null && student[col.qname] >= 0
       ).length;
     });
+
     return attemptedCounts;
   };
 
@@ -237,9 +238,6 @@ const OralPCE = ({ uid }) => {
   const questionColumns = getQuestionColumns();
 
   const questionOralPce = getQuestionColumns().map(group => group.conames);
-
-  console.log("questionOralPce", questionOralPce); // This will now return only arrays of conames
-  console.log(COsData);
 
   const extractColumnNames = () => {
     const q1Columns = [];
@@ -670,8 +668,9 @@ const OralPCE = ({ uid }) => {
 
 
   const complete = (coColumns, allCOs) => {
-    console.log(coColumns);
 
+    const columns = questionOralPce;
+    console.log("coColumns", coColumns)
     // Object to store the calculated attainment for each CO
     const coAttainmentMap = {};
 
@@ -732,6 +731,7 @@ const OralPCE = ({ uid }) => {
 
     return finalCOAttainment; // Return the accumulated result
   };
+
 
   const total = getTotalPercentage();
   return (
@@ -1175,41 +1175,21 @@ const OralPCE = ({ uid }) => {
                   </tr>
                   {/* Dynamic Rows for COs */}
                   {distinctConames.map((coName) => {
-                    // Map over COsActualNum to include index and filter by CO name
-                    const columns = questionOralPce;
-                    console.log("columns", columns);
+                    const columns = questionOralPce; // Your column structure
                     const coColumns = COsActualNum
                       .map((col, index) => ({ ...col, index })) // include index for mapping
                       .filter((col) => col.coname.includes(coName)); // filter by CO name
-                    console.log("coColumns", coColumns)
-                    // Calculate the CO average using the complete function
-                    const allCOs = distinctConames; // Assuming distinctConames contains all COs
-                    console.log("allCOs", allCOs)
-                    const coAverageResults = complete(coColumns, allCOs); // Returns an array of {coursename, attainment}
-                    console.log("coAverageResults", coAverageResults);
 
-                    const mapColumnsToCOAverageResults = (columns, coAverageResults) => {
-                      return columns.flatMap((coName) => {
-                        // Check if coName is an array (e.g., [CO1, CO3, CO5])
-                        if ((coName)) {
-                          // If it's an array, map over the array and find each result
-                          return coName.map(name => {
-                            const coResult = coAverageResults.find(result => result.coursename === name);
-                            console.log("coResult",{ coursename: coName, attainment: coResult })
-                            return coResult ? coResult : { coursename: name, attainment: '100.00' };
-                          });
-                        } else {
-                          // If it's a single value, handle it normally
-                          const coResult = coAverageResults.find(result => result.coursename === coName);
-                          return coResult ? coResult : { coursename: coName, attainment: '0.00' };
-                        }
-                      });
-                    };
-                    const mappedResults = mapColumnsToCOAverageResults(columns, coAverageResults);
-                    console.log("Mapped Results:", mappedResults);
-                    const specificResult = mappedResults.find(result => result.coursename === coName);
+                    // Calculate the CO average using your complete function
+                    const allCOs = distinctConames;
+                    const coAverageResults = complete(coColumns, allCOs);
 
-                    console.log("specificResult", specificResult);
+                    console.log("coAverageResults", coAverageResults)
+
+                    console.log("coName", coName);
+
+                    const coAverageResult = coAverageResults.find(result => result.coursename === coName);
+
                     return (
                       <tr key={coName}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
@@ -1219,8 +1199,7 @@ const OralPCE = ({ uid }) => {
                           className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
                           colSpan={questionColumns.length}
                         >
-                          {/* Display the attainment for the current coName */}
-                          {specificResult ? `${specificResult.coursename}: ${specificResult.attainment} %` : `${total} %`}
+                          {coAverageResult ? `${coAverageResult.coursename}: ${coAverageResult.attainment} %` : `${total} %`}
                         </td>
                       </tr>
                     );

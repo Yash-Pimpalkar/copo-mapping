@@ -817,7 +817,7 @@ const IntaTWUniv = ({ uid }) => {
               <td className="border border-gray-300 p-2">AVG</td>
 
               {/* Calculate Average for PO Columns */}
-              {poPsoData[0].po.map((_, i) => {
+              {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => {
                 const poValues = poPsoData
                   .map((item, index) => {
                     const totalatt = parseFloat(loData[index]?.total) || 0;
@@ -837,7 +837,7 @@ const IntaTWUniv = ({ uid }) => {
               })}
 
               {/* Calculate Average for PSO Columns */}
-              {poPsoData[0].pso.map((_, i) => {
+              {poPsoData.length > 0 && poPsoData[0].pso.map((_, i) => {
                 const psoValues = poPsoData
                   .map((item, index) => {
                     const totalatt = parseFloat(loData[index]?.total) || 0;
