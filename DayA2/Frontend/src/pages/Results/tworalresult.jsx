@@ -154,15 +154,81 @@ const Tworalresult = ({ uid }) => {
       { coname: "Course Attainment", twattainment: TotalAttainment, oralattainment: "", conameIndirect: "", indirect: "" }
     ];
 
+    const headers3 = ['LO/CO', 'PO1', 'PO2', 'PO3', 'PO4', 'PO5', 'PO6', 'PO7', 'PO8', 'PO9', 'PO10', 'PO11', 'PO12', 'PSO1', 'PSO2'];
+
+    // Data for the table body
+    const data = poPsoData.map((item, index) => {
+      const totalatt = parseFloat(loData[index]?.total) || 0;
+      const row = [loData[index]?.coname];
+
+      // Add PO values to the row
+      item.po.forEach(poValue => {
+        row.push(poValue !== null ? ((poValue * totalatt) / 3).toFixed(2) : '-');
+      });
+
+      // Add PSO values to the row
+      item.pso.forEach(psoValue => {
+        row.push(psoValue !== null ? ((psoValue * totalatt) / 3).toFixed(2) : '-');
+      });
+
+      return row;
+    });
+
+    // Add average row
+    const avgRow = ['AVG'];
+
+    // Calculate averages for PO columns
+    poPsoData[0].po.forEach((_, i) => {
+      const poValues = poPsoData
+        .map((item, index) => {
+          const totalatt = parseFloat(loData[index]?.total) || 0;
+          const poValue = item.po[i] !== null ? parseFloat(item.po[i]) : null;
+          return poValue !== null ? (poValue * totalatt) / 3 : null;
+        })
+        .filter(value => value !== null);
+      const poSum = poValues.reduce((acc, val) => acc + val, 0);
+      const poAverage = poValues.length > 0 ? poSum / poValues.length : 0;
+      avgRow.push(poAverage.toFixed(2));
+    });
+
+    // Calculate averages for PSO columns
+    poPsoData[0].pso.forEach((_, i) => {
+      const psoValues = poPsoData
+        .map((item, index) => {
+          const totalatt = parseFloat(loData[index]?.total) || 0;
+          const psoValue = item.pso[i] !== null ? parseFloat(item.pso[i]) : null;
+          return psoValue !== null ? (psoValue * totalatt) / 3 : null;
+        })
+        .filter(value => value !== null);
+      const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
+      const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0;
+      avgRow.push(psoAverage.toFixed(2));
+    });
+
+    // Add the average row to the data
+    data.push(avgRow);
+
+
     // Merge loDataForExport and additionalData for final export
-    const dataForExport = [
-      ...loDataForExport,
-      ...additionalData
+    const dataForExport = [...loDataForExport, ...additionalData];
+    // Create empty rows to separate sections
+    const emptyRows = Array(2).fill({}); // Create 2 empty objects for spacing
+
+    // Combine Course Attainment and PSO Data
+    const finalDataForExport = [
+      ...dataForExport,
+      ...emptyRows,  // Add empty rows for spacing
+      headers3,
+      ...data,
+    
     ];
 
+
     // Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+    const worksheet = XLSX.utils.json_to_sheet(finalDataForExport);
     const workbook = XLSX.utils.book_new();
+
+    const poPsoStartRow = loDataForExport.length + additionalData.length; 
 
     // Get dynamic lengths for the data
     const loDataLength = loDataForExport.length; // Length of the LO data

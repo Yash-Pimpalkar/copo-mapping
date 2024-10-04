@@ -312,48 +312,63 @@ const IntaTWUniv = ({ uid }) => {
         indirect: "",
       },
     ];
+    
+   
 
-    const headers2 = [
-      {
-        psoName: "PSO",
-        po1: "PO1",
-        po2: "PO2",
-        po3: "PO3",
-        po4: "PO4",
-        po5: "PO5",
-        po6: "PO6",
-        po7: "PO7",
-        po8: "PO8",
-        po9: "PO9",
-        po10: "PO10",
-        po11: "PO11",
-        po12: "PO12",
-        pso1: "PSO1",
-        pso2: "PSO2",
-      },
-    ];
+    const headers = ['LO/CO', 'PO1', 'PO2', 'PO3', 'PO4', 'PO5', 'PO6', 'PO7', 'PO8', 'PO9', 'PO10', 'PO11', 'PO12', 'PSO1', 'PSO2'];
 
-    // Add data for the PSO sheet dynamically (example structure)
-    const poPsoDataForExport = [
-      ...headers2,
-      ...poPsoData.map((item) => ({
-        psoName: item.psoName,
-        po1: item.po[0],
-        po2: item.po[1],
-        po3: item.po[2],
-        po4: item.po[3],
-        po5: item.po[4],
-        po6: item.po[5],
-        po7: item.po[6],
-        po8: item.po[7],
-        po9: item.po[8],
-        po10: item.po[9],
-        po11: item.po[10],
-        po12: item.po[11],
-        pso1: item.pso[0],
-        pso2: item.pso[1],
-      })),
-    ];
+    // Data for the table body
+    const data = poPsoData.map((item, index) => {
+      const totalatt = parseFloat(loData[index]?.total) || 0;
+      const row = [loData[index]?.coname];
+
+      // Add PO values to the row
+      item.po.forEach(poValue => {
+        row.push(poValue !== null ? ((poValue * totalatt) / 3).toFixed(2) : '-');
+      });
+
+      // Add PSO values to the row
+      item.pso.forEach(psoValue => {
+        row.push(psoValue !== null ? ((psoValue * totalatt) / 3).toFixed(2) : '-');
+      });
+
+      return row;
+    });
+
+    // Add average row
+    const avgRow = ['AVG'];
+
+    // Calculate averages for PO columns
+    poPsoData[0].po.forEach((_, i) => {
+      const poValues = poPsoData
+        .map((item, index) => {
+          const totalatt = parseFloat(loData[index]?.total) || 0;
+          const poValue = item.po[i] !== null ? parseFloat(item.po[i]) : null;
+          return poValue !== null ? (poValue * totalatt) / 3 : null;
+        })
+        .filter(value => value !== null);
+      const poSum = poValues.reduce((acc, val) => acc + val, 0);
+      const poAverage = poValues.length > 0 ? poSum / poValues.length : 0;
+      avgRow.push(poAverage.toFixed(2));
+    });
+
+    // Calculate averages for PSO columns
+    poPsoData[0].pso.forEach((_, i) => {
+      const psoValues = poPsoData
+        .map((item, index) => {
+          const totalatt = parseFloat(loData[index]?.total) || 0;
+          const psoValue = item.pso[i] !== null ? parseFloat(item.pso[i]) : null;
+          return psoValue !== null ? (psoValue * totalatt) / 3 : null;
+        })
+        .filter(value => value !== null);
+      const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
+      const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0;
+      avgRow.push(psoAverage.toFixed(2));
+    });
+
+    // Add the average row to the data
+    data.push(avgRow);
+
 
     // Merge loDataForExport and additionalData for final export
     const dataForExport = [...loDataForExport, ...additionalData];
@@ -364,14 +379,29 @@ const IntaTWUniv = ({ uid }) => {
     const finalDataForExport = [
       ...dataForExport,
       ...emptyRows,  // Add empty rows for spacing
-      ...headers2,
-      ...poPsoDataForExport,
+      headers,
+      ...data,
+    
     ];
 
 
     // Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(finalDataForExport);
     const workbook = XLSX.utils.book_new();
+
+    const poPsoStartRow = loDataForExport.length + additionalData.length;  // Adjusted starting row for PO/PSO
+
+// Add merge properties for PO/PSO headers
+// worksheet['!merges'] = [
+//   {
+//     s: { r: poPsoStartRow, c: 1 }, // Start at PO header row
+//     e: { r: poPsoStartRow + 12, c: 1 }, // Rowspan of 13 for PO
+//   },
+//   {
+//     s: { r: poPsoStartRow, c: 2 }, // Start at PSO header row
+//     e: { r: poPsoStartRow + 1, c: 2 }, // Rowspan of 2 for PSO
+//   },
+// ];
 
     // Get dynamic lengths for the data
     const loDataLength = loDataForExport.length; // Length of the LO data
@@ -445,16 +475,6 @@ const IntaTWUniv = ({ uid }) => {
         s: { r: directAttainmentStartRow + 2, c: 0 }, // Dynamic start for conameIndirect (row-spanned)
         e: { r: directAttainmentStartRow + 2, c: 2 }, // Dynamic end row
       },
-
-      // // Merging for 'Final Indirect Course Attainment'
-      // {
-      //   s: { r: additionalDataStartRow, c: 3 }, // Dynamic start for conameIndirect (row-spanned)
-      //   e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 2, c: 3}, // Dynamic end row
-      // },
-      // {
-      //   s: { r: additionalDataStartRow, c: 4 }, // Dynamic start for indirect (column-spanned)
-      //   e: { r: additionalDataStartRow + indirectAttainmentRowSpan - 2, c: 4 }, // Dynamic end row
-      // },
 
       // Merging for 'Final Direct Course Attainment'
       {

@@ -667,10 +667,7 @@ const OralPCE = ({ uid }) => {
   };
 
 
-  const complete = (coColumns, allCOs) => {
-
-    const columns = questionOralPce;
-    console.log("coColumns", coColumns)
+  const complete = (coColumns, allCOs, columns) => {
     // Object to store the calculated attainment for each CO
     const coAttainmentMap = {};
 
@@ -720,17 +717,62 @@ const OralPCE = ({ uid }) => {
     });
 
     // Create the final output for all COs
-    const finalCOAttainment = Object.keys(coAttainmentMap).map(co => ({
+    let finalCOAttainment = Object.keys(coAttainmentMap).map(co => ({
       coursename: co,
       attainment: (coAttainmentMap[co] / coAttainmentCount[co]).toFixed(2) // Calculate the average attainment
     }))
-      .filter(co => co.attainment > 0) // Filter out COs with zero attainment
       .sort((a, b) => a.coursename.localeCompare(b.coursename)); // Sort by coursename for consistent ordering
+
+    // Create a map for quick lookup of CO index in finalCOAttainment array
+    const coIndexMap = {};
+    finalCOAttainment.forEach((co, index) => {
+      coIndexMap[co.coursename] = index;
+    });
+
+    // Function to get average of neighbors' attainments within the same column group
+    const getAverageOfNeighbors = (coArray, coIndexMap, columns) => {
+      return coArray.map((co, index) => {
+        if (parseFloat(co.attainment) === 0) {
+          // Find all groups where the CO is present
+          const groups = columns.filter(group => group.includes(co.coursename));
+
+          console.log("groups for", co.coursename, groups); // Debugging output to check group mapping
+
+          if (groups.length > 0) {
+            let neighborAttainments = [];
+
+            // Loop through each group and collect neighbor attainment values
+            groups.forEach(group => {
+              const currentNeighbors = group.map(neighbor => {
+                const neighborIndex = coIndexMap[neighbor];
+                return neighborIndex !== undefined ? parseFloat(coArray[neighborIndex].attainment) : 0;
+              }).filter(attainment => attainment > 0); // Only keep valid attainment values
+
+              // Combine all valid neighbor attainments across groups
+              neighborAttainments = neighborAttainments.concat(currentNeighbors);
+            });
+
+            if (neighborAttainments.length > 0) {
+              const averageAttainment = (
+                neighborAttainments.reduce((a, b) => a + b, 0) / neighborAttainments.length
+              ).toFixed(2);
+              co.attainment = averageAttainment;
+            }
+          }
+        }
+        return co;
+      });
+    };
+
+
+    // Assign average attainment to COs with zero attainment
+    finalCOAttainment = getAverageOfNeighbors(finalCOAttainment, coIndexMap, columns);
 
     console.log("finalCOAttainment", finalCOAttainment);
 
     return finalCOAttainment; // Return the accumulated result
   };
+
 
 
   const total = getTotalPercentage();
@@ -1182,7 +1224,7 @@ const OralPCE = ({ uid }) => {
 
                     // Calculate the CO average using your complete function
                     const allCOs = distinctConames;
-                    const coAverageResults = complete(coColumns, allCOs);
+                    const coAverageResults = complete(coColumns, allCOs, columns);
 
                     console.log("coAverageResults", coAverageResults)
 
