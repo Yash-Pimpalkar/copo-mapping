@@ -275,15 +275,15 @@ export const upload_OralPce_Questions = async (req, res) => {
                 INSERT INTO col_oralpce (colnames, usercourseid)
                 VALUES (?, ?)
               `;
-              columnResult = await db
-                .promise()
-                .query(insertColQuery, [
-                  question[i], // colname
-                  usercourse_id
-                ]);
+            columnResult = await db
+              .promise()
+              .query(insertColQuery, [
+                question[i], // colname
+                usercourse_id
+              ]);
 
             // Insert into `question_oralpce` with `pceid`
-            for (let coName of questionforcol[i])  {
+            for (let coName of questionforcol[i]) {
               const insertQuestionQuery = `
                 INSERT INTO question_oralpce (colname, conames, marks, pce_id, usercourse_id)
                 VALUES (?, ?, ?, ?, ?)
@@ -372,7 +372,7 @@ export const showOralPCEData = async (req, res) => {
       return res.status(500).send('Server error');
     }
     if (!results || results.length == 0 || results[0][0].message) {
-      return res.status(404).json({error:'No data found'});
+      return res.status(404).json({ error: 'No data found' });
     }
     console.log(results);
     return res.status(200).json(results[0]);
@@ -478,13 +478,19 @@ export const limitPCE = (req, res) => {
 
 
 export const OralPCE_Attainment = async (req, res) => {
-  const { coAverages, userCourseId } = req.body;  // Now includes userCourseId
+  const { coAverages, userCourseId } = req.body; // Now includes userCourseId
 
-  console.log(coAverages, userCourseId);
+  console.log("userCourseId:", coAverages, userCourseId);
 
   try {
-    for (const { coName, coAverage } of coAverages) {
-      const parsedCoAverage = parseFloat(coAverage);
+    for (const { coName, attainmentPercentage } of coAverages) {
+      const parsedCoAverage = parseFloat(attainmentPercentage);
+
+      // If parsedCoAverage is NaN, skip this record
+      if (isNaN(parsedCoAverage)) {
+        console.error(`Invalid attainmentPercentage for ${coName}`);
+        continue; // Skip the rest of the loop and move to the next record
+      }
 
       // Determine attainment based on coAverage
       let attainment;
@@ -498,6 +504,8 @@ export const OralPCE_Attainment = async (req, res) => {
         attainment = 3;
       }
 
+      console.log(parsedCoAverage);
+
       // Check if the coname and usercourse_id combination already exists
       const sql = "SELECT idoralpce_attainment FROM oralpce_attainment WHERE conames = ? AND usercourseid = ?";
       db.query(sql, [coName, userCourseId], (error, results) => {
@@ -509,7 +517,7 @@ export const OralPCE_Attainment = async (req, res) => {
         if (results.length > 0) {
           // If exists, update both Oral_attainment and attainment
           const sql1 = "UPDATE oralpce_attainment SET oralpce_attainment = ?, attainment = ? WHERE idoralpce_attainment = ?";
-          db.query(sql1, [parsedCoAverage, attainment, results[0].idOral_attainment], (error, result) => {
+          db.query(sql1, [parsedCoAverage, attainment, results[0].idoralpce_attainment], (error, result) => {
             if (error) {
               console.log(error);
               return res.status(500).json({ error: error.message });

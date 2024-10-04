@@ -598,41 +598,48 @@ const OralPCE = ({ uid }) => {
     );
   });
 
-  // console.log(IaData);
   function calculateCoAverages(
     distinctConames,
     questionColumns,
     attainmentData
   ) {
     return distinctConames.map((coName) => {
-      const coColumns = questionColumns
-        .map((col, index) => ({ ...col, index })) // include index for mapping
-        .filter((col) => col.coname === coName); // filter by CO name
+      // const coColumns = questionColumns
+      //   .map((col, index) => ({ ...col, index })) // include index for mapping
+      //   .filter((col) => col.coname === coName); // filter by CO name
 
-      const coAverage = coColumns.length
-        ? (
-          coColumns.reduce((sum, col) => {
-            const attainmentValue = getTotalStudentsPassedPerQuestion(
-              attainmentData.passedPercentage
-            )[col.index];
-            const attemptedCount = getTotalStudentsAttempted()[col.index];
-            const attainment = attemptedCount
-              ? (attainmentValue / attemptedCount) * 100
-              : 0;
-            return sum + attainment;
-          }, 0) / coColumns.length
-        ).toFixed(2)
-        : 0;
+      // const coAverage = coColumns.length
+      //   ? (
+      //     coColumns.reduce((sum, col) => {
+      //       const attainmentValue = getTotalStudentsPassedPerQuestion(
+      //         attainmentData.passedPercentage
+      //       )[col.index];
+      //       const attemptedCount = getTotalStudentsAttempted()[col.index];
+      //       const attainment = attemptedCount
+      //         ? (attainmentValue / attemptedCount) * 100
+      //         : 0;
+      //       return sum + attainment;
+      //     }, 0) / coColumns.length
+      //   ).toFixed(2)
+      //   : 0;
+      // Find the current CO average result
+      const coAverageResult = coAverageResults.find(result => result.coursename === coName);
 
-      return { coName, coAverage };
+      const attainmentPercentage = coAverageResult
+      ? coAverageResult.attainmentPercentage
+      : total;
+
+      return { coName, 
+        attainmentPercentage : parseFloat(attainmentPercentage).toFixed(2)
+      };
     });
   }
 
-  const coAverages = calculateCoAverages(
-    distinctConames,
-    questionColumns,
-    attainmentData
-  );
+  // const coAverages = calculateCoAverages(
+  //   distinctConames,
+  //   questionColumns,
+  //   attainmentData
+  // );
 
   // console.log(coAverages);
   const [message, setMessage] = useState("");
@@ -644,11 +651,11 @@ const OralPCE = ({ uid }) => {
   ) => {
     if (userCourseId) {
       const coAverages = calculateCoAverages(
-        distinctConames,
+        [...new Set(distinctConames)],
         questionColumns,
         attainmentData
       );
-      console.log(coAverages);
+      console.log("coAverages", coAverages);
 
       api
         .post("/api/oral/pce/insert-co-averages", {
@@ -666,6 +673,10 @@ const OralPCE = ({ uid }) => {
     }
   };
 
+  // Call complete function once for all COs outside the map
+  const allCOs = distinctConames;
+  const columns = questionOralPce; // Your column structure
+  const coColumns = COsActualNum.map((col, index) => ({ ...col, index })); // Include index for mapping
 
   const complete = (coColumns, allCOs, columns) => {
     // Object to store the calculated attainment for each CO
@@ -687,19 +698,21 @@ const OralPCE = ({ uid }) => {
         const attemptedCount = getTotalStudentsAttempted()[col.index];
 
         // Calculate attainment percentage
-        const attainment = attemptedCount
+        const attainmentPercentage = attemptedCount
           ? (attainmentValue / attemptedCount) * 100
           : 0;
 
         // Iterate over the COs in the current column and update their attainment in the map
         coNames.forEach(co => {
-          // If the CO has been calculated already, sum the attainment and count occurrences
-          if (coAttainmentMap[co]) {
-            coAttainmentMap[co] += attainment; // Accumulate attainment
-            coAttainmentCount[co] += 1; // Increment the count for averaging later
-          } else {
-            coAttainmentMap[co] = attainment; // Initialize attainment
-            coAttainmentCount[co] = 1; // Initialize the count
+          if (attainmentPercentage > 0) { // Only consider attainments greater than 0
+            // If the CO has been calculated already, sum the attainment and count occurrences
+            if (coAttainmentMap[co]) {
+              coAttainmentMap[co] += attainmentPercentage; // Accumulate attainment
+              coAttainmentCount[co] += 1; // Increment the count for averaging later
+            } else {
+              coAttainmentMap[co] = attainmentPercentage; // Initialize attainment
+              coAttainmentCount[co] = 1; // Initialize the count
+            }
           }
         });
       });
@@ -719,7 +732,7 @@ const OralPCE = ({ uid }) => {
     // Create the final output for all COs
     let finalCOAttainment = Object.keys(coAttainmentMap).map(co => ({
       coursename: co,
-      attainment: (coAttainmentMap[co] / coAttainmentCount[co]).toFixed(2) // Calculate the average attainment
+      attainmentPercentage: (coAttainmentMap[co] / coAttainmentCount[co]).toFixed(2) // Calculate the average attainment
     }))
       .sort((a, b) => a.coursename.localeCompare(b.coursename)); // Sort by coursename for consistent ordering
 
@@ -732,11 +745,9 @@ const OralPCE = ({ uid }) => {
     // Function to get average of neighbors' attainments within the same column group
     const getAverageOfNeighbors = (coArray, coIndexMap, columns) => {
       return coArray.map((co, index) => {
-        if (parseFloat(co.attainment) === 0) {
+        if (parseFloat(co.attainmentPercentage) === 0) {
           // Find all groups where the CO is present
           const groups = columns.filter(group => group.includes(co.coursename));
-
-          console.log("groups for", co.coursename, groups); // Debugging output to check group mapping
 
           if (groups.length > 0) {
             let neighborAttainments = [];
@@ -745,18 +756,16 @@ const OralPCE = ({ uid }) => {
             groups.forEach(group => {
               const currentNeighbors = group.map(neighbor => {
                 const neighborIndex = coIndexMap[neighbor];
-                return neighborIndex !== undefined ? parseFloat(coArray[neighborIndex].attainment) : 0;
-              }).filter(attainment => attainment > 0); // Only keep valid attainment values
+                return neighborIndex !== undefined ? parseFloat(coArray[neighborIndex].attainmentPercentage) : 0;
+              }).filter(attainmentPercentage => attainmentPercentage > 0); // Only keep valid (non-zero) attainment values
 
               // Combine all valid neighbor attainments across groups
               neighborAttainments = neighborAttainments.concat(currentNeighbors);
             });
 
             if (neighborAttainments.length > 0) {
-              const averageAttainment = (
-                neighborAttainments.reduce((a, b) => a + b, 0) / neighborAttainments.length
-              ).toFixed(2);
-              co.attainment = averageAttainment;
+              const maxAttainment = Math.max(...neighborAttainments).toFixed(2);
+              co.attainmentPercentage = maxAttainment;
             }
           }
         }
@@ -764,9 +773,11 @@ const OralPCE = ({ uid }) => {
       });
     };
 
-
     // Assign average attainment to COs with zero attainment
     finalCOAttainment = getAverageOfNeighbors(finalCOAttainment, coIndexMap, columns);
+
+    // Filter out COs with '0.00' attainment before returning the final result
+    finalCOAttainment = finalCOAttainment.filter(co => co.attainmentPercentage !== '0.00');
 
     console.log("finalCOAttainment", finalCOAttainment);
 
@@ -774,6 +785,10 @@ const OralPCE = ({ uid }) => {
   };
 
 
+  // Calculate CO averages for all COs at once
+  const coAverageResults = complete(coColumns, allCOs, columns);
+
+  console.log("coAverageResults", coAverageResults);
 
   const total = getTotalPercentage();
   return (
@@ -1217,31 +1232,28 @@ const OralPCE = ({ uid }) => {
                   </tr>
                   {/* Dynamic Rows for COs */}
                   {distinctConames.map((coName) => {
-                    const columns = questionOralPce; // Your column structure
-                    const coColumns = COsActualNum
-                      .map((col, index) => ({ ...col, index })) // include index for mapping
-                      .filter((col) => col.coname.includes(coName)); // filter by CO name
 
-                    // Calculate the CO average using your complete function
-                    const allCOs = distinctConames;
-                    const coAverageResults = complete(coColumns, allCOs, columns);
-
-                    console.log("coAverageResults", coAverageResults)
-
-                    console.log("coName", coName);
-
+                    // Find the current CO average result
                     const coAverageResult = coAverageResults.find(result => result.coursename === coName);
+
+                    const displayAttainmentPercentage = coAverageResult
+                      ? `${coAverageResult.attainmentPercentage} %`
+                      : `${total} %`;
 
                     return (
                       <tr key={coName}>
+                        {/* Display CO Name */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
                           {coName} Average
                         </td>
+
+                        {/* Display the attainment or fallback total */}
                         <td
                           className="px-6 py-4 whitespace-nowrap text-sm text-white-500"
                           colSpan={questionColumns.length}
                         >
-                          {coAverageResult ? `${coAverageResult.coursename}: ${coAverageResult.attainment} %` : `${total} %`}
+                          {/* Show the CO attainment percentage or '0.00%' if not found */}
+                          {displayAttainmentPercentage}
                         </td>
                       </tr>
                     );

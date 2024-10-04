@@ -520,6 +520,16 @@ const IntaTWUniv = ({ uid }) => {
     XLSX.writeFile(workbook, "IA1IA2INTATWUNIV_Attainment.xlsx");
   };
 
+  const handlePsoAverage = (poValues, psoValues, poAverage, psoAverage, index) => {
+    const check = () => {
+    }
+    console.log("handlePsoAverage", check)
+
+    // You can also perform actions like API calls, state updates, etc.
+  };
+
+  console.log("handlePsoAverage", handlePsoAverage)
+
   return (
     <div className="p-4">
       {/* Course Attainment Table */}
@@ -848,7 +858,7 @@ const IntaTWUniv = ({ uid }) => {
 
                 const poSum = poValues.reduce((acc, val) => acc + val, 0);
                 const poAverage = poValues.length > 0 ? poSum / poValues.length : 0; // Use only the non-null values for average
-
+                console.log("poAverage",poAverage)
                 return (
                   <td key={i} className="border border-gray-300 p-2">
                     {poAverage.toFixed(2)}
@@ -868,7 +878,7 @@ const IntaTWUniv = ({ uid }) => {
 
                 const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
                 const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0; // Use only the non-null values for average
-
+                console.log("psoAverage",psoAverage)
                 return (
                   <td key={i} className="border border-gray-300 p-2">
                     {psoAverage.toFixed(2)}
