@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../../api';
-import * as XLSX from 'xlsx';
-import Pagination from '../../../component/Pagination/Pagination';
+import React, { useEffect, useState } from "react";
+import api from "../../../api";
+import * as XLSX from "xlsx";
+import Pagination from "../../../component/Pagination/Pagination";
 
 const Attendance = ({ uid }) => {
   const [attendanceData, setAttendanceData] = useState([]);
@@ -10,7 +10,7 @@ const Attendance = ({ uid }) => {
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [maxLimit, setMaxLimit] = useState(0); // Adjust this as needed
+  const [maxLimit, setMaxLimit] = useState(0);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const Attendance = ({ uid }) => {
       try {
         const res = await api.get(`/api/termwork/show/attendance/${uid}`);
         setAttendanceData(res.data);
-        const res1=await api.get(`/api/termwork/attendance/limit/${uid}`);
+        const res1 = await api.get(`/api/termwork/attendance/limit/${uid}`);
         setMaxLimit(res1.data[0].maxmarks);
       } catch (error) {
         console.error("Error fetching attendance data:", error);
@@ -29,7 +29,7 @@ const Attendance = ({ uid }) => {
       fetchAttendanceData();
     }
   }, [uid]);
-console.log(maxLimit)
+
   const filteredData = attendanceData.filter((item) => {
     const query = searchQuery.toUpperCase();
     return (
@@ -41,8 +41,72 @@ console.log(maxLimit)
 
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
+  const handleEditClick = (att_id) => {
+    setEditingRow(att_id);
+    setEditedMarks((prev) => ({
+      ...prev,
+      [att_id]: attendanceData.find((student) => student.att_id === att_id)
+        .marks,
+    }));
+  };
+
+  const handleSaveClick = async (att_id) => {
+    const marks = editedMarks[att_id];
+
+    try {
+      await api.put("/api/termwork/attendance/update", {
+        att_id: att_id,
+        marks: parseInt(marks), // Ensure the marks are sent as an integer
+      });
+
+      // Update the state to reflect the saved changes
+      setAttendanceData((prevData) =>
+        prevData.map((item) =>
+          item.att_id === att_id ? { ...item, marks: parseInt(marks) } : item
+        )
+      );
+
+      setEditingRow(null); // Close the editing mode
+      setMessage("Marks updated successfully!"); // Optionally set a success message
+    } catch (error) {
+      console.error("Error saving marks:", error);
+      setMessage("Error updating marks. Please try again."); // Optionally set an error message
+    }
+  };
+
+  const handleCancelClick = () => {
+    setEditingRow(null);
+    setEditedMarks({});
+  };
+
+  const handleMarksChange = (event, att_id) => {
+    const value = event.target.value;
+
+    if (value === "") {
+      setEditedMarks((prev) => ({ ...prev, [att_id]: null }));
+      return;
+    }
+
+    // Validate against `maxLimit`
+    if (parseInt(value) > maxLimit) {
+      alert(`Value should not be greater than ${maxLimit}`);
+      return;
+    }
+
+    if (parseInt(value) < 0) {
+      alert("Value should not be less than 0");
+      return;
+    }
+
+    setEditedMarks((prev) => ({ ...prev, [att_id]: value }));
+  };
+
+  // Function to handle file upload (Excel import)
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -76,6 +140,7 @@ console.log(maxLimit)
     reader.readAsArrayBuffer(file);
   };
 
+  // Function to handle Excel file download (Excel export)
   const handleFileDownload = () => {
     const formattedData = attendanceData.map((student) => ({
       att_id: student.att_id,
@@ -93,59 +158,8 @@ console.log(maxLimit)
     XLSX.writeFile(workbook, "attendance_data.xlsx");
   };
 
-  const handleEditClick = (index) => {
-    setEditingRow(index);
-    setEditedMarks({
-      ...editedMarks,
-      [index]: attendanceData[index].marks,
-    });
-  };
-// console.log(attendanceData)
-  const handleSaveClick = async (index) => {
-    const att_id = attendanceData[index].att_id;
-    const marks = editedMarks[index];
-
-    try {
-      await api.put("/api/termwork/attendance/update", { att_id: att_id, Marks: marks });
-      setAttendanceData((prevData) =>
-        prevData.map((item, idx) =>
-          idx === index ? { ...item, marks } : item
-        )
-      );
-      setEditingRow(null);
-    } catch (error) {
-      console.error("Error saving marks:", error);
-    }
-  };
-
-  const handleCancelClick = () => {
-    setEditingRow(null);
-    setEditedMarks({});
-  };
-
-  const handleMarksChange = (event, index) => {
-    const value = event.target.value;
-
-    if (value === "") {
-      setEditedMarks((prev) => ({ ...prev, [index]: null }));
-      return; 
-    }
-
-    if (value > maxLimit) {
-      alert(`Value should not be greater than ${maxLimit}`);
-      return; 
-    }
-
-    if (value < 0) {
-      alert("Value should not be less than 0");
-      return; 
-    }
-
-    setEditedMarks((prev) => ({ ...prev, [index]: value }));
-  };
-
   return (
-    <div className="overflow-x-auto  min-h-screen">
+    <div className="overflow-x-auto min-h-screen">
       {/* Container for Export, Import and Search Bar */}
       <div className="mb-4 flex justify-between items-center bg-white shadow-lg rounded-lg p-4">
         {/* File Upload */}
@@ -166,7 +180,10 @@ console.log(maxLimit)
         />
 
         {/* Download Excel Button */}
-        <button onClick={handleFileDownload} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
+        <button
+          onClick={handleFileDownload}
+          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+        >
           Download Excel
         </button>
       </div>
@@ -184,34 +201,57 @@ console.log(maxLimit)
         </thead>
         <tbody>
           {paginatedData.map((student, index) => (
-            <tr key={index} className="hover:bg-gray-100 transition duration-200">
-              <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
+            <tr
+              key={student.att_id}
+              className="hover:bg-gray-100 transition duration-200"
+            >
               <td className="border border-gray-300 px-4 py-2">
-                {editingRow === index ? (
+                {index + 1 + (currentPage - 1) * itemsPerPage}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {student.sid}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {student.student_name}
+              </td>
+              <td className="border border-gray-300 px-4 py-2">
+                {editingRow === student.att_id ? (
                   <input
-                    type="text"
-                    value={editedMarks[index] || student.marks}
-                    onChange={(e) => handleMarksChange(e, index)}
+                    type="number" // Ensure the input type is 'number'
+                    value={
+                      editedMarks[student.att_id] !== undefined
+                        ? editedMarks[student.att_id]
+                        : student.marks
+                    }
+                    onChange={(e) => handleMarksChange(e, student.att_id)}
                     className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
                   />
                 ) : (
                   student.marks
                 )}
               </td>
+
               <td className="border border-gray-300 px-4 py-2 flex justify-center">
-                {editingRow === index ? (
+                {editingRow === student.att_id ? (
                   <>
-                    <button onClick={() => handleSaveClick(index)} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
+                    <button
+                      onClick={() => handleSaveClick(student.att_id)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+                    >
                       Save
                     </button>
-                    <button onClick={handleCancelClick} className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300">
+                    <button
+                      onClick={handleCancelClick}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300"
+                    >
                       Cancel
                     </button>
                   </>
                 ) : (
-                  <button onClick={() => handleEditClick(index)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                  <button
+                    onClick={() => handleEditClick(student.att_id)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+                  >
                     Edit
                   </button>
                 )}
