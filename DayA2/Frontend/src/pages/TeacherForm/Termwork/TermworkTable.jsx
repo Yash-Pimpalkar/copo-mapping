@@ -19,12 +19,14 @@ const TermworkTable = ({ uid }) => {
   const [currentComponent, setCurrentComponent] = useState("TheoryAssignment");
   const [attainmentList, setAttainmentList] = useState([]); // State for attainment list
   const [experimentList, setExperimentList] = useState([]); // 
-  const [showAttainmentList, setShowAttainmentList] = useState(false); 
+
+  const [tw_id ,setTWid]= useState(0)  // const [showAttainmentList, setShowAttainmentList] = useState(false); 
   useEffect(() => {
     const fetchTermworkLabels = async () => {
       try {
         const response = await api.get(`/api/termwork/gettermworkdata/${userCourseId}`);
         setTwData(response.data);
+       
       } catch (error) {
         console.error("Error fetching termwork labels:", error);
       }
@@ -45,7 +47,26 @@ const TermworkTable = ({ uid }) => {
   const updateExperimentList = (list) => {
     setExperimentList(list);
   };
- console.log(experimentList,attainmentList)
+//  console.log(experimentList,attainmentList)
+useEffect(() => {
+  if (twdata && twdata.length > 0) {
+    setTWid(twdata[0].twid); // Assuming setTWid is a state setter function
+  }
+}, [twdata]); // Dependency array should be closed correctly
+
+console.log(tw_id)
+useEffect(() => {
+  // Clear local storage whenever tw_id changes
+  localStorage.removeItem("AssignmentAttainmentData");
+localStorage.removeItem("ExperimentAttainmentData");
+ localStorage.removeItem("MiniProjectAttainmentData"); // Assuming mini-project data is stored similarly
+ localStorage.removeItem("PPTAttainmentData"); // For PPT
+   localStorage.removeItem("ReportAttainmentData"); // For report
+localStorage.removeItem("TradeAttainmentData"); // For trade
+  localStorage.removeItem("JournalAttainmentData");
+  localStorage.removeItem("SciLabAttainmentData")
+  console.log("Local storage cleared due to tw_id change.");
+}, [tw_id]);
   return (
     <div className="min-h-screen flex flex-col items-center bg-white p-6">
       {/* Heading */}
@@ -60,6 +81,7 @@ const TermworkTable = ({ uid }) => {
         </div>
       </div>
 
+
       {twdata && twdata.length > 0 && (
         <>
           {twdata[0].twid === 1 ? (
@@ -68,8 +90,8 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "TheoryAssignment" ? (
                 <>
-                  <TheoryAssignment userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
-                  <button
+                  <TheoryAssignment  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
+                  <button 
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
                   >
@@ -78,7 +100,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "Attendance" ? (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance   tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("SciLab")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -94,7 +116,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <SciLab uid={userCourseId} />
+                  <SciLab  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -108,7 +130,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "Experiment" ? (
                 <>
-                  <Experiment userCourseId={userCourseId}  updateExperimentList={updateExperimentList}/>
+                  <Experiment  tw_id={tw_id}  userCourseId={userCourseId}  updateExperimentList={updateExperimentList}/>
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -118,7 +140,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "Attendance" ? (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("MiniProject")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -128,7 +150,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <MiniProject uid={userCourseId} />
+                  <MiniProject  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -142,7 +164,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "TheoryAssignment" ? (
                 <>
-                   <TheoryAssignment userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
+                   <TheoryAssignment  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -152,7 +174,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("TheoryAssignment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -166,7 +188,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "Experiment" ? (
                 <>
-                  <Experiment userCourseId={userCourseId}  updateExperimentList={updateExperimentList}/>
+                  <Experiment  tw_id={tw_id}  userCourseId={userCourseId}  updateExperimentList={updateExperimentList}/>
                   <button
                     onClick={() => setCurrentComponent("TheoryAssignment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -176,7 +198,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "TheoryAssignment" ? (
                 <>
-                    <TheoryAssignment userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
+                    <TheoryAssignment  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -186,7 +208,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Experiment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -200,7 +222,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "Experiment" ? (
                 <>
-                   <Experiment userCourseId={userCourseId}  updateExperimentList={updateExperimentList}/>
+                   <Experiment  tw_id={tw_id}  userCourseId={userCourseId}  updateExperimentList={updateExperimentList}/>
                   <button
                     onClick={() => setCurrentComponent("TheoryAssignment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -210,7 +232,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "TheoryAssignment" ? (
                 <>
-                     <TheoryAssignment userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
+                     <TheoryAssignment  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -220,7 +242,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "Attendance" ? (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("MiniProject")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -230,7 +252,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <MiniProject userCourseId={userCourseId} />
+                  <MiniProject  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -244,7 +266,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "TheoryAssignment" ? (
                 <>
-                  <TheoryAssignment userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
+                  <TheoryAssignment  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -254,7 +276,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "Attendance" ? (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("PPT")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -264,7 +286,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "PPT" ? (
                 <>
-                  <PPT userCourseId={userCourseId} />
+                  <PPT  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Report")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -274,7 +296,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <Report userCourseId={userCourseId} />
+                  <Report  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("PPT")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -288,7 +310,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "Attendance" ? (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Trade")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -298,7 +320,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : currentComponent === "Trade" ? (
                 <>
-                  <Trade userCourseId={userCourseId} />
+                  <Trade  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Journal")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -308,7 +330,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <Journal userCourseId={userCourseId} />
+                  <Journal  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Trade")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -322,7 +344,7 @@ const TermworkTable = ({ uid }) => {
             <>
               {currentComponent === "TheoryAssignment" ? (
                 <>
-                   <TheoryAssignment userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
+                   <TheoryAssignment  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateAttainmentList={updateAttainmentList}  />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -335,7 +357,7 @@ const TermworkTable = ({ uid }) => {
                 </>
               ) : (
                 <>
-                  <Attendance uid={userCourseId} />
+                  <Attendance  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("TheoryAssignment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -344,14 +366,15 @@ const TermworkTable = ({ uid }) => {
                   </button>
                 </>
               )}
-               <AttainmentListDisplay 
-              attainmentList={attainmentList} 
-              experimentList={experimentList}
-              userCourseId={userCourseId} // Pass the experiment list
-            />
+              
+              
             </>
           )}
-         
+          
+          <AttainmentListDisplay 
+              userCourseId={userCourseId}
+              tw_id={tw_id}  // Pass the experiment list
+            />
         </>
       )}
     </div>
