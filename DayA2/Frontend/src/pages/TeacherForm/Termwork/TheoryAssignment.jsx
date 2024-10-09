@@ -4,7 +4,7 @@ import Pagination from "../../../component/Pagination/Pagination"; // Import the
 import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
 
-const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList }) => {
+const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
   const [TwAssignMentData, setTwAssignmentData] = useState([]);
   const [questiondata, SetQuestionData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -253,7 +253,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList }) => {
       reader.readAsArrayBuffer(file);
     }
   };
-
+  
   const handleAttainmentChange = (e, field) => {
     const value = e.target.value;
 
@@ -279,18 +279,32 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList }) => {
     distinctConames,
     questionColumns,
     attainmentData,
+    tw_id,
     userCourseId
   ) => {
     // Logic to handle attainment calculation
     const attainmentList = calculateAttainmentList();
-      onUpdateAttainmentList(attainmentList); 
+    
+    // Store data in localStorage
+    const dataToStore = {
+      attainmentList,
+      passedPercentage: attainmentData.passedPercentage,
+      tw_id,
+      userCourseId,
+    };
+  
+    localStorage.setItem('AssignmentAttainmentData', JSON.stringify(dataToStore));
+  
+    // Call onUpdateAttainmentList
+    onUpdateAttainmentList(attainmentList);
+  
     console.log(
       "Attainment updated",
       distinctConames,
       questionColumns,
       attainmentData
     );
-
+  
     setMessage("Attainment data has been updated successfully.");
   };
 
@@ -354,12 +368,13 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList }) => {
   const calculateAttainmentList = () => {
     const attainmentList = assignmentKeys.map((assignmentKey, index) => {
       const coname = getCOName(assignmentKey);
-  
+       
       // Get total students passed and attempted for this question/CO name
       const passedCount = getTotalStudentsPassedPerQuestion(
         attainmentData.passedPercentage
       )[index];
   
+      
       const attemptedCount = getTotalStudentsAttempted()[index];
   
       // Calculate attainment percentage
@@ -542,6 +557,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList }) => {
                 distinctConames,
                 questionColumns,
                 attainmentData,
+                tw_id,
                 userCourseId
               )
             }
