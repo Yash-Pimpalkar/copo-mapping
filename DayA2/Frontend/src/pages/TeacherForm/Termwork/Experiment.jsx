@@ -4,7 +4,7 @@ import Pagination from "../../../component/Pagination/Pagination";
 import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
 
-const Experiment = ({ userCourseId }) => {
+const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
   const [experimentData, setExperimentData] = useState([]);
   const [questionData, setQuestionData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -277,13 +277,35 @@ const Experiment = ({ userCourseId }) => {
     }
   };
   console.log(experimentData)
-  const handle_Attenment = (experimentKeys, attainmentData, userCourseId) => {
-    console.log("Attainment updated:", experimentKeys, attainmentData);
+  
+  const handle_Attenment = (
+    experimentKeys,
+    attainmentData,
+    tw_id,
+    userCourseId
+  ) => {
 
-    // Assuming experimentKeys and attainmentData are used to calculate attainment
-    // You can implement any calculations, updates, or API calls here
-
-    // Display a success message after updating the attainment
+    console.log(userCourseId)
+    // Logic to handle attainment calculation
+    const attainmentList = calculateAttainmentList();
+     console.log(attainmentData.passedPercentage)
+    // Store data in localStorage as 'ExperimentAttainmentData'
+    const dataToStore = {
+      attainmentList,
+      passedPercentage:attainmentData.passedPercentage,
+      tw_id,          // Include tw_id
+      userCourseId,   // Include userCourseId
+    };
+  
+    localStorage.setItem('ExperimentAttainmentData', JSON.stringify(dataToStore));
+  
+    // Call the function to update the experiment list
+    updateExperimentList(attainmentList);
+  
+    // Log the data after updating
+    console.log("Attainment updated:",  attainmentData);
+  
+    // Display a success message
     setMessage("Attainment data has been updated successfully.");
   };
   // Get total students passed per question based on percentage criteria
@@ -307,14 +329,26 @@ const Experiment = ({ userCourseId }) => {
 
   // Handle input change for percentage criteria
   const handleAttainmentChange = (e, field) => {
-    const { value } = e.target;
-    if (value >= 0 && value <= 100) {
-      setAttainmentData((prev) => ({ ...prev, [field]: value }));
-      setError("");
-    } else {
-      setError("Percentage must be between 0 and 100");
+    const value = e.target.value;
+
+    // Ensure value is between 0 and 100
+    if (field === "passedPercentage") {
+      const numericValue = Number(value);
+      if (numericValue < 0 || numericValue > 100) {
+        setError("Percentage must be between 0 and 100.");
+        return;
+      } else {
+        setError(""); // Clear error if valid
+      }
     }
+
+    // Update the state
+    setAttainmentData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
   };
+
   // Helper function to map experiment key (e.g., EXPERIMENT1) to question_id
   const getQuestionIdFromExperimentKey = (experimentKey) => {
     const question = questionData.find(
@@ -323,7 +357,45 @@ const Experiment = ({ userCourseId }) => {
     return question ? question.question_id : null;
   };
 
+
+  useEffect(() => {
+    // Only calculate attainment list if there is data to process
+    if (experimentData.length > 0 && questionData.length > 0) {
+      const attainmentList = calculateAttainmentList();
+      updateExperimentList(attainmentList); // Pass the attainment list correctly
+    }
+  }, [experimentData, questionData]); // Trigger whenever the experiment data or question data changes
+  
+  const calculateAttainmentList = () => {
+    const attainmentList = experimentKeys.map((experimentKey, index) => {
+      const coname = getCOName(experimentKey);
+  
+      // Get total students passed and attempted for this experiment/CO name
+      const passedCount = getTotalStudentsPassedPerQuestion(
+        attainmentData.passedPercentage
+      )[index];
+  
+      const attemptedCount = getTotalStudentsAttempted()[index];
+  
+      // Calculate attainment percentage
+      const attainment = attemptedCount
+        ? ((passedCount / attemptedCount) * 100).toFixed(2)
+        : 0;
+  
+      // Return the coname and its corresponding attainment
+      return {
+        coname: coname,
+        attainment: `${attainment}%`,
+      };
+    });
+  
+    return attainmentList;
+  };
+  
+
   return (
+
+    <>
     <div className="overflow-x-auto">
       {/* Container for Export, Import and Search Bar */}
       <div className="mb-4 flex justify-between items-center">
@@ -483,12 +555,18 @@ const Experiment = ({ userCourseId }) => {
           </h1>
           <button
             onClick={() =>
-              handle_Attenment(experimentKeys, attainmentData, userCourseId)
+              handle_Attenment(
+                experimentKeys,
+                attainmentData,
+                tw_id,
+                userCourseId
+              )
             }
             className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
           >
             Update Attainment
           </button>
+         
         </div>
 
         <div className="mb-4">
@@ -505,7 +583,7 @@ const Experiment = ({ userCourseId }) => {
             max="100"
             value={attainmentData.passedPercentage}
             onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-            className="border px-4 py-2 rounded-md"
+            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
 
@@ -585,6 +663,9 @@ const Experiment = ({ userCourseId }) => {
         </table>
       </div>
     </div>
+   
+    </>
+    
   );
 };
 
