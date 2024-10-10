@@ -63,7 +63,7 @@ const Termwork = ({ uid }) => {
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-r from-blue-50 to-blue-100 p-6">
       {/* Heading */}
       <h1 className="text-3xl md:text-4xl font-bold text-blue-800 mb-6">
-        Termwork
+        Select Termwork
       </h1>
 
       {/* Course Selector Card */}

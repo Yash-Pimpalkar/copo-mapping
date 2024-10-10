@@ -146,10 +146,10 @@ export default function Navbar() {
     { name: "Upload Ia1", href: "/uploadia1", userType: [2] },
     { name: "Upload Ia2", href: "/uploadia2", userType: [2] },
     { name: "Upload Sem", href: "/uploadsem", userType: [2] },
+    { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
     { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
     { name: "Upload Oral", href: "/uploadoral", userType: [2] },
     { name: "Upload Oral(PCE)", href: "/uploadoralpce", userType: [2] },
-    { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
   ];
 
   // const TermworkNavigation = [
@@ -428,7 +428,7 @@ export default function Navbar() {
                   <Disclosure as="div" className="relative">
                     <DisclosureButton
                       to="/termwork"
-                      className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white pt-5"
+                      className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                     >
                       Term Work
                     </DisclosureButton>

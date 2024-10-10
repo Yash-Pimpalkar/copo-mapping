@@ -540,13 +540,13 @@ const IntaTWUniv = ({ uid }) => {
         <table className="min-w-full border-collapse border border-gray-300 mb-4 text-sm md:text-base">
           <thead>
             <tr>
-              <th className="border border-gray-300 p-2" colSpan={11}>
+              <th className="divide-y border border-gray-300 p-2" colSpan={11}>
                 Lab Course Attainment
               </th>
             </tr>
             <tr>
               <th
-                className="border border-gray-300 p-2 text-center"
+                className="border border-gray-300 p-2 text-center"  
                 colSpan={6}
               >
                 Direct Course Attainment Calculations
@@ -586,7 +586,7 @@ const IntaTWUniv = ({ uid }) => {
               <th className="border border-gray-300 p-2 text-center">UNIV</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y">
             {/* Data Rows */}
             {loData.map((item, index) => (
               <tr key={index}>
@@ -790,7 +790,7 @@ const IntaTWUniv = ({ uid }) => {
         PO, PSO Attainment
       </h2>
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm md:text-base">
+        <table className="min-w-full divide-y border-collapse border border-gray-300 text-sm md:text-base">
           <thead>
             <tr>
               <th className="border border-gray-300 p-2" colSpan={15}>

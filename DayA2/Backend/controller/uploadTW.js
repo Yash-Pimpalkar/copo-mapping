@@ -340,7 +340,7 @@ export const upload_tw_questions = async (req, res) => {
     }
   } else if (dataToSubmit.formDataForKey === "Report") {
     try {
-      const { usercourseid, maxMarks, numReports, reportDetails } = dataToSubmit;
+      const { usercourseid, maxMarks,  coNames } = dataToSubmit;
       // Assuming `reportDetails` contains details similar to `questions` in the original code.
 
       // 1. Check if `usercourseid` already exists in `upload_report`
@@ -361,27 +361,27 @@ export const upload_tw_questions = async (req, res) => {
         try {
           // 2. Insert into `upload_report` table
           const insertReportQuery = `
-                  INSERT INTO upload_report (usercourseid, maxmarks, noofreports)
-                  VALUES (?, ?, ?)
+                  INSERT INTO upload_report (usercourseid, maxmarks)
+                  VALUES (?, ?)
                 `;
-          const [reportResult] = await db.promise().query(insertReportQuery, [usercourseid, maxMarks, numReports]);
+          const [reportResult] = await db.promise().query(insertReportQuery, [usercourseid, maxMarks]);
 
           // Retrieve the inserted `report_id`
           const report_id = reportResult.insertId;
 
-          // 3. Insert each detail into `report_details` and get `report_idq`
-          for (let reportDetail of reportDetails) {
-            const { title, coNames } = reportDetail;
+          // // 3. Insert each detail into `report_details` and get `report_idq`
+          // for (let reportDetail of reportDetails) {
+          //   const { title, coNames } = reportDetail;
 
-            // Insert into `report_details` with `report_id`
-            const insertReportDetailQuery = `
-                      INSERT INTO report_details (report_title, report_id)
-                      VALUES (?, ?)
-                    `;
-            const [reportDetailResult] = await db.promise().query(insertReportDetailQuery, [title, report_id]);
+          //   // Insert into `report_details` with `report_id`
+          //   const insertReportDetailQuery = `
+          //             INSERT INTO report_details (report_title, report_id)
+          //             VALUES (?, ?)
+          //           `;
+          //   const [reportDetailResult] = await db.promise().query(insertReportDetailQuery, [title, report_id]);
 
-            // Retrieve the inserted `report_idq`
-            const report_idq = reportDetailResult.insertId;
+          //   // Retrieve the inserted `report_idq`
+          //   const report_idq = reportDetailResult.insertId;
 
             // 4. Insert each CO name into `co_report` for the corresponding `report_idq`
             for (let coName of coNames) {
@@ -389,9 +389,9 @@ export const upload_tw_questions = async (req, res) => {
                           INSERT INTO co_report (coname, co_id)
                           VALUES (?, ?)
                         `;
-              await db.promise().query(insertCoReportQuery, [coName, report_idq]);
+              await db.promise().query(insertCoReportQuery, [coName, report_id]);
             }
-          }
+          
 
           // Commit the transaction if all queries were successful
           db.commit((commitErr) => {
@@ -417,59 +417,48 @@ export const upload_tw_questions = async (req, res) => {
     }
   } else if (dataToSubmit.formDataForKey === "PPT") {
     try {
-      const { usercourseid, maxMarks, numPPTs, pptDetails } = dataToSubmit;
-      // Assuming `pptDetails` contains details similar to `questions` in the original code.
-
+      const { usercourseid, maxMarks, coNames } = dataToSubmit; // Ensure coNames is included in the request
+  
+      // Check if coNames exists and is an array
+      if (!Array.isArray(coNames)) {
+        return res.status(400).json({ error: "Invalid CO names format. Expected an array of CO names." });
+      }
+  
       // 1. Check if `usercourseid` already exists in `upload_ppt`
       const checkQuery = `SELECT * FROM upload_ppt WHERE usercourseid = ?`;
       const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
-
+  
       if (checkResult.length > 0) {
         // If usercourseid exists, return an error message
         return res.status(400).json({ error: "Data already exists for this usercourseid." });
       }
-
+  
       // Begin a transaction
       db.beginTransaction(async (err) => {
         if (err) {
           return res.status(500).json({ error: "Error starting transaction" });
         }
-
+  
         try {
           // 2. Insert into `upload_ppt` table
           const insertPPTQuery = `
-                  INSERT INTO upload_ppt (usercourseid, maxmarks, noofppts)
-                  VALUES (?, ?, ?)
-                `;
-          const [pptResult] = await db.promise().query(insertPPTQuery, [usercourseid, maxMarks, numPPTs]);
-
+            INSERT INTO upload_ppt (usercourseid, maxmarks)
+            VALUES (?, ?)
+          `;
+          const [pptResult] = await db.promise().query(insertPPTQuery, [usercourseid, maxMarks]);
+  
           // Retrieve the inserted `ppt_id`
           const ppt_id = pptResult.insertId;
-
-          // 3. Insert each detail into `ppt_details` and get `ppt_idq`
-          for (let pptDetail of pptDetails) {
-            const { title, coNames } = pptDetail;
-
-            // Insert into `ppt_details` with `ppt_id`
-            const insertPPTDetailQuery = `
-                      INSERT INTO ppt_details (ppt_title, ppt_id)
-                      VALUES (?, ?)
-                    `;
-            const [pptDetailResult] = await db.promise().query(insertPPTDetailQuery, [title, ppt_id]);
-
-            // Retrieve the inserted `ppt_idq`
-            const ppt_idq = pptDetailResult.insertId;
-
-            // 4. Insert each CO name into `co_ppt` for the corresponding `ppt_idq`
-            for (let coName of coNames) {
-              const insertCoPPTQuery = `
-                          INSERT INTO co_ppt (coname, co_id)
-                          VALUES (?, ?)
-                        `;
-              await db.promise().query(insertCoPPTQuery, [coName, ppt_idq]);
-            }
+  
+          // 3. Insert each CO name into `co_ppt` for the corresponding `ppt_id`
+          for (let coName of coNames) {
+            const insertCoPPTQuery = `
+              INSERT INTO co_ppt (coname, co_id)
+              VALUES (?, ?)
+            `;
+            await db.promise().query(insertCoPPTQuery, [coName, ppt_id]); // Insert the coName and corresponding ppt_id as co_id
           }
-
+  
           // Commit the transaction if all queries were successful
           db.commit((commitErr) => {
             if (commitErr) {
@@ -491,14 +480,14 @@ export const upload_tw_questions = async (req, res) => {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "An error occurred while checking usercourseid." });
-    }
+    }  
 
 }  else if (dataToSubmit.formDataForKey === "Attendance") {
   const { usercourseid, maxMarks } = dataToSubmit;
 
   try {
     // 1. Check if `usercourseid` already exists in `upload_attendance`
-    const checkQuery = `SELECT * FROM upload_attendance WHERE usercourseid = ?`;
+    const checkQuery = `SELECT * FROM upload_attendance WHERE usecourseid = ?`;
     const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
 
     if (checkResult.length > 0) {
@@ -515,7 +504,7 @@ export const upload_tw_questions = async (req, res) => {
       try {
         // 2. Insert into `upload_attendance` table
         const insertAttendanceQuery = `
-          INSERT INTO upload_attendance (usercourseid, maxmarks)
+          INSERT INTO upload_attendance (usecourseid, maxmarks)
           VALUES (?, ?)
         `;
         await db.promise().query(insertAttendanceQuery, [usercourseid, maxMarks]);
@@ -544,11 +533,11 @@ export const upload_tw_questions = async (req, res) => {
   }
 
 //scilab
-}else if (dataToSubmit.formDataForKey === "SCILab / Mini Project") {
-  const { usercourseid, maxMarks } = dataToSubmit;
+} else if (dataToSubmit.formDataForKey === "SCILab / Mini Project") {
+  const { usercourseid, maxMarks, coNames } = dataToSubmit;
 
   try {
-    // 1. Check if `usercourseid` already exists in `upload_attendance`
+    // 1. Check if `usercourseid` already exists in `uploadscilabpract`
     const checkQuery = `SELECT * FROM uploadscilabpract WHERE usercourseid = ?`;
     const [checkResult] = await db.promise().query(checkQuery, [usercourseid]);
 
@@ -560,43 +549,59 @@ export const upload_tw_questions = async (req, res) => {
     // Begin a transaction
     db.beginTransaction(async (err) => {
       if (err) {
+        console.error("Error starting transaction:", err);
         return res.status(500).json({ error: "Error starting transaction" });
       }
 
       try {
-        // 2. Insert into `upload_attendance` table
+        // 2. Insert into `uploadscilabpract` table
         const insertAttendanceQuery = `
           INSERT INTO uploadscilabpract (usercourseid, maxmarks)
           VALUES (?, ?)
         `;
-        await db.promise().query(insertAttendanceQuery, [usercourseid, maxMarks]);
+        console.log("Running query:", insertAttendanceQuery, [usercourseid, maxMarks]);
+        const [scilabresult] = await db.promise().query(insertAttendanceQuery, [usercourseid, maxMarks]);
 
-        // Commit the transaction if the query was successful
+        // Retrieve the inserted `sci_id`
+        const sci_id = scilabresult.insertId;
+        console.log("Inserted sci_id:", sci_id);
+
+        for (let coName of coNames) {
+          const insertCoPPTQuery = `
+            INSERT INTO co_scilab (coname, co_id)
+            VALUES (?, ?)
+          `;
+          console.log("Running query:", insertCoPPTQuery, [coName, sci_id]);
+          await db.promise().query(insertCoPPTQuery, [coName, sci_id]);
+        }
+
+        // Commit the transaction if successful
         db.commit((commitErr) => {
           if (commitErr) {
             db.rollback(() => {
+              console.error("Error committing transaction:", commitErr);
               return res.status(500).json({ error: "Error committing transaction" });
             });
           } else {
-            return res.status(200).json({ message: "Scilab/Mini roject data uploaded successfully!" });
+            console.log("Transaction committed successfully");
+            return res.status(200).json({ message: "Scilab/Mini Project data uploaded successfully!" });
           }
         });
       } catch (error) {
         // Rollback the transaction in case of an error
         db.rollback(() => {
-          console.error(error);
+          console.error("Error during upload process:", error);
           return res.status(500).json({ error: "An error occurred during the upload process." });
         });
       }
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error while checking usercourseid:", error);
     return res.status(500).json({ error: "An error occurred while checking usercourseid." });
   }
 
-//MiniProject for subjects like rospl in IT
-
-}else if (dataToSubmit.formDataForKey === "Mini Project") {
+  
+} else if (dataToSubmit.formDataForKey === "Mini Project") {
   const { usercourseid, logbookMaxMarks, review1MaxMarks, review2MaxMarks, projectReportMaxMarks, coNames } = dataToSubmit;
 
 try {

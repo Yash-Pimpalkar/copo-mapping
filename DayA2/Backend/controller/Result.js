@@ -24,7 +24,13 @@ export const fetchTermwork = (req, res) => {
     if (!userCourseId) {
       return res.status(400).json({ error: "usercourse id is required" });
     }
-    
+
+    const sql2 = "SELECT * FROM ia2_attainment WHERE usercourse_id = ?";
+    if (!userCourseId) {
+      return res.status(400).json({ error: "usercourse id is required" });
+    }
+  
+  
     try {
       db.query(sql, [userCourseId] ,(error,result) => {
           if (error) {

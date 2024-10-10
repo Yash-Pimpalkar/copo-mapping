@@ -212,15 +212,61 @@ const Uploadthassign = ({ uid }) => {
     }
   
     // Validation logic for Attendance, Report, PPT, and SCILab forms
-    else if (key === "attid" || key === 'report_id' || key === 'ppt_id' || key === 'scprid') {
+    else if (key === "attid") {
       // Only validate maxMarks for these forms
       if (!formDataForKey.maxMarks) {
         alert(`Please enter Max Marks for ${formNames[key]}`);
         return;
-      }
+      } 
+    } else if(key === 'report_id' || key === 'ppt_id' || key === 'scprid'){
+      
+       // Ensure maxMarks is available
+  const maxMarks = formDataForKey.maxMarks;
 
-       
-    } else if (key === "journalid") {
+  if (!maxMarks) {
+    alert(`Please enter Max Marks for ${formNames[key]}`);
+    return;
+  }
+      const coNames = Array.from({ length: numCOs[key] || 0 }).map((_, coIndex) => {
+        return (formDataForKey[`coName_${coIndex}`] || "").toUpperCase();
+      }).filter(Boolean);
+    
+      if (coNames.length === 0) {
+        alert('Please complete the CO Names');
+        return;
+      }
+    
+      // Prepare data to submit for Journal
+      const dataToSubmit = {
+        usercourseid: selectedCourseId,
+        maxMarks,
+        coNames, // Include CO Names in the data
+        Data: formDataForKey,
+        formDataForKey: formNames[key] // You can structure this according to your backend needs
+      };
+    
+      // Log the journal data to console
+      console.log("Data to be submitted:", dataToSubmit);
+    
+      // API call to submit journal data
+      try {
+        setLoading(true);
+        setSubmittingKey(key);
+    
+        await api.post("/api/tw/upload/", dataToSubmit);
+    
+        alert("Data submitted successfully");
+        setError(null);
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        setError(error.response?.data?.error || "Failed to submit data");
+      } finally {
+        setLoading(false);
+        setSubmittingKey(null);
+      }
+    
+      return;
+    }else if (key === "journalid") {
       const { maxMarks } = formDataForKey;
       if (!maxMarks) {
       alert('Please complete the "Max Marks" field for Journal');
@@ -384,7 +430,7 @@ const Uploadthassign = ({ uid }) => {
                   {formNames[key]} Form
                 </h3>
     
-                {key === 'attid' || key === 'scprid' || key === 'ppt_id' || key === 'report_id' 
+                {key === 'attid'
                 ? (
                   <>
                     <label
@@ -401,6 +447,60 @@ const Uploadthassign = ({ uid }) => {
                       className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm uppercase"
                     />
     
+                    <button
+                      onClick={() => handleFormSubmit(key)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 w-full"
+                      disabled={loading || submittingKey === key}
+                    >
+                      {submittingKey === key ? <LoadingButton /> : "Submit"}
+                    </button>
+                  </>
+                ) : key === 'scprid' || key === 'ppt_id' || key === 'report_id'
+                ? (
+                  <>
+                    <label
+                      htmlFor={`max-marks-${key}`}
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Max Marks for {formNames[key]}
+                    </label>
+                    <input
+                      id={`max-marks-${key}`}
+                      type="text"
+                      value={formData[key]?.maxMarks || ""}
+                      onChange={(e) => handleMaxMarksChange(key, "maxMarks", e.target.value)}
+                      className="block w-full py-2 px-3 mb-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm uppercase"
+                    />
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      How many COs for this question?
+                    </label>
+                    <input
+                      type="text"
+                      value={numCOs[key] || ""}
+                      onChange={(e) => handleCOCountChange(key, e.target.value)}
+                      className="px-4 py-2 mt-1 block w-full border border-gray-300 rounded-md shadow-sm uppercase"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Enter the CO Names
+                    </label>
+                    {numCOs[key] > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-1 mb-4">
+                        {Array.from({ length: parseInt(numCOs[key], 10) || 1 }).map((_, coIndex) => (
+                          <input
+                            key={coIndex}
+                            type="text"
+                            value={formData[key]?.[`coName_${coIndex}`] || ""}
+                            onChange={(e) => handleCONameChange(key, coIndex, e.target.value)}
+                            className="px-2 py-2 w-full border border-gray-300 rounded-md shadow-sm uppercase"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                     <button
                       onClick={() => handleFormSubmit(key)}
                       className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 w-full"
@@ -542,7 +642,7 @@ const Uploadthassign = ({ uid }) => {
                       Enter the CO Names
                     </label>
                     {numCOs[key] > 0 && (
-                      <div className="grid grid-cols-3 gap-2 mt-1">
+                      <div className="grid grid-cols-3 gap-2 mt-1 mb-4">
                         {Array.from({ length: parseInt(numCOs[key], 10) || 1 }).map((_, coIndex) => (
                           <input
                             key={coIndex}
@@ -639,7 +739,7 @@ const Uploadthassign = ({ uid }) => {
                                   Enter the CO Names
                                 </label>
                                 {numCOs[key]?.[index] > 0 && (
-                                  <div className="grid grid-cols-3 gap-2 mt-1">
+                                  <div className="grid grid-cols-3 gap-2 mt-1 mb-4">
                                     {Array.from({ length: numCOs[key]?.[index] || 1 }).map((_, coIndex) => (
                                       <input
                                         key={coIndex}
