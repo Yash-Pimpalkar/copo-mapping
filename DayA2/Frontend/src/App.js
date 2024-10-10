@@ -44,6 +44,8 @@ import PureTheoryResult from './pages/Results/puretheoryresult';
 import MainResult from './pages/Results/mainresult';
 import OralPCE from './pages/TeacherForm/OralPCE';
 import UploadPCE from './pages/Questions/UploadOralPCE';
+import FeedbackPage from './component/LMSFeedback/MainFeedback';
+import EditQuestionsPage from './component/LMSFeedback/EditQuestionsPage';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -119,7 +121,8 @@ function App() {
               <Route path='/Twonly' element={<TWOnly uid={user_id}/>}/>
               <Route path='/PureTheoryResult' element={<PureTheoryResult uid={user_id}/>}/>
               <Route path='/Mainresult' element={<MainResult uid={user_id}/>}/>
-           
+              <Route path='/lmsfeedback' element={<FeedbackPage uid={user_id}/>}/>
+              <Route path='/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>

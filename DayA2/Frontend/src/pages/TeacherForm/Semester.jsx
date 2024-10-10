@@ -260,7 +260,66 @@ const Semester = ({ uid }) => {
     const headers = ["sem_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
+    const attainmentHeaders = [
+      "Details",
+      ...userCourse.map((course) => course.co_name)
+    ];
+
+    // Passed Row: Total number of students who passed each course
+    const passedRow = [
+      `Total Passed`,
+      ...userCourse.map((course) => {
+        // Filter students who passed for the current course
+        const passedStudents = SemData.filter(
+          (student) =>
+            student.marks >= (maxLimit * attainmentData.passedPercentage) / 100
+        );
+        // Return the number of passed students
+        return passedStudents.length;
+      })
+    ];
+
+    // Attempted Row: Total number of students who attempted each course
+    const attemptedRow = [
+      `Total Attempted`,
+      ...userCourse.map((course) => {
+        // Return the total number of students who attempted (assuming all students in OralData attempted)
+        return SemData.length;
+      })
+    ];
+
+    const attainmentRow = userCourse.map((course) => {
+      // Filter students based on passing criteria
+      const passedStudents = SemData.filter(
+        (student) =>
+          student.marks >= (maxLimit * attainmentData.passedPercentage) / 100
+      );
+
+      // Calculate the attainment percentage
+      const attainmentPercentage = (
+        (passedStudents.length / SemData.length) * 100
+      ).toFixed(2);
+
+      // Return both co_name and attainmentPercentage
+      return [course.co_name, attainmentPercentage + ' %'];
+    });
+
+    // Combining everything for export
+    const attainmentDataForExport = [
+      attainmentHeaders,
+      passedRow,
+      attemptedRow,
+      ...attainmentRow // Spread attainmentRow to ensure each CO row is separate in the Excel
+    ];
+
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+
+    const attainmentStartRow = dataWithHeaders.length + 2;
+
+    XLSX.utils.sheet_add_aoa(worksheet, attainmentDataForExport, {
+      origin: { r: attainmentStartRow, c: 0 },
+    });
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "SemesterData");
     XLSX.writeFile(workbook, "semester_data.xlsx");
@@ -274,12 +333,12 @@ const Semester = ({ uid }) => {
         (student) =>
           student.marks >= (maxLimit * attainmentData.passedPercentage) / 100
       ).length;
-      
+
       const totalStudents = SemData.length;
       const attainment = totalStudents
         ? ((studentsPassed / totalStudents) * 100).toFixed(2)
         : 0;
-  
+
       return { coName: course.co_name, coAverage: attainment };
     });
   }
@@ -289,12 +348,12 @@ const Semester = ({ uid }) => {
       // Calculate CO averages
       const coAverages = calculateCoAverages(userCourse, SemData, maxLimit, attainmentData);
       console.log(coAverages);
-  
+
       // Map over coAverages and calculate attainment for each CO
       const coAveragesWithAttainment = coAverages.map((co) => {
         let attainment;
         const average = parseFloat(co.coAverage); // Convert coAverage to float
-  
+
         // Determine attainment based on coAverage
         if (average <= 40) {
           attainment = 0;
@@ -305,7 +364,7 @@ const Semester = ({ uid }) => {
         } else {
           attainment = 3;
         }
-  
+
         // Return the object with both coName, coAverage, and attainment
         return {
           coName: co.coName,
@@ -313,9 +372,9 @@ const Semester = ({ uid }) => {
           attainment, // Include calculated attainment
         };
       });
-  
+
       console.log(coAveragesWithAttainment); // Verify the structure
-  
+
       // Post the data to the backend
       api
         .post("/api/sem/insert-co-averages", {
@@ -332,7 +391,7 @@ const Semester = ({ uid }) => {
         });
     }
   };
-  
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -440,92 +499,92 @@ const Semester = ({ uid }) => {
           </div>
         </div>
         {filteredData.length > 0 && (
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Seat No.
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Student ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Student Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-        
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.slice(startIndex, endIndex).map((student, index) => {
-              const actualIndex = index + startIndex; // Adjust index to match actual data index
-              // { console.log(actualIndex)
-              //  console.log(editingRow)}
-              return (
-                <tr key={student.sid} className="hover:bg-gray-100">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {actualIndex + 1} {/* Displaying the row number */}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.stud_clg_id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.student_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {editingRow === actualIndex ? (
-                      <input
-                        type="text"
-                        value={
-                          editedMarks[actualIndex] !== undefined
-                            ? editedMarks[actualIndex]
-                            : student.marks
-                        }
-                        onChange={(event) =>
-                          handleMarksChange(event, actualIndex)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      />
-                    ) : (
-                      student.marks // Show existing marks if not editing
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {editingRow === actualIndex ? (
-                      <>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  Seat No.
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  Student ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  Student Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredData.slice(startIndex, endIndex).map((student, index) => {
+                const actualIndex = index + startIndex; // Adjust index to match actual data index
+                // { console.log(actualIndex)
+                //  console.log(editingRow)}
+                return (
+                  <tr key={student.sid} className="hover:bg-gray-100">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {actualIndex + 1} {/* Displaying the row number */}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {student.stud_clg_id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {student.student_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {editingRow === actualIndex ? (
+                        <input
+                          type="text"
+                          value={
+                            editedMarks[actualIndex] !== undefined
+                              ? editedMarks[actualIndex]
+                              : student.marks
+                          }
+                          onChange={(event) =>
+                            handleMarksChange(event, actualIndex)
+                          }
+                          className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                      ) : (
+                        student.marks // Show existing marks if not editing
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {editingRow === actualIndex ? (
+                        <>
+                          <button
+                            onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
+                            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelClick}
+                            className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
                         <button
-                          onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
+                          onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
                           className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                         >
-                          Save
+                          Edit
                         </button>
-                        <button
-                          onClick={handleCancelClick}
-                          className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-       
-        </table>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+
+          </table>
         )}
         {totalPages > 0 && (
           <Pagination
@@ -536,169 +595,169 @@ const Semester = ({ uid }) => {
         )}
       </div>
       {filteredData.length > 0 && (
-      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-       <div className="flex justify-between items-center mb-4">
-    <h1 className="text-lg font-semibold">
-      Total Students Passed Each Question
-    </h1>
-    <button
-      onClick={() =>
-        handle_Attainment(
-          userCourse,
-          SemData,
-          maxLimit,
-          attainmentData,
-          userCourseId
-        )
-      }
-      className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
-    >
-      Update Attainment
-    </button>
-  </div>
-
-        <div className="mb-4">
-          <label
-            htmlFor="total-student-passed"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Total Students Passed with &gt;= PERCENTAGE %
-          </label>
-          <input
-            id="total-student-passed"
-            type="text"
-            value={attainmentData.passedPercentage}
-            onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          {message && (
-                <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
-                  {message}
-                </div>
-              )}
-        </div>
         <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-          <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
-          <h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-lg font-semibold">
+              Total Students Passed Each Question
+            </h1>
+            <button
+              onClick={() =>
+                handle_Attainment(
+                  userCourse,
+                  SemData,
+                  maxLimit,
+                  attainmentData,
+                  userCourseId
+                )
+              }
+              className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+            >
+              Update Attainment
+            </button>
+          </div>
 
-            {attainmentData.passedPercentage} % of Max Marks: {maxLimit} ={" "}
-            {(t = (maxLimit * attainmentData.passedPercentage) / 100)}{" "}
-          </h1>
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-blue-500 text-white">
-              <tr>
-                <th
-                  colSpan={2}
-                  className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider"
-                >
-                  Attenment calculation
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              <tr className="bg-white">
-                <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
-                  Students passed with {attainmentData.passedPercentage} %
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {
-                    SemData.filter(
-                      (student) =>
-                        student.marks >=
-                        (maxLimit * attainmentData.passedPercentage) / 100
-                    ).length
-                  }
-                </td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
-                  Total Students
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {SemData.length}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          {userCourse.length > 0 && (
-          <table className="min-w-full table-fixed divide-y divide-gray-200">
-          <thead className="bg-blue-500 text-white">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
-                Details
-              </th>
-              {userCourse.map((course) => (
-                <th
-                  key={course.idcos}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
-                >
-                  {course.co_name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            <tr>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
-                Total Passed
-              </td>
-              {userCourse.map((course) => (
-                <td
-                  key={course.idcos}
-                  className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
-                >
-                  {
-                    SemData.filter(
-                      (student) =>
-                        student.marks >=
-                        (maxLimit * attainmentData.passedPercentage) / 100
-                    ).length
-                  }
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
-                Total Students
-              </td>
-              {userCourse.map((course) => (
-                <td
-                  key={course.idcos}
-                  className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
-                >
-                  {SemData.length}
-                </td>
-              ))}
-            </tr>
-        
-            {userCourse.map((course) => (
-              <tr
-                key={course.idcos}
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-              >
-                <td className="w-1/4"> {course.co_name}</td>
-                <td className="w-1/4">
-                  {(
-                    (SemData.filter(
-                      (student) =>
-                        student.marks >=
-                        (maxLimit * attainmentData.passedPercentage) / 100
-                    ).length /
-                      SemData.length) *
-                    100
-                  ).toFixed(2)} %
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          
-        </table>   
-             
-          )}
-          
+          <div className="mb-4">
+            <label
+              htmlFor="total-student-passed"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Total Students Passed with &gt;= PERCENTAGE %
+            </label>
+            <input
+              id="total-student-passed"
+              type="text"
+              value={attainmentData.passedPercentage}
+              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {message && (
+              <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
+                {message}
+              </div>
+            )}
+          </div>
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+            <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
+            <h1>
+
+              {attainmentData.passedPercentage} % of Max Marks: {maxLimit} ={" "}
+              {(t = (maxLimit * attainmentData.passedPercentage) / 100)}{" "}
+            </h1>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  <th
+                    colSpan={2}
+                    className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider"
+                  >
+                    Attenment calculation
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <tr className="bg-white">
+                  <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                    Students passed with {attainmentData.passedPercentage} %
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {
+                      SemData.filter(
+                        (student) =>
+                          student.marks >=
+                          (maxLimit * attainmentData.passedPercentage) / 100
+                      ).length
+                    }
+                  </td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                    Total Students
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {SemData.length}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            {userCourse.length > 0 && (
+              <table className="min-w-full table-fixed divide-y divide-gray-200">
+                <thead className="bg-blue-500 text-white">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
+                      Details
+                    </th>
+                    {userCourse.map((course) => (
+                      <th
+                        key={course.idcos}
+                        className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
+                      >
+                        {course.co_name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  <tr>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                      Total Passed
+                    </td>
+                    {userCourse.map((course) => (
+                      <td
+                        key={course.idcos}
+                        className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                      >
+                        {
+                          SemData.filter(
+                            (student) =>
+                              student.marks >=
+                              (maxLimit * attainmentData.passedPercentage) / 100
+                          ).length
+                        }
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                      Total Students
+                    </td>
+                    {userCourse.map((course) => (
+                      <td
+                        key={course.idcos}
+                        className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                      >
+                        {SemData.length}
+                      </td>
+                    ))}
+                  </tr>
+
+                  {userCourse.map((course) => (
+                    <tr
+                      key={course.idcos}
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    >
+                      <td className="w-1/4"> {course.co_name}</td>
+                      <td className="w-1/4">
+                        {(
+                          (SemData.filter(
+                            (student) =>
+                              student.marks >=
+                              (maxLimit * attainmentData.passedPercentage) / 100
+                          ).length /
+                            SemData.length) *
+                          100
+                        ).toFixed(2)} %
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+
+              </table>
+
+            )}
+
+          </div>
         </div>
-      </div>
       )}
     </div>
   );

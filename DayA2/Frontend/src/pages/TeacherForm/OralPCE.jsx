@@ -499,13 +499,11 @@ const OralPCE = ({ uid }) => {
     const passedRow = [
       `Passed >= ${attainmentData.passedPercentage}%`,
       ...getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage),
-      ...getAllRowsStudentsTotalPercentage(attainmentData.passedPercentage),
     ];
 
     const attemptedRow = [
       "Students Attempted Per Question",
       ...getTotalStudentsAttempted(),
-      ...getAllRowsStudentsTotal(),
     ];
 
     const coAttainmentRow = [
@@ -521,27 +519,14 @@ const OralPCE = ({ uid }) => {
     ];
 
     // Add dynamic rows for CO averages
-    const coAverageRows = ["CO1", "CO2"].map((coName) => {
-      const coColumns = questionColumns
-        .map((col, index) => ({ ...col, index })) // include index for mapping
-        .filter((col) => col.coname === coName); // filter by CO name
+    const coAverageRows = distinctConames.map((coName) => {
+      const coAverageResult = coAverageResults.find(result => result.coursename === coName);
 
-      const coAverage = coColumns.length
-        ? (
-          coColumns.reduce((sum, col) => {
-            const attainmentValue = getTotalStudentsPassedPerQuestion(
-              attainmentData.passedPercentage
-            )[col.index];
-            const attemptedCount = getTotalStudentsAttempted()[col.index];
-            const attainment = attemptedCount
-              ? (attainmentValue / attemptedCount) * 100
-              : 0;
-            return sum + attainment;
-          }, 0) / coColumns.length
-        ).toFixed(2)
-        : 0;
+      const displayAttainmentPercentage = coAverageResult
+        ? `${coAverageResult.attainmentPercentage} %`
+        : `${total} %`;
 
-      return [coName + " Average", coAverage + " %"];
+      return [coName + " Average", displayAttainmentPercentage + " %"];
     });
 
     const attainmentDataForExport = [
@@ -626,11 +611,12 @@ const OralPCE = ({ uid }) => {
       const coAverageResult = coAverageResults.find(result => result.coursename === coName);
 
       const attainmentPercentage = coAverageResult
-      ? coAverageResult.attainmentPercentage
-      : total;
+        ? coAverageResult.attainmentPercentage
+        : total;
 
-      return { coName, 
-        attainmentPercentage : parseFloat(attainmentPercentage).toFixed(2)
+      return {
+        coName,
+        attainmentPercentage: parseFloat(attainmentPercentage).toFixed(2)
       };
     });
   }

@@ -258,9 +258,70 @@ const Oral = ({ uid }) => {
         }));
 
         const headers = ["oral_id", "Student ID", "Student Name", "Marks"];
-        const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
+        const dataWithHeaders = [
+            headers,
+            ...formattedData.map(Object.values)
+        ];
+
+        const attainmentHeaders = [
+            "Details",
+            ...userCourse.map((course) => course.co_name)
+        ];
+
+        // Passed Row: Total number of students who passed each course
+        const passedRow = [
+            `Total Passed`,
+            ...userCourse.map((course) => {
+                // Filter students who passed for the current course
+                const passedStudents = OralData.filter(
+                    (student) =>
+                        student.marks >= (maxLimit * attainmentData.passedPercentage) / 100
+                );
+                // Return the number of passed students
+                return passedStudents.length;
+            })
+        ];
+
+        // Attempted Row: Total number of students who attempted each course
+        const attemptedRow = [
+            `Total Attempted`,
+            ...userCourse.map((course) => {
+                // Return the total number of students who attempted (assuming all students in OralData attempted)
+                return OralData.length;
+            })
+        ];
+
+        const attainmentRow = userCourse.map((course) => {
+            // Filter students based on passing criteria
+            const passedStudents = OralData.filter(
+                (student) =>
+                    student.marks >= (maxLimit * attainmentData.passedPercentage) / 100
+            );
+
+            // Calculate the attainment percentage
+            const attainmentPercentage = (
+                (passedStudents.length / OralData.length) * 100
+            ).toFixed(2);
+
+            // Return both co_name and attainmentPercentage
+            return [course.co_name, attainmentPercentage + ' %'];
+        });
+
+        // Combining everything for export
+        const attainmentDataForExport = [
+            attainmentHeaders,
+            passedRow,
+            attemptedRow,
+            ...attainmentRow // Spread attainmentRow to ensure each CO row is separate in the Excel
+        ];
 
         const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+        const attainmentStartRow = dataWithHeaders.length + 2;
+
+        XLSX.utils.sheet_add_aoa(worksheet, attainmentDataForExport, {
+            origin: { r: attainmentStartRow, c: 0 },
+        });
+
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "OralData");
         XLSX.writeFile(workbook, "oral_data.xlsx");
@@ -440,92 +501,93 @@ const Oral = ({ uid }) => {
                     </div>
                 </div>
                 {filteredData.length > 0 && (
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Seat No.
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Student ID
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Student Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Total
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                        Seat No.
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                        Student ID
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                        Student Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                        Total
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
 
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredData.slice(startIndex, endIndex).map((student, index) => {
-                                const actualIndex = index + startIndex; // Adjust index to match actual data index
-                                // { console.log(actualIndex)
-                                //  console.log(editingRow)}
-                                return (
-                                    <tr key={student.sid} className="hover:bg-gray-100">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {actualIndex + 1} {/* Displaying the row number */}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {student.stud_clg_id}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {student.student_name}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <input
-                                                    type="text"
-                                                    value={
-                                                        editedMarks[actualIndex] !== undefined
-                                                            ? editedMarks[actualIndex]
-                                                            : student.marks
-                                                    }
-                                                    onChange={(event) =>
-                                                        handleMarksChange(event, actualIndex)
-                                                    }
-                                                    className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            ) : (
-                                                student.marks // Show existing marks if not editing
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredData.slice(startIndex, endIndex).map((student, index) => {
+                                    const actualIndex = index + startIndex; // Adjust index to match actual data index
+                                    // { console.log(actualIndex)
+                                    //  console.log(editingRow)}
+                                    return (
+                                        <tr key={student.sid} className="hover:bg-gray-100">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {actualIndex + 1} {/* Displaying the row number */}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {student.stud_clg_id}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {student.student_name}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {editingRow === actualIndex ? (
+                                                    <input
+                                                        type="text"
+                                                        value={
+                                                            editedMarks[actualIndex] !== undefined
+                                                                ? editedMarks[actualIndex]
+                                                                : student.marks
+                                                        }
+                                                        onChange={(event) =>
+                                                            handleMarksChange(event, actualIndex)
+                                                        }
+                                                        className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                    />
+                                                ) : (
+                                                    student.marks // Show existing marks if not editing
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {editingRow === actualIndex ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
+                                                            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelClick}
+                                                            className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
+                                                ) : (
                                                     <button
-                                                        onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
+                                                        onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
                                                         className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                                                     >
-                                                        Save
+                                                        Edit
                                                     </button>
-                                                    <button
-                                                        onClick={handleCancelClick}
-                                                        className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
-                                                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                                                >
-                                                    Edit
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-
-                    </table>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
                 {totalPages > 0 && (
                     <Pagination
@@ -622,81 +684,80 @@ const Oral = ({ uid }) => {
                             </tbody>
                         </table>
                         {userCourse.length > 0 && (
-                            <table className="min-w-full table-fixed divide-y divide-gray-200">
-                                <thead className="bg-blue-500 text-white">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
-                                            Details
-                                        </th>
-                                        {userCourse.map((course) => (
-                                            <th
-                                                key={course.idcos}
-                                                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
-                                            >
-                                                {course.co_name}
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full table-fixed divide-y divide-gray-200">
+                                    <thead className="bg-blue-500 text-white">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
+                                                Details
                                             </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200 bg-white">
-                                    <tr>
-                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
-                                            Total Passed
-                                        </td>
-                                        {userCourse.map((course) => (
-                                            <td
-                                                key={course.idcos}
-                                                className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
-                                            >
-                                                {
-                                                    OralData.filter(
-                                                        (student) =>
-                                                            student.marks >=
-                                                            (maxLimit * attainmentData.passedPercentage) / 100
-                                                    ).length
-                                                }
-                                            </td>
-                                        ))}
-                                    </tr>
-                                    <tr>
-                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
-                                            Total Students
-                                        </td>
-                                        {userCourse.map((course) => (
-                                            <td
-                                                key={course.idcos}
-                                                className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
-                                            >
-                                                {OralData.length}
-                                            </td>
-                                        ))}
-                                    </tr>
-
-                                    {userCourse.map((course) => (
-                                        <tr
-                                            key={course.idcos}
-                                            className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                                        >
-                                            <td className="w-1/4"> {course.co_name}</td>
-                                            <td className="w-1/4">
-                                                {(
-                                                    (OralData.filter(
-                                                        (student) =>
-                                                            student.marks >=
-                                                            (maxLimit * attainmentData.passedPercentage) / 100
-                                                    ).length /
-                                                        OralData.length) *
-                                                    100
-                                                ).toFixed(2)} %
-                                            </td>
+                                            {userCourse.map((course) => (
+                                                <th
+                                                    key={course.idcos}
+                                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
+                                                >
+                                                    {course.co_name}
+                                                </th>
+                                            ))}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 bg-white">
+                                        <tr>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                                                Total Passed
+                                            </td>
+                                            {userCourse.map((course) => (
+                                                <td
+                                                    key={course.idcos}
+                                                    className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                                                >
+                                                    {
+                                                        OralData.filter(
+                                                            (student) =>
+                                                                student.marks >=
+                                                                (maxLimit * attainmentData.passedPercentage) / 100
+                                                        ).length
+                                                    }
+                                                </td>
+                                            ))}
+                                        </tr>
+                                        <tr>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                                                Total Students
+                                            </td>
+                                            {userCourse.map((course) => (
+                                                <td
+                                                    key={course.idcos}
+                                                    className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                                                >
+                                                    {OralData.length}
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {userCourse.map((course) => (
+                                            <tr
+                                                key={course.idcos}
+                                                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                                            >
+                                                <td className="w-1/4"> {course.co_name}</td>
+                                                <td className="w-1/4">
+                                                    {(
+                                                        (OralData.filter(
+                                                            (student) =>
+                                                                student.marks >=
+                                                                (maxLimit * attainmentData.passedPercentage) / 100
+                                                        ).length /
+                                                            OralData.length) *
+                                                        100
+                                                    ).toFixed(2)} %
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
-
-
                     </div>
                 </div>
             )}

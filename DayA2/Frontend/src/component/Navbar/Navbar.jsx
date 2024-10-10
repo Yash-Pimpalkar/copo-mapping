@@ -132,9 +132,8 @@ export default function Navbar() {
     { name: "Semester", href: "/semester", userTypes: [2] },
     // { name: "Practical", href: "/practical", userTypes: [2] },
     { name: "Termwork", href: "/termwork", userTypes: [2] },
-    { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
     { name: "Oral/Practical", href: "/oralpractical", userTypes: [2] },
-    { name: "Oral (PCE)", href: "/oralpce", userType: [2]},
+    { name: "Oral (PCE)", href: "/oralpce", userType: [2] },
     // { name: "Assignment", href: "/assg", userTypes: [2] },
     { name: "copo", href: "/coposhow", userTypes: [2] },
   ];
@@ -150,22 +149,23 @@ export default function Navbar() {
     { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
     { name: "Upload Oral", href: "/uploadoral", userType: [2] },
     { name: "Upload Oral(PCE)", href: "/uploadoralpce", userType: [2] },
-  ];
-   
-  const TermworkNavigation = [
-    // { name:"Upload Theory only", href:"uploadthonly", userType: [2]},
-    { name:"Upload Theory+Assignment", href:"/theoryassg", userType: [2]},
-    // { name:"Upload Practical Internal", href:"uploadprinternal", userType: [2]},
-    // { name:"Upload Pract hav MiniPro", href:"uploadprhavminipro", userType: [2]},
-    // { name:"Upload Pure Practical", href:"uploadpurepract", userType: [2]},
-    // { name:"Upload Pracical 10+10(mini)+5", href:"uploadpr10", userType: [2]},
+    { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
   ];
 
+  // const TermworkNavigation = [
+  //   // { name:"Upload Theory only", href:"uploadthonly", userType: [2]},
+  //   { name: "Upload Theory+Assignment", href: "/theoryassg", userType: [2] },
+  //   // { name:"Upload Practical Internal", href:"uploadprinternal", userType: [2]},
+  //   // { name:"Upload Pract hav MiniPro", href:"uploadprhavminipro", userType: [2]},
+  //   // { name:"Upload Pure Practical", href:"uploadpurepract", userType: [2]},
+  //   // { name:"Upload Pracical 10+10(mini)+5", href:"uploadpr10", userType: [2]},
+  // ];
+
   const ProjectNavigation = [
-    { name:"Upload Major Project", href:"/uploadmajorprosem ", userType: [2]},
-    { name:"Upload Mini Project", href:"/uploadminiprosem ", userType: [2]},
-    { name:"Major Project", href:"/majorprosem ", userType: [2]},
-    { name:"Mini Project", href:"/miniprosem ", userType: [2]},
+    { name: "Upload Major Project", href: "/uploadmajorprosem ", userType: [2] },
+    { name: "Upload Mini Project", href: "/uploadminiprosem ", userType: [2] },
+    { name: "Major Project", href: "/majorprosem ", userType: [2] },
+    { name: "Mini Project", href: "/miniprosem ", userType: [2] },
   ];
 
   return (
@@ -280,26 +280,12 @@ export default function Navbar() {
                           </MenuItems>
                         </Menu>
                         <Menu as="div" className="relative">
-                          <MenuButton className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                          <NavLink
+                            to="/theoryassg"
+                            className="rounded-md mt-10 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                          >
                             Term Work
-                          </MenuButton>
-                          <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                            {TermworkNavigation.map((item) => (
-                              <MenuItem key={item.name}>
-                                {({ active }) => (
-                                  <NavLink
-                                    to={item.href}
-                                    className={classNames(
-                                      active ? "bg-gray-100" : "",
-                                      "block px-4 py-2 text-sm text-gray-700"
-                                    )}
-                                  >
-                                    {item.name}
-                                  </NavLink>
-                                )}
-                              </MenuItem>
-                            ))}
-                          </MenuItems>
+                          </NavLink>
                         </Menu>
 
                         <Menu as="div" className="relative">
@@ -440,7 +426,13 @@ export default function Navbar() {
                     </DisclosurePanel>
                   </Disclosure>
                   <Disclosure as="div" className="relative">
-                    <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <DisclosureButton
+                      to="/termwork"
+                      className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white pt-5"
+                    >
+                      Term Work
+                    </DisclosureButton>
+                    {/* <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                       Term Work
                     </DisclosureButton>
                     <DisclosurePanel className="space-y-1">
@@ -454,7 +446,7 @@ export default function Navbar() {
                           {item.name}
                         </DisclosureButton>
                       ))}
-                    </DisclosurePanel>
+                    </DisclosurePanel> */}
                   </Disclosure>
                   <Disclosure as="div" className="relative">
                     <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
