@@ -50,6 +50,8 @@ import TeacherlmsDashboard from './pages/LMS/Teacher/TeacherlmsDashboard';
 import CreateClassroom from './pages/LMS/Classroom/CreateClassroom';
 import StudentLmsAttendance from './pages/LMS/Attendance/StudentlmsAttendance';
 import LMSTeacherNavbar from './component/LmsNavbar/LmsNavbar';
+import LMSStudentNavbar from './component/LmsNavbar/StudentNavbar';
+import StudentlmsDashboard from './pages/LMS/Student/StudentlmsDashboard';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -88,8 +90,8 @@ function App() {
         {token ? (
           usertype == 1 ? (
             <>
-              <Route path="/" element={<Dashboard />} />
-              {/* Add other routes for usertype === 1 here */}
+              <Route path="/StudentlmsDashboard" element={<StudentlmsDashboard />} />
+              
             </>
           ) : usertype == 2 ? (
             <>
