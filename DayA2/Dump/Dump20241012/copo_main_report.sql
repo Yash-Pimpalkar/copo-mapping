@@ -1,0 +1,55 @@
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+--
+-- Host: localhost    Database: copo
+-- ------------------------------------------------------
+-- Server version	8.0.39
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `main_report`
+--
+
+DROP TABLE IF EXISTS `main_report`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `main_report` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `report_id` int DEFAULT NULL,
+  `sid` int DEFAULT NULL,
+  `marks` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `report_id_idx` (`report_id`),
+  CONSTRAINT `report_id` FOREIGN KEY (`report_id`) REFERENCES `upload_report` (`report_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=154 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `main_report`
+--
+
+LOCK TABLES `main_report` WRITE;
+/*!40000 ALTER TABLE `main_report` DISABLE KEYS */;
+INSERT INTO `main_report` VALUES (1,6,1,4),(2,6,2,7),(3,6,3,7),(4,6,4,7),(5,6,5,7),(6,6,6,7),(7,6,7,7),(8,6,8,7),(9,6,9,7),(10,6,10,7),(11,6,11,7),(12,6,12,7),(13,6,13,7),(14,6,14,7),(15,6,15,7),(16,6,16,7),(17,6,17,7),(18,6,18,7),(19,6,19,7),(20,6,20,7),(21,6,21,7),(22,6,22,7),(23,6,23,7),(24,6,24,7),(25,6,25,7),(26,6,26,7),(27,6,27,7),(28,6,28,7),(29,6,29,7),(30,6,30,7),(31,6,31,7),(32,6,32,7),(33,6,33,7),(34,6,34,7),(35,6,35,7),(36,6,36,7),(37,6,37,7),(38,6,38,7),(39,6,39,7),(40,6,40,7),(41,6,41,7),(42,6,42,7),(43,6,43,7),(44,6,44,7),(45,6,45,7),(46,6,46,7),(47,6,47,7),(48,6,48,7),(49,6,49,7),(50,6,50,7),(51,6,51,7),(52,6,52,7),(53,6,53,7),(54,6,54,7),(55,6,55,7),(56,6,56,7),(57,6,57,7),(58,6,58,7),(59,6,59,7),(60,6,60,7),(61,6,61,7),(62,6,62,7),(63,6,63,7),(64,6,64,7),(65,6,65,7),(66,6,66,7),(67,6,67,7),(68,6,68,7),(69,6,69,7),(70,6,70,7),(71,6,71,7),(72,6,72,7),(73,6,73,7),(74,6,74,7),(75,6,75,7),(76,6,76,7),(77,6,77,7),(78,6,78,7),(79,6,79,7),(80,6,80,7),(81,6,81,7),(82,6,82,7),(83,6,83,7),(84,6,84,7),(85,6,85,7),(86,6,86,7),(87,6,87,7),(88,6,88,7),(89,6,89,7),(90,6,90,7),(91,6,91,7),(92,6,92,7),(93,6,93,7),(94,6,94,7),(95,6,95,7),(96,6,96,7),(97,6,97,7),(98,6,98,7),(99,6,99,7),(100,6,100,7),(101,6,101,7),(102,6,102,7),(103,6,103,7),(104,6,104,7),(105,6,105,7),(106,6,106,7),(107,6,107,7),(108,6,108,7),(109,6,109,7),(110,6,110,7),(111,6,111,7),(112,6,112,7),(113,6,113,7),(114,6,114,7),(115,6,115,7),(116,6,116,7),(117,6,117,7),(118,6,118,7),(119,6,119,7),(120,6,120,7),(121,6,121,7),(122,6,122,7),(123,6,123,7),(124,6,124,7),(125,6,125,7),(126,6,126,7),(127,6,127,7),(128,6,128,7),(129,6,129,7),(130,6,130,7),(131,6,131,7),(132,6,132,7),(133,6,133,7),(134,6,134,7),(135,6,135,7),(136,6,136,7),(137,6,137,7),(138,6,138,7),(139,6,139,7),(140,6,140,7),(141,6,141,7),(142,6,142,7),(143,6,143,7),(144,6,144,7),(145,6,145,7),(146,6,146,7),(147,6,147,7),(148,6,148,7),(149,6,149,7),(150,6,150,7),(151,6,151,7),(152,6,152,7),(153,6,153,7);
+/*!40000 ALTER TABLE `main_report` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-10-12  4:44:07

@@ -3,14 +3,19 @@ import api from '../../../api';
 import * as XLSX from 'xlsx';
 import Pagination from '../../../component/Pagination/Pagination';
 
-const Journal = ({ uid }) => {
+const Journal = ({ uid, tw_id }) => {
   const [journalData, setJournalData] = useState([]);
+  const [COData, setCOData] = useState([]);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editedMarks, setEditedMarks] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [maxLimit, setMaxLimit] = useState(0);
+  const [message, setMessage] = useState("");
+  const [attainmentData, setAttainmentData] = useState({
+    passedPercentage: 0, // Default percentage
+  });
 
   useEffect(() => {
     const fetchJournalData = async () => {
@@ -19,6 +24,8 @@ const Journal = ({ uid }) => {
         setJournalData(res.data);
         const res1 = await api.get(`/api/termwork/journal/limit/${uid}`);
         setMaxLimit(res1.data[0].maxmarks);
+        const res2 = await api.get(`/api/termwork/show/journalco/${uid}`);
+        setCOData(res2.data);
       } catch (error) {
         console.error("Error fetching journal data:", error);
       }
@@ -32,11 +39,13 @@ const Journal = ({ uid }) => {
   const filteredData = journalData.filter((item) => {
     const query = searchQuery.toUpperCase();
     return (
-      item.student_name?.toUpperCase().includes(query) ||
-      item.sid?.toString().includes(query) ||
-      item.stud_clg_id?.toUpperCase().includes(query)
+      (item.student_name && item.student_name.toUpperCase().includes(query)) ||
+      (item.sid && item.sid.toString().includes(query)) ||
+      (item.stud_clg_id && item.stud_clg_id.toUpperCase().includes(query))
     );
   });
+  
+  
 
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -143,6 +152,95 @@ const Journal = ({ uid }) => {
     setEditedMarks((prev) => ({ ...prev, [index]: value }));
   };
 
+
+  const handleAttainmentChange = (event, key) => {
+    let value = event.target.value;
+
+    // Prevent non-numeric input
+    if (!/^\d*$/.test(value)) {
+      setError("Only numeric values are allowed.");
+      return;
+    }
+
+    // Convert value to a number for validation
+    const numericValue = Number(value);
+
+    // Ensure value is within the range
+    if (numericValue < 0 || numericValue > 100) {
+      setError(`Value must be between 0 and 100`);
+      return;
+    } else {
+      setError(""); // Clear error if within range
+    }
+
+    // Update the attainment data state
+    setAttainmentData((prevData) => ({
+      ...prevData,
+      [key]: value,
+    }));
+  };
+
+  const handle_Attainment = ()=> {
+
+  }
+  
+
+  const [error, setError] = useState("");
+
+  const handle_Attenment = (
+    attainmentData,
+    tw_id,
+    userCourseId
+  ) => {
+    // Logic to handle attainment calculation
+    const attainmentList = calculatejournalAttainmentList(COData, journalData, maxLimit, attainmentData); // Corrected here
+  
+    console.log(attainmentData.passedPercentage);
+  
+    // Store data in localStorage
+    const dataToStore = {
+      attainmentList,
+      passedPercentage: attainmentData.passedPercentage,
+      tw_id,
+      userCourseId,
+    };
+  
+    localStorage.setItem('JournalAttainmentData', JSON.stringify(dataToStore));
+  
+    console.log("Journal Attainment updated", COData, journalData);
+    setMessage("Journal attainment data has been updated successfully.");
+  };
+  
+  const calculatejournalAttainmentList = (COData, journalData, maxLimit, attainmentData) => {
+    console.log(attainmentData.passedPercentage); // Now this will correctly log the passedPercentage
+    return COData.map((course) => {
+      const coname = course.coname; // Get the CO name
+  
+      // Calculate the passing threshold based on the passed percentage
+      const passingMarks = (maxLimit * attainmentData.passedPercentage) / 100;
+  
+      // Calculate the number of students who passed
+      const passedCount = journalData.filter(student => student.marks >= passingMarks).length;
+  
+      // Calculate the percentage of students who passed
+      const attainmentPercentage = journalData.length > 0 
+        ? ((passedCount / journalData.length) * 100).toFixed(2) 
+        : 0;
+  
+      // Return the coname and its corresponding attainment percentage
+      return {
+        coname: coname,
+        attainment: `${attainmentPercentage} %`,
+      };
+    });
+  };  
+
+  console.log(journalData)
+  console.log(COData)
+  console.log(maxLimit)
+  console.log(attainmentData.passedPercentage)
+
+
   return (
     <div className="overflow-x-auto min-h-screen">
       {/* Container for Export, Import and Search Bar */}
@@ -228,7 +326,173 @@ const Journal = ({ uid }) => {
           onPageChange={setCurrentPage}
         />
       )}
+      <div>
+      {journalData.length > 0 && (
+        <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-lg font-semibold">
+              Total Students Passed Each Question
+            </h1>
+            <button
+              onClick={() =>
+                handle_Attenment(
+                 attainmentData,
+                 tw_id,
+                 uid
+                )
+              }
+              className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+            >
+              Update Attainment
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="total-student-passed"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Total Students Passed with &gt;= PERCENTAGE %
+            </label>
+            <input
+              id="total-student-passed"
+              type="text"
+              value={attainmentData.passedPercentage}
+              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {message && (
+              <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
+                {message}
+              </div>
+            )}
+          </div>
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+            <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
+            <h1>
+
+              {/* {attainmentData.passedPercentage} % of Max Marks: {maxLimit} ={" "}
+              {(t = (maxLimit * attainmentData.passedPercentage) / 100)}{" "} */}
+            </h1>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  <th
+                    colSpan={2}
+                    className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider"
+                  >
+                    Attainment calculation
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <tr className="bg-white">
+                  <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                    Students passed with {attainmentData.passedPercentage} %
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {
+                      journalData.filter(
+                        (student) =>
+                          student.marks >=
+                          (maxLimit * attainmentData.passedPercentage) / 100
+                      ).length
+                    }
+                  </td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                    Total Students
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {journalData.length}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            {COData.length > 0 && (
+              <table className="min-w-full table-fixed divide-y divide-gray-200">
+                <thead className="bg-blue-500 text-white">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
+                      Details
+                    </th>
+                    {COData.map((course) => (
+                      <th
+                        key={course.idco_journal}
+                        className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
+                      >
+                        {course.coname}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  <tr>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                      Total Passed
+                    </td>
+                    {COData.map((course) => (
+                      <td
+                        key={course.idco_journal}
+                        className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                      >
+                        {
+                          journalData.filter(
+                            (student) =>
+                              student.marks >=
+                              (maxLimit * attainmentData.passedPercentage) / 100
+                          ).length
+                        }
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                      Total Students
+                    </td>
+                    {COData.map((course) => (
+                      <td
+                        key={course.idco_journal}
+                        className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                      >
+                        {journalData.length}
+                      </td>
+                    ))}
+                  </tr>
+
+                  {COData.map((course) => (
+                    <tr
+                      key={course.idco_journal}
+                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                    >
+                      <td className="w-1/4"> {course.coname}</td>
+                      <td className="w-1/4">
+                        {(
+                          (journalData.filter(
+                            (student) =>
+                              student.marks >=
+                              (maxLimit * attainmentData.passedPercentage) / 100
+                          ).length /
+                            journalData.length) *
+                          100
+                        ).toFixed(2)} %
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+
+              </table>
+
+            )}
+            </div>
+            </div>
+
+)}
+      </div>
     </div>
+      
   );
 };
 

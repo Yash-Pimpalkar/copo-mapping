@@ -1,5 +1,5 @@
 import express from "express";
-import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, JournalLimit, JournalUpload, MajorProjectLimit, MajorProjectUpload, MiniProjectLimit, MiniProjectUpload, PPTLimit, PPTUpload, ReportLimit, ReportUpload, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showJournalData, showMajorProjectData, showMiniProjectData, showPPTData, showReportData, showSciLabData, showTradeData, submitTermworkId, Termwork_Attainment, TradeLimit, TradeUpload, updateAssignments, updateExperiments } from "../controller/termwork.js";
+import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, JournalLimit, JournalUpload, MajorProjectLimit, MajorProjectUpload, MiniProjectLimit, MiniProjectUpload, PPTLimit, PPTUpload, ReportLimit, ReportUpload, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showJournalData, showMajorProjectData, showMiniProjectData, showPPTData, showReportData, showSciLabData, showTradeData, submitTermworkId, Termwork_Attainment, TradeLimit, TradeUpload, updateAssignments, updateExperiments, showjournalcodata, showcoPptData, showReportcoData, showSciLabcoData } from "../controller/termwork.js";
 const router =express.Router();
 
 // main termwork
@@ -30,12 +30,14 @@ router.get("/gd/limit/:uid", GdLimit);
 
 // Scilab Route
 router.get("/show/scilab/:uid", showSciLabData);
+router.get("/show/scilabco/:uid", showSciLabcoData);
 router.put("/scilab/update", SciLabUpload);
 router.get("/scilab/limit/:uid", SciLabLimit);
 
 
 //jornal Route 
 router.get("/show/journal/:uid", showJournalData);
+router.get("/show/journalco/:uid", showjournalcodata);
 router.put("/journal/update", JournalUpload);
 router.get("/journal/limit/:uid", JournalLimit);
 
@@ -51,12 +53,14 @@ router.get("/minipro/limit/:uid", MiniProjectLimit);
 
 // ppt 
 router.get("/show/ppt/:uid", showPPTData);
+router.get("/showco/ppt/:uid", showcoPptData);
 router.put("/ppt/update", PPTUpload);
 router.get("/ppt/limit/:uid", PPTLimit);
 
 // report
 
 router.get("/show/report/:uid", showReportData);
+router.get("/show/reportco/:uid", showReportcoData);
 router.put("/report/update", ReportUpload);
 router.get("/report/limit/:uid", ReportLimit);
 

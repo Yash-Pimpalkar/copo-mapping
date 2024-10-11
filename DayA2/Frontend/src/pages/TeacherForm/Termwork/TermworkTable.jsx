@@ -286,7 +286,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : currentComponent === "PPT" ? (
                 <>
-                  <PPT  tw_id={tw_id}  userCourseId={userCourseId} />
+                  <PPT  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Report")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -296,7 +296,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : (
                 <>
-                  <Report  tw_id={tw_id}  userCourseId={userCourseId} />
+                  <Report  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("TheoryAssignment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -320,7 +320,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : currentComponent === "Trade" ? (
                 <>
-                  <Trade  tw_id={tw_id}  userCourseId={userCourseId} />
+                  <Trade  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Journal")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -330,7 +330,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : (
                 <>
-                  <Journal  tw_id={tw_id}  userCourseId={userCourseId} />
+                  <Journal  tw_id={tw_id}  uid={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Trade")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"

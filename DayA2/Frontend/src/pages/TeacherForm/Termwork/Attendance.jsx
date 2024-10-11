@@ -57,27 +57,35 @@ const Attendance = ({ uid }) => {
 
   const handleSaveClick = async (att_id) => {
     const marks = editedMarks[att_id];
-
+  
+    // Validate that marks is a valid number
+    if (isNaN(marks) || marks === "") {
+      setMessage("Invalid marks. Please enter a valid number.");
+      return;
+    }
+  
     try {
+      // Send the updated marks to the backend
       await api.put("/api/termwork/attendance/update", {
         att_id: att_id,
-        marks: parseInt(marks), // Ensure the marks are sent as an integer
+        marks: parseInt(marks, 10), // Ensure marks are integers
       });
-
-      // Update the state to reflect the saved changes
+  
+      // Update the local state to reflect saved changes
       setAttendanceData((prevData) =>
         prevData.map((item) =>
-          item.att_id === att_id ? { ...item, marks: parseInt(marks) } : item
+          item.att_id === att_id ? { ...item, marks: parseInt(marks, 10) } : item
         )
       );
-
-      setEditingRow(null); // Close the editing mode
-      setMessage("Marks updated successfully!"); // Optionally set a success message
+  
+      setEditingRow(null); // Exit editing mode
+      setMessage("Marks updated successfully!"); // Set success message
     } catch (error) {
       console.error("Error saving marks:", error);
-      setMessage("Error updating marks. Please try again."); // Optionally set an error message
+      setMessage("Error updating marks. Please try again."); // Set error message
     }
   };
+  
 
   const handleCancelClick = () => {
     setEditingRow(null);

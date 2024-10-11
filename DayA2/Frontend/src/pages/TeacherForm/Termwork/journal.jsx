@@ -17,6 +17,7 @@ const Journal = ({ uid }) => {
       try {
         const res = await api.get(`/api/termwork/show/journal/${uid}`);
         setJournalData(res.data);
+        console.log(res);
         const res1 = await api.get(`/api/termwork/journal/limit/${uid}`);
         setMaxLimit(res1.data[0].maxmarks);
       } catch (error) {

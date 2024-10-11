@@ -534,7 +534,7 @@ export const showAttendanceData = async (req, res) => {
     INNER JOIN 
       copo_students_details AS c ON a.sid = c.sid
     WHERE 
-      u.usecourseid = ?;
+      u.usercourseid = ?;
   `;
 
   db.query(sql, userCourseId, (error, results) => {
@@ -565,9 +565,9 @@ export const AttendanceUpload = async (req, res) => {
   // Prepare the query and values
   const sql = 'UPDATE main_atten SET marks = ? WHERE att_id = ?';
   const queryValues = updates.map(update => {
-    const Marks = parseInt(update.Marks, 10);
+    const marks = parseInt(update.marks, 10);  // Change 'Marks' to 'marks'
     return [
-      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+      isNaN(marks) ? null : marks,  // Use null if marks is NaN
       update.att_id
     ];
   });
@@ -596,9 +596,10 @@ export const AttendanceUpload = async (req, res) => {
   }
 };
 
+
 export const AttendanceLimit = (req, res) => {
   const userCourseId = req.params.uid;
-  const checkQuery = 'SELECT * FROM upload_attendance WHERE usecourseid = ?';
+  const checkQuery = 'SELECT * FROM upload_attendance WHERE usercourseid = ?';
 
   db.query(checkQuery, userCourseId, (Err, result) => {
     if (Err) {
@@ -735,6 +736,30 @@ export const showSciLabData = async (req, res) => {
   });
 };
 
+export const showSciLabcoData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      co.coname, 
+      co.co_id
+    FROM 
+      co_scilab AS co
+    INNER JOIN 
+      uploadscilabpract  AS u ON co.co_id = u.scipractid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching Scilab practical data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+
 export const SciLabUpload = async (req, res) => {
   let updates = req.body;
   console.log('Received updates:', updates);
@@ -827,6 +852,31 @@ export const showJournalData = async (req, res) => {
     }
   });
 };
+
+export const showjournalcodata = async(req,res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+   SELECT 
+      co.coname, 
+      co.co_id
+    FROM 
+      co_journal AS co
+    INNER JOIN 
+      upload_journal AS u ON co.co_id = u.journalid
+    WHERE 
+      u.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching journal data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+}
 export const JournalUpload = async (req, res) => {
   let updates = req.body;
   console.log('Received updates:', updates);
@@ -1100,6 +1150,32 @@ export const showPPTData = async (req, res) => {
     }
   });
 };
+
+export const showcoPptData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+   SELECT 
+      co.idco_ppt,
+      co.coname,
+      co.co_id
+    FROM 
+      co_ppt AS co
+    INNER JOIN 
+      upload_ppt AS u ON co.co_id = u.ppt_id
+    WHERE 
+      u.usercourseid = ?;
+  `;
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching PPT data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+
 export const PPTUpload = async (req, res) => {
   let updates = req.body;
   console.log('Received updates:', updates);
@@ -1236,6 +1312,32 @@ export const ReportUpload = async (req, res) => {
     console.error('Error updating report marks:', error);
     res.status(500).json('Server error');
   }
+};
+
+export const showReportcoData  = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+   SELECT 
+      co.idco_report,
+      co.coname,
+      co.co_id
+    FROM 
+      co_report AS co
+    INNER JOIN 
+      upload_report AS u ON co.co_id = u.report_id
+    WHERE 
+      u.usercourseid = ?;
+
+  `;
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching report data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
 };
 export const ReportLimit = (req, res) => {
   const userCourseId = req.params.uid;
