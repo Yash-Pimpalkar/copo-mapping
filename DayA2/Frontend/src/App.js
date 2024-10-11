@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Navbar from './component/Navbar/Navbar';
@@ -48,6 +48,8 @@ import FeedbackPage from './component/LMSFeedback/MainFeedback';
 import EditQuestionsPage from './component/LMSFeedback/EditQuestionsPage';
 import TeacherlmsDashboard from './pages/LMS/Teacher/TeacherlmsDashboard';
 import CreateClassroom from './pages/LMS/Classroom/CreateClassroom';
+import StudentLmsAttendance from './pages/LMS/Attendance/StudentlmsAttendance';
+import LMSTeacherNavbar from './component/LmsNavbar/LmsNavbar';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -74,10 +76,14 @@ function App() {
       }
     }
   }, []);
-
+  const location = useLocation(); 
   return (
     <>
       <Navbar />
+      {location.pathname.startsWith('/TeacherlmsDashboard') || 
+       location.pathname.startsWith('/lms') ? (
+        <LMSTeacherNavbar /> // Render the LMS Navbar alongside the main Navbar
+      ) : null }
       <Routes>
         {token ? (
           usertype == 1 ? (
@@ -127,6 +133,7 @@ function App() {
               <Route path='/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
               <Route path='/TeacherlmsDashboard' element={<TeacherlmsDashboard uid={user_id}/>} />
               <Route path='/lms/CreateClassroom' element={<CreateClassroom uid={user_id}/>} />
+              <Route path='/lms/StudentLmsAttendance' element={<StudentLmsAttendance uid={user_id}/>} />
 
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
