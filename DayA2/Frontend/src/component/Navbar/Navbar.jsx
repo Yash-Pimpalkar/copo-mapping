@@ -11,6 +11,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../api.js";
+import logo from '../Pagination/maplms.png';
 
 function ProfileDropdown({ email, onSignOut }) {
   const [isTruncated, setIsTruncated] = useState(true);
@@ -147,7 +148,7 @@ export default function Navbar() {
     { name: "Upload Ia2", href: "/uploadia2", userType: [2] },
     { name: "Upload Sem", href: "/uploadsem", userType: [2] },
     { name: "Upload Termwork", href: "/uploadtermwork", userTypes: [2] },
-    { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
+    // { name: "Upload Practical", href: "/uploadpractical", userType: [2] },
     { name: "Upload Oral", href: "/uploadoral", userType: [2] },
     { name: "Upload Oral(PCE)", href: "/uploadoralpce", userType: [2] },
   ];
@@ -188,7 +189,7 @@ export default function Navbar() {
             <div className="flex flex-shrink-0 items-center">
               <img
                 alt="Your Company"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+                src={logo}
                 className="h-8 w-auto cursor-pointer"
               />
             </div>
