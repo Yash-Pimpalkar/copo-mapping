@@ -50,7 +50,9 @@ import TeacherlmsDashboard from './pages/LMS/Teacher/TeacherlmsDashboard';
 import CreateClassroom from './pages/LMS/Classroom/CreateClassroom';
 import StudentLmsAttendance from './pages/LMS/Attendance/StudentlmsAttendance';
 import LMSTeacherNavbar from './component/LmsNavbar/LmsNavbar';
-
+import LMSStudentNavbar from './component/LmsNavbar/StudentNavbar';
+import StudentlmsDashboard from './pages/LMS/Student/StudentlmsDashboard';
+import CreateEvents from './pages/LMS/Events/CreateEvents';
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
 // import Uploadprinternal from './pages/Termwork/Uploadprinternal';
@@ -88,8 +90,8 @@ function App() {
         {token ? (
           usertype == 1 ? (
             <>
-              <Route path="/" element={<Dashboard />} />
-              {/* Add other routes for usertype === 1 here */}
+              <Route path="/StudentlmsDashboard" element={<StudentlmsDashboard />} />
+              
             </>
           ) : usertype == 2 ? (
             <>
@@ -134,6 +136,7 @@ function App() {
               <Route path='/TeacherlmsDashboard' element={<TeacherlmsDashboard uid={user_id}/>} />
               <Route path='/lms/CreateClassroom' element={<CreateClassroom uid={user_id}/>} />
               <Route path='/lms/StudentLmsAttendance' element={<StudentLmsAttendance uid={user_id}/>} />
+              <Route path='/lms/CreateEvents' element={<CreateEvents uid={user_id}/>} />
 
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>

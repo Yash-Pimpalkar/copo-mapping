@@ -47,14 +47,14 @@ function ProfileDropdown({ email, onSignOut }) {
             {isTruncated ? `${email.slice(0, 20)}...` : email}
           </NavLink>
         </MenuItem>
-        <MenuItem>
+        {/* <MenuItem>
           <a
             href="#"
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
             Settings
           </a>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem>
           <NavLink
             onClick={onSignOut}
@@ -115,7 +115,11 @@ export default function Navbar() {
   };
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard", userTypes: [1] },
+    { name: "LMS", href: "/StudentlmsDashboard", userTypes: [1] },
+    { name: "Upcoming Events", href: "/", userTypes: [1] },
+    { name: "Progress Tracker", href: "/", userTypes: [1] },
+    { name: "Announcement", href: "/", userTypes: [1] },
+    { name: "Feedback", href: "/", userTypes: [1] },
     { name: "User Selection", href: "/userselection", userTypes: [3] },
     { name: "Assign Course", href: "/assigncourse", userTypes: [3] },
   ];
