@@ -106,7 +106,7 @@ function App() {
               <Route path='/uploadsem' element={<UploadSem  uid={user_id}/>} />
               <Route path='/termwork' element={<Termwork uid={user_id}/>}/>
               <Route path='/theoryonly' element={<TheoryOnly uid={user_id}/>}/>
-              <Route path='/theoryassg' element={<TermworkTable uid={user_id}/>}/>
+              <Route path='/showtermwork' element={<TermworkTable uid={user_id}/>}/>
               <Route path='/uploadtermwork' element={<UploadTermwork uid={user_id}/>}/>
               <Route path='/uploadoral' element={<UploadOral uid={user_id}/>}/>
               <Route path='/oralpractical' element={<Oral uid={user_id}/>}/>
