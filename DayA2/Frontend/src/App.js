@@ -47,6 +47,7 @@ import UploadPCE from './pages/Questions/UploadOralPCE';
 import FeedbackPage from './component/LMSFeedback/MainFeedback';
 import EditQuestionsPage from './component/LMSFeedback/EditQuestionsPage';
 import TeacherlmsDashboard from './pages/LMS/Teacher/TeacherlmsDashboard';
+import CreateClassroom from './pages/LMS/Classroom/CreateClassroom';
 
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
@@ -125,6 +126,7 @@ function App() {
               <Route path='/lmsfeedback' element={<FeedbackPage uid={user_id}/>}/>
               <Route path='/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
               <Route path='/TeacherlmsDashboard' element={<TeacherlmsDashboard uid={user_id}/>} />
+              <Route path='/lms/CreateClassroom' element={<CreateClassroom uid={user_id}/>} />
 
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
