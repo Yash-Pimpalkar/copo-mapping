@@ -534,7 +534,7 @@ export const showAttendanceData = async (req, res) => {
     INNER JOIN 
       copo_students_details AS c ON a.sid = c.sid
     WHERE 
-      u.usercourseid = ?;
+      u.usecourseid = ?;
   `;
 
   db.query(sql, userCourseId, (error, results) => {
@@ -598,7 +598,7 @@ export const AttendanceUpload = async (req, res) => {
 
 export const AttendanceLimit = (req, res) => {
   const userCourseId = req.params.uid;
-  const checkQuery = 'SELECT * FROM upload_attendance WHERE usercourseid = ?';
+  const checkQuery = 'SELECT * FROM upload_attendance WHERE usecourseid = ?';
 
   db.query(checkQuery, userCourseId, (Err, result) => {
     if (Err) {

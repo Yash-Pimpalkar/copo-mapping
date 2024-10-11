@@ -298,10 +298,10 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 <>
                   <Report  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
-                    onClick={() => setCurrentComponent("PPT")}
+                    onClick={() => setCurrentComponent("TheoryAssignment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
                   >
-                    Back to PPT
+                    Back to Assignment
                   </button>
                 </>
               )}
