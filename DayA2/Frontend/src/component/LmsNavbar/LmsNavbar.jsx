@@ -64,7 +64,7 @@ const LMSTeacherNavbar = () => {
               <ul className="absolute top-full left-0 bg-blue-500 mt-2 rounded shadow-md p-2 space-y-2">
                 <li><a href="#studentCohorts" className="hover:underline block">Student Cohorts</a></li>
                 <li><a href="/lms/StudentlmsAttendance" className="hover:underline block">Student Attendance</a></li>
-                <li><a href="#studentFeedback" className="hover:underline block">Student Feedback</a></li>
+                <li><a href="/lms/lmsfeedback" className="hover:underline block">Student Feedback</a></li>
               </ul>
             )}
           </li>

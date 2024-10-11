@@ -129,7 +129,7 @@ function App() {
               <Route path='/Twonly' element={<TWOnly uid={user_id}/>}/>
               <Route path='/PureTheoryResult' element={<PureTheoryResult uid={user_id}/>}/>
               <Route path='/Mainresult' element={<MainResult uid={user_id}/>}/>
-              <Route path='/lmsfeedback' element={<FeedbackPage uid={user_id}/>}/>
+              <Route path='/lms/lmsfeedback' element={<FeedbackPage uid={user_id}/>}/>
               <Route path='/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
               <Route path='/TeacherlmsDashboard' element={<TeacherlmsDashboard uid={user_id}/>} />
               <Route path='/lms/CreateClassroom' element={<CreateClassroom uid={user_id}/>} />
