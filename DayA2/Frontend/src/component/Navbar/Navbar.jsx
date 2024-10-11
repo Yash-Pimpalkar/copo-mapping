@@ -47,14 +47,14 @@ function ProfileDropdown({ email, onSignOut }) {
             {isTruncated ? `${email.slice(0, 20)}...` : email}
           </NavLink>
         </MenuItem>
-        <MenuItem>
+        {/* <MenuItem>
           <a
             href="#"
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
             Settings
           </a>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem>
           <NavLink
             onClick={onSignOut}
