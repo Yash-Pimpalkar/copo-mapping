@@ -54,6 +54,10 @@ import Dummyfeedback from './pages/LMS/LMSFeedback/dummyfeedback';
 import LMSStudentNavbar from './component/LmsNavbar/StudentNavbar';
 import StudentlmsDashboard from './pages/LMS/Student/StudentlmsDashboard';
 import CreateEvents from './pages/LMS/Events/CreateEvents';
+import CreateCohorts from './pages/LMS/Cohort/CreateCohort';
+import ManageCohorts from './pages/LMS/Cohort/ManageCohorts';
+import EditCohort from './pages/LMS/Cohort/EditCohort';
+import ManageStudents from './pages/LMS/Cohort/ManageStudents';
 // import Uploadpurepract from './pages/Termwork/Uploadpurepract';
 // import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
 // import Uploadprinternal from './pages/Termwork/Uploadprinternal';
@@ -139,6 +143,10 @@ function App() {
               <Route path='/lms/StudentLmsAttendance' element={<StudentLmsAttendance uid={user_id}/>} />
               <Route path='/lms/CreateEvents' element={<CreateEvents uid={user_id}/>} />
               <Route path='/lms/dummyfeedback' element={<Dummyfeedback uid={user_id}/>}/>
+              <Route path='/lms/CreateCohorts' element={<CreateCohorts uid={user_id}/>} />
+              <Route path='/lms/ManageCohorts' element={<ManageCohorts uid={user_id}/>} />
+              <Route path="/lms/EditCohort/:cohortId" element={<EditCohort uid={user_id}/>} />
+              <Route path="/lms/managestudents/:cohortId" element={<ManageStudents uid={user_id}/>} />
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>

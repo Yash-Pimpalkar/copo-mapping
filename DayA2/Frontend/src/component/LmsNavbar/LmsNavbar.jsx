@@ -45,8 +45,8 @@ const LMSTeacherNavbar = () => {
             </a>
             {activeDropdown === 'cohorts' && (
               <ul className="absolute top-full left-0 bg-blue-500 mt-2 rounded shadow-md p-2 space-y-2">
-                <li><a href="#createCohorts" className="hover:underline block">Create Cohorts</a></li>
-                <li><a href="#manageCohorts" className="hover:underline block">Manage Cohorts</a></li>
+                <li><a href="/lms/CreateCohorts" className="hover:underline block">Create Cohorts</a></li>
+                <li><a href="/lms/ManageCohorts" className="hover:underline block">Manage Cohorts</a></li>
               </ul>
             )}
           </li>
