@@ -7,6 +7,7 @@ const ManageStudents = () => {
   const { cohortId } = useParams(); // Get cohortId from the URL
   const [students, setStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [cohortname,setCohortName]=useState()
   const [initialCohortStudents, setInitialCohortStudents] = useState([]); // To track the original students already in the cohort
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -18,6 +19,21 @@ const ManageStudents = () => {
     semester: '',
   });
 
+  useEffect(() => {
+    const fetchCohortName = async () => {
+      try {
+        const response = await api.get(`/api/cohorts/cohortname/${cohortId}`);
+        // Set initially selected students
+        setCohortName(response.data[0].cohort_name)
+      } catch (error) {
+        console.error('Error fetching cohort students:', error);
+      }
+    };
+  
+    fetchCohortName();
+  }, [cohortId]);
+
+  
   // Fetch cohort students from the backend
   useEffect(() => {
     const fetchCohortStudents = async () => {
@@ -172,8 +188,13 @@ const ManageStudents = () => {
   
 
   return (
-    <div className="flex container mx-auto p-4">
+    <div>
+<h1 className="text-3xl font-bold text-center mx-auto text-blue-600">{cohortname}</h1>
+
+    <div className="flex container mx-auto p-4 ">
       {/* Left container for selected students */}
+      
+  
       <div className="w-1/3 p-4 border border-gray-300 rounded-lg mr-4">
         <h2 className="text-xl font-bold mb-4">Selected Students</h2>
 
@@ -308,6 +329,8 @@ const ManageStudents = () => {
           </tbody>
         </table>
       </div>
+    </div>
+
     </div>
   );
 };

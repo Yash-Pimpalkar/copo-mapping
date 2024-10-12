@@ -1,5 +1,5 @@
 import express from "express";
-import {  assignStudentsToCohort,  createCohort, deleteCohort, getAllCohorts, getCohortById, getCohortStudents, ManageStudents, removeAllStudentsFromCohort, removeStudentFromCohort, updateCohort } from "../../controller/lms/Cohort.js";
+import {  assignStudentsToCohort,  cohort_name,  createCohort, deleteCohort, getAllCohorts, getCohortById, getCohortStudents, ManageStudents, removeAllStudentsFromCohort, removeStudentFromCohort, updateCohort } from "../../controller/lms/Cohort.js";
 
 const router =express.Router()
 
@@ -7,6 +7,7 @@ router.get('/managestudents',ManageStudents);
 
 router.get('/show', getAllCohorts);
 router.get('/:id', getCohortById);
+
 router.post('/', createCohort);
 router.put('/:id', updateCohort);
 router.delete('/:id', deleteCohort);
@@ -20,5 +21,9 @@ router.delete('/removestudent/:cohortId/:studentId', removeStudentFromCohort);
 
 // Route to remove all students from the cohort
 router.delete('/deletestudents/:cohortId', removeAllStudentsFromCohort);
+router.get('/cohortname/:cohort_id', cohort_name);
+
+
+
 
 export default router;

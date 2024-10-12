@@ -82,7 +82,7 @@ export const getAllCohorts = (req, res) => {
   
 
   export const ManageStudents = (req, res) => {
-    console.log("Fetching students...");
+    // console.log("Fetching students...");
     const sql = 'SELECT sid, stud_clg_id, student_name, semester, branch, email, academic_year FROM lms_students';
   
     db.query(sql, (error, results) => {
@@ -264,6 +264,25 @@ export const removeAllStudentsFromCohort = (req, res) => {
       }
     });
   };
+
+
+  export const cohort_name = (req, res) => {
+    const { cohort_id } = req.params; // Destructure cohort_id from req.params
+    // console.log(cohort_id); // Verify the cohort_id is being received correctly
   
+    const sql = "SELECT * FROM cohort WHERE cohort_id = ?";
   
+    db.query(sql, [cohort_id], (error, results) => {
+      if (error) {
+        console.error('Error fetching cohort: ', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+  
+      if (results.length > 0) {
+        res.status(200).json(results);
+      } else {
+        res.status(404).json({ message: 'Cohort not found' });
+      }
+    });
+  };
   
