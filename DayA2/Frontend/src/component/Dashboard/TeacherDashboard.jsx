@@ -8,14 +8,6 @@ function TeacherDashboard() {
   const [attainmentHistory, setAttainmentHistory] = useState([]);
   const navigate = useNavigate(); // Use useNavigate for programmatic navigation
 
-  const fetchAttainmentHistory = async () => {
-    try {
-      const res = await api.get('/api/attainment/history'); // Adjust the endpoint accordingly
-      setAttainmentHistory(res.data);
-    } catch (error) {
-      console.error("Error fetching attainment history:", error);
-    }
-  };
 
   const handleLogout = () => {
     localStorage.clear(); // Clear local storage
@@ -73,25 +65,6 @@ function TeacherDashboard() {
               <Link to="/usercourse" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                 View Courses
               </Link>
-            </div>
-
-            {/* History of Attainment Calculated */}
-            <div className="bg-white p-6 rounded-lg shadow-lg transform transition duration-500 hover:scale-105">
-              <h3 className="text-xl font-semibold mb-4">History of Attainment Calculated</h3>
-              <p className="text-gray-600 text-lg">View the history of attainment calculations.</p>
-              <button
-                onClick={fetchAttainmentHistory}
-                className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Fetch History
-              </button>
-              <ul className="mt-4">
-                {attainmentHistory.map((item, index) => (
-                  <li key={index} className="border-b border-gray-200 py-2">
-                    {item.date}: Attainment - {item.attainment}% (Calculated at {item.time})
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </section>
