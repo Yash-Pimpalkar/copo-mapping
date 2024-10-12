@@ -82,7 +82,7 @@ export const getAllCohorts = (req, res) => {
   
 
   export const ManageStudents = (req, res) => {
-    // console.log("Fetching students...");
+    console.log("Fetching students...");
     const sql = 'SELECT sid, stud_clg_id, student_name, semester, branch, email, academic_year FROM lms_students';
   
     db.query(sql, (error, results) => {
@@ -128,69 +128,69 @@ export const assignStudentsToCohort = (req, res) => {
   };
   
 
-export const insertStudentCohort = (req, res) => {
-    const { cohortId, studentIds } = req.body; // Expecting cohortId and studentIds array from frontend
+// export const insertStudentCohort = (req, res) => {
+//     const { cohortId, studentIds } = req.body; // Expecting cohortId and studentIds array from frontend
   
-    // Check if cohortId and studentIds are provided
-    if (!cohortId || !studentIds || !Array.isArray(studentIds)) {
-      return res.status(400).json({
-        error: 'cohortId and studentIds are required',
-      });
-    }
+//     // Check if cohortId and studentIds are provided
+//     if (!cohortId || !studentIds || !Array.isArray(studentIds)) {
+//       return res.status(400).json({
+//         error: 'cohortId and studentIds are required',
+//       });
+//     }
   
-    // Prepare a placeholder for the SQL query
-    const placeholders = studentIds.map(() => '(?, ?)').join(', ');
+//     // Prepare a placeholder for the SQL query
+//     const placeholders = studentIds.map(() => '(?, ?)').join(', ');
   
-    // Create a SQL query to check existing student IDs in the cohort
-    const existingStudentsQuery = `
-      SELECT student_id 
-      FROM student_cohort 
-      WHERE cohort_id = ? 
-        AND student_id IN (${studentIds.join(',')})
-    `;
+//     // Create a SQL query to check existing student IDs in the cohort
+//     const existingStudentsQuery = `
+//       SELECT student_id 
+//       FROM student_cohort 
+//       WHERE cohort_id = ? 
+//         AND student_id IN (${studentIds.join(',')})
+//     `;
   
-    // Execute the query to find existing students
-    db.query(existingStudentsQuery, [cohortId], (err, existingResults) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: 'An error occurred while checking existing students',
-        });
-      }
+//     // Execute the query to find existing students
+//     db.query(existingStudentsQuery, [cohortId], (err, existingResults) => {
+//       if (err) {
+//         console.error(err);
+//         return res.status(500).json({
+//           error: 'An error occurred while checking existing students',
+//         });
+//       }
   
-      // Create an array of existing student IDs
-      const existingStudentIds = existingResults.map(row => row.student_id);
+//       // Create an array of existing student IDs
+//       const existingStudentIds = existingResults.map(row => row.student_id);
   
-      // Filter out duplicates
-      const newStudentIds = studentIds.filter(id => !existingStudentIds.includes(id));
+//       // Filter out duplicates
+//       const newStudentIds = studentIds.filter(id => !existingStudentIds.includes(id));
   
-      if (newStudentIds.length === 0) {
-        return res.status(200).json({
-          message: 'No new students to add to the cohort',
-        });
-      }
+//       if (newStudentIds.length === 0) {
+//         return res.status(200).json({
+//           message: 'No new students to add to the cohort',
+//         });
+//       }
   
-      // Prepare the insertion query
-      const insertQuery = `
-        INSERT INTO student_cohort (student_id, cohort_id) 
-        VALUES ${newStudentIds.map(id => `(${id}, ${cohortId})`).join(', ')}
-      `;
+//       // Prepare the insertion query
+//       const insertQuery = `
+//         INSERT INTO student_cohort (student_id, cohort_id) 
+//         VALUES ${newStudentIds.map(id => `(${id}, ${cohortId})`).join(', ')}
+//       `;
   
-      // Execute the insertion query
-      db.query(insertQuery, (err) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({
-            error: 'An error occurred while adding students to the cohort',
-          });
-        }
+//       // Execute the insertion query
+//       db.query(insertQuery, (err) => {
+//         if (err) {
+//           console.error(err);
+//           return res.status(500).json({
+//             error: 'An error occurred while adding students to the cohort',
+//           });
+//         }
   
-        res.status(200).json({
-          message: `${newStudentIds.length} students added to cohort successfully`,
-        });
-      });
-    });
-  };
+//         res.status(200).json({
+//           message: `${newStudentIds.length} students added to cohort successfully`,
+//         });
+//       });
+//     });
+//   };
 
 
 
@@ -213,5 +213,57 @@ export const insertStudentCohort = (req, res) => {
       res.status(200).json(results);
     });
   };
+
+
+
+  // Remove a single student from the cohort
+  export const removeStudentFromCohort = (req, res) => {
+    const { cohortId, studentId } = req.params;
+  
+    // Check if cohortId and studentId exist
+    if (!cohortId || !studentId) {
+      return res.status(400).json({ message: 'Cohort ID and Student ID are required' });
+    }
+  
+    const sql = 'DELETE FROM student_cohort WHERE (student_id = ? AND cohort_id = ?)';
+  
+    // Reverse the order of studentId and cohortId here
+    db.query(sql, [studentId, cohortId], (error, results) => {
+      if (error) {
+        console.log(error)
+        console.error('Error removing student from cohort:', error);
+        return res.status(500).json({ message: 'Error removing student from cohort', error });
+      }
+  
+      // Check if any rows were affected by the delete query
+      if (results.affectedRows > 0) {
+        return res.status(200).json({ message: 'Student removed successfully from the cohort' });
+      } else {
+        return res.status(404).json({ message: 'Student not found in this cohort' });
+      }
+    });
+  };
+  
+  
+  // Remove all students from a specific cohort
+export const removeAllStudentsFromCohort = (req, res) => {
+    const { cohortId } = req.params;
+  
+    const query = 'DELETE FROM student_cohort WHERE cohort_id = ?';
+  
+    db.query(query, [cohortId], (error, results) => {
+      if (error) {
+        console.error('Error removing all students from cohort:', error);
+        return res.status(500).json({ message: 'Error removing all students from cohort' });
+      }
+  
+      if (results.affectedRows > 0) {
+        return res.status(200).json({ message: 'All students removed successfully from the cohort' });
+      } else {
+        return res.status(404).json({ message: 'No students found in this cohort' });
+      }
+    });
+  };
+  
   
   

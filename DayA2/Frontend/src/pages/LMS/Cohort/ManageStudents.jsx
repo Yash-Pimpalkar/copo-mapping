@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // Import useParams to get cohortId from the URL
-import axios from 'axios';
 import api from '../../../api.js';
 import { FaTrashAlt } from 'react-icons/fa';  // Importing the trash icon for removal
 
@@ -8,6 +7,7 @@ const ManageStudents = () => {
   const { cohortId } = useParams(); // Get cohortId from the URL
   const [students, setStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [initialCohortStudents, setInitialCohortStudents] = useState([]); // To track the original students already in the cohort
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [uniqueBranches, setUniqueBranches] = useState([]);
@@ -23,6 +23,7 @@ const ManageStudents = () => {
     const fetchCohortStudents = async () => {
       try {
         const response = await api.get(`/api/cohorts/cohortstudents/${cohortId}`);
+        setInitialCohortStudents(response.data); // Set initial students
         setSelectedStudents(response.data); // Set initially selected students
       } catch (error) {
         console.error('Error fetching cohort students:', error);
@@ -39,11 +40,11 @@ const ManageStudents = () => {
         const response = await api.get('/api/cohorts/managestudents');
         setStudents(response.data);
         setFilteredStudents(response.data);
-         // Extract unique branches and academic years
-         const branches = [...new Set(response.data.map(student => student.branch))];
-         const years = [...new Set(response.data.map(student => student.academic_year))];
-         setUniqueBranches(branches);
-         setUniqueYears(years); // Initialize filtered students
+        // Extract unique branches and academic years
+        const branches = [...new Set(response.data.map(student => student.branch))];
+        const years = [...new Set(response.data.map(student => student.academic_year))];
+        setUniqueBranches(branches);
+        setUniqueYears(years); 
       } catch (error) {
         console.error('Error fetching students:', error);
       }
@@ -78,9 +79,45 @@ const ManageStudents = () => {
     );
   };
 
-  // Handle removing students from the selected list
-  const handleRemoveStudent = (student) => {
-    setSelectedStudents((prevSelected) => prevSelected.filter((s) => s.sid !== student.sid));
+  // Handle removing students from the selected list and deleting from the database
+  const handleRemoveStudent = async (student) => {
+    try {
+      // Delete the student from the database for this cohort
+      await api.delete(`/api/cohorts/removestudent/${cohortId}/${student.sid}`);
+      // Remove the student from the selected list
+      setSelectedStudents((prevSelected) => prevSelected.filter((s) => s.sid !== student.sid));
+    } catch (error) {
+      console.error('Error removing student:', error);
+      alert('Error while removing the student');
+    }
+  };
+
+  // Identify newly selected students that are not part of the initial cohort
+  const getNewlySelectedStudents = () => {
+    return selectedStudents.filter(
+      (student) => !initialCohortStudents.some((initial) => initial.sid === student.sid)
+    );
+  };
+
+  // Handle submitting the newly selected students
+  const handleAddNewStudents = async () => {
+    const newStudents = getNewlySelectedStudents(); // Get newly selected students
+    if (newStudents.length === 0) {
+      alert('No new students to add');
+      return;
+    }
+
+    try {
+      await api.post(`/api/cohorts/assignstudents/${cohortId}`, {
+        selectedStudents: newStudents.map(student => student.sid),
+      });
+      alert('New students added successfully');
+      // Optionally, update the cohort students to reflect the new additions
+      setInitialCohortStudents((prev) => [...prev, ...newStudents]);
+    } catch (error) {
+      console.error('Error assigning new students:', error);
+      alert('Error while adding new students');
+    }
   };
 
   // Handle filter changes
@@ -90,40 +127,46 @@ const ManageStudents = () => {
   };
 
   // Handle selecting all students
- // Handle selecting all students
-const handleSelectAll = () => {
+  const handleSelectAll = () => {
     if (selectedStudents.length === filteredStudents.length && filteredStudents.length > 0) {
-      // If all filtered students are already selected, deselect all filtered students
       setSelectedStudents((prevSelected) =>
         prevSelected.filter(
           (s) => !filteredStudents.some((filteredStudent) => filteredStudent.sid === s.sid)
         )
       );
     } else {
-      // Add filtered students to the already selected ones, ensuring no duplicates
       setSelectedStudents((prevSelected) => {
-        const newSelected = [...prevSelected]; // Copy previous selected students
+        const newSelected = [...prevSelected];
         filteredStudents.forEach((student) => {
           if (!newSelected.some((s) => s.sid === student.sid)) {
-            newSelected.push(student); // Add the filtered student if not already selected
+            newSelected.push(student);
           }
         });
-        return newSelected; // Return the merged list
+        return newSelected;
       });
     }
   };
-  
 
-  // Handle submitting the selected students
+  // Handle deleting all students from the cohort
+  const handleDeleteAll = async () => {
+    try {
+      await api.delete(`/api/cohorts/deletestudents/${cohortId}`);
+      setSelectedStudents([]); // Clear the selected students list
+      alert('All students removed from the cohort successfully');
+    } catch (error) {
+      console.error('Error deleting all students:', error);
+      alert('Error while deleting students');
+    }
+  };
   const handleSubmit = async () => {
     try {
       await api.post(`/api/cohorts/assignstudents/${cohortId}`, {
         selectedStudents: selectedStudents.map(student => student.sid),
       });
-      alert('Cohort updated successfully');
+      alert('All selected students submitted successfully');
     } catch (error) {
-      console.error('Error assigning students:', error);
-      alert('Error while assigning students');
+      console.error('Error submitting students:', error);
+      alert('Error while submitting students');
     }
   };
   
@@ -138,7 +181,23 @@ const handleSelectAll = () => {
           onClick={handleSubmit}
           className="bg-blue-500 text-white px-4 py-2 mb-4 rounded"
         >
-          Submit Selected Students
+          Submit All Selected Students
+        </button>
+
+        {/* New button for adding newly selected students */}
+        <button
+          onClick={handleAddNewStudents}
+          className="bg-green-500 text-white px-4 py-2 mb-4 rounded"
+        >
+          Add Newly Selected Students
+        </button>
+
+        {/* New button for deleting all students */}
+        <button
+          onClick={handleDeleteAll}
+          className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
+        >
+          Delete All Students
         </button>
 
         <ul>
@@ -147,7 +206,7 @@ const handleSelectAll = () => {
               <span>{student.student_name}</span>
               <FaTrashAlt
                 className="text-red-500 cursor-pointer"
-                onClick={() => handleRemoveStudent(student)} // Handle removing the student from the selected list
+                onClick={() => handleRemoveStudent(student)} // Handle removing the student from the cohort
               />
             </li>
           ))}
@@ -170,7 +229,6 @@ const handleSelectAll = () => {
         </div>
 
         {/* Filters for branch, academic year, and semester */}
-      
         <div className="mb-4 grid grid-cols-3 gap-4">
           <div>
             <label className="block mb-2">Branch</label>
