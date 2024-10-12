@@ -64,24 +64,7 @@ const LMSTeacherNavbar = () => {
               <ul className="absolute top-full left-0 bg-blue-500 mt-2 rounded shadow-md p-2 space-y-2">
                 <li><a href="#studentCohorts" className="hover:underline block">Student Cohorts</a></li>
                 <li><a href="/lms/StudentlmsAttendance" className="hover:underline block">Student Attendance</a></li>
-                <li><a href="/lms/lmsfeedback" className="hover:underline block">Student Feedback</a></li>
-              </ul>
-            )}
-          </li>
-
-          {/* Events Dropdown */}
-          <li className="relative">
-            <a
-              href="#!"
-              className="hover:underline"
-              onClick={() => handleDropdownToggle('events')}
-            >
-              Events
-            </a>
-            {activeDropdown === 'events' && (
-              <ul className="absolute top-full left-0 bg-blue-500 mt-2 rounded shadow-md p-2 space-y-2">
-                <li><a href="/lms/CreateEvents" className="hover:underline block">Create Event</a></li>
-                <li><a href="/" className="hover:underline block">View Events</a></li>
+                <li><a href="/lms/StudentFeedback" className="hover:underline block">Student Feedback</a></li>
               </ul>
             )}
           </li>

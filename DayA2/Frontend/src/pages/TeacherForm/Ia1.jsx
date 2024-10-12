@@ -81,6 +81,8 @@ const Ia1 = ({ uid }) => {
     }
   }, [uid]);
 
+  console.log("Cosdata", COsData)
+
   // Fetch IA data when the userCourseId changes
   useEffect(() => {
     const fetchIaData = async () => {
@@ -92,6 +94,7 @@ const Ia1 = ({ uid }) => {
         try {
           const res = await api.get(`/api/ia/${userCourseId}`);
           setIaData(res.data);
+          console.log(res.data)
           const res1 = await api.get(`/api/ia/cos/${userCourseId}`);
           setCOsData(res1.data);
         } catch (error) {
@@ -360,8 +363,7 @@ const Ia1 = ({ uid }) => {
           const maxLimit = col.marks;
           if (marks !== null && marks > maxLimit) {
             errors.push(
-              `Row ${rowIndex + 2}: ${
-                col.qname
+              `Row ${rowIndex + 2}: ${col.qname
               } has marks ${marks}, which exceeds the limit of ${maxLimit}.`
             );
             marks = Math.min(marks, maxLimit); // Adjust the marks to be within the limit
@@ -496,17 +498,17 @@ const Ia1 = ({ uid }) => {
 
       const coAverage = coColumns.length
         ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
+          coColumns.reduce((sum, col) => {
+            const attainmentValue = getTotalStudentsPassedPerQuestion(
+              attainmentData.passedPercentage
+            )[col.index];
+            const attemptedCount = getTotalStudentsAttempted()[col.index];
+            const attainment = attemptedCount
+              ? (attainmentValue / attemptedCount) * 100
+              : 0;
+            return sum + attainment;
+          }, 0) / coColumns.length
+        ).toFixed(2)
         : 0;
 
       return [coName + " Average", coAverage + " %"];
@@ -579,17 +581,17 @@ const Ia1 = ({ uid }) => {
 
       const coAverage = coColumns.length
         ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
+          coColumns.reduce((sum, col) => {
+            const attainmentValue = getTotalStudentsPassedPerQuestion(
+              attainmentData.passedPercentage
+            )[col.index];
+            const attemptedCount = getTotalStudentsAttempted()[col.index];
+            const attainment = attemptedCount
+              ? (attainmentValue / attemptedCount) * 100
+              : 0;
+            return sum + attainment;
+          }, 0) / coColumns.length
+        ).toFixed(2)
         : 0;
 
       return { coName, coAverage };
@@ -622,7 +624,7 @@ const Ia1 = ({ uid }) => {
         distinctConames,
         questionColumns,
         attainmentData
-      );  
+      );
 
       api
         .post("/api/ia/insert-co-averages", {
@@ -646,30 +648,30 @@ const Ia1 = ({ uid }) => {
       const coColumns = questionColumns
         .map((col, index) => ({ ...col, index }))
         .filter((col) => col.coname === coName);
-  
+
       const coAverage = coColumns.length
         ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
+          coColumns.reduce((sum, col) => {
+            const attainmentValue = getTotalStudentsPassedPerQuestion(
+              attainmentData.passedPercentage
+            )[col.index];
+            const attemptedCount = getTotalStudentsAttempted()[col.index];
+            const attainment = attemptedCount
+              ? (attainmentValue / attemptedCount) * 100
+              : 0;
+            return sum + attainment;
+          }, 0) / coColumns.length
+        ).toFixed(2)
         : 0;
-  
+
       // Return categorization based on CO average
       return coAverage < 40
         ? 0
         : coAverage <= 60
-        ? 1
-        : coAverage <= 70
-        ? 2
-        : 3;
+          ? 1
+          : coAverage <= 70
+            ? 2
+            : 3;
     });
   };
 
@@ -982,7 +984,7 @@ const Ia1 = ({ uid }) => {
               <h1 className="text-lg font-semibold">
                 Total Students Passed Each Question
               </h1>
-             
+
               <button
                 onClick={() =>
                   handle_Attenment(
@@ -1099,79 +1101,79 @@ const Ia1 = ({ uid }) => {
                     })}
                   </tr>
                   {/* Dynamic Rows for COs */}
-                  
-                  
+
+
                 </tbody>
               </table>
               <table className="min-w-full divide-y divide-gray-200">
-  <thead className="bg-gray-50">
-    <tr>
-      <th
-        scope="col"
-        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-      >
-        CO Name
-      </th>
-      <th
-        scope="col"
-        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-      >
-        CO Average
-      </th>
-      <th
-        scope="col"
-        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-      >
-        Categorization
-      </th>
-    </tr>
-  </thead>
-  <tbody className="bg-white divide-y divide-gray-200">
-    {distinctConames.map((coName) => {
-      const coColumns = questionColumns
-        .map((col, index) => ({ ...col, index })) // include index for mapping
-        .filter((col) => col.coname === coName); // filter by CO name
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                    >
+                      CO Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                    >
+                      CO Average
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                    >
+                      Categorization
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {distinctConames.map((coName) => {
+                    const coColumns = questionColumns
+                      .map((col, index) => ({ ...col, index })) // include index for mapping
+                      .filter((col) => col.coname === coName); // filter by CO name
 
-      const coAverage = coColumns.length
-        ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
-        : 0;
+                    const coAverage = coColumns.length
+                      ? (
+                        coColumns.reduce((sum, col) => {
+                          const attainmentValue = getTotalStudentsPassedPerQuestion(
+                            attainmentData.passedPercentage
+                          )[col.index];
+                          const attemptedCount = getTotalStudentsAttempted()[col.index];
+                          const attainment = attemptedCount
+                            ? (attainmentValue / attemptedCount) * 100
+                            : 0;
+                          return sum + attainment;
+                        }, 0) / coColumns.length
+                      ).toFixed(2)
+                      : 0;
 
-      // Calculate categorization based on the CO average
-      const categorization = coAverage < 40
-        ? 0
-        : coAverage <= 60
-        ? 1
-        : coAverage <= 70
-        ? 2
-        : 3;
+                    // Calculate categorization based on the CO average
+                    const categorization = coAverage < 40
+                      ? 0
+                      : coAverage <= 60
+                        ? 1
+                        : coAverage <= 70
+                          ? 2
+                          : 3;
 
-      return (
-        <tr key={coName}>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {coName}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {coAverage} %
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {categorization}
-          </td>
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
+                    return (
+                      <tr key={coName}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {coName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {coAverage} %
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {categorization}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
 
             </div>
           </div>

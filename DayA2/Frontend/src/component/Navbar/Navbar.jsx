@@ -198,7 +198,7 @@ export default function Navbar() {
               />
             </div>
             <div className="hidden sm:ml-6 sm:block">
-              <div className="flex space-x-4">
+              <div className="flex items-center space-x-4">
                 {token && user_id !== 0 && (
                   <>
                     {navigation
@@ -292,7 +292,7 @@ export default function Navbar() {
                         <Menu as="div" className="relative">
                           <Link
                             to="/showtermwork"
-                            className="block px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                            className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                           >
                             Term Work
                           </Link>
@@ -460,12 +460,12 @@ export default function Navbar() {
                     </DisclosurePanel>
                   </Disclosure>
                   <Disclosure as="div" className="relative">
-                    <DisclosureButton
+                    <Link
                       to="/termwork"
                       className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                     >
                       Term Work
-                    </DisclosureButton>
+                    </Link>
                     {/* <DisclosureButton className="block px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                       Term Work
                     </DisclosureButton>

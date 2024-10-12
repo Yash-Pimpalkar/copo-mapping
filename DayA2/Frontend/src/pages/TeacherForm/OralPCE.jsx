@@ -94,6 +94,7 @@ const OralPCE = ({ uid }) => {
         try {
           const res = await api.get(`/api/oral/show/pce/${userCourseId}`);
           setOralPCEData(res.data);
+          console.log(res.data)
           const res1 = await api.get(`/api/oral/cos/pce/${userCourseId}`);
           setCOsData(res1.data);
           const res2 = await api.get(`/api/oral/pce/actualco/${userCourseId}`);
@@ -366,6 +367,8 @@ const OralPCE = ({ uid }) => {
     }));
   };
 
+  console.log("COsData", COsData)
+
   // Handle file upload
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -385,19 +388,18 @@ const OralPCE = ({ uid }) => {
         const validatedStudent = { ...student };
 
         COsData.forEach((col) => {
-          let marks = student[col.qname];
-
+          let marks = student[col.colname];
           // Ensure marks are within limits and handle null
           const maxLimit = col.marks;
           if (marks !== null && marks > maxLimit) {
             errors.push(
-              `Row ${rowIndex + 2}: ${col.qname
+              `Row ${rowIndex + 2}: ${col.colname
               } has marks ${marks}, which exceeds the limit of ${maxLimit}.`
             );
             marks = Math.min(marks, maxLimit); // Adjust the marks to be within the limit
           }
 
-          validatedStudent[col.qname] = marks;
+          validatedStudent[col.colname] = marks;
         });
 
         return validatedStudent;
@@ -411,11 +413,11 @@ const OralPCE = ({ uid }) => {
         const changes = [];
         validatedData.forEach((student) => {
           COsData.forEach((col) => {
-            const marks = student[col.qname];
+            const marks = student[col.colname];
             if (marks !== undefined) {
               changes.push({
                 sid: student.sid,
-                qid: col.idtable_ia,
+                qid: col.oralpce_idq,
                 marks: marks,
               });
             }

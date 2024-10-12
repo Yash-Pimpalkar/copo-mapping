@@ -44,12 +44,13 @@ import PureTheoryResult from './pages/Results/puretheoryresult';
 import MainResult from './pages/Results/mainresult';
 import OralPCE from './pages/TeacherForm/OralPCE';
 import UploadPCE from './pages/Questions/UploadOralPCE';
-import FeedbackPage from './component/LMSFeedback/MainFeedback';
-import EditQuestionsPage from './component/LMSFeedback/EditQuestionsPage';
+import FeedbackPage from './pages/LMS/LMSFeedback/MainFeedback';
+import EditQuestionsPage from './pages/LMS/LMSFeedback/EditQuestionsPage';
 import TeacherlmsDashboard from './pages/LMS/Teacher/TeacherlmsDashboard';
 import CreateClassroom from './pages/LMS/Classroom/CreateClassroom';
 import StudentLmsAttendance from './pages/LMS/Attendance/StudentlmsAttendance';
 import LMSTeacherNavbar from './component/LmsNavbar/LmsNavbar';
+import Dummyfeedback from './pages/LMS/LMSFeedback/dummyfeedback';
 import LMSStudentNavbar from './component/LmsNavbar/StudentNavbar';
 import StudentlmsDashboard from './pages/LMS/Student/StudentlmsDashboard';
 import CreateEvents from './pages/LMS/Events/CreateEvents';
@@ -131,13 +132,13 @@ function App() {
               <Route path='/Twonly' element={<TWOnly uid={user_id}/>}/>
               <Route path='/PureTheoryResult' element={<PureTheoryResult uid={user_id}/>}/>
               <Route path='/Mainresult' element={<MainResult uid={user_id}/>}/>
-              <Route path='/lms/lmsfeedback' element={<FeedbackPage uid={user_id}/>}/>
-              <Route path='/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
+              <Route path='/lms/StudentFeedback' element={<FeedbackPage uid={user_id}/>}/>
+              <Route path='/lms/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
               <Route path='/TeacherlmsDashboard' element={<TeacherlmsDashboard uid={user_id}/>} />
               <Route path='/lms/CreateClassroom' element={<CreateClassroom uid={user_id}/>} />
               <Route path='/lms/StudentLmsAttendance' element={<StudentLmsAttendance uid={user_id}/>} />
               <Route path='/lms/CreateEvents' element={<CreateEvents uid={user_id}/>} />
-
+              <Route path='/lms/dummyfeedback' element={<Dummyfeedback uid={user_id}/>}/>
               {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
               <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
               <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>

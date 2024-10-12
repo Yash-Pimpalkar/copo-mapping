@@ -223,17 +223,26 @@ const Semester = ({ uid }) => {
       const worksheet = workbook.Sheets[sheetName];
       let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
+      console.log("jsonData", jsonData);
+
       // Assuming the first row contains headers
       const headers = jsonData[0];
       const rows = jsonData.slice(1); // Skip header row
 
-      const validatedData = rows.map((row) => {
-        const student = {};
-        headers.forEach((header, index) => {
-          student[header] = row[index];
+      const validatedData = rows
+        .map((row) => {
+          const student = {};
+          headers.forEach((header, index) => {
+            student[header] = row[index];
+          });
+          return student;
+        })
+        .filter((student) => {
+          // Check if oral_id is not null, not a string, and is a valid number
+          return student.sem_id && !isNaN(student.sem_id);
         });
-        return student;
-      });
+
+      console.log("validatedData", validatedData);
 
       try {
         console.log(validatedData);

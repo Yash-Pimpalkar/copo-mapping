@@ -109,10 +109,10 @@ export const OralUpload = async (req, res) => {
   // Prepare the query and values
   const sql = 'UPDATE table_oral SET marks = ? WHERE oral_id = ?';
   const queryValues = updates.map(update => {
-    const marks = parseInt(update.Marks, 10);
+    const Marks = parseInt(update.Marks, 10);
 
     return [
-      isNaN(marks) ? null : marks,  // Use null or a default value if marks is NaN
+      isNaN(Marks) ? null : Marks,  // Use null or a default value if marks is NaN
       update.oral_id
     ];
   });
