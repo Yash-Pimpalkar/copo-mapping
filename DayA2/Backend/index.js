@@ -44,7 +44,7 @@ app.use("/api/uploadmajorprosem",UploadMajorProjectRoute)
 app.use("/api/uploadminiprosem",UploadMiniProjectRoute);
 app.use("/api/result",ResultRoute);
 app.use("/api/branch",BranchRoute);
-app.use("/api/cohorts",CohortRoute)
+app.use("/api/cohorts",CohortRoute);
 
 
 app.listen(port, () => {

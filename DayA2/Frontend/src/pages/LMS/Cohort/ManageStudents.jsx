@@ -1,25 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom'; // Import useParams to get cohortId from the URL
 import axios from 'axios';
 import api from '../../../api.js';
+import { FaTrashAlt } from 'react-icons/fa';  // Importing the trash icon for removal
 
 const ManageStudents = () => {
+  const { cohortId } = useParams(); // Get cohortId from the URL
   const [students, setStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredStudents, setFilteredStudents] = useState([]);
+  const [uniqueBranches, setUniqueBranches] = useState([]);
+  const [uniqueYears, setUniqueYears] = useState([]);
   const [filters, setFilters] = useState({
     branch: '',
     academicYear: '',
     semester: '',
   });
 
-  // Fetch students from API
+  // Fetch cohort students from the backend
+  useEffect(() => {
+    const fetchCohortStudents = async () => {
+      try {
+        const response = await api.get(`/api/cohorts/cohortstudents/${cohortId}`);
+        setSelectedStudents(response.data); // Set initially selected students
+      } catch (error) {
+        console.error('Error fetching cohort students:', error);
+      }
+    };
+  
+    fetchCohortStudents();
+  }, [cohortId]);
+
+  // Fetch all students from the API
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await api.get('/api/cohorts/managestudents'); // Adjust the API endpoint as needed
+        const response = await api.get('/api/cohorts/managestudents');
         setStudents(response.data);
-        setFilteredStudents(response.data); // Initialize filtered students
+        setFilteredStudents(response.data);
+         // Extract unique branches and academic years
+         const branches = [...new Set(response.data.map(student => student.branch))];
+         const years = [...new Set(response.data.map(student => student.academic_year))];
+         setUniqueBranches(branches);
+         setUniqueYears(years); // Initialize filtered students
       } catch (error) {
         console.error('Error fetching students:', error);
       }
@@ -28,7 +52,7 @@ const ManageStudents = () => {
     fetchStudents();
   }, []);
 
-  // Filter students based on search and selected filters
+  // Filter students based on search term and filters
   useEffect(() => {
     const filtered = students.filter((student) => {
       const matchesSearchTerm = student.student_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -45,13 +69,18 @@ const ManageStudents = () => {
     setFilteredStudents(filtered);
   }, [searchTerm, filters, students]);
 
-  // Handle checkbox selection for students
+  // Handle selecting/deselecting students
   const handleSelectStudent = (student) => {
     setSelectedStudents((prevSelected) =>
-      prevSelected.includes(student)
-        ? prevSelected.filter((s) => s !== student)
+      prevSelected.some(s => s.sid === student.sid)
+        ? prevSelected.filter((s) => s.sid !== student.sid)
         : [...prevSelected, student]
     );
+  };
+
+  // Handle removing students from the selected list
+  const handleRemoveStudent = (student) => {
+    setSelectedStudents((prevSelected) => prevSelected.filter((s) => s.sid !== student.sid));
   };
 
   // Handle filter changes
@@ -60,21 +89,76 @@ const ManageStudents = () => {
     setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
   };
 
+  // Handle selecting all students
+ // Handle selecting all students
+const handleSelectAll = () => {
+    if (selectedStudents.length === filteredStudents.length && filteredStudents.length > 0) {
+      // If all filtered students are already selected, deselect all filtered students
+      setSelectedStudents((prevSelected) =>
+        prevSelected.filter(
+          (s) => !filteredStudents.some((filteredStudent) => filteredStudent.sid === s.sid)
+        )
+      );
+    } else {
+      // Add filtered students to the already selected ones, ensuring no duplicates
+      setSelectedStudents((prevSelected) => {
+        const newSelected = [...prevSelected]; // Copy previous selected students
+        filteredStudents.forEach((student) => {
+          if (!newSelected.some((s) => s.sid === student.sid)) {
+            newSelected.push(student); // Add the filtered student if not already selected
+          }
+        });
+        return newSelected; // Return the merged list
+      });
+    }
+  };
+  
+
+  // Handle submitting the selected students
+  const handleSubmit = async () => {
+    try {
+      await api.post(`/api/cohorts/assignstudents/${cohortId}`, {
+        selectedStudents: selectedStudents.map(student => student.sid),
+      });
+      alert('Cohort updated successfully');
+    } catch (error) {
+      console.error('Error assigning students:', error);
+      alert('Error while assigning students');
+    }
+  };
+  
+
   return (
     <div className="flex container mx-auto p-4">
+      {/* Left container for selected students */}
       <div className="w-1/3 p-4 border border-gray-300 rounded-lg mr-4">
         <h2 className="text-xl font-bold mb-4">Selected Students</h2>
+
+        <button
+          onClick={handleSubmit}
+          className="bg-blue-500 text-white px-4 py-2 mb-4 rounded"
+        >
+          Submit Selected Students
+        </button>
+
         <ul>
           {selectedStudents.map((student) => (
-            <li key={student.sid} className="border-b py-2">
-              {student.student_name}
+            <li key={student.sid} className="border-b py-2 flex items-center justify-between">
+              <span>{student.student_name}</span>
+              <FaTrashAlt
+                className="text-red-500 cursor-pointer"
+                onClick={() => handleRemoveStudent(student)} // Handle removing the student from the selected list
+              />
             </li>
           ))}
         </ul>
       </div>
+
+      {/* Right container for managing students */}
       <div className="w-2/3 p-4 border border-gray-300 rounded-lg">
         <h2 className="text-xl font-bold mb-4">Manage Students</h2>
 
+        {/* Search input */}
         <div className="mb-4">
           <input
             type="text"
@@ -85,38 +169,54 @@ const ManageStudents = () => {
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block mb-2">Branch</label>
-          <select name="branch" onChange={handleFilterChange} className="border border-gray-300 p-2 rounded w-full">
-            <option value="">All Branches</option>
-            <option value="COMPUTER">COMPUTER</option>
-            <option value="IT">IT</option>
-            <option value="AIDS">AIDS</option>
-            <option value="AIML">AIML</option>
-            <option value="MECATRONICS">MECATRONICS</option>
-          </select>
+        {/* Filters for branch, academic year, and semester */}
+      
+        <div className="mb-4 grid grid-cols-3 gap-4">
+          <div>
+            <label className="block mb-2">Branch</label>
+            <select name="branch" onChange={handleFilterChange} className="border border-gray-300 p-2 rounded w-full">
+              <option value="">All Branches</option>
+              {uniqueBranches.map((branch, index) => (
+                <option key={index} value={branch}>{branch}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">Academic Year</label>
+            <select name="academicYear" onChange={handleFilterChange} className="border border-gray-300 p-2 rounded w-full">
+              <option value="">All Years</option>
+              {uniqueYears.map((year, index) => (
+                <option key={index} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2">Semester</label>
+            <input
+              type="number"
+              name="semester"
+              onChange={handleFilterChange}
+              className="border border-gray-300 p-2 rounded w-full"
+            />
+          </div>
         </div>
 
+        {/* Select All Checkbox */}
         <div className="mb-4">
-          <label className="block mb-2">Academic Year</label>
-          <input
-            type="text"
-            name="academicYear"
-            onChange={handleFilterChange}
-            className="border border-gray-300 p-2 rounded w-full"
-          />
+          <label>
+            <input
+              type="checkbox"
+              checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+              onChange={handleSelectAll}
+              className="mr-2"
+            />
+            Select All Listed Students
+          </label>
         </div>
 
-        <div className="mb-4">
-          <label className="block mb-2">Semester</label>
-          <input
-            type="number"
-            name="semester"
-            onChange={handleFilterChange}
-            className="border border-gray-300 p-2 rounded w-full"
-          />
-        </div>
-
+        {/* Table of students */}
         <table className="table-auto w-full">
           <thead>
             <tr>
@@ -135,7 +235,7 @@ const ManageStudents = () => {
                 <td className="border px-4 py-2">
                   <input
                     type="checkbox"
-                    checked={selectedStudents.includes(student)}
+                    checked={selectedStudents.some(s => s.sid === student.sid)}
                     onChange={() => handleSelectStudent(student)}
                   />
                 </td>
