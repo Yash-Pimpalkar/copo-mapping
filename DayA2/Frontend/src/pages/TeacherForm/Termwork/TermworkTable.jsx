@@ -64,7 +64,7 @@ localStorage.removeItem("ExperimentAttainmentData");
    localStorage.removeItem("ReportAttainmentData"); // For report
 localStorage.removeItem("TradeAttainmentData"); // For trade
   localStorage.removeItem("JournalAttainmentData");
-  localStorage.removeItem("SciLabAttainmentData")
+  localStorage.removeItem("ScilabAttainmentData")
   console.log("Local storage cleared due to tw_id change.");
 }, [tw_id]);
   return (

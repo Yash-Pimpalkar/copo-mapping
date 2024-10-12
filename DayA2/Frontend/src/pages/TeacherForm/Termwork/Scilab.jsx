@@ -199,7 +199,7 @@ const SciLab = ({ uid, tw_id }) => {
       attainmentList,
       passedPercentage: attainmentData.passedPercentage,
       tw_id,
-      userCourseId,
+      userCourseId:uid,
     };
   
     localStorage.setItem('ScilabAttainmentData', JSON.stringify(dataToStore));
