@@ -1,0 +1,57 @@
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+--
+-- Host: localhost    Database: copo
+-- ------------------------------------------------------
+-- Server version	8.0.39
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `main_atten`
+--
+
+DROP TABLE IF EXISTS `main_atten`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `main_atten` (
+  `att_id` int NOT NULL AUTO_INCREMENT,
+  `attend_id` int DEFAULT NULL,
+  `sid` int DEFAULT NULL,
+  `marks` int DEFAULT NULL,
+  PRIMARY KEY (`att_id`),
+  KEY `attendid_idx` (`attend_id`),
+  KEY `sida_idx` (`sid`),
+  CONSTRAINT `attendid` FOREIGN KEY (`attend_id`) REFERENCES `upload_attendance` (`attid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sida` FOREIGN KEY (`sid`) REFERENCES `copo_students_details` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=154 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `main_atten`
+--
+
+LOCK TABLES `main_atten` WRITE;
+/*!40000 ALTER TABLE `main_atten` DISABLE KEYS */;
+INSERT INTO `main_atten` VALUES (1,8,1,7),(2,8,2,8),(3,8,3,8),(4,8,4,8),(5,8,5,8),(6,8,6,8),(7,8,7,8),(8,8,8,8),(9,8,9,8),(10,8,10,8),(11,8,11,8),(12,8,12,8),(13,8,13,8),(14,8,14,8),(15,8,15,8),(16,8,16,8),(17,8,17,8),(18,8,18,8),(19,8,19,8),(20,8,20,8),(21,8,21,8),(22,8,22,8),(23,8,23,8),(24,8,24,8),(25,8,25,8),(26,8,26,8),(27,8,27,8),(28,8,28,8),(29,8,29,8),(30,8,30,8),(31,8,31,8),(32,8,32,8),(33,8,33,8),(34,8,34,8),(35,8,35,8),(36,8,36,8),(37,8,37,8),(38,8,38,8),(39,8,39,8),(40,8,40,8),(41,8,41,8),(42,8,42,8),(43,8,43,8),(44,8,44,8),(45,8,45,8),(46,8,46,8),(47,8,47,8),(48,8,48,8),(49,8,49,8),(50,8,50,8),(51,8,51,8),(52,8,52,8),(53,8,53,8),(54,8,54,8),(55,8,55,8),(56,8,56,8),(57,8,57,8),(58,8,58,8),(59,8,59,8),(60,8,60,8),(61,8,61,8),(62,8,62,8),(63,8,63,8),(64,8,64,8),(65,8,65,8),(66,8,66,8),(67,8,67,8),(68,8,68,8),(69,8,69,8),(70,8,70,8),(71,8,71,8),(72,8,72,8),(73,8,73,8),(74,8,74,8),(75,8,75,8),(76,8,76,8),(77,8,77,8),(78,8,78,8),(79,8,79,8),(80,8,80,8),(81,8,81,8),(82,8,82,8),(83,8,83,8),(84,8,84,8),(85,8,85,8),(86,8,86,8),(87,8,87,8),(88,8,88,8),(89,8,89,8),(90,8,90,8),(91,8,91,8),(92,8,92,8),(93,8,93,8),(94,8,94,8),(95,8,95,8),(96,8,96,8),(97,8,97,8),(98,8,98,8),(99,8,99,8),(100,8,100,8),(101,8,101,8),(102,8,102,8),(103,8,103,8),(104,8,104,8),(105,8,105,8),(106,8,106,8),(107,8,107,8),(108,8,108,8),(109,8,109,8),(110,8,110,8),(111,8,111,8),(112,8,112,8),(113,8,113,8),(114,8,114,8),(115,8,115,8),(116,8,116,8),(117,8,117,8),(118,8,118,8),(119,8,119,8),(120,8,120,8),(121,8,121,8),(122,8,122,8),(123,8,123,8),(124,8,124,8),(125,8,125,8),(126,8,126,8),(127,8,127,8),(128,8,128,8),(129,8,129,8),(130,8,130,8),(131,8,131,8),(132,8,132,8),(133,8,133,8),(134,8,134,8),(135,8,135,8),(136,8,136,8),(137,8,137,8),(138,8,138,8),(139,8,139,8),(140,8,140,8),(141,8,141,8),(142,8,142,8),(143,8,143,8),(144,8,144,8),(145,8,145,8),(146,8,146,8),(147,8,147,8),(148,8,148,8),(149,8,149,8),(150,8,150,8),(151,8,151,8),(152,8,152,8),(153,8,153,8);
+/*!40000 ALTER TABLE `main_atten` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-10-15  2:26:07
