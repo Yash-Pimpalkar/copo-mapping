@@ -4,13 +4,13 @@ import axios from 'axios';
 import api from '../../api';
 
 const EditCourse = () => {
-  const { cohortId } = useParams(); // Get cohort ID from URL
+  const { usercourse_id } = useParams(); // Get course ID from URL
   const navigate = useNavigate();
-  
-  const [cohortName, setCohortName] = useState('');
+
+  const [courseName, setCourseName] = useState('');
   const [branch, setBranch] = useState('');
   const [semester, setSemester] = useState('');
-  const [classname, setClassname] = useState('');
+  const [cocount, setCoCount] = useState('');
   const [academicYear, setAcademicYear] = useState('');
   const [branches, setBranches] = useState([]); // For branch dropdown
 
@@ -23,19 +23,19 @@ const EditCourse = () => {
     5: 'MECATRONICS',
   };
 
-  // Fetch cohort details by ID
-  const fetchCohortDetails = async () => {
+  // Fetch course details by ID
+  const fetchCourseDetails = async () => {
     try {
-      const response = await api.get(`/api/cohorts/${cohortId}`);
-      const cohort = response.data;
-      console.log(cohort.branch);
-      setCohortName(cohort.cohort_name);
-      setBranch(cohort.branch);  // This is the branch ID
-      setSemester(cohort.semester);
-      setClassname(cohort.classname);
-      setAcademicYear(cohort.academic_year);
+      const response = await api.get(`/api/usercourse/specific/${usercourse_id}`);
+      const course = response.data[0];
+      console.log(course.branch);
+      setCourseName(course.course_name);
+      setBranch(course.branch);  // This is the branch ID
+      setSemester(course.semester);
+      setCoCount(course.co_count);
+      setAcademicYear(course.academic_year);
     } catch (error) {
-      console.error('Error fetching cohort details:', error);
+      console.error('Error fetching Course details:', error);
     }
   };
 
@@ -50,24 +50,25 @@ const EditCourse = () => {
   };
 
   useEffect(() => {
-    fetchCohortDetails();
+    fetchCourseDetails();
     fetchBranches();
-  }, [cohortId]);
+  }, [usercourse_id]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/api/cohorts/${cohortId}`, {
-        cohort_name: cohortName,
+      await api.put(`/api/edit/specific/${usercourse_id}`, {
+        course_name: courseName,
         branch,
         semester,
-        classname,
+        cocount,
         academic_year: academicYear,
       });
-      navigate('/lms/ManageCohorts'); // Redirect to Manage Cohorts page
+      console.log("Complete frontend")
+      navigate('/usercourse'); // Redirect to Manage Courses page
     } catch (error) {
-      console.error('Error updating cohort:', error);
+      console.error('Error updating Course:', error);
     }
   };
 
@@ -79,8 +80,8 @@ const EditCourse = () => {
           <label className="block mb-2">Course Name</label>
           <input
             type="text"
-            value={cohortName}
-            onChange={(e) => setCohortName(e.target.value)}
+            value={courseName}
+            onChange={(e) => setCourseName(e.target.value)}
             className="border border-gray-300 p-2 rounded w-full"
             required
           />
@@ -116,8 +117,8 @@ const EditCourse = () => {
           <label className="block mb-2">CO Count</label>
           <input
             type="text"
-            value={classname}
-            onChange={(e) => setClassname(e.target.value)}
+            value={cocount}
+            onChange={(e) => setCoCount(e.target.value)}
             className="border border-gray-300 p-2 rounded w-full"
             required
           />
@@ -132,7 +133,8 @@ const EditCourse = () => {
             required
           />
         </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        <button type="submit"
+          onClick={(e) => handleSubmit(e.target.value)} className="bg-blue-600 text-white px-4 py-2 rounded">
           Update Classroom
         </button>
       </form>

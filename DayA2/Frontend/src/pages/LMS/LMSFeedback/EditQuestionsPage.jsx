@@ -205,6 +205,16 @@ const EditQuestionsPage = ({ uid }) => {
                                             type="text"
                                             placeholder="Enter label"
                                         />
+
+                                        <div className="px-4 py-6 sm:grid sm:grid-cols-1 sm:gap-4 sm:px-0">
+                                            <dt className="text-xl font-medium leading-6 text-gray-900">Multiple Choice Values</dt>
+                                            <textarea
+                                                className="bg-white border border-gray-300 text-gray-700 py-3 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                rows="6" // Adjust this value to change the height of the text box
+                                                cols="50" // Adjust this value to change the width of the text box
+                                            />
+                                        </div>
+
                                         <div className="flex flex-col mt-6">
                                             <label className="block text-gray-700 text-lg font-bold mb-2" htmlFor="numberofCOs">
                                                 Number of COs:

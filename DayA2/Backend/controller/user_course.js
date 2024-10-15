@@ -76,13 +76,10 @@ export const user_course_registration = (req, res) => {
   processCourse(0);
 };
 
-
-
-
-export const show_user_course = (req,res) => {
-  const id= req.params.uid;
-  const sql=`select u.usercourse_id,u.user_id,c.coursecode,c.course_name,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where user_id=? `;
-  db.query(sql,id,(err,result)=>{
+export const show_user_course = (req, res) => {
+  const id = req.params.uid;
+  const sql = `select u.usercourse_id,u.user_id,c.coursecode,c.course_name,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where user_id=? `;
+  db.query(sql, id, (err, result) => {
     if (err) {
       console.error('Error saving to database:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -91,11 +88,50 @@ export const show_user_course = (req,res) => {
   })
 }
 
-export const show_CoCount = (req,res) => {
-  const id= req.params.uid;
+export const show_specific_user_course = (req, res) => {
+  const id = req.params.uid;
+  const sql = `select u.usercourse_id,u.user_id,c.coursecode,c.course_name,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where u.usercourse_id=? `;
+  db.query(sql, id, (err, result) => {
+    if (err) {
+      console.error('Error saving to database:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.status(201).json(result);
+  })
+};
+
+export const edit_specific_course = () => {
+  const { usercourse_id } = req.params;
+  const { course_name, branch, semester, cocount, academic_year } = req.body;
+
+  // SQL query to update the course based on usercourse_id
+  const query = `
+    UPDATE user_course 
+    SET 
+      branch = ?, 
+      semester = ?, 
+      co_count = ?, 
+      academic_year = ? 
+    WHERE 
+      usercourse_id = ?`;
+
+  // Execute the query with the values from the request body
+  db.query(query, [branch, semester, cocount, academic_year], (err, result) => {
+    if (err) {
+      console.error('Error updating the course:', err);
+      res.status(500).json({ error: 'An error occurred while updating the course.' });
+    } else {
+      res.status(200).json({ message: 'Course updated successfully!' });
+    }
+    res.status(201).json(result);
+  });
+}
+
+export const show_CoCount = (req, res) => {
+  const id = req.params.uid;
   // console.log(id)
-  const sql=`select * from user_course where usercourse_id=? `;
-  db.query(sql,id,(err,result)=>{
+  const sql = `select * from user_course where usercourse_id=? `;
+  db.query(sql, id, (err, result) => {
     if (err) {
       console.error('Error saving to database:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -106,12 +142,12 @@ export const show_CoCount = (req,res) => {
 }
 
 
-export const coname = (req,res)=>{
-  const userCourseId = req.params.uid; 
+export const coname = (req, res) => {
+  const userCourseId = req.params.uid;
   console.log(userCourseId)
-  const sql='select * from cos where usercourse_id = ?'
-  db.query(sql,userCourseId,(Err,result)=>{
-    if(Err){
+  const sql = 'select * from cos where usercourse_id = ?'
+  db.query(sql, userCourseId, (Err, result) => {
+    if (Err) {
       console.log(Err)
     }
     res.status(200).json(result)
@@ -123,7 +159,7 @@ export const coname = (req,res)=>{
 
 
 
-   
 
 
- 
+
+
