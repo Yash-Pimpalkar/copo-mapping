@@ -10,7 +10,7 @@ const EditCourse = () => {
   const [courseName, setCourseName] = useState('');
   const [branch, setBranch] = useState('');
   const [semester, setSemester] = useState('');
-  const [cocount, setCoCount] = useState('');
+  const [cocount, setCoCount] = useState(0);
   const [academicYear, setAcademicYear] = useState('');
   const [branches, setBranches] = useState([]); // For branch dropdown
 
@@ -134,7 +134,7 @@ const EditCourse = () => {
           />
         </div>
         <button type="submit"
-          onClick={(e) => handleSubmit(e.target.value)} className="bg-blue-600 text-white px-4 py-2 rounded">
+          className="bg-blue-600 text-white px-4 py-2 rounded">
           Update Classroom
         </button>
       </form>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../../api';
 import CourseSelector from '../../../component/CourseSelector/CourseSelector';
+import validateForm from '../../auth/validate';
 
 const EditQuestionsPage = ({ uid }) => {
     const [courses, setCourses] = useState([]);
@@ -13,6 +14,7 @@ const EditQuestionsPage = ({ uid }) => {
     const [userCourseId, setUserCourseId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [numCOs, setCOs] = useState();
+    const [choicesData, setChoicesData] = useState([]);
 
     // Fetch courses on mount
     useEffect(() => {
@@ -97,6 +99,28 @@ const EditQuestionsPage = ({ uid }) => {
         updatedQuestionsCOData[questionIndex].coNames = Array.from({ length: value }, () => '');
         setQuestionsCOData(updatedQuestionsCOData);
     };
+
+    const handleNumChoicesChange = (questionIndex, value) => {
+        const updatedChoicesData = [...choicesData];
+        const numChoices = parseInt(value, 10);
+
+        // Ensure that choicesData has a defined array for the current question
+        if (!updatedChoicesData[questionIndex]) {
+            updatedChoicesData[questionIndex] = [];
+        }
+
+        // Adjust the number of choices for the current question
+        if (numChoices > updatedChoicesData[questionIndex].length) {
+            while (updatedChoicesData[questionIndex].length < numChoices) {
+                updatedChoicesData[questionIndex].push(''); // Add empty choices
+            }
+        } else {
+            updatedChoicesData[questionIndex] = updatedChoicesData[questionIndex].slice(0, numChoices);
+        }
+
+        setChoicesData(updatedChoicesData);
+    };
+
 
     const handleCONameChange = (questionIndex, coIndex, value) => {
         const updatedQuestionsCOData = [...questionsCOData];
@@ -206,21 +230,47 @@ const EditQuestionsPage = ({ uid }) => {
                                             placeholder="Enter label"
                                         />
 
-                                        <div className="px-4 py-6 sm:grid sm:grid-cols-1 sm:gap-4 sm:px-0">
-                                            <dt className="text-xl font-medium leading-6 text-gray-900">Multiple Choice Values</dt>
-                                            <textarea
-                                                className="bg-white border border-gray-300 text-gray-700 py-3 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                rows="6" // Adjust this value to change the height of the text box
-                                                cols="50" // Adjust this value to change the width of the text box
+                                        <div className="flex flex-col mt-6">
+                                            <label className="block text-gray-700 text-lg font-bold mb-2" htmlFor={`Values-${index}`}>
+                                                Multiple Choice Values:
+                                            </label>
+                                            <input
+                                                id={`Values-${index}`}
+                                                type="number"
+                                                min="0"
+                                                className="bg-white border border-gray-300 text-gray-700 w-full py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                onChange={(e) => handleNumChoicesChange(index, e.target.value)}
                                             />
                                         </div>
 
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                                            {choicesData[index]?.map((choice, choiceIndex) => (
+                                                <div key={choiceIndex} className="flex items-center space-x-2">
+                                                    <label className="block text-gray-700 text-lg font-bold" htmlFor={`choice-${index}-${choiceIndex}`}>
+                                                        Choice {choiceIndex + 1}:
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id={`choice-${index}-${choiceIndex}`}
+                                                        placeholder={`Enter Choice ${choiceIndex + 1}`}
+                                                        value={choice}
+                                                        onChange={(e) => {
+                                                            const updatedChoices = [...choicesData];
+                                                            updatedChoices[index][choiceIndex] = e.target.value;
+                                                            setChoicesData(updatedChoices);
+                                                        }}
+                                                        className="bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+
                                         <div className="flex flex-col mt-6">
-                                            <label className="block text-gray-700 text-lg font-bold mb-2" htmlFor="numberofCOs">
+                                            <label className="block text-gray-700 text-lg font-bold mb-2" htmlFor={`Values-${index}`}>
                                                 Number of COs:
                                             </label>
                                             <input
-                                                id={`numCOs-${index}`}
+                                                id={`Values-${index}`}
                                                 type="number"
                                                 min="0"
                                                 className="bg-white border border-gray-300 text-gray-700 w-full py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
