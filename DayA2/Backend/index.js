@@ -21,7 +21,7 @@ import UploadMiniProjectRoute from "./routes/Upload_miniproject.js";
 import ResultRoute from "./routes/Result.js"
 import BranchRoute from "./routes/showbranch.js"
 import CohortRoute from "./routes/lms/Cohort.js"
-import LMSClassRoom from "./routes/lms/Upload_classroom.js"
+import LMSClassRoom from "./routes/lms/classroom.js"
 // import LMSClassRoom from "./routes/lms/Upload_classroom.js"
 const port = 8081;
 
