@@ -801,10 +801,10 @@ const MajorproSem = ({ uid }) => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                <th className="sticky left-0 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
                                     Seat No.
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                <th className="sticky left-10 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
                                     Student ID
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
@@ -845,10 +845,10 @@ const MajorproSem = ({ uid }) => {
 
                                 return (
                                     <tr key={student.sid} className="hover:bg-gray-100">
-                                        <td className="sticky-left-0  z-10  px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="sticky left-0  bg-white z-10  px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {actualIndex + 1} {/* Displaying the row number */}
                                         </td>
-                                        <td className="sticky-left-10  z-10 px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="sticky left-10 bg-white z-10 px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {student.stud_clg_id}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
