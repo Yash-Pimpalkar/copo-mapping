@@ -509,23 +509,23 @@ const Oral = ({ uid }) => {
                     </div>
                 </div>
                 {filteredData.length > 0 && (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto"> {/* This div will make the table scrollable on smaller screens */}
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-blue-500">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                    <th className="sticky left-0 px-2 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-3 md:px-6">
                                         Seat No.
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                    <th className="sticky left-20 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-1 md:px-4">
                                         Student ID
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                    <th className="sticky left-40 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-3 md:px-3">
                                         Student Name
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-4 md:px-6">
                                         Total
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                    <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-4 md:px-6">
                                         Actions
                                     </th>
                                 </tr>
@@ -534,20 +534,18 @@ const Oral = ({ uid }) => {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {filteredData.slice(startIndex, endIndex).map((student, index) => {
                                     const actualIndex = index + startIndex; // Adjust index to match actual data index
-                                    // { console.log(actualIndex)
-                                    //  console.log(editingRow)}
                                     return (
                                         <tr key={student.sid} className="hover:bg-gray-100">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="sticky left-0 bg-white px-1 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-1 md:px-4">
                                                 {actualIndex + 1} {/* Displaying the row number */}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="sticky left-20 bg-white px-2 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-4 md:px-6">
                                                 {student.stud_clg_id}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="sticky left-40 bg-white py-4 whitespace-nowrap text-sm text-gray-500 sm:px-1 md:px-4">
                                                 {student.student_name}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-4 md:px-6">
                                                 {editingRow === actualIndex ? (
                                                     <input
                                                         type="text"
@@ -565,26 +563,26 @@ const Oral = ({ uid }) => {
                                                     student.marks // Show existing marks if not editing
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-4 md:px-6">
                                                 {editingRow === actualIndex ? (
                                                     <>
                                                         <button
-                                                            onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
-                                                            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                                                            onClick={() => handleSaveClick(actualIndex)}
+                                                            className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 sm:px-4 sm:py-2"
                                                         >
                                                             Save
                                                         </button>
                                                         <button
                                                             onClick={handleCancelClick}
-                                                            className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                                            className="ml-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 sm:px-4 sm:py-2"
                                                         >
                                                             Cancel
                                                         </button>
                                                     </>
                                                 ) : (
                                                     <button
-                                                        onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
-                                                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                                                        onClick={() => handleEditClick(actualIndex)}
+                                                        className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 sm:px-4 sm:py-2"
                                                     >
                                                         Edit
                                                     </button>
@@ -696,7 +694,7 @@ const Oral = ({ uid }) => {
                                 <table className="min-w-full table-fixed divide-y divide-gray-200">
                                     <thead className="bg-blue-500 text-white">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
+                                            <th className="sticky left-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
                                                 Details
                                             </th>
                                             {userCourse.map((course) => (
@@ -711,7 +709,7 @@ const Oral = ({ uid }) => {
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 bg-white">
                                         <tr>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                                            <td className="sticky left-0 bg-white px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
                                                 Total Passed
                                             </td>
                                             {userCourse.map((course) => (
@@ -730,7 +728,7 @@ const Oral = ({ uid }) => {
                                             ))}
                                         </tr>
                                         <tr>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                                            <td className="sticky left-0 bg-white px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
                                                 Total Students
                                             </td>
                                             {userCourse.map((course) => (
@@ -746,9 +744,9 @@ const Oral = ({ uid }) => {
                                         {userCourse.map((course) => (
                                             <tr
                                                 key={course.idcos}
-                                                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                                                className="sticky left-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                                             >
-                                                <td className="w-1/4"> {course.co_name}</td>
+                                                <td className="sticky left-0 bg-white w-1/4"> {course.co_name}</td>
                                                 <td className="w-1/4">
                                                     {(
                                                         (OralData.filter(

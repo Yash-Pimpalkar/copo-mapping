@@ -897,7 +897,7 @@ const OralPCE = ({ uid }) => {
           </div>
         ) : (
           <>
-            {/* // Display Oral PCE Data */}
+            {/* Display Oral PCE Data */}
             {filteredData.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -905,19 +905,19 @@ const OralPCE = ({ uid }) => {
                     <tr>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-0 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Student ID
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-24 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Student Name
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-48 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         College ID
                       </th>
@@ -956,116 +956,100 @@ const OralPCE = ({ uid }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredData
-                      .slice(startIndex, endIndex)
-                      .map((student, index) => {
-                        const actualIndex = index + startIndex; // Adjust index to match actual data index
-                        // {
-                        //   console.log(actualIndex);
-                        // }
-                        // {
-                        //   console.log(editingRow);
-                        // }
-                        return (
-                          <tr key={student.sid}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {filteredData.slice(startIndex, endIndex).map((student, index) => {
+                      const actualIndex = index + startIndex; // Adjust index to match actual data index
+                      return (
+                        <tr key={student.sid}>
+                          <td className="sticky left-0 px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.sid}
+                                onChange={(e) => handleInputChange(e, index, "sid")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.sid
+                            )}
+                          </td>
+                          <td className="sticky left-24 px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.student_name}
+                                onChange={(e) =>
+                                  handleInputChange(e, index, "student_name")
+                                }
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.student_name
+                            )}
+                          </td>
+                          <td className="sticky left-48 px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.stud_clg_id}
+                                onChange={(e) =>
+                                  handleInputChange(e, index, "stud_clg_id")
+                                }
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.stud_clg_id
+                            )}
+                          </td>
+                          {questionColumns.map((col) => (
+                            <td
+                              key={col.id}
+                              className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                            >
                               {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.sid}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "sid")
+                                <select
+                                  value={
+                                    student[col.qname] === null ? "" : student[col.qname]
                                   }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
+                                  onChange={(e) => handleInputChange(e, index, col.qname)}
+                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                >
+                                  <option value="">NULL</option>
+                                  {[...Array(col.marks + 1).keys()].map((i) => (
+                                    <option key={i} value={i}>
+                                      {i}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : student[col.qname] !== null ? (
+                                student[col.qname]
                               ) : (
-                                student.sid
+                                "N/A"
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.student_name}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "student_name")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
-                              ) : (
-                                student.student_name
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.stud_clg_id}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "stud_clg_id")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
-                              ) : (
-                                student.stud_clg_id
-                              )}
-                            </td>
-                            {questionColumns.map((col) => (
-                              <td
-                                key={col.id}
-                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                          ))}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {calculateTotal(student)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {editingRow === actualIndex ? (
+                              <button
+                                onClick={() => handleSaveClick(index)}
+                                className="text-indigo-600 hover:text-indigo-900"
                               >
-                                {editingRow === actualIndex ? (
-                                  <select
-                                    value={
-                                      student[col.qname] === null
-                                        ? ""
-                                        : student[col.qname]
-                                    }
-                                    onChange={(e) =>
-                                      handleInputChange(e, index, col.qname)
-                                    }
-                                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                  >
-                                    <option value="">NULL</option>
-                                    {[...Array(col.marks + 1).keys()].map(
-                                      (i) => (
-                                        <option key={i} value={i}>
-                                          {i}
-                                        </option>
-                                      )
-                                    )}
-                                  </select>
-                                ) : student[col.qname] !== null ? (
-                                  student[col.qname]
-                                ) : (
-                                  "N/A"
-                                )}
-                              </td>
-                            ))}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {calculateTotal(student)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <button
-                                  onClick={() => handleSaveClick(index)}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Save
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleEditClick(index)}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Edit
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                Save
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleEditClick(index)}
+                                className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1129,13 +1113,13 @@ const OralPCE = ({ uid }) => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                    <th className="sticky left-0 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
                       Type
                     </th>
                     {questionColumns.map((col) => (
                       <th
                         key={col.id}
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className=" px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         {col.qname}
                       </th>
@@ -1144,7 +1128,7 @@ const OralPCE = ({ uid }) => {
                     </th>
                   </tr>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                    <th className="sticky left-0 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
                       &nbsp;
                     </th>
                     {questionColumns.map((col) => (
@@ -1161,7 +1145,7 @@ const OralPCE = ({ uid }) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                    <td className="sticky left-0 bg-white px-6 py-4 whitespace-nowrap text-sm text-white-500">
                       {display} {attainmentData.passedPercentage} {"%"}
                     </td>
                     {getTotalStudentsPassedPerQuestion(
@@ -1179,7 +1163,7 @@ const OralPCE = ({ uid }) => {
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                    <td className="sticky left-0 bg-white px-6 py-4 whitespace-nowrap text-sm text-white-500">
                       Students Attempted Per Question
                     </td>
                     {getTotalStudentsAttempted().map((count, index) => (
@@ -1195,7 +1179,7 @@ const OralPCE = ({ uid }) => {
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                    <td className="sticky left-0 bg-white px-6 py-4 whitespace-nowrap text-sm text-white-500">
                       CO Attainment
                     </td>
                     {getTotalStudentsPassedPerQuestion(
@@ -1231,7 +1215,7 @@ const OralPCE = ({ uid }) => {
                     return (
                       <tr key={coName}>
                         {/* Display CO Name */}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white-500">
+                        <td className="sticky left-0 bg-white px-6 py-4 whitespace-nowrap text-sm text-white-500">
                           {coName} Average
                         </td>
 

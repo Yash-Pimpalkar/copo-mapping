@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from "../../api";
 import LoadingButton from "../../component/Loading/Loading";
-
+import Pagination from '../../component/Pagination/Pagination';
 
 const User_course = ({ uid }) => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(6);
   const [loading, setLoading] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+
 
   const navigate = useNavigate();
 
@@ -18,7 +19,7 @@ const User_course = ({ uid }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await api.post(`/api/usercourse/${uid}`);
+        const res = await api.get(`/api/usercourse/${uid}`);
         setData(res.data);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -45,7 +46,7 @@ const User_course = ({ uid }) => {
     setEditFormData({
       semester: data[index].semester,
       academic_year: data[index].academic_year,
-      co_count: data[index].co_count
+      co_count: data[index].co_count,
     });
   };
 
@@ -53,7 +54,7 @@ const User_course = ({ uid }) => {
     const { name, value } = e.target;
     setEditFormData({
       ...editFormData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -80,14 +81,16 @@ const User_course = ({ uid }) => {
     setEditIndex(null);
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(data.length / itemsPerPage); i++) {
-    pageNumbers.push(i);
-  }
+  const totalItems = data.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
@@ -99,30 +102,44 @@ const User_course = ({ uid }) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-blue-500">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Index</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">User Course ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">User ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Course Name</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Semester</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Academic Year</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Branch</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">CO Count</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">User Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider sticky left-0 bg-blue-500 z-10">
+                Index
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                User Course ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                User ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider sticky left-14 bg-blue-500 z-10">
+                Course Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Semester
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Academic Year
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Branch
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                CO Count
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                User Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentItems.map((item, index) => (
               <tr key={index} className="hover:bg-gray-100">
-                <td className="px-4 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                <td className="px-4 py-4 text-sm font-medium text-gray-900 whitespace-nowrap sticky left-0 bg-white z-10">
                   {indexOfFirstItem + index + 1}
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-700">
-                  {item.usercourse_id}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">
-                  {item.user_id}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">
+                <td className="px-4 py-4 text-sm text-gray-700">{item.usercourse_id}</td>
+                <td className="px-4 py-4 text-sm text-gray-700">{item.user_id}</td>
+                <td className="px-4 py-4 text-sm text-gray-700 sticky left-14 bg-white z-10">
                   {item.course_name}
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-700">
@@ -151,21 +168,9 @@ const User_course = ({ uid }) => {
                     item.academic_year
                   )}
                 </td>
+                <td className="px-4 py-4 text-sm text-gray-700">{item.branch}</td>
                 <td className="px-4 py-4 text-sm text-gray-700">
-                  {item.branch}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">
-                  {editIndex === index ? (
-                    <input
-                      type="text"
-                      name="co_count"
-                      value={editFormData.co_count}
-                      onChange={handleEditChange}
-                      className="border border-gray-300 p-1 rounded"
-                    />
-                  ) : (
-                    item.co_count
-                  )}
+                  {item.co_count}
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-700">
                   {editIndex === index ? (
@@ -191,12 +196,13 @@ const User_course = ({ uid }) => {
                       >
                         Add CO's
                       </button>
-                      <button
+                      <Link
                         className="bg-yellow-500 text-white px-4 py-2 rounded"
-                        onClick={() => handleEditClick(index)}
+                        // onClick={() => handleEditClick(index)}
+                        to={`/EditCourse/${item.usercourse_id}`}
                       >
                         Edit
-                      </button>
+                      </Link>
                       <button
                         className="bg-teal-500 text-white px-4 py-2 rounded"
                         onClick={() => handleShowCos(item.usercourse_id)}
@@ -211,17 +217,14 @@ const User_course = ({ uid }) => {
           </tbody>
         </table>
       </div>
-      <div className="flex justify-center mt-4 space-x-1">
-        {pageNumbers.map(number => (
-          <button
-            key={number}
-            onClick={() => setCurrentPage(number)}
-            className={`px-4 py-2 border rounded ${currentPage === number ? 'bg-blue-500 text-white' : 'bg-white text-black'}`}
-          >
-            {number}
-          </button>
-        ))}
-      </div>
+
+      {totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };

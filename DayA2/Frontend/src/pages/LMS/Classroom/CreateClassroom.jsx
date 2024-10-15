@@ -1,25 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from '../../../api';
 
-const CreateClassroom = () => {
+const CreateClassroom = ({ uid }) => {
+  const [courses, setCourses] = useState([]);
+  const [distinctCourses, setDistinctCourses] = useState([]);
   const [classroomName, setClassroomName] = useState("");
   const [selectedCohorts, setSelectedCohorts] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Fetch courses on mount
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/api/copo/${uid}`);
+        setCourses(res.data);
+
+        const distinct = Array.from(new Set(res.data.map(course => course.course_name)))
+          .map(course_name => ({
+            course_name,
+            academic_year: res.data.find(course => course.course_name === course_name).academic_year
+          }));
+
+        setDistinctCourses(distinct);
+      } catch (error) {
+        console.error('Error fetching course data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (uid) {
+      fetchCourseData();
+    }
+  }, [uid]);
+
 
   const cohorts = ["Cohort A", "Cohort B", "Cohort C"]; // Example cohorts
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]; // Example years
-  const departments = ["Computer", "AIDS", "IT", "Mechatronics"]; // Example departments
+  const departments = [
+    { name: "Computer", value: 1 },
+    { name: "AIDS", value: 2 },
+    { name: "IT", value: 3 },
+    { name: "EXTC", value: 4 },
+  ]; // Example departments  
   const semesters = [
-    "Semester 1",
-    "Semester 2",
-    "Semester 3",
-    "Semester 4",
-    "Semester 5",
-    "Semester 6",
-    "Semester 7",
-    "Semester 8",
+    { name: "Semester 1", value: 1 },
+    { name: "Semester 2", value: 2 },
+    { name: "Semester 3", value: 3 },
+    { name: "Semester 4", value: 4 },
+    { name: "Semester 5", value: 5 },
+    { name: "Semester 6", value: 6 },
+    { name: "Semester 7", value: 7 },
+    { name: "Semester 8", value: 8 },
   ]; // Example semesters
+
 
   const handleCohortChange = (cohort) => {
     if (selectedCohorts.includes(cohort)) {
@@ -29,8 +68,28 @@ const CreateClassroom = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Get the current time
+    const currentTime = new Date().toISOString();
+
+    const formatDateForDatabase = (isoDate) => {
+      const date = new Date(isoDate);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    const formattedCreatedAt = formatDateForDatabase(currentTime);
+
+    const selectedDepartmentObj = departments.find(dep => dep.name === selectedDepartment);
+    const selectedSemesterObj = semesters.find(sem => sem.name === selectedSemester);
+
     // Handle the creation of the classroom here
     console.log(
       "Classroom Created:",
@@ -44,6 +103,45 @@ const CreateClassroom = () => {
       "Semester:",
       selectedSemester
     );
+
+    const formData = { classroomName, selectedCohorts, selectedYear, selectedDepartment, selectedSemester };
+    console.log("formData", formData);
+
+    // Check for missing fields
+    if (!classroomName || !selectedCohorts || !selectedYear || !selectedDepartment || !selectedSemester) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Prepare data to submit
+      const dataToSubmit = {
+        userid: uid,
+        room_name: classroomName,
+        //selectedCohorts: selectedCohorts,
+        selectedYear: parseInt(selectedYear, 10),
+        branch: selectedDepartmentObj ? selectedDepartmentObj.value : null,
+        semester: selectedSemesterObj ? selectedSemesterObj.value : null,
+        created_at: formattedCreatedAt
+      };
+
+      console.log("dataToSubmit", dataToSubmit);
+
+      // Send data to the server
+      await api.post("/api/lmsclassroom/create", {
+        formDataForCohortClassroom: dataToSubmit
+      });
+
+      alert('Data submitted successfully');
+      setError(null);
+    } catch (error) {
+      console.error('Error submitting data:', error);
+      setError(error.response?.data?.error || 'Failed to submit data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -104,8 +202,8 @@ const CreateClassroom = () => {
               Select Department
             </option>
             {departments.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept}
+              <option key={dept.value} value={dept.name}>
+                {dept.name}
               </option>
             ))}
           </select>
@@ -127,8 +225,8 @@ const CreateClassroom = () => {
               Select Semester
             </option>
             {semesters.map((semester) => (
-              <option key={semester} value={semester}>
-                {semester}
+              <option key={semester.value} value={semester.name}>
+                {semester.name}
               </option>
             ))}
           </select>

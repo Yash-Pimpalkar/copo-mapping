@@ -357,8 +357,7 @@ const Ia2 = ({ uid }) => {
           const maxLimit = col.marks;
           if (marks !== null && marks > maxLimit) {
             errors.push(
-              `Row ${rowIndex + 2}: ${
-                col.qname
+              `Row ${rowIndex + 2}: ${col.qname
               } has marks ${marks}, which exceeds the limit of ${maxLimit}.`
             );
             marks = Math.min(marks, maxLimit); // Adjust the marks to be within the limit
@@ -490,17 +489,17 @@ const Ia2 = ({ uid }) => {
 
       const coAverage = coColumns.length
         ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
+          coColumns.reduce((sum, col) => {
+            const attainmentValue = getTotalStudentsPassedPerQuestion(
+              attainmentData.passedPercentage
+            )[col.index];
+            const attemptedCount = getTotalStudentsAttempted()[col.index];
+            const attainment = attemptedCount
+              ? (attainmentValue / attemptedCount) * 100
+              : 0;
+            return sum + attainment;
+          }, 0) / coColumns.length
+        ).toFixed(2)
         : 0;
 
       return [coName + " Average", coAverage + " %"];
@@ -573,17 +572,17 @@ const Ia2 = ({ uid }) => {
 
       const coAverage = coColumns.length
         ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
+          coColumns.reduce((sum, col) => {
+            const attainmentValue = getTotalStudentsPassedPerQuestion(
+              attainmentData.passedPercentage
+            )[col.index];
+            const attemptedCount = getTotalStudentsAttempted()[col.index];
+            const attainment = attemptedCount
+              ? (attainmentValue / attemptedCount) * 100
+              : 0;
+            return sum + attainment;
+          }, 0) / coColumns.length
+        ).toFixed(2)
         : 0;
 
       return { coName, coAverage };
@@ -616,7 +615,7 @@ const Ia2 = ({ uid }) => {
         distinctConames,
         questionColumns,
         attainmentData
-      );  
+      );
 
       api
         .post("/api/ia/ia2/insert-co-averages", {
@@ -640,30 +639,30 @@ const Ia2 = ({ uid }) => {
       const coColumns = questionColumns
         .map((col, index) => ({ ...col, index }))
         .filter((col) => col.coname === coName);
-  
+
       const coAverage = coColumns.length
         ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
+          coColumns.reduce((sum, col) => {
+            const attainmentValue = getTotalStudentsPassedPerQuestion(
+              attainmentData.passedPercentage
+            )[col.index];
+            const attemptedCount = getTotalStudentsAttempted()[col.index];
+            const attainment = attemptedCount
+              ? (attainmentValue / attemptedCount) * 100
+              : 0;
+            return sum + attainment;
+          }, 0) / coColumns.length
+        ).toFixed(2)
         : 0;
-  
+
       // Return categorization based on CO average
       return coAverage < 40
         ? 0
         : coAverage <= 60
-        ? 1
-        : coAverage <= 70
-        ? 2
-        : 3;
+          ? 1
+          : coAverage <= 70
+            ? 2
+            : 3;
     });
   };
   return (
@@ -782,47 +781,47 @@ const Ia2 = ({ uid }) => {
           </div>
         ) : (
           <>
-            {/* // Display IA Data */}
+            {/* Display IA Data */}
             {filteredData.length > 0 && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto max-w-full">
+                <table className="w-full min-w-max divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-0 z-10 px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Student ID
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-20 z-10 px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Student Name
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-40 z-10 px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         College ID
                       </th>
                       {questionColumns.map((col) => (
                         <th
                           key={col.id}
-                          className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                          className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                         >
                           {col.qname}
                         </th>
                       ))}
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Total
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Actions
                       </th>
@@ -831,7 +830,7 @@ const Ia2 = ({ uid }) => {
                       {questionColumns.map((col) => (
                         <th
                           key={col.id}
-                          className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                          className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                         >
                           {col.coname}
                         </th>
@@ -839,111 +838,91 @@ const Ia2 = ({ uid }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredData
-                      .slice(startIndex, endIndex)
-                      .map((student, index) => {
-                        const actualIndex = index + startIndex; // Adjust index to match actual data index
-
-                        return (
-                          <tr key={student.sid}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {filteredData.slice(startIndex, endIndex).map((student, index) => {
+                      const actualIndex = index + startIndex;
+                      return (
+                        <tr key={student.sid}>
+                          <td className="sticky left-0 z-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-white-500">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.sid}
+                                onChange={(e) => handleInputChange(e, index, "sid")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.sid
+                            )}
+                          </td>
+                          <td className="sticky left-20 z-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-white-500">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.student_name}
+                                onChange={(e) => handleInputChange(e, index, "student_name")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.student_name
+                            )}
+                          </td>
+                          <td className="sticky left-40 z-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-white-500">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.stud_clg_id}
+                                onChange={(e) => handleInputChange(e, index, "stud_clg_id")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.stud_clg_id
+                            )}
+                          </td>
+                          {questionColumns.map((col) => (
+                            <td key={col.id} className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
                               {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.sid}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "sid")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
+                                <select
+                                  value={student[col.qname] === null ? "" : student[col.qname]}
+                                  onChange={(e) => handleInputChange(e, index, col.qname)}
+                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                >
+                                  <option value="">NULL</option>
+                                  {[...Array(col.marks + 1).keys()].map((i) => (
+                                    <option key={i} value={i}>
+                                      {i}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : student[col.qname] !== null ? (
+                                student[col.qname]
                               ) : (
-                                student.sid
+                                "N/A"
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.student_name}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "student_name")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
-                              ) : (
-                                student.student_name
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.stud_clg_id}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "stud_clg_id")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
-                              ) : (
-                                student.stud_clg_id
-                              )}
-                            </td>
-                            {questionColumns.map((col) => (
-                              <td
-                                key={col.id}
-                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                          ))}
+                          <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {calculateTotal(student)}
+                          </td>
+                          <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {editingRow === actualIndex ? (
+                              <button
+                                onClick={() => handleSaveClick(index)}
+                                className="text-indigo-600 hover:text-indigo-900"
                               >
-                                {editingRow === actualIndex ? (
-                                  <select
-                                    value={
-                                      student[col.qname] === null
-                                        ? ""
-                                        : student[col.qname]
-                                    }
-                                    onChange={(e) =>
-                                      handleInputChange(e, index, col.qname)
-                                    }
-                                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                  >
-                                    <option value="">NULL</option>
-                                    {[...Array(col.marks + 1).keys()].map(
-                                      (i) => (
-                                        <option key={i} value={i}>
-                                          {i}
-                                        </option>
-                                      )
-                                    )}
-                                  </select>
-                                ) : student[col.qname] !== null ? (
-                                  student[col.qname]
-                                ) : (
-                                  "N/A"
-                                )}
-                              </td>
-                            ))}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {calculateTotal(student)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <button
-                                  onClick={() => handleSaveClick(index)}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Save
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleEditClick(index)}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Edit
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                Save
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleEditClick(index)}
+                                className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1083,78 +1062,78 @@ const Ia2 = ({ uid }) => {
                     })}
                   </tr>
 
-              
+
                 </tbody>
               </table>
               <table className="min-w-full divide-y divide-gray-200">
-  <thead className="bg-gray-50">
-    <tr>
-      <th
-        scope="col"
-        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-      >
-        CO Name
-      </th>
-      <th
-        scope="col"
-        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-      >
-        CO Average
-      </th>
-      <th
-        scope="col"
-        className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-      >
-        Categorization
-      </th>
-    </tr>
-  </thead>
-  <tbody className="bg-white divide-y divide-gray-200">
-    {distinctConames.map((coName) => {
-      const coColumns = questionColumns
-        .map((col, index) => ({ ...col, index })) // include index for mapping
-        .filter((col) => col.coname === coName); // filter by CO name
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                    >
+                      CO Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                    >
+                      CO Average
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                    >
+                      Categorization
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {distinctConames.map((coName) => {
+                    const coColumns = questionColumns
+                      .map((col, index) => ({ ...col, index })) // include index for mapping
+                      .filter((col) => col.coname === coName); // filter by CO name
 
-      const coAverage = coColumns.length
-        ? (
-            coColumns.reduce((sum, col) => {
-              const attainmentValue = getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              )[col.index];
-              const attemptedCount = getTotalStudentsAttempted()[col.index];
-              const attainment = attemptedCount
-                ? (attainmentValue / attemptedCount) * 100
-                : 0;
-              return sum + attainment;
-            }, 0) / coColumns.length
-          ).toFixed(2)
-        : 0;
+                    const coAverage = coColumns.length
+                      ? (
+                        coColumns.reduce((sum, col) => {
+                          const attainmentValue = getTotalStudentsPassedPerQuestion(
+                            attainmentData.passedPercentage
+                          )[col.index];
+                          const attemptedCount = getTotalStudentsAttempted()[col.index];
+                          const attainment = attemptedCount
+                            ? (attainmentValue / attemptedCount) * 100
+                            : 0;
+                          return sum + attainment;
+                        }, 0) / coColumns.length
+                      ).toFixed(2)
+                      : 0;
 
-      // Calculate categorization based on the CO average
-      const categorization = coAverage < 40
-        ? 0
-        : coAverage <= 60
-        ? 1
-        : coAverage <= 70
-        ? 2
-        : 3;
+                    // Calculate categorization based on the CO average
+                    const categorization = coAverage < 40
+                      ? 0
+                      : coAverage <= 60
+                        ? 1
+                        : coAverage <= 70
+                          ? 2
+                          : 3;
 
-      return (
-        <tr key={coName}>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {coName}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {coAverage} %
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            {categorization}
-          </td>
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
+                    return (
+                      <tr key={coName}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {coName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {coAverage} %
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {categorization}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
 
             </div>
           </div>

@@ -4,7 +4,7 @@ const router =express.Router();
 
 
 router.post("/",user_course_registration);
-router.post("/:uid",show_user_course);
+router.get("/:uid",show_user_course);
 router.get("/cocount/:uid",show_CoCount);
 router.get("/coname/:uid",coname);
 export default router;

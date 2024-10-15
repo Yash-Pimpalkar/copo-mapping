@@ -794,47 +794,47 @@ const Ia1 = ({ uid }) => {
           </div>
         ) : (
           <>
-            {/* // Display IA Data */}
+            {/* Display IA Data */}
             {filteredData.length > 0 && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto max-w-full">
+                <table className="w-full min-w-max divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-0 z-10 px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Student ID
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-20 z-10 px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Student Name
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="sticky left-40 z-10 px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         College ID
                       </th>
                       {questionColumns.map((col) => (
                         <th
                           key={col.id}
-                          className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                          className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                         >
                           {col.qname}
                         </th>
                       ))}
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Total
                       </th>
                       <th
                         rowSpan="2"
-                        className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                        className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
                         Actions
                       </th>
@@ -843,7 +843,7 @@ const Ia1 = ({ uid }) => {
                       {questionColumns.map((col) => (
                         <th
                           key={col.id}
-                          className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
+                          className="px-2 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                         >
                           {col.coname}
                         </th>
@@ -851,116 +851,91 @@ const Ia1 = ({ uid }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredData
-                      .slice(startIndex, endIndex)
-                      .map((student, index) => {
-                        const actualIndex = index + startIndex; // Adjust index to match actual data index
-                        // {
-                        //   console.log(actualIndex);
-                        // }
-                        // {
-                        //   console.log(editingRow);
-                        // }
-                        return (
-                          <tr key={student.sid}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {filteredData.slice(startIndex, endIndex).map((student, index) => {
+                      const actualIndex = index + startIndex;
+                      return (
+                        <tr key={student.sid}>
+                          <td className="sticky left-0 z-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-white-500">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.sid}
+                                onChange={(e) => handleInputChange(e, index, "sid")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.sid
+                            )}
+                          </td>
+                          <td className="sticky left-20 z-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-white-500">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.student_name}
+                                onChange={(e) => handleInputChange(e, index, "student_name")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.student_name
+                            )}
+                          </td>
+                          <td className="sticky left-40 z-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-white-500">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.stud_clg_id}
+                                onChange={(e) => handleInputChange(e, index, "stud_clg_id")}
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.stud_clg_id
+                            )}
+                          </td>
+                          {questionColumns.map((col) => (
+                            <td key={col.id} className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
                               {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.sid}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "sid")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
+                                <select
+                                  value={student[col.qname] === null ? "" : student[col.qname]}
+                                  onChange={(e) => handleInputChange(e, index, col.qname)}
+                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                >
+                                  <option value="">NULL</option>
+                                  {[...Array(col.marks + 1).keys()].map((i) => (
+                                    <option key={i} value={i}>
+                                      {i}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : student[col.qname] !== null ? (
+                                student[col.qname]
                               ) : (
-                                student.sid
+                                "N/A"
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.student_name}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "student_name")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
-                              ) : (
-                                student.student_name
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <input
-                                  type="text"
-                                  value={student.stud_clg_id}
-                                  onChange={(e) =>
-                                    handleInputChange(e, index, "stud_clg_id")
-                                  }
-                                  className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sticky-left-2"
-                                />
-                              ) : (
-                                student.stud_clg_id
-                              )}
-                            </td>
-                            {questionColumns.map((col) => (
-                              <td
-                                key={col.id}
-                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                          ))}
+                          <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {calculateTotal(student)}
+                          </td>
+                          <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {editingRow === actualIndex ? (
+                              <button
+                                onClick={() => handleSaveClick(index)}
+                                className="text-indigo-600 hover:text-indigo-900"
                               >
-                                {editingRow === actualIndex ? (
-                                  <select
-                                    value={
-                                      student[col.qname] === null
-                                        ? ""
-                                        : student[col.qname]
-                                    }
-                                    onChange={(e) =>
-                                      handleInputChange(e, index, col.qname)
-                                    }
-                                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                  >
-                                    <option value="">NULL</option>
-                                    {[...Array(col.marks + 1).keys()].map(
-                                      (i) => (
-                                        <option key={i} value={i}>
-                                          {i}
-                                        </option>
-                                      )
-                                    )}
-                                  </select>
-                                ) : student[col.qname] !== null ? (
-                                  student[col.qname]
-                                ) : (
-                                  "N/A"
-                                )}
-                              </td>
-                            ))}
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {calculateTotal(student)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {editingRow === actualIndex ? (
-                                <button
-                                  onClick={() => handleSaveClick(index)}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Save
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleEditClick(index)}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Edit
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                Save
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleEditClick(index)}
+                                className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
