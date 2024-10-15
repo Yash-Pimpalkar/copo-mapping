@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import Pagination from "../../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
+import LoadingButton from "../../../component/Loading/Loading";
 // import { limit } from "../../../../../Backend/controller/Upload_majorproject";
 
 const MajorproSem = ({ uid }) => {
     const [courses, setCourses] = useState([]);
     const [distinctCourses, setDistinctCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState("");
+    const [Err, setErr] = useState();
     const [selectedYear, setSelectedYear] = useState("");
     const [userCourseId, setUserCourseId] = useState(null);
     const [userCourse, setUserCourse] = useState([]);
@@ -17,6 +19,7 @@ const MajorproSem = ({ uid }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [editingRow, setEditingRow] = useState(null);
     const [editedMarks, setEditedMarks] = useState({});
+    const [loading, setLoading] = useState(false);
     const [maxLimitlogbook, setmaxlimitlogbook] = useState(0);
     const [maxLimitreview1, setmaxlimitreview1] = useState(0);
     const [maxLimitreview2, setmaxlimitreview2] = useState(0);
@@ -27,6 +30,7 @@ const MajorproSem = ({ uid }) => {
     useEffect(() => {
         const fetchCourseData = async () => {
             try {
+                setLoading(true);
                 const res = await api.get(`/api/copo/${uid}`);
                 setCourses(res.data);
                 console.log(res.data);
@@ -42,6 +46,8 @@ const MajorproSem = ({ uid }) => {
                 setDistinctCourses(distinct);
             } catch (error) {
                 console.error("Error fetching course data:", error);
+            } finally{
+                setLoading(false);
             }
         };
 
@@ -54,6 +60,7 @@ const MajorproSem = ({ uid }) => {
         const fetchMajorproData = async () => {
             if (userCourseId) {
                 try {
+                    setLoading(true);
                     const res = await api.get(`/api/uploadmajorprosem/show/${userCourseId}`);
                     SetMajorproData(res.data);
                     const res1 = await api.get(`/api/uploadmajorprosem/coname/${userCourseId}`);
@@ -73,6 +80,8 @@ const MajorproSem = ({ uid }) => {
                     setmaxlimitproreport(limits.proreportmarks); // Assuming the structure matches { logbookmarks, review1marks, review2marks, proreportmarks }
                 } catch (error) {
                     console.error("Error fetching data:", error);
+                } finally {
+                    setLoading(false);
                 }
             }
         };
@@ -223,6 +232,7 @@ const MajorproSem = ({ uid }) => {
         const mainmajorprosemId = MajorproData[actualIndex].mainmajorprosemid;
         const updatedData = editedMarks[index];
         try {
+            setLoading(true);
             await api.put("/api/uploadmajorprosem/", {
                 mainmajorprosemid: mainmajorprosemId,
                 logbook_marks: updatedData.logbook_marks,
@@ -239,6 +249,8 @@ const MajorproSem = ({ uid }) => {
             setEditingRow(null);
         } catch (error) {
             console.error("Error saving data:", error);
+        } finally{
+            setLoading(false);
         }
     };
 
@@ -555,6 +567,7 @@ const MajorproSem = ({ uid }) => {
             });
 
             try {
+                setLoading(true);
                 console.log(validatedData);
                 await api.put("/api/uploadmajorprosem/", validatedData);
                 SetMajorproData(validatedData);
@@ -563,6 +576,8 @@ const MajorproSem = ({ uid }) => {
             } catch (error) {
                 console.error("Error uploading file:", error);
                 alert("Failed to upload file. Please try again.");
+            }finally{
+                setLoading(false);
             }
         };
 
@@ -688,7 +703,7 @@ const MajorproSem = ({ uid }) => {
                             id="course-select"
                             value={selectedCourse}
                             onChange={handleCourseChange}
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         >
                             <option value="">Select a course</option>
                             {distinctCourses.map((course, index) => (
@@ -710,7 +725,7 @@ const MajorproSem = ({ uid }) => {
                             id="year-select"
                             value={selectedYear}
                             onChange={handleYearChange}
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         >
                             <option value="">Select a year</option>
                             {courses
@@ -724,52 +739,65 @@ const MajorproSem = ({ uid }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row md:space-x-4 mb-4 items-center">
-                    <div className="mb-4 md:mb-0 flex-1">
-                        <label
-                            htmlFor="file-upload"
-                            className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                            Upload File
-                        </label>
-                        <input
-                            type="file"
-                            accept=".xlsx"
-                            onChange={handleFileUpload}
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
-                    </div>
+        {/* Upload, Search, and Download Controls */}
+        <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 items-center">
+  <div className="flex-1 w-full">
+    <label
+      htmlFor="file-upload"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Upload File
+    </label>
+    <input
+      type="file"
+      accept=".xlsx"
+      onChange={handleFileUpload}
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
 
-                    <div className="mb-4 md:mb-0 flex-1">
-                        <label
-                            htmlFor="search-bar"
-                            className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                            Search
-                        </label>
-                        <input
-                            type="text"
-                            id="search-bar"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            placeholder="Search by student name or ID"
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 pl-3 focus:border-indigo-500 sm:text-sm"
-                        />
-                    </div>
+  <div className="flex-1 w-full">
+    <label
+      htmlFor="search-bar"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Search
+    </label>
+    <input
+      type="text"
+      id="search-bar"
+      value={searchQuery}
+      onChange={handleSearchChange}
+      placeholder="Search by student name or ID"
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
 
-                    <div className="mb-4 md:mb-0 flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Download Data
-                        </label>
-                        <button
-                            onClick={handleFileDownload}
-                            className="w-full bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                            Download
-                        </button>
-                    </div>
-                </div>
+  <div className="mb-4 md:mb-0 flex-1">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Download Data
+    </label>
+    <button
+      onClick={handleFileDownload}
+      className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    >
+      Download
+    </button>
+  </div>
+</div>
+{Err && (
+          <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+            Error: {Err}
+          </p>
+        )}
+        {loading ? (
+          <div className="flex justify-center items-center">
+            <LoadingButton />
+          </div>
+        ) : (
+          <>
                 {filteredData.length > 0 && (
+                    <div className="mt-4 overflow-x-auto max-w-full">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
@@ -817,10 +845,10 @@ const MajorproSem = ({ uid }) => {
 
                                 return (
                                     <tr key={student.sid} className="hover:bg-gray-100">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="sticky-left-0  z-10  px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {actualIndex + 1} {/* Displaying the row number */}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="sticky-left-10  z-10 px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {student.stud_clg_id}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -938,10 +966,10 @@ const MajorproSem = ({ uid }) => {
                                 );
                             })}
                         </tbody>
-
-
-
                     </table>
+                </div>
+                )}
+              </>
                 )}
                 {totalPages > 0 && (
                     <Pagination

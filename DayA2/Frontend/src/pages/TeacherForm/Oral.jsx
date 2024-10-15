@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
+import LoadingButton from "../../component/Loading/Loading";
 
 const Oral = ({ uid }) => {
     const [courses, setCourses] = useState([]);
@@ -17,6 +18,8 @@ const Oral = ({ uid }) => {
     const [editingRow, setEditingRow] = useState(null);
     const [editedMarks, setEditedMarks] = useState({});
     const [maxLimit, setmaxlimit] = useState();
+    const [loading, setLoading] = useState(false);
+  const [Err, setErr] = useState();
     const [attainmentData, setAttainmentData] = useState({
         passedPercentage: 50,
     });
@@ -427,7 +430,7 @@ const Oral = ({ uid }) => {
                             id="course-select"
                             value={selectedCourse}
                             onChange={handleCourseChange}
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         >
                             <option value="">Select a course</option>
                             {distinctCourses.map((course, index) => (
@@ -449,7 +452,7 @@ const Oral = ({ uid }) => {
                             id="year-select"
                             value={selectedYear}
                             onChange={handleYearChange}
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         >
                             <option value="">Select a year</option>
                             {courses
@@ -463,53 +466,67 @@ const Oral = ({ uid }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row md:space-x-4 mb-4 items-center">
-                    <div className="mb-4 md:mb-0 flex-1">
-                        <label
-                            htmlFor="file-upload"
-                            className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                            Upload File
-                        </label>
-                        <input
-                            type="file"
-                            accept=".xlsx"
-                            onChange={handleFileUpload}
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        />
-                    </div>
+                       {/* Upload, Search, and Download Controls */}
+        <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 items-center">
+  <div className="flex-1 w-full">
+    <label
+      htmlFor="file-upload"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Upload File
+    </label>
+    <input
+      type="file"
+      accept=".xlsx"
+      onChange={handleFileUpload}
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
 
-                    <div className="mb-4 md:mb-0 flex-1">
-                        <label
-                            htmlFor="search-bar"
-                            className="block text-sm font-medium text-gray-700 mb-2"
-                        >
-                            Search
-                        </label>
-                        <input
-                            type="text"
-                            id="search-bar"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            placeholder="Search by student name or ID"
-                            className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 pl-3 focus:border-indigo-500 sm:text-sm"
-                        />
-                    </div>
+  <div className="flex-1 w-full">
+    <label
+      htmlFor="search-bar"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Search
+    </label>
+    <input
+      type="text"
+      id="search-bar"
+      value={searchQuery}
+      onChange={handleSearchChange}
+      placeholder="Search by student name or ID"
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
 
-                    <div className="mb-4 md:mb-0 flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Download Data
-                        </label>
-                        <button
-                            onClick={handleFileDownload}
-                            className="w-full bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                            Download
-                        </button>
-                    </div>
-                </div>
+  <div className="mb-4 md:mb-0 flex-1">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Download Data
+    </label>
+    <button
+      onClick={handleFileDownload}
+      className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    >
+      Download
+    </button>
+  </div>
+</div>
+{Err && (
+          <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+            Error: {Err}
+          </p>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center">
+            <LoadingButton />
+          </div>
+        ) : (
+          <>
+            {/* Display Oral PCE Data */}
                 {filteredData.length > 0 && (
-                    <div className="overflow-x-auto"> {/* This div will make the table scrollable on smaller screens */}
+                    <div className="mt-4 overflow-x-auto"> {/* This div will make the table scrollable on smaller screens */}
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-blue-500">
                                 <tr>
@@ -539,10 +556,10 @@ const Oral = ({ uid }) => {
                                             <td className="sticky left-0 bg-white px-1 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-1 md:px-4">
                                                 {actualIndex + 1} {/* Displaying the row number */}
                                             </td>
-                                            <td className="sticky left-20 bg-white px-2 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-4 md:px-6">
+                                            <td className="sticky left-10 bg-white px-2 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-4 md:px-6">
                                                 {student.stud_clg_id}
                                             </td>
-                                            <td className="sticky left-40 bg-white py-4 whitespace-nowrap text-sm text-gray-500 sm:px-1 md:px-4">
+                                            <td className="bg-white py-4 whitespace-nowrap text-sm text-gray-500 sm:px-1 md:px-4">
                                                 {student.student_name}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 sm:px-4 md:px-6">
@@ -594,6 +611,8 @@ const Oral = ({ uid }) => {
                             </tbody>
                         </table>
                     </div>
+                )}
+                    </>
                 )}
                 {totalPages > 0 && (
                     <Pagination

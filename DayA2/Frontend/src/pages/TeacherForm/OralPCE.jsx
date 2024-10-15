@@ -839,51 +839,51 @@ const OralPCE = ({ uid }) => {
           </div>
         </div>
         {/* Upload, Search, and Download Controls */}
-        <div className="flex flex-col md:flex-row md:space-x-4 mb-4 items-center">
-          <div className="mb-4 md:mb-0 flex-1">
-            <label
-              htmlFor="file-upload"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Upload File
-            </label>
-            <input
-              type="file"
-              accept=".xlsx"
-              onChange={handleFileUpload}
-              className="block w-full border p-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
+        <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 items-center">
+  <div className="flex-1 w-full">
+    <label
+      htmlFor="file-upload"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Upload File
+    </label>
+    <input
+      type="file"
+      accept=".xlsx"
+      onChange={handleFileUpload}
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
 
-          <div className="mb-4 md:mb-0 flex-1">
-            <label
-              htmlFor="search-bar"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Search
-            </label>
-            <input
-              type="text"
-              id="search-bar"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search by student name or ID"
-              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
+  <div className="flex-1 w-full">
+    <label
+      htmlFor="search-bar"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Search
+    </label>
+    <input
+      type="text"
+      id="search-bar"
+      value={searchQuery}
+      onChange={handleSearchChange}
+      placeholder="Search by student name or ID"
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
 
-          <div className="mb-4 md:mb-0 flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Download Data
-            </label>
-            <button
-              onClick={handleFileDownload}
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            >
-              Download
-            </button>
-          </div>
-        </div>
+  <div className="mb-4 md:mb-0 flex-1">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Download Data
+    </label>
+    <button
+      onClick={handleFileDownload}
+      className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    >
+      Download
+    </button>
+  </div>
+</div>
 
         {Err && (
           <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
@@ -899,7 +899,7 @@ const OralPCE = ({ uid }) => {
           <>
             {/* Display Oral PCE Data */}
             {filteredData.length > 0 && (
-              <div className="overflow-x-auto">
+              <div className="mt-4 overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -913,13 +913,13 @@ const OralPCE = ({ uid }) => {
                         rowSpan="2"
                         className="sticky left-24 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
-                        Student Name
+                        College ID
                       </th>
                       <th
                         rowSpan="2"
                         className="sticky left-48 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider"
                       >
-                        College ID
+                        Student Name
                       </th>
                       {questionColumns.map((col) => (
                         <th
@@ -972,21 +972,7 @@ const OralPCE = ({ uid }) => {
                               student.sid
                             )}
                           </td>
-                          <td className="sticky left-24 px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
-                            {editingRow === actualIndex ? (
-                              <input
-                                type="text"
-                                value={student.student_name}
-                                onChange={(e) =>
-                                  handleInputChange(e, index, "student_name")
-                                }
-                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                              />
-                            ) : (
-                              student.student_name
-                            )}
-                          </td>
-                          <td className="sticky left-48 px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
+                          <td className="sticky left-10 px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
                             {editingRow === actualIndex ? (
                               <input
                                 type="text"
@@ -998,6 +984,20 @@ const OralPCE = ({ uid }) => {
                               />
                             ) : (
                               student.stud_clg_id
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 bg-white">
+                            {editingRow === actualIndex ? (
+                              <input
+                                type="text"
+                                value={student.student_name}
+                                onChange={(e) =>
+                                  handleInputChange(e, index, "student_name")
+                                }
+                                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              />
+                            ) : (
+                              student.student_name
                             )}
                           </td>
                           {questionColumns.map((col) => (
