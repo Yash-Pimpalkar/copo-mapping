@@ -102,7 +102,12 @@ const ManageClassroom = ({ uid }) => {
                                 </td>
                                 <td className="border px-4 py-2">{classroom.semester}</td>
                                 <td className="border px-4 py-2">{new Date(classroom.created_at).toLocaleString()}</td>
-                                <td className="border px-4 py-2"> </td>
+                                <td className="border px-4 py-2">   <Link
+                                        to={`/lms/Manageclassstudents/${classroom.classroom_id}`}
+                                        className="text-green-500 hover:underline mr-4"
+                                    >
+                                        Manage Class Students
+                                    </Link> </td>
                                 <td className="border px-4 py-2">
                                     {/* Edit, Delete, and Manage Students buttons */}
                                     <Link
@@ -111,12 +116,7 @@ const ManageClassroom = ({ uid }) => {
                                     >
                                         Edit
                                     </Link>
-                                    {/* <Link
-                                        to={`/lms/ManageStudents/${classroom.classroom_id}`}
-                                        className="text-green-500 hover:underline mr-4"
-                                    >
-                                        Manage Students
-                                    </Link> */}
+                                 
                                     <button
                                         onClick={() => handleDelete(classroom.classroom_id)}
                                         className="text-red-500 hover:underline"
