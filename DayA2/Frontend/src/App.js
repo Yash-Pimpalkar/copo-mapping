@@ -61,11 +61,7 @@ import ManageStudents from './pages/LMS/Cohort/ManageStudents';
 import ManageClassroom from './pages/LMS/Classroom/ManageClassroom';
 import EditCourse from './pages/TeacherRegistration/EditCourse';
 import ManageClassroomStudents from './pages/LMS/Classroom/ManageClassroomStudents';
-// import Uploadpurepract from './pages/Termwork/Uploadpurepract';
-// import UploadPrhavminipro from './pages/Termwork/UploadPrhavminipro';
-// import Uploadprinternal from './pages/Termwork/Uploadprinternal';
-// import Uploadpr10 from './pages/Termwork/Uploadpr10+10(mini)+5';
-// import Uploadthonly from './pages/Termwork/Uploadthonly';
+import ViewAllClassroom from './pages/LMS/Classroom/ViewAllClassroom';
 
 function App() {
   const [token, setToken] = useState("");
@@ -153,11 +149,8 @@ function App() {
               <Route path="/lms/managestudents/:cohortId" element={<ManageStudents uid={user_id}/>} />
               <Route path='/lms/manageclassroom/:classroomId' element={<ManageClassroom uid={user_id}/>} />
               <Route path= "/lms/manageclassstudents/:classId" element={<ManageClassroomStudents uid={user_id}/>} />
-              {/* <Route path='/uploadpurepract' element={<Uploadpurepract uid={user_id}/>}/>
-              <Route path='/uploadprhavminipro' element={<UploadPrhavminipro uid={user_id}/>}/>
-              <Route path='/uploadprinternal' element={<Uploadprinternal uid={user_id}/>}/>
-              <Route path='/uploadpr10' element={<Uploadpr10 uid={user_id}/>}/>
-              <Route path='/uploadthonly' element={<Uploadthonly uid={user_id}/>}/> */}
+              <Route path= "/lms/viewclasssroom/" element={<ViewAllClassroom uid={user_id}/>} />
+
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>
