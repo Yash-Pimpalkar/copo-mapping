@@ -14,7 +14,7 @@ router.post('/assignstudents/:classId', addStudentsToClass);
 router.delete('/deletestudents/:classId', deleteAllStudentsFromClass);
 
 // Delete One Student from Class
-router.delete('/deletestudent/:classId/:sid', deleteStudentFromClass);
+router.delete('/deletestudent/:sid/:classId', deleteStudentFromClass);
 
 router.get('/fetchstudents/:classId',getClassroomStudents);
 

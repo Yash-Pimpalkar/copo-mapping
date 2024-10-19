@@ -198,24 +198,31 @@ console.log(error)
 // Delete a Student from Class
 export const deleteStudentFromClass = async (req, res) => {
     const { classId, sid } = req.params;
+    const classIdAsInt = parseInt(classId); // Convert cohortId to an integer
+    const sidAsInt = parseInt(sid); // Convert cohortId to an integer
+    console.log("classId:", classId, "sid:", sid);  // Log the parameters
   
     const query = `DELETE FROM class_student_table WHERE class_id = ? AND sid = ?`;
-  
+    console.log(typeof classIdAsInt);
     try {
-      // Execute the query and await the result
-      const result = await db.query(query, [classId, sid]);
-      
-      // Check if any rows were affected
-      if (result[0].affectedRows === 0) {
+      // Execute the query
+      const [result] = await db.query(query, [classIdAsInt, sidAsInt]);
+  
+      // Log the query result for debugging
+      console.log('Query Result:', result);
+  
+      // Check if any rows were affected (i.e., student was found and deleted)
+      if (result.affectedRows === 0) {
         return res.status(404).json({ message: 'Student not found in the class' });
       }
   
-      res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result[0].affectedRows });
+      res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
     } catch (error) {
-      console.error('Error deleting student:', error);
+      console.error('Error deleting student:', error.message);  // Log the error
       res.status(500).json({ message: 'Error deleting student' });
     }
   };
+  
 
 
   export const getClassroomStudents = (req, res) => {

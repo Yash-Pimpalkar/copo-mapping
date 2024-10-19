@@ -111,10 +111,11 @@ export const getAllCohorts = (req, res) => {
 
 export const assignStudentsToCohort = (req, res) => {
     const { cohort_id } = req.params; // Cohort ID from URL
+    const cohortIdAsInt = parseInt(cohort_id); // Convert cohortId to an integer
     const { selectedStudents } = req.body; // Array of selected student IDs
   
     // Insert each student into the student_cohort table
-    const values = selectedStudents.map(sid => [sid, cohort_id]);
+    const values = selectedStudents.map(sid => [sid, cohortIdAsInt]);
     const sql = 'INSERT INTO student_cohort (student_id, cohort_id) VALUES ?';
   
     db.query(sql, [values], (error) => {

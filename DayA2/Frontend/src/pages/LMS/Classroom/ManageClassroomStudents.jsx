@@ -50,11 +50,11 @@ const ManageClassroomStudents = ({ uid }) => {
         setTimeout(() => setErrorMessage(''), 5000);
         console.error('Error fetching classroom students:', error);
       }
+      console.log(typeof classIdAsInt);
     };
 
     fetchClassroomStudents();
   }, [classIdAsInt]); // Dependencies array to fetch new data when classId changes
-
   // Fetch all students for cohort assignment
   useEffect(() => {
     const fetchStudents = async () => {
@@ -130,7 +130,6 @@ const ManageClassroomStudents = ({ uid }) => {
       setTimeout(() => setErrorMessage(''), 5000);
     }
   };
-
 
   // Add newly selected students from selected cohorts to the cohort
   const handleAddNewStudents = async () => {

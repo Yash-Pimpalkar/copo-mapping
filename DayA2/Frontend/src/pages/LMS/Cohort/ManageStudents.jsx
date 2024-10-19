@@ -5,7 +5,11 @@ import { FaTrashAlt } from 'react-icons/fa';  // Importing the trash icon for re
 
 const ManageStudents = () => {
   const { cohortId } = useParams(); // Get cohortId from the URL
+<<<<<<< Updated upstream
   const cohortIdAsInt = parseInt(cohortId, 10); // Convert cohortId to an integer
+=======
+  const cohortIdAsInt = parseInt(cohortId); // Convert cohortId to an integer
+>>>>>>> Stashed changes
   const [students, setStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [cohortname,setCohortName]=useState()
@@ -177,7 +181,10 @@ const ManageStudents = () => {
   };
   const handleSubmit = async () => {
     try {
+<<<<<<< Updated upstream
       console.log(typeof cohortId);
+=======
+>>>>>>> Stashed changes
       await api.post(`/api/cohorts/assignstudents/${cohortIdAsInt}`, {
         selectedStudents: selectedStudents.map(student => student.sid),
       });
