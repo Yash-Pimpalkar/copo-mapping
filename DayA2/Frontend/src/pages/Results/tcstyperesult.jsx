@@ -300,7 +300,7 @@ const Tcstyperesult = ({ uid }) => {
       ...emptyRows,  // Add empty rows for spacing
       headers3,
       ...data,
-    
+
     ];
 
 
@@ -308,7 +308,7 @@ const Tcstyperesult = ({ uid }) => {
     const worksheet = XLSX.utils.json_to_sheet(finalDataForExport);
     const workbook = XLSX.utils.book_new();
 
-    const poPsoStartRow = loDataForExport.length + additionalData.length; 
+    const poPsoStartRow = loDataForExport.length + additionalData.length;
 
     // Get dynamic lengths for the data
     const loDataLength = loDataForExport.length; // Length of the LO data
@@ -434,20 +434,30 @@ const Tcstyperesult = ({ uid }) => {
       {/* {loData.length > 0 && ( */}
       <>
         <h1 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">TCS TYPE IA1 AND IA2 Attainment</h1>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border border-gray-300 mb-4 text-sm md:text-base">
-            <thead>
+        <div className="w-full overflow-x-auto table-container">
+          <table className="w-full min-w-[300px] sm:min-w-[500px] md:min-w-[700px] lg:min-w-[900px] xl:min-w-[1200px] 2xl:min-w-[1440px] border-collapse border border-gray-300 mb-4 text-sm md:text-base lg:text-lg">
+            <thead className="sticky top-0 bg-white z-10">
               <tr>
-                <th className='border border-gray-300 p-2' colSpan={12}>Lab Course Attainment</th>
+                <th className="border border-gray-300 p-2" colSpan={12}>
+                  Lab Course Attainment
+                </th>
               </tr>
               <tr>
                 <th className="border border-gray-300 p-2 text-center" colSpan={7}>
                   Direct Course Attainment Calculations
                 </th>
-                <th className="border border-gray-300 p-2 text-center" rowSpan={2} colSpan={2}>Indirect Course Attainment Calculation</th>
-                <th className="border border-gray-300 p-2 text-center" rowSpan={2}>Direct Attainment</th>
-                <th className="border border-gray-300 p-2 text-center" rowSpan={2}>Indirect Attainment</th>
-                <th className="border border-gray-300 p-2 text-center" rowSpan={2}>Total Attainment</th>
+                <th className="border border-gray-300 p-2 text-center" rowSpan={2} colSpan={2}>
+                  Indirect Course Attainment Calculation
+                </th>
+                <th className="border border-gray-300 p-2 text-center" rowSpan={2}>
+                  Direct Attainment
+                </th>
+                <th className="border border-gray-300 p-2 text-center" rowSpan={2}>
+                  Indirect Attainment
+                </th>
+                <th className="border border-gray-300 p-2 text-center" rowSpan={2}>
+                  Total Attainment
+                </th>
               </tr>
               <tr>
                 <th className="border border-gray-300 p-2 text-center">CO</th>
@@ -460,7 +470,6 @@ const Tcstyperesult = ({ uid }) => {
               </tr>
             </thead>
             <tbody>
-              {/* Data Rows */}
               {loData.map((item, index) => (
                 <tr key={index}>
                   <td className="border border-gray-300 p-2 text-center">{item.coname}</td>
@@ -478,7 +487,6 @@ const Tcstyperesult = ({ uid }) => {
                 </tr>
               ))}
 
-              {/* Attainment, Weightage Rows */}
               <tr>
                 <td className="border border-gray-300 p-2 text-center" colSpan={5}>AVERAGE</td>
                 <td className="border border-gray-300 p-2 text-center">{Average}</td>
@@ -528,96 +536,134 @@ const Tcstyperesult = ({ uid }) => {
         </div>
 
         {/* PO and PSO Attainment Table */}
-        {/* PO and PSO Attainment Table */}
         <h2 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">PO, PSO Attainment</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border border-gray-300 text-sm md:text-base">
-            <thead>
-              <tr>
-                <th className="border border-gray-300 p-2" colSpan={15}>PO, PSO Attainment</th>
-              </tr>
-              <tr>
-                <th className="border border-gray-300 p-2" colSpan={13}>PO</th>
-                <th className="border border-gray-300 p-2" colSpan={2}>PSO</th>
-              </tr>
-              <tr>
-                <th className="border border-gray-300 p-2">LO</th>
-                {[...Array(12).keys()].map(i => (
-                  <th key={i} className="border border-gray-300 p-2">PO{i + 1}</th>
-                ))}
-                <th className="border border-gray-300 p-2">PSO1</th>
-                <th className="border border-gray-300 p-2">PSO2</th>
-              </tr>
-            </thead>
-            <tbody>
-
-              {poPsoData.map((item, index) => {
-                const totalatt = parseFloat(loData[index]?.total) || 0;  // Access totalatt from loData
-                return (
-                  <tr key={index}>
-                    <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
-                    {item.po.map((poValue, i) => (
-                      <td key={i} className="border border-gray-300 p-2">
-                        {poValue !== null ? (poValue * totalatt / 3).toFixed(2) : '-'}
-                      </td>
-                    ))}
-                    {item.pso.map((psoValue, i) => (
-                      <td key={i} className="border border-gray-300 p-2">
-                        {psoValue !== null ? (psoValue * totalatt / 3).toFixed(2) : '-'}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-              {/* Average Row */}
-              <tr>
-                <td className="border border-gray-300 p-2">AVG</td>
-
-                {/* Calculate Average for PO Columns */}
-                {poPsoData.length > 0 && poPsoData[0].po.map((_, i) => {
-                  const poValues = poPsoData
-                    .map((item, index) => {
-                      const totalatt = parseFloat(loData[index]?.total) || 0;
-                      const poValue = item.po[i] !== null ? parseFloat(item.po[i]) : null;
-                      return poValue !== null ? (poValue * totalatt) / 3 : null;
-                    })
-                    .filter((value) => value !== null); // Filter out null values
-
-                  const poSum = poValues.reduce((acc, val) => acc + val, 0);
-                  const poAverage = poValues.length > 0 ? poSum / poValues.length : 0; // Use only the non-null values for average
-
+        <div className="w-full max-w-screen-3xl mx-auto sm:w-[300px] md:w-[500px] lg:w-[630px] xl:w-[900px] 2xl:w-[1200px] 3xl:w-[1440px]">
+          <div className="overflow-x-auto sm:overflow-x-scroll md:overflow-x-scroll lg:overflow-x-scroll xl:overflow-x-auto 2xl:overflow-x-auto 3xl:overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            <table className="min-w-full border-collapse border border-gray-300 text-sm md:text-base lg:text-lg font-sans">
+              <thead>
+                <tr className="border-b border-gray-400">
+                  <th className="border border-gray-300 p-2" colSpan={15}>
+                    PO, PSO Attainment
+                  </th>
+                </tr>
+                <tr className="border-b border-gray-400">
+                  <th className="border border-gray-300 p-2" colSpan={13}>
+                    PO
+                  </th>
+                  <th className="border border-gray-300 p-2" colSpan={2}>
+                    PSO
+                  </th>
+                </tr>
+                <tr className="border-b border-gray-400 bg-gray-100">
+                  <th className="border border-gray-300 p-2">LO</th>
+                  {[...Array(12).keys()].map((i) => (
+                    <th key={i} className="border border-gray-300 p-2">
+                      PO{i + 1}
+                    </th>
+                  ))}
+                  <th className="border border-gray-300 p-2">PSO1</th>
+                  <th className="border border-gray-300 p-2">PSO2</th>
+                </tr>
+              </thead>
+              <tbody>
+                {poPsoData.map((item, index) => {
+                  const totalatt = parseFloat(loData[index]?.total) || 0; // Access totalatt from loData
                   return (
-                    <td key={i} className="border border-gray-300 p-2">
-                      {poAverage.toFixed(2)}
-                    </td>
+                    <tr key={index} className="border-b border-gray-300">
+                      <td className="border border-gray-300 p-2">{loData[index]?.coname}</td>
+                      {item.po.map((poValue, i) => (
+                        <td key={i} className="border border-gray-300 p-2 whitespace-nowrap">
+                          {poValue !== null ? (poValue * totalatt / 3).toFixed(2) : '-'}
+                        </td>
+                      ))}
+                      {item.pso.map((psoValue, i) => (
+                        <td key={i} className="border border-gray-300 p-2 whitespace-nowrap">
+                          {psoValue !== null ? (psoValue * totalatt / 3).toFixed(2) : '-'}
+                        </td>
+                      ))}
+                    </tr>
                   );
                 })}
 
-                {/* Calculate Average for PSO Columns */}
-                {poPsoData.length > 0 && poPsoData[0].pso.map((_, i) => {
-                  const psoValues = poPsoData
-                    .map((item, index) => {
-                      const totalatt = parseFloat(loData[index]?.total) || 0;
-                      const psoValue = item.pso[i] !== null ? parseFloat(item.pso[i]) : null;
-                      return psoValue !== null ? (psoValue * totalatt) / 3 : null;
-                    })
-                    .filter((value) => value !== null); // Filter out null values
+                {/* Average Row */}
+                <tr className="border-b border-gray-300">
+                  <td className="border border-gray-300 p-2">AVG</td>
+                  {poPsoData.length > 0 &&
+                    poPsoData[0].po.map((_, i) => {
+                      const poValues = poPsoData
+                        .map((item, index) => {
+                          const totalatt = parseFloat(loData[index]?.total) || 0;
+                          const poValue = item.po[i] !== null ? parseFloat(item.po[i]) : null;
+                          return poValue !== null ? (poValue * totalatt) / 3 : null;
+                        })
+                        .filter((value) => value !== null);
 
-                  const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
-                  const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0; // Use only the non-null values for average
+                      const poSum = poValues.reduce((acc, val) => acc + val, 0);
+                      const poAverage = poValues.length > 0 ? poSum / poValues.length : 0;
 
-                  return (
-                    <td key={i} className="border border-gray-300 p-2">
-                      {psoAverage.toFixed(2)}
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
+                      return (
+                        <td key={i} className="border border-gray-300 p-2 whitespace-nowrap">
+                          {poAverage.toFixed(2)}
+                        </td>
+                      );
+                    })}
+                  {poPsoData.length > 0 &&
+                    poPsoData[0].pso.map((_, i) => {
+                      const psoValues = poPsoData
+                        .map((item, index) => {
+                          const totalatt = parseFloat(loData[index]?.total) || 0;
+                          const psoValue = item.pso[i] !== null ? parseFloat(item.pso[i]) : null;
+                          return psoValue !== null ? (psoValue * totalatt) / 3 : null;
+                        })
+                        .filter((value) => value !== null);
+
+                      const psoSum = psoValues.reduce((acc, val) => acc + val, 0);
+                      const psoAverage = psoValues.length > 0 ? psoSum / psoValues.length : 0;
+
+                      return (
+                        <td key={i} className="border border-gray-300 p-2 whitespace-nowrap">
+                          {psoAverage.toFixed(2)}
+                        </td>
+                      );
+                    })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="container mx-auto p-4">
+          <div className="overflow-hidden lg:overflow-x-auto sm:overflow-x-scroll md:overflow-x-scroll">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Column 1
+                  </th>
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Column 2
+                  </th>
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Column 3
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-2 py-4 whitespace-nowrap">Data 1</td>
+                  <td className="px-2 py-4 whitespace-nowrap">Data 2</td>
+                  <td className="px-2 py-4 whitespace-nowrap">Data 3</td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-4 whitespace-nowrap">Data 4</td>
+                  <td className="px-2 py-4 whitespace-nowrap">Data 5</td>
+                  <td className="px-2 py-4 whitespace-nowrap">Data 6</td>
+                </tr>
+                {/* Add more rows as needed */}
+              </tbody>
+            </table>
+          </div>
         </div>
       </>
-      {/* )} */}
     </div>
   );
 };

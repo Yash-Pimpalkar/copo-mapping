@@ -5,6 +5,7 @@ import { FaTrashAlt } from 'react-icons/fa';  // Importing trash icon for removi
 
 const ManageClassroomStudents = ({ uid }) => {
   const { classId } = useParams(); // Get classroomId from the URL
+  const classIdAsInt = parseInt(classId, 10);
   const [students, setStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [classCohorts, setClassCohorts] = useState([]);
@@ -19,7 +20,7 @@ const ManageClassroomStudents = ({ uid }) => {
     semester: '',
   });
   const [selectedCohorts, setSelectedCohorts] = useState([]); // State to track selected cohorts
-  const [errorMessage, setErrorMessage] = useState(''); 
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Fetch cohorts based on userId
   useEffect(() => {
@@ -33,14 +34,14 @@ const ManageClassroomStudents = ({ uid }) => {
         setTimeout(() => setErrorMessage(''), 5000);
       }
     };
-  
+
     fetchCohorts();
   }, [uid]);
 
   useEffect(() => {
     const fetchClassroomStudents = async () => {
       try {
-        const response = await api.get(`/api/lmsclassroom/fetchstudents/${classId}`); // Update the API endpoint as needed
+        const response = await api.get(`/api/lmsclassroom/fetchstudents/${classIdAsInt}`); // Update the API endpoint as needed
         setInitialCohortStudents(response.data); // Set initial students
         setSelectedStudents(response.data); // Set initially selected students
       } catch (error) {
@@ -50,10 +51,10 @@ const ManageClassroomStudents = ({ uid }) => {
         console.error('Error fetching classroom students:', error);
       }
     };
-  
+
     fetchClassroomStudents();
-  }, [classId]); // Dependencies array to fetch new data when classId changes
-  
+  }, [classIdAsInt]); // Dependencies array to fetch new data when classId changes
+
   // Fetch all students for cohort assignment
   useEffect(() => {
     const fetchStudents = async () => {
@@ -65,7 +66,7 @@ const ManageClassroomStudents = ({ uid }) => {
         const branches = [...new Set(response.data.map(student => student.branch))];
         const years = [...new Set(response.data.map(student => student.academic_year))];
         setUniqueBranches(branches);
-        setUniqueYears(years); 
+        setUniqueYears(years);
       } catch (error) {
         console.error('Error fetching students:', error);
         setErrorMessage('Failed to fetch cohorts. Please try again later.');
@@ -82,7 +83,7 @@ const ManageClassroomStudents = ({ uid }) => {
       const matchesSearchTerm = student.student_name.toLowerCase().includes(searchTerm.toLowerCase())
         || student.stud_clg_id.toLowerCase().includes(searchTerm.toLowerCase())
         || student.email.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesBranch = filters.branch ? student.branch === filters.branch : true;
       const matchesAcademicYear = filters.academicYear ? student.academic_year === filters.academicYear : true;
       const matchesSemester = filters.semester ? student.semester === parseInt(filters.semester, 10) : true;
@@ -105,10 +106,22 @@ const ManageClassroomStudents = ({ uid }) => {
   // Remove student from selected list
   const handleRemoveStudent = async (student) => {
     try {
+      // Convert student ID to an integer
+      const sid = parseInt(student.sid, 10);
+
       // Delete the student from the database for this classroom
-     api.delete(`/api/cohorts/deletestudent/${classId}/${student.sid}`); // Ensure this endpoint matches your routing structure
+      await api.delete(`/api/lmsclassroom/deletestudent/${sid}/${classIdAsInt}`);
+
+      // Log student ID and class ID to verify their types
+      console.log(`Student ID: ${sid}, Type: ${typeof sid}`);
+      console.log(`Class ID: ${classIdAsInt}, Type: ${typeof classIdAsInt}`);
+      
+
       // Remove the student from the selected list
-      setSelectedStudents((prevSelected) => prevSelected.filter((s) => s.sid !== student.sid));
+      setSelectedStudents((prevSelected) =>
+        prevSelected.filter((s) => s.sid !== student.sid)
+      );
+
       alert('Student removed successfully');
     } catch (error) {
       console.error('Error removing student:', error);
@@ -117,7 +130,7 @@ const ManageClassroomStudents = ({ uid }) => {
       setTimeout(() => setErrorMessage(''), 5000);
     }
   };
-  
+
 
   // Add newly selected students from selected cohorts to the cohort
   const handleAddNewStudents = async () => {
@@ -130,7 +143,7 @@ const ManageClassroomStudents = ({ uid }) => {
     }
 
     try {
-       api.post(`/api/lmsclassroom/assignstudents/${classId}`, {
+      api.post(`/api/lmsclassroom/assignstudents/${classIdAsInt}`, {
         selectedStudents: newStudents.map(student => student.sid),
       });
       alert('New students added successfully');
@@ -140,7 +153,7 @@ const ManageClassroomStudents = ({ uid }) => {
       alert('Error while adding new students');
       setErrorMessage('Error while adding new students. Please try again.');
       setTimeout(() => setErrorMessage(''), 5000);
-      
+
     }
   };
 
@@ -152,14 +165,14 @@ const ManageClassroomStudents = ({ uid }) => {
       .map(option => option.value);
 
     setSelectedCohorts(selectedCohortIds);
-     console.log(selectedCohorts)
+    console.log(selectedCohorts)
     // Fetch students from selected cohorts
     const fetchCohortStudents = async () => {
       try {
         const cohortStudents = await Promise.all(selectedCohortIds.map(cohortId =>
           api.get(`/api/cohorts/cohortstudents/${cohortId}`)
         ));
-        
+
         // Combine students and avoid duplicates
         const allCohortStudents = cohortStudents.flatMap(res => res.data);
         const uniqueStudents = Array.from(new Set(allCohortStudents.map(s => s.sid)))
@@ -205,7 +218,7 @@ const ManageClassroomStudents = ({ uid }) => {
 
   const handleDeleteAll = async () => {
     try {
-       api.delete(`/api/lmsclassroom/deletestudents/${classId}`);
+      api.delete(`/api/lmsclassroom/deletestudents/${classIdAsInt}`);
       setSelectedStudents([]); // Clear the selected students list
       alert('All students removed from the cohort successfully');
     } catch (error) {
@@ -219,8 +232,8 @@ const ManageClassroomStudents = ({ uid }) => {
   return (
     <div>
       <h1 className="text-3xl font-bold text-center text-blue-600">Manage Classroom Students</h1>
- {/* Display Error Message */}
- {errorMessage && (
+      {/* Display Error Message */}
+      {errorMessage && (
         <div className="bg-red-500 text-white p-4 mb-4 rounded">
           {errorMessage}
         </div>
@@ -237,11 +250,11 @@ const ManageClassroomStudents = ({ uid }) => {
             Add Newly Selected Students
           </button>
           <button
-          onClick={handleDeleteAll}
-          className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
-        >
-          Delete All Students
-        </button>
+            onClick={handleDeleteAll}
+            className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
+          >
+            Delete All Students
+          </button>
 
           <ul>
             {selectedStudents.map((student) => (
@@ -316,16 +329,16 @@ const ManageClassroomStudents = ({ uid }) => {
             </div>
           </div>
           <div className="mb-4">
-          <label>
-            <input
-              type="checkbox"
-              checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
-              onChange={handleSelectAll}
-              className="mr-2"
-            />
-            Select All Listed Students
-          </label>
-        </div>
+            <label>
+              <input
+                type="checkbox"
+                checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+                onChange={handleSelectAll}
+                className="mr-2"
+              />
+              Select All Listed Students
+            </label>
+          </div>
 
           {/* Table of students */}
           <table className="table-auto w-full">

@@ -5,6 +5,7 @@ import { FaTrashAlt } from 'react-icons/fa';  // Importing the trash icon for re
 
 const ManageStudents = () => {
   const { cohortId } = useParams(); // Get cohortId from the URL
+  const cohortIdAsInt = parseInt(cohortId, 10); // Convert cohortId to an integer
   const [students, setStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [cohortname,setCohortName]=useState()
@@ -22,7 +23,7 @@ const ManageStudents = () => {
   useEffect(() => {
     const fetchCohortName = async () => {
       try {
-        const response = await api.get(`/api/cohorts/cohortname/${cohortId}`);
+        const response = await api.get(`/api/cohorts/cohortname/${cohortIdAsInt}`);
         // Set initially selected students
         setCohortName(response.data[0].cohort_name)
       } catch (error) {
@@ -31,14 +32,14 @@ const ManageStudents = () => {
     };
   
     fetchCohortName();
-  }, [cohortId]);
+  }, [cohortIdAsInt]);
 
   
   // Fetch cohort students from the backend
   useEffect(() => {
     const fetchCohortStudents = async () => {
       try {
-        const response = await api.get(`/api/cohorts/cohortstudents/${cohortId}`);
+        const response = await api.get(`/api/cohorts/cohortstudents/${cohortIdAsInt}`);
         setInitialCohortStudents(response.data); // Set initial students
         setSelectedStudents(response.data); // Set initially selected students
       } catch (error) {
@@ -47,7 +48,7 @@ const ManageStudents = () => {
     };
   
     fetchCohortStudents();
-  }, [cohortId]);
+  }, [cohortIdAsInt]);
 
   // Fetch all students from the API
   useEffect(() => {
@@ -99,7 +100,7 @@ const ManageStudents = () => {
   const handleRemoveStudent = async (student) => {
     try {
       // Delete the student from the database for this cohort
-      await api.delete(`/api/cohorts/removestudent/${cohortId}/${student.sid}`);
+      await api.delete(`/api/cohorts/removestudent/${cohortIdAsInt}/${student.sid}`);
       // Remove the student from the selected list
       setSelectedStudents((prevSelected) => prevSelected.filter((s) => s.sid !== student.sid));
     } catch (error) {
@@ -124,7 +125,7 @@ const ManageStudents = () => {
     }
 
     try {
-      await api.post(`/api/cohorts/assignstudents/${cohortId}`, {
+      await api.post(`/api/cohorts/assignstudents/${cohortIdAsInt}`, {
         selectedStudents: newStudents.map(student => student.sid),
       });
       alert('New students added successfully');
@@ -166,7 +167,7 @@ const ManageStudents = () => {
   // Handle deleting all students from the cohort
   const handleDeleteAll = async () => {
     try {
-      await api.delete(`/api/cohorts/deletestudents/${cohortId}`);
+      await api.delete(`/api/cohorts/deletestudents/${cohortIdAsInt}`);
       setSelectedStudents([]); // Clear the selected students list
       alert('All students removed from the cohort successfully');
     } catch (error) {
@@ -176,7 +177,8 @@ const ManageStudents = () => {
   };
   const handleSubmit = async () => {
     try {
-      await api.post(`/api/cohorts/assignstudents/${cohortId}`, {
+      console.log(typeof cohortId);
+      await api.post(`/api/cohorts/assignstudents/${cohortIdAsInt}`, {
         selectedStudents: selectedStudents.map(student => student.sid),
       });
       alert('All selected students submitted successfully');
