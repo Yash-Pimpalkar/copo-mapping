@@ -537,7 +537,7 @@ const Tcstyperesult = ({ uid }) => {
 
         {/* PO and PSO Attainment Table */}
         <h2 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">PO, PSO Attainment</h2>
-        <div className="w-full max-w-screen-3xl mx-auto sm:w-[300px] md:w-[500px] lg:w-[630px] xl:w-[900px] 2xl:w-[1200px] 3xl:w-[1440px]">
+        <div className="w-full max-w-screen-3xl mx-auto">
           <div className="overflow-x-auto sm:overflow-x-scroll md:overflow-x-scroll lg:overflow-x-scroll xl:overflow-x-auto 2xl:overflow-x-auto 3xl:overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
             <table className="min-w-full border-collapse border border-gray-300 text-sm md:text-base lg:text-lg font-sans">
               <thead>
@@ -627,38 +627,6 @@ const Tcstyperesult = ({ uid }) => {
                       );
                     })}
                 </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="container mx-auto p-4">
-          <div className="overflow-hidden lg:overflow-x-auto sm:overflow-x-scroll md:overflow-x-scroll">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Column 1
-                  </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Column 2
-                  </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Column 3
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td className="px-2 py-4 whitespace-nowrap">Data 1</td>
-                  <td className="px-2 py-4 whitespace-nowrap">Data 2</td>
-                  <td className="px-2 py-4 whitespace-nowrap">Data 3</td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-4 whitespace-nowrap">Data 4</td>
-                  <td className="px-2 py-4 whitespace-nowrap">Data 5</td>
-                  <td className="px-2 py-4 whitespace-nowrap">Data 6</td>
-                </tr>
-                {/* Add more rows as needed */}
               </tbody>
             </table>
           </div>

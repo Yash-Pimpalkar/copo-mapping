@@ -126,7 +126,7 @@ const ManageClassroomStudents = ({ uid }) => {
     } catch (error) {
       console.error('Error removing student:', error);
       alert('Error while removing the student');
-      setErrorMessage('Error while removing the student. Please try again.');
+      // setErrorMessage('Error while removing the student. Please try again.');
       setTimeout(() => setErrorMessage(''), 5000);
     }
   };

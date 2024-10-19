@@ -22,6 +22,7 @@ import ResultRoute from "./routes/Result.js"
 import BranchRoute from "./routes/showbranch.js"
 import CohortRoute from "./routes/lms/Cohort.js"
 import LMSClassRoom from "./routes/lms/classroom.js"
+import FeedbackClassroom from "./routes/lms/feedback.js"
 // import LMSClassRoom from "./routes/lms/Upload_classroom.js"
 const port = 8081;
 
@@ -30,27 +31,27 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 app.use(cookieParser())
-app.use("/api/register",registerRoute)
-app.use("/api/login/",loginRoute)
-app.use("/api/course",courseRoute)
-app.use("/api/usercourse",UserCourseRoute)
-app.use("/api/cos",cosRoute)
-app.use("/api/pos",posRoute)
-app.use("/api/copo",copoRoute)
-app.use("/api/ia",IaRoute)
-app.use("/api/sem",SemRoute)
-app.use("/api/termwork",TermworkRoute)
-app.use("/api/tw/upload",UploadTermworkRoute)
-app.use("/api/oral",UploadOralRoute)
-app.use("/api/uploadmajorprosem",UploadMajorProjectRoute)
-app.use("/api/uploadminiprosem",UploadMiniProjectRoute);
-app.use("/api/result",ResultRoute);
-app.use("/api/branch",BranchRoute);
-app.use("/api/cohorts",CohortRoute);
-app.use("/api/lmsclassroom",LMSClassRoom);
-
+app.use("/api/register", registerRoute)
+app.use("/api/login/", loginRoute)
+app.use("/api/course", courseRoute)
+app.use("/api/usercourse", UserCourseRoute)
+app.use("/api/cos", cosRoute)
+app.use("/api/pos", posRoute)
+app.use("/api/copo", copoRoute)
+app.use("/api/ia", IaRoute)
+app.use("/api/sem", SemRoute)
+app.use("/api/termwork", TermworkRoute)
+app.use("/api/tw/upload", UploadTermworkRoute)
+app.use("/api/oral", UploadOralRoute)
+app.use("/api/uploadmajorprosem", UploadMajorProjectRoute)
+app.use("/api/uploadminiprosem", UploadMiniProjectRoute);
+app.use("/api/result", ResultRoute);
+app.use("/api/branch", BranchRoute);
+app.use("/api/cohorts", CohortRoute);
+app.use("/api/lmsclassroom", LMSClassRoom);
+app.use("/api/lmsclassroom/feedback", FeedbackClassroom);
 
 app.listen(port, () => {
-    console.log("Server is Running on PORT :", port);
-  });
+  console.log("Server is Running on PORT :", port);
+});
 

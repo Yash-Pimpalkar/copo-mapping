@@ -10,9 +10,16 @@ const EditQuestionsPage = ({ uid }) => {
     const [selectedComponent, setSelectedComponent] = useState(null);
     const [numQuestions, setNumQuestions] = useState(0);
     const [questionsCOData, setQuestionsCOData] = useState([]);
+    const [questionsLabelData, setQuestionsLabelData] = useState(Array.from({ length: numQuestions }, () => ({ LabelNames: [] })));
     const [userCourseId, setUserCourseId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [numCOs, setCOs] = useState();
+    const [formData, setFormData] = useState({ label: '', questions: [] });
+    const [error, setError] = useState(null);
+    const [selectedDay, setSelectedDay] = useState('');
+    const [selectedMonth, setSelectedMonth] = useState('');
+    const [selectedYear, setSelectedYear] = useState('');
+    const [selectedDate, setSelectedDate] = useState('');
 
     // Fetch courses on mount
     useEffect(() => {
@@ -61,51 +68,236 @@ const EditQuestionsPage = ({ uid }) => {
         }
     }, [uid]);
 
-    const handleSubmit = () => {
-        // Handle form submission logic here
+    // Arrays to populate day, month, and year dropdowns
+    const days = Array.from({ length: 31 }, (_, i) => i + 1);
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+
+    const handleDateChange = (day, month, year) => {
+        if (day && month && year) {
+            console.log(day)
+            console.log(month)
+            console.log(year)
+            const monthIndex = months.indexOf(month); // Convert month to its index (0-11)
+            const dateObject = new Date(year, monthIndex, day);
+            setSelectedDate(dateObject.toISOString().split('T')[0]); // Store date in YYYY-MM-DD format
+        } else {
+            console.error("Dta not reached here")
+        }
     };
 
-    const handleSelectChange = (value) => {
-        setSelectedComponent(value);
+    const handleDayChange = (e) => {
+        const day = e.target.value;
+        setSelectedDay(day);
+        console.log("Day:", day);
+        handleDateChange(day, selectedMonth, selectedYear);
     };
 
-    const handleCheckboxChange = (index) => {
-        const updatedCheckedStates = [...checkedStates];
-        updatedCheckedStates[index] = !updatedCheckedStates[index];
-        setCheckedStates(updatedCheckedStates);
+    const handleMonthChange = (e) => {
+        const month = e.target.value;
+        setSelectedMonth(month);
+        console.log("Month:", month);
+        handleDateChange(selectedDay, month, selectedYear);
     };
+
+    const handleYearChange = (e) => {
+        const year = e.target.value;
+        setSelectedYear(year);
+        console.log("Year:", year);
+        handleDateChange(selectedDay, selectedMonth, year);
+    };
+
 
     const handleNumQuestionsChange = (e) => {
-        const value = parseInt(e.target.value, 10);
-        setNumQuestions(value > 0 ? value : 0);
+        const newNumQuestions = parseInt(e.target.value, 10);
+        setNumQuestions(newNumQuestions);
 
-        const initialQuestionsCOData = Array.from({ length: value }, () => ({
+        // Initialize questionsLabelData with empty LabelNames arrays
+        setQuestionsLabelData(Array.from({ length: newNumQuestions }, () => ({ LabelNames: [] })));
+
+        const newQuestions = Array.from({ length: newNumQuestions }, (_, index) => ({
+            required: checkedStates[index] || false,
+            questionName: '',
             numCOs: 0,
             coNames: [],
         }));
 
-        setQuestionsCOData(initialQuestionsCOData);
+        setFormData((prevData) => ({ ...prevData, questions: newQuestions }));
     };
 
-    const handleNumCOsChange = (questionIndex, value) => {
-        const updatedQuestionsCOData = [...questionsCOData];
-        if (!updatedQuestionsCOData[questionIndex]) {
-            updatedQuestionsCOData[questionIndex] = { numCOs: 0, coNames: [] };
-        }
+    // const handleCheckboxChange = (index) => {
+    //     const newCheckedStates = [...checkedStates];
+    //     newCheckedStates[index] = !newCheckedStates[index];
+    //     setCheckedStates(newCheckedStates);
 
-        updatedQuestionsCOData[questionIndex].numCOs = value;
-        updatedQuestionsCOData[questionIndex].coNames = Array.from({ length: value }, () => '');
-        setQuestionsCOData(updatedQuestionsCOData);
+    //     setFormData((prevData) => {
+    //         const newQuestions = [...prevData.questions];
+    //         if (newQuestions[index]) {
+    //             newQuestions[index].required = newCheckedStates[index];
+    //         }
+    //         return { ...prevData, questions: newQuestions };
+    //     });
+    // };
+
+    const handleNumCOsChange = (index, value) => {
+        const numCOs = parseInt(value, 10);
+        setQuestionsCOData((prevData) => {
+            const newQuestionsCOData = [...prevData];
+            newQuestionsCOData[index] = { ...newQuestionsCOData[index], coNames: Array(numCOs).fill('') };
+            return newQuestionsCOData;
+        });
+
+        setFormData((prevData) => {
+            const newQuestions = [...prevData.questions];
+            if (newQuestions[index]) {
+                newQuestions[index].numCOs = numCOs;
+                newQuestions[index].coNames = Array(numCOs).fill('');
+            }
+            return { ...prevData, questions: newQuestions };
+        });
+
     };
 
     const handleCONameChange = (questionIndex, coIndex, value) => {
-        const updatedQuestionsCOData = [...questionsCOData];
-        if (!updatedQuestionsCOData[questionIndex]) {
-            updatedQuestionsCOData[questionIndex] = { numCOs: 0, coNames: [] };
-        }
+        setQuestionsCOData((prevData) => {
+            const newQuestionsCOData = [...prevData];
+            newQuestionsCOData[questionIndex].coNames[coIndex] = value;
+            return newQuestionsCOData;
+        });
 
-        updatedQuestionsCOData[questionIndex].coNames[coIndex] = value.toUpperCase();
-        setQuestionsCOData(updatedQuestionsCOData);
+        setFormData((prevData) => {
+            const newQuestions = [...prevData.questions];
+            if (newQuestions[questionIndex]) {
+                newQuestions[questionIndex].coNames[coIndex] = value;
+            }
+            return { ...prevData, questions: newQuestions };
+        });
+    };
+
+    const handleQuestionLabelChange = (questionIndex, labelIndex, value) => {
+        setQuestionsLabelData((prevData) => {
+            const newQuestionsLabelData = [...prevData];
+
+            // Ensure the question exists and initialize LabelNames if necessary
+            if (!newQuestionsLabelData[questionIndex]) {
+                newQuestionsLabelData[questionIndex] = { LabelNames: [] };
+            }
+
+            // Ensure LabelNames is initialized as an array
+            if (!Array.isArray(newQuestionsLabelData[questionIndex].LabelNames)) {
+                newQuestionsLabelData[questionIndex].LabelNames = [];
+            }
+
+            // Initialize the specific index in LabelNames if it doesn't exist
+            if (newQuestionsLabelData[questionIndex].LabelNames[labelIndex] === undefined) {
+                newQuestionsLabelData[questionIndex].LabelNames[labelIndex] = "";
+            }
+
+            // Set the new value
+            newQuestionsLabelData[questionIndex].LabelNames[labelIndex] = value;
+
+            console.log(newQuestionsLabelData);
+
+            return newQuestionsLabelData;
+        });
+
+        setFormData((prevData) => {
+            const newQuestions = [...prevData.questions];
+
+            // Ensure the question exists and initialize LabelNames if necessary
+            if (!newQuestions[questionIndex]) {
+                newQuestions[questionIndex] = { LabelNames: [] };
+            }
+
+            // Ensure LabelNames is initialized as an array
+            if (!Array.isArray(newQuestions[questionIndex].LabelNames)) {
+                newQuestions[questionIndex].LabelNames = [];
+            }
+
+            // Initialize the specific index in LabelNames if it doesn't exist
+            if (newQuestions[questionIndex].LabelNames[labelIndex] === undefined) {
+                newQuestions[questionIndex].LabelNames[labelIndex] = "";
+            }
+
+            // Set the new value
+            newQuestions[questionIndex].LabelNames[labelIndex] = value;
+
+            return { ...prevData, questions: newQuestions };
+        });
+    };
+
+    const handleQuestionNameChange = (index, value) => {
+        setFormData((prevData) => {
+            const newQuestions = [...prevData.questions];
+            if (newQuestions[index]) {
+                newQuestions[index].questionName = value;
+            }
+            return { ...prevData, questions: newQuestions };
+        });
+    };
+
+    const handleLabelChange = (e) => {
+        const { value } = e.target;
+        setFormData((prevData) => ({ ...prevData, label: value }));
+    };
+
+    console.log(selectedDate);
+
+    const handleSubmit = async () => {
+        console.log('Form Data:', formData);
+        // You can call your API or any other logic to handle the data here.
+
+        // Get the current time
+        console.log("selectedDate");
+
+        const { label, coNames, questionName, numCOs } = formData;
+        const currentTime = new Date().toISOString();
+
+        const formatDateForDatabase = (isoDate) => {
+            const date = new Date(isoDate);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+
+        const formattedCreatedAt = formatDateForDatabase(currentTime);
+
+        try {
+            setLoading(true);
+
+            // Prepare data to submit
+            const dataToSubmit = {
+                userid: userCourseId,
+                question_name: label,
+                conames: coNames,
+                questions: questionName,
+                noofcos: numCOs,
+                created_at: formattedCreatedAt,
+                deadline: selectedDate,
+            };
+
+            console.log("dataToSubmit", dataToSubmit);
+
+            // Send data to the server
+            await api.post("/api/lmsclassroom/feedback/create", {
+                formDataForCohortClassroom: dataToSubmit
+            });
+
+            alert('Data submitted successfully');
+            setError(null);
+        } catch (error) {
+            console.error('Error submitting data:', error);
+            setError(error.response?.data?.error || 'Failed to submit data');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -128,14 +320,14 @@ const EditQuestionsPage = ({ uid }) => {
                         </select>
                     </div>
 
-                    <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-auto">
+                    {/* <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-auto">
                         <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded border border-gray-300 hover:bg-gray-300 text-center w-full md:w-auto">
                             Export questions
                         </button>
                         <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded border border-gray-300 hover:bg-gray-300 text-center w-full md:w-auto">
                             Save as new template
                         </button>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Course Selector */}
@@ -167,6 +359,8 @@ const EditQuestionsPage = ({ uid }) => {
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             id="label"
                             type="text"
+                            value={formData.label}
+                            onChange={handleLabelChange}
                             placeholder="Enter label"
                         />
 
@@ -176,7 +370,7 @@ const EditQuestionsPage = ({ uid }) => {
                             </label>
                             <input
                                 id="numQuestions"
-                                type="number"
+                                type="text"
                                 min="0"
                                 className="bg-white border border-gray-300 text-gray-700 w-full py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 onChange={handleNumQuestionsChange}
@@ -187,7 +381,7 @@ const EditQuestionsPage = ({ uid }) => {
                             <div className="mt-6">
                                 {Array.from({ length: numQuestions }).map((_, index) => (
                                     <div key={index} className="bg-white p-4 sm:p-6 mb-6 shadow-md w-full max-w-8xl rounded-lg border border-gray-300">
-                                        <div className="flex items-center gap-4 mb-4">
+                                        {/* <div className="flex items-center gap-4 mb-4">
                                             <input
                                                 type="checkbox"
                                                 id={`required-checkbox-${index}`}
@@ -198,12 +392,16 @@ const EditQuestionsPage = ({ uid }) => {
                                             <label htmlFor={`required-checkbox-${index}`} className="text-gray-900 text-lg font-bold">
                                                 Required
                                             </label>
-                                        </div>
+                                        </div> */}
+                                        <label htmlFor={`questionbox-${index}`} className="text-gray-900 text-lg font-bold mb-2">
+                                            Question {index + 1} Name
+                                        </label>
                                         <input
                                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                            id="label"
                                             type="text"
                                             placeholder="Enter label"
+                                            value={formData.questions[index]?.questionName || ''}
+                                            onChange={(e) => handleQuestionNameChange(index, e.target.value)}
                                         />
                                         <div className="flex flex-col mt-6">
                                             <label className="block text-gray-700 text-lg font-bold mb-2" htmlFor="numberofCOs">
@@ -211,7 +409,7 @@ const EditQuestionsPage = ({ uid }) => {
                                             </label>
                                             <input
                                                 id={`numCOs-${index}`}
-                                                type="number"
+                                                type="text"
                                                 min="0"
                                                 className="bg-white border border-gray-300 text-gray-700 w-full py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onChange={(e) => handleNumCOsChange(index, e.target.value)}
@@ -230,7 +428,7 @@ const EditQuestionsPage = ({ uid }) => {
                                                         placeholder="Enter CO name"
                                                         value={questionsCOData[index].coNames[coIndex]}
                                                         onChange={(e) => handleCONameChange(index, coIndex, e.target.value)}
-                                                        className="bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 upper-case"
                                                     />
                                                 </div>
                                             ))}
@@ -240,6 +438,56 @@ const EditQuestionsPage = ({ uid }) => {
                             </div>
                         )}
                     </div>
+                    <div className="p-4 flex flex-col items-center bg-gray-100 rounded-lg shadow-md">
+                        <h2 className="text-lg font-semibold mb-4">Add Deadline</h2>
+
+                        <div className="flex space-x-4">
+                            {/* Day Dropdown */}
+                            <select
+                                value={selectedDate}
+                                onChange={handleDayChange}
+                                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Day</option>
+                                {days.map((day) => (
+                                    <option key={day} value={day}>
+                                        {day}
+                                    </option>
+                                ))}
+                            </select>
+                            {/* Month Dropdown */}
+                            <select
+                                value={selectedMonth}
+                                onChange={handleMonthChange}
+                                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Month</option>
+                                {months.map((month, index) => (
+                                    <option key={index} value={month}>
+                                        {month}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Year Dropdown */}
+                            <select
+                                value={selectedYear}
+                                onChange={handleYearChange}
+                                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Year</option>
+                                {years.map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="mt-4">
+                            <p className="text-gray-700">Selected Date: {selectedDay} {selectedMonth} {selectedYear}</p>
+                        </div>
+                    </div>
                     <button
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-6 w-full md:w-auto"
                         type="button"
@@ -248,8 +496,9 @@ const EditQuestionsPage = ({ uid }) => {
                         Submit
                     </button>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 

@@ -140,59 +140,59 @@ export const fetch_cohorts_byuser = (req, res) => {
 export const addStudentsToClass = (req, res) => {
     const { classId } = req.params;
     const { selectedStudents } = req.body;
-  
+
     // Validate input
     if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
-      return res.status(400).json({ message: 'No students provided' });
+        return res.status(400).json({ message: 'No students provided' });
     }
-  
+
     // Prepare values for insertion
     const values = selectedStudents.map(sid => `(${sid}, ${classId})`).join(',');
-  
+
     const query = `INSERT INTO class_student_table (sid, class_id) VALUES ${values} 
                    ON DUPLICATE KEY UPDATE student_class_id = LAST_INSERT_ID(student_class_id)`;
-  
+
     // Execute the query
     db.query(query, (error, result) => {
-      if (error) {
-        console.error('Error adding students:', error);
-        return res.status(500).json({ message: 'Error adding students' });
-      }
-      res.status(201).json({ message: 'Students added successfully' });
+        if (error) {
+            console.error('Error adding students:', error);
+            return res.status(500).json({ message: 'Error adding students' });
+        }
+        res.status(201).json({ message: 'Students added successfully' });
     });
-  };
-  
+};
+
 // Delete All Students from Class
 // Delete All Students from Class
 // Delete All Students from Class
 export const deleteAllStudentsFromClass = (req, res) => {
 
-    try{
-    const { classId } = req.params;
-  
-    const query = `DELETE FROM class_student_table WHERE class_id = ?`;
-  
-    // Execute the query
-    db.query(query, [classId], (error, result) => {
-      if (error) {
-        console.error('Error deleting students:', error);
-        return res.status(500).json({ message: 'Error deleting students' });
-      }
-  
-      // Check if any rows were affected
-      if (result.affectedRows === 0) {
-        return res.status(200).json({ message: 'No students found in the class' });
-      }
-  
-      res.status(200).json({ message: 'All students removed from the class successfully', affectedRows: result.affectedRows });
-    });
+    try {
+        const { classId } = req.params;
 
-}catch(error){
-console.log(error)
-}
-  };
-  
-  
+        const query = `DELETE FROM class_student_table WHERE class_id = ?`;
+
+        // Execute the query
+        db.query(query, [classId], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+
+            // Check if any rows were affected
+            if (result.affectedRows === 0) {
+                return res.status(200).json({ message: 'No students found in the class' });
+            }
+
+            res.status(200).json({ message: 'All students removed from the class successfully', affectedRows: result.affectedRows });
+        });
+
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+
 
 // Delete One Student from Class
 // Delete a Student from Class
@@ -201,54 +201,60 @@ export const deleteStudentFromClass = async (req, res) => {
     const classIdAsInt = parseInt(classId); // Convert cohortId to an integer
     const sidAsInt = parseInt(sid); // Convert cohortId to an integer
     console.log("classId:", classId, "sid:", sid);  // Log the parameters
-  
+
     const query = `DELETE FROM class_student_table WHERE class_id = ? AND sid = ?`;
     console.log(typeof classIdAsInt);
     try {
-      // Execute the query
-      const [result] = await db.query(query, [classIdAsInt, sidAsInt]);
-  
-      // Log the query result for debugging
-      console.log('Query Result:', result);
-  
-      // Check if any rows were affected (i.e., student was found and deleted)
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Student not found in the class' });
-      }
-  
-      res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
+        // Execute the query
+        db.query(query, [classIdAsInt, sidAsInt], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+
+            // Log the query result for debugging
+            console.log('Query Result:', result);
+
+            // Check if any rows were affected (i.e., student was found and deleted)
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Student not found in the class' });
+            }
+
+            res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
+        });
+
     } catch (error) {
-      console.error('Error deleting student:', error.message);  // Log the error
-      res.status(500).json({ message: 'Error deleting student' });
+        console.error('Error deleting student:', error.message);  // Log the error
+        res.status(500).json({ message: 'Error deleting student' });
     }
-  };
-  
+};
 
 
-  export const getClassroomStudents = (req, res) => {
+
+export const getClassroomStudents = (req, res) => {
     const { classId } = req.params; // Assuming classId is passed as a parameter
-  
+
     const sql = `
       SELECT s.sid, s.stud_clg_id, s.student_name, s.semester, s.branch, s.email, s.academic_year 
       FROM lms_students s
       INNER JOIN class_student_table cs ON s.sid = cs.sid
       WHERE cs.class_id = ?
     `;
-  
-    db.query(sql, [classId], (error, results) => {
-      if (error) {
-        console.error('Error fetching classroom students:', error);
-        return res.status(500).json({ message: 'Internal Server Error' });
-      }
-  
-      res.status(200).json(results);
-    });
-  };
-  
 
-  
-  
-  
+    db.query(sql, [classId], (error, results) => {
+        if (error) {
+            console.error('Error fetching classroom students:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        res.status(200).json(results);
+    });
+};
+
+
+
+
+
 
 
 
