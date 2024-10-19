@@ -25,47 +25,47 @@ const ViewAllClassroom = ({ uid }) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-7xl p-8">
-        <h2 className="text-4xl font-extrabold text-gray-800 mb-8 text-center">Classrooms</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="w-full max-w-7xl p-4 sm:p-8">
+        <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-800 mb-4 sm:mb-8 text-center">Classrooms</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {classrooms.length > 0 ? (
             classrooms.map((classroom) => (
               <div
                 key={classroom.classroom_id}
-                className="relative bg-white border rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="relative bg-white border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
               >
                 {/* Top section with gradient and course details */}
-                <div className="h-32 bg-gradient-to-r from-teal-500 to-blue-600 rounded-t-lg p-4 flex items-start justify-between">
+                <div className="h-24 sm:h-32 bg-gradient-to-r from-teal-500 to-blue-600 rounded-t-lg p-4 flex items-start justify-between">
                   <div>
-                    <h3 className="text-white text-xl font-semibold">{classroom.room_name}</h3>
-                    <p className="text-white text-sm">Semester: {classroom.semester}</p>
+                    <h3 className="text-white text-lg sm:text-xl font-semibold">{classroom.room_name}</h3>
+                    <p className="text-white text-xs sm:text-sm">Semester: {classroom.semester}</p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500 text-white flex items-center justify-center text-lg sm:text-xl font-bold">
                     {classroom.room_name.charAt(0).toUpperCase()}
                   </div>
                 </div>
 
                 {/* Middle section with instructor info */}
                 <div className="p-4">
-                  <p className="text-gray-700 text-sm">Academic Year: {classroom.academic_year}</p>
-                  <p className="text-gray-500 text-sm">Instructor: Vinod N. Alone</p>
+                  <p className="text-gray-700 text-sm sm:text-base">Academic Year: {classroom.academic_year}</p>
+                  <p className="text-gray-500 text-xs sm:text-sm">Instructor: Vinod N. Alone</p>
                 </div>
 
                 {/* Bottom icons */}
-                <div className="flex justify-between px-4 pb-4 mt-auto">
-                  <FaCamera className="text-gray-600 hover:text-gray-800 cursor-pointer" size={24} />
-                  <FaFolder className="text-gray-600 hover:text-gray-800 cursor-pointer" size={24} />
+                <div className="flex justify-around px-4 pb-4 mt-auto">
+                  <FaCamera className="text-gray-600 hover:text-gray-800 cursor-pointer transition-transform transform hover:scale-125" size={20} />
+                  <FaFolder className="text-gray-600 hover:text-gray-800 cursor-pointer transition-transform transform hover:scale-125" size={20} />
                 </div>
 
-                {/* View Classroom Button (positioned between gradient and white section) */}
+                {/* View Classroom Button */}
                 <Link
                   to={`/classroom/${classroom.classroom_id}`}
-                  className="absolute top-24 right-2 bg-white text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-200 transition-colors transform -translate-y-1/2"
+                  className="absolute top-20 sm:top-24 right-2 bg-white text-gray-800 p-1 sm:p-2 rounded-full shadow-md hover:bg-gray-200 transition-colors transform -translate-y-1/2"
                   style={{ zIndex: 10 }}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

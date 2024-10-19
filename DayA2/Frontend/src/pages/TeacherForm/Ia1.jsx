@@ -3,6 +3,7 @@ import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
 import LoadingButton from "../../component/Loading/Loading";
+import { useNavigate } from 'react-router-dom';
 
 const Ia1 = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -19,6 +20,9 @@ const Ia1 = ({ uid }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [Err, setErr] = useState();
+
+  const navigate = useNavigate(); 
+
   const [display, setDisplay] = useState("Total student passed with >=");
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
@@ -674,7 +678,10 @@ const Ia1 = ({ uid }) => {
             : 3;
     });
   };
-
+  
+  const handleClick = () => {
+    navigate('/AddStudent');
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -684,9 +691,11 @@ const Ia1 = ({ uid }) => {
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+          
+          <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
             Add Student
           </button>
+        
         </div>
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
           <div className="mb-4 md:mb-0 flex-1">

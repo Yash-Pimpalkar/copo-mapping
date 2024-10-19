@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // To get classId from the URL
-import api from '../../../api.js';
+import api from '../../api.js';
 import { FaTrashAlt } from 'react-icons/fa';  // Importing trash icon for removing students
 
-const ManageClassroomStudents = ({ uid }) => {
+const AddStudent = ({ uid }) => {
   const { classId } = useParams(); // Get classroomId from the URL
   const classIdAsInt = parseInt(classId, 10);
   const [students, setStudents] = useState([]);
@@ -231,7 +231,7 @@ const ManageClassroomStudents = ({ uid }) => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-center text-blue-600">Manage Classroom Students</h1>
+      <h1 className="text-3xl font-bold text-center text-blue-600">Manage Students</h1>
       {/* Display Error Message */}
       {errorMessage && (
         <div className="bg-red-500 text-white p-4 mb-4 rounded">
@@ -379,4 +379,4 @@ const ManageClassroomStudents = ({ uid }) => {
   );
 };
 
-export default ManageClassroomStudents;
+export default AddStudent;

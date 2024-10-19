@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../../api.js';
 
 const ManageClassroom = ({ uid }) => {
-    const [classrooms, setClassRoom] = useState({});
-    const [courses, setCourses] = useState([]);
-    const [distinctCourses, setDistinctCourses] = useState([]);
+    const [classrooms, setClassRoom] = useState([]);
     const [loading, setLoading] = useState(false);
     const branchMapping = {
         1: 'COMPUTER',
@@ -15,63 +13,32 @@ const ManageClassroom = ({ uid }) => {
         5: 'MECATRONICS'
     };
 
-    // Fetch courses on mount
+    // Fetch classrooms from API
     useEffect(() => {
-        const fetchCourseData = async () => {
+        const fetchClassroom = async () => {
             try {
                 setLoading(true);
-                const res = await api.get(`/api/copo/${uid}`);
-                setCourses(res.data);
+                const response = await api.get(`/api/lmsclassroom/show/${uid}`);
 
-                const distinct = Array.from(new Set(res.data.map(course => course.course_name)))
-                    .map(course_name => ({
-                        course_name,
-                        academic_year: res.data.find(course => course.course_name === course_name).academic_year
-                    }));
-
-                setDistinctCourses(distinct);
+                const classroomData = Array.isArray(response.data) ? response.data : [response.data];
+                setClassRoom(classroomData);
             } catch (error) {
-                console.error('Error fetching course data:', error);
+                console.error('Error fetching classroom:', error);
             } finally {
                 setLoading(false);
             }
         };
 
         if (uid) {
-            fetchCourseData();
-        }
-    }, [uid]);
-
-    // Fetch classrooms from API
-    useEffect(() => {
-        const fetchClassroom = async () => {
-            try {
-                console.log("uid", uid);
-                const response = await api.get(`/api/lmsclassroom/show/${uid}`);
-                console.log(response); // API to get all classrooms
-
-                // Check if the response data is an object; if so, wrap it into an array
-                const classroomData = Array.isArray(response.data) ? response.data : [response.data];
-
-                setClassRoom(classroomData); // Set the state with the properly formatted array
-            } catch (error) {
-                console.error('Error fetching classroom:', error);
-            }
-        };
-
-        if (uid) { // Only fetch if uid is available
             fetchClassroom();
         }
     }, [uid]);
 
-    console.log(classrooms);
-
-
-    // Handle delete cohort
+    // Handle delete classroom
     const handleDelete = async (classroomId) => {
         try {
-            await api.delete(`/api/lmsclassroom/delete/${classroomId}`); // API to delete cohort
-            setClassRoom(classrooms.filter((classroom) => classroom.classroom_id !== classroomId)); // Remove from state
+            await api.delete(`/api/lmsclassroom/delete/${classroomId}`);
+            setClassRoom(classrooms.filter((classroom) => classroom.classroom_id !== classroomId));
         } catch (error) {
             console.error('Error deleting classroom:', error);
         }
@@ -79,56 +46,71 @@ const ManageClassroom = ({ uid }) => {
 
     return (
         <div className="container mx-auto p-4">
-            <h2 className="text-2xl font-bold mb-4">Manage Classroom</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold mb-6 text-center">Manage Classroom</h2>
 
-            <table className="table-auto w-full">
-                <thead>
-                    <tr>
-                        <th className="px-4 py-2">Classroom Name</th>
-                        <th className="px-4 py-2">Branch</th>
-                        <th className="px-4 py-2">Semester</th>
-                        <th className="px-4 py-2">Created Time</th>
-                        <th className="px-4 py-2">Add Students</th>
-                        <th className="px-4 py-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {Object.values(classrooms).map((classroom, i) => (
-                        classroom && classroom.room_name ? ( // Check if classroom and room_name are valid
-                            <tr key={classroom.classroom_id}>
-                                <td className="border px-4 py-2">{classroom.room_name}</td>
-                                <td className="border px-4 py-2">
-                                    {branchMapping[classroom.branch] || 'Unknown Branch'}
-                                </td>
-                                <td className="border px-4 py-2">{classroom.semester}</td>
-                                <td className="border px-4 py-2">{new Date(classroom.created_at).toLocaleString()}</td>
-                                <td className="border px-4 py-2">   <Link
-                                        to={`/lms/Manageclassstudents/${classroom.classroom_id}`}
-                                        className="text-green-500 hover:underline mr-4"
-                                    >
-                                        Manage Class Students
-                                    </Link> </td>
-                                <td className="border px-4 py-2">
-                                    {/* Edit, Delete, and Manage Students buttons */}
-                                    <Link
-                                        to={`/lms/EditCohort/${classroom.classroom_id}`}
-                                        className="text-blue-500 hover:underline mr-4"
-                                    >
-                                        Edit
-                                    </Link>
-                                 
-                                    <button
-                                        onClick={() => handleDelete(classroom.classroom_id)}
-                                        className="text-red-500 hover:underline"
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
+            {loading ? (
+                <div className="flex justify-center items-center">
+                    <p className="text-xl font-semibold text-gray-500">Loading...</p>
+                </div>
+            ) : (
+                // Wrap table in a div with horizontal scrolling
+                <div className="overflow-x-auto">
+                    <table className="table-auto min-w-full">
+                        <thead>
+                            <tr>
+                                <th className="px-4 py-2 text-left">Classroom Name</th>
+                                <th className="px-4 py-2 text-left">Branch</th>
+                                <th className="px-4 py-2 text-left">Semester</th>
+                                <th className="px-4 py-2 text-left">Created Time</th>
+                                <th className="px-4 py-2 text-left">Add Students</th>
+                                <th className="px-4 py-2 text-left">Actions</th>
                             </tr>
-                        ) : null // If classroom is null or room_name is missing, render nothing
-                    ))}
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody>
+                            {classrooms.map((classroom) => (
+                                classroom && classroom.room_name ? (
+                                    <tr key={classroom.classroom_id} className="border-t">
+                                        <td className="border px-4 py-2">{classroom.room_name}</td>
+                                        <td className="border px-4 py-2">
+                                            {branchMapping[classroom.branch] || 'Unknown Branch'}
+                                        </td>
+                                        <td className="border px-4 py-2">{classroom.semester}</td>
+                                        <td className="border px-4 py-2">{new Date(classroom.created_at).toLocaleString()}</td>
+                                        <td className="border px-4 py-2">
+                                            <Link
+                                                to={`/lms/Manageclassstudents/${classroom.classroom_id}`}
+                                                className="text-green-500 hover:underline"
+                                            >
+                                                Manage Class Students
+                                            </Link>
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            <Link
+                                                to={`/lms/EditCohort/${classroom.classroom_id}`}
+                                                className="text-blue-500 hover:underline mr-4"
+                                            >
+                                                Edit
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(classroom.classroom_id)}
+                                                className="text-red-500 hover:underline"
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ) : null
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {!loading && classrooms.length === 0 && (
+                <div className="flex justify-center items-center">
+                    <p className="text-xl font-semibold text-gray-500">No classrooms found.</p>
+                </div>
+            )}
         </div>
     );
 };
