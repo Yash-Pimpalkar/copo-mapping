@@ -692,9 +692,11 @@ const Ia1 = ({ uid }) => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
           
-          <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-            Add Student
-          </button>
+          {userCourseId && (
+            <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              Add Student
+            </button>
+          )}
         
         </div>
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">

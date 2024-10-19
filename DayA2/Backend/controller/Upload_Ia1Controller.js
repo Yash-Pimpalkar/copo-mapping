@@ -120,26 +120,35 @@ WHERE uc.usercourse_id IS NOT NULL;
 //     })
 //   }
 
-  export const showIaData = async (req, res) => {
-    const userCourseId = req.params.uid;
-    console.log(userCourseId)
-    if (!userCourseId) {
-      return res.status(400).send('Invalid userCourseId');
+export const showIaData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  console.log(userCourseId);
+  
+  if (!userCourseId) {
+    return res.status(400).send('Invalid userCourseId');
+  }
+
+  const sql = 'CALL GetStudentMarksByCourseID(?)';
+  db.query(sql, [userCourseId], (error, results) => {
+    if (error) {
+      console.log('Error fetching IA data:', error);
+      return res.status(500).send('Server error');
     }
-  
-    const sql = 'CALL GetStudentMarksByCourseID(?)';
-    db.query(sql, [userCourseId], (error, results) => {
-      if (error) {
-        console.log('Error fetching IA data:', error);
-        return res.status(500).send('Server error');
-      }
-      if (!results || results.length == 0 || results[0][0].message) {
-        return res.status(404).json({error:'No data found'});
-      }
-  
-      return res.status(200).json(results[0]);
-    });
-  };
+
+    // Check if results is a valid array and has the expected structure
+    if (!results || results.length === 0 || !results[0] || results[0].length === 0) {
+      return res.status(404).json({ error: 'No data found' });
+    }
+
+    // Now safely check for the 'message' field if it exists
+    if (results[0][0].message) {
+      return res.status(404).json({ error: results[0][0].message });
+    }
+
+    return res.status(200).json(results[0]);
+  });
+};
+
   
 
 export const IaCOsName = (req, res) => {
@@ -512,5 +521,98 @@ export const Ia2_Attainment = async (req, res) => {
   } catch (error) {
     console.error('Error inserting/updating CO averages and categorizations:', error);
     res.status(500).json({ error: 'Error inserting/updating CO averages and categorizations' });
+  }
+};
+
+
+//important for addstudent point of view 
+
+export const addStudentsToClass = (req, res) => {
+  // const { class } = req.params;
+  const { selectedStudents } = req.body;
+
+  // Validate input
+  if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
+      return res.status(400).json({ message: 'No students provided' });
+  }
+
+  // Prepare values for insertion
+  const values = selectedStudents.map(sid => `(${sid})`).join(',');
+
+  const query = `INSERT INTO upload_ia  (sid) VALUES ${values} 
+                 ON DUPLICATE KEY UPDATE idupload_ia = LAST_INSERT_ID(idupload_ia)`;
+
+  // Execute the query
+  db.query(query, (error, result) => {
+      if (error) {
+          console.error('Error adding students:', error);
+          return res.status(500).json({ message: 'Error adding students' });
+      }
+      res.status(201).json({ message: 'Students added successfully' });
+  });
+};
+
+
+export const deleteAllStudentsFromClass = (req, res) => {
+
+  try {
+      // const { classId } = req.params;
+
+      const query = `DELETE FROM upload_ia WHERE sid = ?`;
+
+      // Execute the query
+      db.query(query, (error, result) => {
+          if (error) {
+              console.error('Error deleting students:', error);
+              return res.status(500).json({ message: 'Error deleting students' });
+          }
+
+          // Check if any rows were affected
+          if (result.affectedRows === 0) {
+              return res.status(200).json({ message: 'No students found in the class' });
+          }
+
+          res.status(200).json({ message: 'All students removed from the class successfully', affectedRows: result.affectedRows });
+      });
+
+  } catch (error) {
+      console.log(error)
+  }
+};
+
+
+
+// Delete One Student from Class
+// Delete a Student from Class
+export const deleteStudentFromClass = async (req, res) => {
+  const {  sid } = req.params;
+  // const classIdAsInt = parseInt(classId); // Convert cohortId to an integer
+  const sidAsInt = parseInt(sid); // Convert cohortId to an integer
+  console.log( "sid:", sid);  // Log the parameters
+
+  const query = `DELETE FROM upload_ia  WHERE sid = ?`;
+  
+  try {
+      // Execute the query
+      db.query(query, [classIdAsInt, sidAsInt], (error, result) => {
+          if (error) {
+              console.error('Error deleting students:', error);
+              return res.status(500).json({ message: 'Error deleting students' });
+          }
+
+          // Log the query result for debugging
+          console.log('Query Result:', result);
+
+          // Check if any rows were affected (i.e., student was found and deleted)
+          if (result.affectedRows === 0) {
+              return res.status(404).json({ message: 'Student not found in the class' });
+          }
+
+          res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
+      });
+
+  } catch (error) {
+      console.error('Error deleting student:', error.message);  // Log the error
+      res.status(500).json({ message: 'Error deleting student' });
   }
 };
