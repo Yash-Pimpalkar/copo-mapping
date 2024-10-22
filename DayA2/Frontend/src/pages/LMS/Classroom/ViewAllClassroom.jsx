@@ -59,8 +59,8 @@ const ViewAllClassroom = ({ uid }) => {
 
                 {/* View Classroom Button */}
                 <Link
-                  to={`/classroom/${classroom.classroom_id}`}
-                  className="absolute top-20 sm:top-24 right-2 bg-white text-gray-800 p-1 sm:p-2 rounded-full shadow-md hover:bg-gray-200 transition-colors transform -translate-y-1/2"
+                  to={`/lms/viewclassroom/${classroom.classroom_id}`}
+                  className="absolute top-24 right-2 bg-white text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-200 transition-colors transform -translate-y-1/2"
                   style={{ zIndex: 10 }}
                 >
                   <svg

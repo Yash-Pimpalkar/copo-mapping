@@ -62,6 +62,8 @@ import ManageClassroom from './pages/LMS/Classroom/ManageClassroom';
 import EditCourse from './pages/TeacherRegistration/EditCourse';
 import ManageClassroomStudents from './pages/LMS/Classroom/ManageClassroomStudents';
 import ViewAllClassroom from './pages/LMS/Classroom/ViewAllClassroom';
+import ClassroomActivities from './pages/LMS/Classroom/ClassroomActivities';
+
 import AddStudent from './pages/TeacherForm/AddStudent';
 
 function App() {
@@ -149,8 +151,14 @@ function App() {
               <Route path='/EditCourse/:usercourse_id' element={<EditCourse uid={user_id}/>} />
               <Route path="/lms/managestudents/:cohortId" element={<ManageStudents uid={user_id}/>} />
               <Route path='/lms/manageclassroom/:classroomId' element={<ManageClassroom uid={user_id}/>} />
-              <Route path= "/lms/manageclassstudents/:classId" element={<ManageClassroomStudents uid={user_id}/>} />
-              <Route path= "/lms/viewclasssroom/" element={<ViewAllClassroom uid={user_id}/>} />
+           
+
+              <Route path= "/lms/manageclasstudents/:classId" element={<ManageClassroomStudents uid={user_id}/>} />
+              <Route path= "/lms/viewclassroom/" element={<ViewAllClassroom uid={user_id}/>} />
+              <Route path= "/lms/viewclassroom/:classroomId" element={<ClassroomActivities uid={user_id}/>} />
+
+             
+              
               <Route path="/AddStudent" element={<AddStudent />} />
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}

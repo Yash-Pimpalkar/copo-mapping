@@ -7,4 +7,7 @@ const api = axios.create({
   },
 });
 
+// Corrected export statement for backend_url
+export const backend_url = 'http://localhost:8081'; // No extra quotes
+
 export default api;
