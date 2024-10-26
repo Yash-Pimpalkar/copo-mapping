@@ -4,9 +4,11 @@ import api from '../../api.js';
 import { FaTrashAlt } from 'react-icons/fa';  // Importing trash icon for removing students
 
 const AddStudent = ({ uid }) => {
-  const { classId } = useParams(); // Get classroomId from the URL
+  const classId = useState([]);
   const classIdAsInt = parseInt(classId, 10);
   const [students, setStudents] = useState([]);
+  const { userCourseId } = useParams();
+  const {curriculum}  = useParams();
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [classCohorts, setClassCohorts] = useState([]);
   const [initialCohortStudents, setInitialCohortStudents] = useState([]);
@@ -41,7 +43,7 @@ const AddStudent = ({ uid }) => {
   useEffect(() => {
     const fetchClassroomStudents = async () => {
       try {
-        const response = await api.get(`/api/lmsclassroom/fetchstudents/${classIdAsInt}`); // Update the API endpoint as needed
+        const response = await api.get(`/api/ia/${curriculum}/fetchstudents/${userCourseId}`); // Update the API endpoint as needed
         setInitialCohortStudents(response.data); // Set initial students
         setSelectedStudents(response.data); // Set initially selected students
       } catch (error) {
@@ -108,9 +110,11 @@ const AddStudent = ({ uid }) => {
     try {
       // Convert student ID to an integer
       const sid = parseInt(student.sid, 10);
-
+      console.log("ghjk",userCourseId)
       // Delete the student from the database for this classroom
-      await api.delete(`/api/ia/deletestudentsfromclass/ia1/${sid}`);
+      const response = api.delete(`/api/students/deletestudent/${curriculum}/${sid}`, {
+        data: { userCourseId: userCourseId }
+      });
 
       // Log student ID and class ID to verify their types
       console.log(`Student ID: ${sid}, Type: ${typeof sid}`);
@@ -134,27 +138,31 @@ const AddStudent = ({ uid }) => {
   // Add newly selected students from selected cohorts to the cohort
   const handleAddNewStudents = async (student) => {
     const newStudents = selectedStudents.filter(
-      (student) => !initialCohortStudents.some((initial) => initial.sid === student.sid)
+        (student) => !initialCohortStudents.some((initial) => initial.sid === student.sid)
     );
+
     if (newStudents.length === 0) {
-      alert('No new students to add');
-      return;
+        alert('No new students to add');
+        return;
     }
 
     try {
-      api.post(`/api/ia/addstudents/ia1/${student.sid}`, {
-        selectedStudents: newStudents.map(student => student.sid),
-      });
-      alert('New students added successfully');
-      setInitialCohortStudents((prev) => [...prev, ...newStudents]);
-    } catch (error) {
-      console.error('Error assigning new students:', error);
-      alert('Error while adding new students');
-      setErrorMessage('Error while adding new students. Please try again.');
-      setTimeout(() => setErrorMessage(''), 5000);
+        // Now you can use userCourseId directly
+        await api.post(`/api/students/addstudents/${curriculum}/${student.sid}`, {
+            selectedStudents: newStudents.map(student => student.sid),
+            usercourseid: userCourseId, // Use the extracted userCourseId
+        });
 
+        alert('New students added successfully');
+        setInitialCohortStudents((prev) => [...prev, ...newStudents]);
+    } catch (error) {
+        console.error('Error assigning new students:', error);
+        alert('Error while adding new students');
+        setErrorMessage('Error while adding new students. Please try again.');
+        setTimeout(() => setErrorMessage(''), 5000);
     }
-  };
+};
+
 
   // Handle cohort selection change
 //   const handleCohortChange = (e) => {
@@ -188,7 +196,7 @@ const AddStudent = ({ uid }) => {
 
 //     fetchCohortStudents();
 //   };
-
+  console.log("YAYY",userCourseId)
   const handleSelectAll = () => {
     if (selectedStudents.length === filteredStudents.length && filteredStudents.length > 0) {
       setSelectedStudents((prevSelected) =>
@@ -217,9 +225,10 @@ const AddStudent = ({ uid }) => {
 
   const handleDeleteAll = async () => {
     try {
-      api.delete(`/api/ia/deleteallstudents/ia1/`);
+     const response= api.delete(`/api/students/deleteallstudents/${curriculum}/${userCourseId}`);
+     console.log(response.data)
       setSelectedStudents([]); // Clear the selected students list
-      alert('All students removed from the cohort successfully');
+      alert('All students removed successfully');
     } catch (error) {
       console.error('Error deleting all students:', error);
       alert('Error while deleting students');

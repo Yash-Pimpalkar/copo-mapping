@@ -258,9 +258,10 @@ export const Ia2COsName = (req, res) => {
 
 
 
- export const showIa2Data = async (req, res) => {
+export const showIa2Data = async (req, res) => {
   const userCourseId = req.params.uid;
-  console.log(userCourseId)
+  console.log(userCourseId);
+
   if (!userCourseId) {
     return res.status(400).send('Invalid userCourseId');
   }
@@ -271,14 +272,23 @@ export const Ia2COsName = (req, res) => {
       console.error('Error fetching IA data:', error);
       return res.status(500).send('Server error');
     }
-    console.log(results)
-    if (!results || results.length == 0 || results[0][0].message) {
-      return res.status(404).json({error:'No data found'});
+
+    console.log('Results:', results);  // Print results to inspect its structure
+
+    // Check if results exist and contain expected data
+    if (!results || results.length === 0 || !Array.isArray(results[0]) || results[0].length === 0) {
+      return res.status(404).json({ error: 'No data found' });
+    }
+
+    // Check if results[0][0] has a message property
+    if (results[0][0].message) {
+      return res.status(404).json({ error: results[0][0].message });
     }
 
     res.status(200).json(results[0]);
   });
 };
+
 
 
 
@@ -527,30 +537,57 @@ export const Ia2_Attainment = async (req, res) => {
 
 //important for addstudent point of view 
 
-export const addStudentsToClass = (req, res) => {
-  // const { class } = req.params;
-  const { selectedStudents } = req.body;
+export const addStudentsToClass = async (req, res) => {
+  const { selectedStudents, usercourseid } = req.body;
 
   // Validate input
   if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
       return res.status(400).json({ message: 'No students provided' });
   }
 
-  // Prepare values for insertion
-  const values = selectedStudents.map(sid => `(${sid})`).join(',');
+  console.log(selectedStudents)
+  console.log(usercourseid)
 
-  const query = `INSERT INTO upload_ia  (sid) VALUES ${values} 
-                 ON DUPLICATE KEY UPDATE idupload_ia = LAST_INSERT_ID(idupload_ia)`;
+  if (!usercourseid) {
+      return res.status(400).json({ message: 'No usercourseid provided' });
+  }
 
-  // Execute the query
-  db.query(query, (error, result) => {
-      if (error) {
-          console.error('Error adding students:', error);
-          return res.status(500).json({ message: 'Error adding students' });
+  try {
+      // Query to fetch qid values from table_ia based on usercourseid
+      const fetchQidQuery = `SELECT idtable_ia FROM table_ia WHERE usercourseid = ?`;
+      const [qidResults] = await db.promise().query(fetchQidQuery, [usercourseid]);
+
+      if (qidResults.length === 0) {
+          return res.status(404).json({ message: 'No questions found for this course' });
       }
-      res.status(201).json({ message: 'Students added successfully' });
-  });
+
+      // Extract qid values
+      const qidValues = qidResults.map(row => row.idtable_ia);
+
+      // Prepare insertion values for upload_ia
+      const values = [];
+      selectedStudents.forEach(sid => {
+          qidValues.forEach(qid => {
+              values.push(`(${sid}, ${qid})`);
+          });
+      });
+
+      // Query to insert multiple rows into upload_ia
+      const insertQuery = `INSERT INTO upload_ia (sid, qid) VALUES ${values.join(', ')} 
+                           ON DUPLICATE KEY UPDATE marks = VALUES(marks)`;
+
+      // Execute the insert query
+      await db.promise().query(insertQuery);
+
+      // Send success response
+      res.status(201).json({ message: 'Students and qid values added successfully' });
+
+  } catch (error) {
+      console.error('Error occurred:', error);
+      res.status(500).json({ message: 'An error occurred while processing the request.' });
+  }
 };
+
 
 
 export const deleteAllStudentsFromClass = (req, res) => {
@@ -594,7 +631,7 @@ export const deleteStudentFromClass = async (req, res) => {
   
   try {
       // Execute the query
-      db.query(query, [classIdAsInt, sidAsInt], (error, result) => {
+      db.query(query, [ sidAsInt], (error, result) => {
           if (error) {
               console.error('Error deleting students:', error);
               return res.status(500).json({ message: 'Error deleting students' });
@@ -615,4 +652,33 @@ export const deleteStudentFromClass = async (req, res) => {
       console.error('Error deleting student:', error.message);  // Log the error
       res.status(500).json({ message: 'Error deleting student' });
   }
+};
+
+
+export const get_Usercourse_Students = (req, res) => {
+  const { uid } = req.params; // Assuming classId is passed as a parameter
+
+  const sql = `
+SELECT DISTINCT
+    s.sid, 
+    s.stud_clg_id, 
+    s.student_name
+FROM 
+    lms_students s
+JOIN 
+    upload_ia ua ON s.sid = ua.sid
+JOIN 
+    table_ia ti ON ua.qid = ti.idtable_ia
+WHERE 
+    ti.usercourseid = ?;
+  `;
+
+  db.query(sql, [uid], (error, results) => {
+      if (error) {
+          console.error('Error fetching classroom students:', error);
+          return res.status(500).json({ message: 'Internal Server Error' });
+      }
+
+      res.status(200).json(results);
+  });
 };

@@ -1,0 +1,57 @@
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+--
+-- Host: localhost    Database: copo
+-- ------------------------------------------------------
+-- Server version	8.0.39
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `main_journal`
+--
+
+DROP TABLE IF EXISTS `main_journal`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `main_journal` (
+  `journalid` int NOT NULL AUTO_INCREMENT,
+  `journal1_id` int DEFAULT NULL,
+  `sid` int DEFAULT NULL,
+  `marks` int DEFAULT NULL,
+  PRIMARY KEY (`journalid`),
+  KEY `sidlll_idx` (`sid`),
+  KEY `journalid_idx` (`journal1_id`),
+  CONSTRAINT `journalid` FOREIGN KEY (`journal1_id`) REFERENCES `upload_journal` (`journalid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sidlll` FOREIGN KEY (`sid`) REFERENCES `copo_students_details` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=154 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `main_journal`
+--
+
+LOCK TABLES `main_journal` WRITE;
+/*!40000 ALTER TABLE `main_journal` DISABLE KEYS */;
+INSERT INTO `main_journal` VALUES (1,3,1,3),(2,3,2,9),(3,3,3,3),(4,3,4,6),(5,3,5,4),(6,3,6,10),(7,3,7,8),(8,3,8,10),(9,3,9,7),(10,3,10,2),(11,3,11,10),(12,3,12,1),(13,3,13,6),(14,3,14,8),(15,3,15,2),(16,3,16,3),(17,3,17,8),(18,3,18,4),(19,3,19,2),(20,3,20,9),(21,3,21,8),(22,3,22,2),(23,3,23,7),(24,3,24,8),(25,3,25,7),(26,3,26,2),(27,3,27,6),(28,3,28,7),(29,3,29,4),(30,3,30,1),(31,3,31,2),(32,3,32,6),(33,3,33,4),(34,3,34,10),(35,3,35,8),(36,3,36,10),(37,3,37,5),(38,3,38,6),(39,3,39,2),(40,3,40,3),(41,3,41,9),(42,3,42,5),(43,3,43,6),(44,3,44,7),(45,3,45,6),(46,3,46,10),(47,3,47,9),(48,3,48,5),(49,3,49,9),(50,3,50,9),(51,3,51,6),(52,3,52,3),(53,3,53,8),(54,3,54,10),(55,3,55,4),(56,3,56,10),(57,3,57,7),(58,3,58,4),(59,3,59,8),(60,3,60,10),(61,3,61,2),(62,3,62,2),(63,3,63,5),(64,3,64,5),(65,3,65,2),(66,3,66,5),(67,3,67,8),(68,3,68,4),(69,3,69,7),(70,3,70,2),(71,3,71,9),(72,3,72,8),(73,3,73,3),(74,3,74,1),(75,3,75,3),(76,3,76,2),(77,3,77,2),(78,3,78,3),(79,3,79,7),(80,3,80,7),(81,3,81,5),(82,3,82,10),(83,3,83,8),(84,3,84,7),(85,3,85,3),(86,3,86,4),(87,3,87,9),(88,3,88,4),(89,3,89,1),(90,3,90,1),(91,3,91,3),(92,3,92,10),(93,3,93,1),(94,3,94,7),(95,3,95,8),(96,3,96,9),(97,3,97,3),(98,3,98,6),(99,3,99,1),(100,3,100,8),(101,3,101,6),(102,3,102,4),(103,3,103,10),(104,3,104,1),(105,3,105,3),(106,3,106,1),(107,3,107,4),(108,3,108,8),(109,3,109,6),(110,3,110,5),(111,3,111,6),(112,3,112,5),(113,3,113,8),(114,3,114,5),(115,3,115,9),(116,3,116,9),(117,3,117,6),(118,3,118,4),(119,3,119,2),(120,3,120,8),(121,3,121,5),(122,3,122,7),(123,3,123,1),(124,3,124,5),(125,3,125,10),(126,3,126,6),(127,3,127,8),(128,3,128,2),(129,3,129,5),(130,3,130,1),(131,3,131,6),(132,3,132,9),(133,3,133,5),(134,3,134,9),(135,3,135,9),(136,3,136,9),(137,3,137,4),(138,3,138,5),(139,3,139,4),(140,3,140,2),(141,3,141,8),(142,3,142,4),(143,3,143,7),(144,3,144,1),(145,3,145,2),(146,3,146,10),(147,3,147,10),(148,3,148,3),(149,3,149,1),(150,3,150,7),(151,3,151,1),(152,3,152,3),(153,3,153,2);
+/*!40000 ALTER TABLE `main_journal` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-10-27  2:19:50

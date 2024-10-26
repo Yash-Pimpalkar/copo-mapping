@@ -23,6 +23,8 @@ const Ia1 = ({ uid }) => {
 
   const navigate = useNavigate(); 
 
+  const curriculum = "ia1";
+
   const [display, setDisplay] = useState("Total student passed with >=");
   const calculatePercentage = (total, maxMarks) => {
     return (total / maxMarks) * 100;
@@ -680,9 +682,9 @@ const Ia1 = ({ uid }) => {
   };
   
   const handleClick = () => {
-    navigate('/AddStudent');
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
   };
-
+  
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">

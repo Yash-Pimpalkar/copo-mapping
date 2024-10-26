@@ -23,7 +23,8 @@ import BranchRoute from "./routes/showbranch.js"
 import CohortRoute from "./routes/lms/Cohort.js"
 import LMSClassRoom from "./routes/lms/classroom.js"
 import ClassActivitiesRoute from "./routes/lms/classroomactivities.js"
-import FeedbackClassroom from "./routes/lms/feedback.js"
+import FeedbackClassroomRoute from "./routes/lms/feedback.js"
+import ManageStudentsRoute from "./routes/managestudent.js"
 // import LMSClassRoom from "./routes/lms/Upload_classroom.js"
 const port = 8081;
 
@@ -51,7 +52,8 @@ app.use("/api/branch",BranchRoute);
 app.use("/api/cohorts",CohortRoute);
 app.use("/api/lmsclassroom",LMSClassRoom);
 app.use("/api/lmsclassroom/activities",ClassActivitiesRoute)
-app.use("/api/lmsclassroom/feedback", FeedbackClassroom);
+app.use("/api/lmsclassroom/feedback", FeedbackClassroomRoute);
+app.use("/api/students/", ManageStudentsRoute);
 
 app.listen(port, () => {
   console.log("Server is Running on PORT :", port);
