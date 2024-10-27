@@ -638,3 +638,135 @@ WHERE
     });
 };
 
+
+
+export const oralpce_addStudentsToClass = async (req, res) => {
+    const { selectedStudents, usercourseid } = req.body;
+  
+    if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
+        return res.status(400).json({ message: 'No students provided' });
+    }
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'No usercourseid provided' });
+    }
+  
+    try {
+        const fetchQidQuery = `SELECT idcol_oralpce AS qid FROM col_oralpce WHERE usercourseid = ?`;
+        const [qidResults] = await db.promise().query(fetchQidQuery, [usercourseid]);
+  
+        if (qidResults.length === 0) {
+            return res.status(404).json({ message: 'No records found for this course' });
+        }
+  
+        const qidValues = qidResults.map(row => row.qid);
+  
+        const values = [];
+        selectedStudents.forEach(sid => {
+            qidValues.forEach(qid => {
+                values.push(`(${sid}, ${qid})`);
+            });
+        });
+  
+        const insertQuery = `INSERT INTO main_oralpce (sid, qid) VALUES ${values.join(', ')} 
+                             ON DUPLICATE KEY UPDATE qid = VALUES(qid)`;
+  
+        await db.promise().query(insertQuery);
+        res.status(201).json({ message: 'Students and qid values added successfully' });
+  
+    } catch (error) {
+        console.error('Error occurred:', error);
+        res.status(500).json({ message: 'An error occurred while processing the request.' });
+    }
+};
+
+export const oralpce_deleteAllStudentsFromClass = (req, res) => {
+    const { uid } = req.params;
+
+    try {
+        const query = `
+        DELETE main_oralpce 
+        FROM main_oralpce 
+        JOIN col_oralpce ON main_oralpce.qid = col_oralpce.idcol_oralpce 
+        WHERE col_oralpce.usercourseid = ?;
+        `;
+
+        db.query(query, [uid], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(200).json({ message: 'No students found in the class' });
+            }
+
+            res.status(200).json({ message: 'All students removed from the class successfully', affectedRows: result.affectedRows });
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'An error occurred while deleting students' });
+    }
+};
+
+export const oralpce_deleteStudentFromClass = (req, res) => {
+    const { sid } = req.params;
+    const { userCourseId } = req.body;
+    const sidAsInt = parseInt(sid);
+
+    const query = `
+    DELETE main_oralpce 
+    FROM main_oralpce 
+    JOIN col_oralpce ON main_oralpce.qid = col_oralpce.idcol_oralpce 
+    WHERE main_oralpce.sid = ? 
+    AND col_oralpce.usercourseid = ?;
+    `;
+
+    try {
+        db.query(query, [sidAsInt, userCourseId], (error, result) => {
+            if (error) {
+                console.error('Error deleting student:', error);
+                return res.status(500).json({ message: 'Error deleting student' });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Student not found in the class' });
+            }
+
+            res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'An error occurred while deleting the student' });
+    }
+};
+
+export const oralpce_get_Usercourse_Students = (req, res) => {
+    const { uid } = req.params;
+
+    const sql = `
+    SELECT DISTINCT
+        s.sid, 
+        s.stud_clg_id, 
+        s.student_name
+    FROM 
+        lms_students s
+    JOIN 
+        main_oralpce mto ON s.sid = mto.sid
+    JOIN 
+        col_oralpce col ON mto.qid = col.idcol_oralpce
+    WHERE 
+        col.usercourseid = ?;
+    `;
+
+    db.query(sql, [uid], (error, results) => {
+        if (error) {
+            console.error('Error fetching classroom students:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        res.status(200).json(results);
+    });
+};

@@ -1,5 +1,5 @@
 import express from "express";
-import { ia1_addStudentsToClass, ia1_deleteAllStudentsFromClass, ia1_deleteStudentFromClass, ia1_get_Usercourse_Students, ia2_addStudentsToClass, ia2_deleteAllStudentsFromClass, ia2_deleteStudentFromClass, ia2_get_Usercourse_Students, oral_addStudentsToClass, oral_deleteAllStudentsFromClass, oral_deleteStudentFromClass, oral_get_Usercourse_Students, sem_addStudentsToClass, sem_deleteAllStudentsFromClass, sem_deleteStudentFromClass, sem_get_Usercourse_Students } from "../controller/managestudents.js";
+import { ia1_addStudentsToClass, ia1_deleteAllStudentsFromClass, ia1_deleteStudentFromClass, ia1_get_Usercourse_Students, ia2_addStudentsToClass, ia2_deleteAllStudentsFromClass, ia2_deleteStudentFromClass, ia2_get_Usercourse_Students, oral_addStudentsToClass, oral_deleteAllStudentsFromClass, oral_deleteStudentFromClass, oral_get_Usercourse_Students, oralpce_addStudentsToClass, oralpce_deleteAllStudentsFromClass, oralpce_deleteStudentFromClass, oralpce_get_Usercourse_Students, sem_addStudentsToClass, sem_deleteAllStudentsFromClass, sem_deleteStudentFromClass, sem_get_Usercourse_Students } from "../controller/managestudents.js";
 const router =express.Router();
 
 //ia1
@@ -24,10 +24,18 @@ router.get("/sem/fetchstudents/:uid",sem_get_Usercourse_Students);
 
 // Oral routes
 
-router.post("/addstudents/oral/:oralid", oral_addStudentsToClass);
+router.post("/addstudents/oral/:sid", oral_addStudentsToClass);
 router.delete("/deleteallstudents/oral/:uid", oral_deleteAllStudentsFromClass);
 router.delete("/deletestudent/oral/:sid", oral_deleteStudentFromClass);
 router.get("/oral/fetchstudents/:uid", oral_get_Usercourse_Students);
+
+// Oral PCE Routes
+
+router.post("/addstudents/oralpce/:sid", oralpce_addStudentsToClass);
+router.delete("/deleteallstudents/oralpce/:uid", oralpce_deleteAllStudentsFromClass);
+router.delete("/deletestudent/oralpce/:sid", oralpce_deleteStudentFromClass);
+router.get("/oralpce/fetchstudents/:uid", oralpce_get_Usercourse_Students);
+
 
 
 export default router;
