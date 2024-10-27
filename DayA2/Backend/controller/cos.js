@@ -15,7 +15,7 @@ export const addcos = (req, res) => {
     WHERE usercourse_id = ?
     AND (co_name, co_body) IN (?)
   `;
-  
+
   // Prepare values for the check query
   const checkValues = formData.map(cos => [cos.cos_name, cos.cos_body]);
 
@@ -27,14 +27,14 @@ export const addcos = (req, res) => {
 
     // Create a set of existing records for easy lookup
     const existingSet = new Set(existingRecords.map(record => `${record.co_name}|${record.co_body}`));
-    
+
     // Check for duplicates in the formData
     const duplicates = formData.filter(cos => existingSet.has(`${cos.cos_name}|${cos.cos_body}`));
-    
+
     if (duplicates.length > 0) {
       return res.status(400).json({ error: "Some COS records already exist", duplicates });
     }
-    
+
     // Proceed with insertion if no duplicates
     const sql = "INSERT INTO cos (usercourse_id, co_name, co_body, created_time) VALUES ?";
     const values = formData.map(cos => [user_course_id, cos.cos_name, cos.cos_body, new Date()]);
@@ -51,14 +51,167 @@ export const addcos = (req, res) => {
 
 
 export const show_cos = (req, res) => {
-    const user_course_id = req.params.uid; 
-    // console.log(user_course_id)// Use req.query for GET requests
-    const sql = "SELECT * FROM cos WHERE usercourse_id=?";
-    db.query(sql, user_course_id, (err, result) => {
-        if (err) {
-            console.error("Error fetching COS records:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-        return res.status(200).json(result);
-    });
+  const user_course_id = req.params.uid;
+  console.log(user_course_id);
+  // console.log(user_course_id)// Use req.query for GET requests
+  const sql = "SELECT * FROM cos WHERE usercourse_id=?";
+  db.query(sql, user_course_id, (err, result) => {
+    if (err) {
+      console.error("Error fetching COS records:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    return res.status(200).json(result);
+  });
 };
+
+export const get_courses = (req, res) => {
+  const sql = "select u.usercourse_id,u.user_id,c.coursecode,c.course_name,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid ";
+
+  db.query(sql, (error, results) => {
+    if (error) {
+      console.error("Error fetching COS records:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    return res.status(200).json(results);
+  })
+}
+
+export const show_cos_for_admin = (req, res) => {
+  const user_course_id = req.params.uid;
+  const sql = "SELECT * FROM cos WHERE usercourse_id=?";
+  db.query(sql, user_course_id, (err, result) => {
+    if (err) {
+      console.error("Error fetching COS records:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    return res.status(200).json(result);
+  });
+};
+
+export const add_cos_from_admin = (req, res) => {
+  const user_course_id = req.body.usercourse_id;
+  const cosToRemove = req.body.cosToRemove; // Array of { co_name, co_body } objects
+
+  if (!cosToRemove || !user_course_id) {
+    return res.status(400).json({ error: "Invalid data" });
+  }
+
+  const deleteall = `DELETE FROM cos WHERE usercourse_id = ?`;
+
+  db.query(deleteall, user_course_id, (error, results) => {
+    if (error) {
+      console.error("Error fetching COS records:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    // // SQL query to delete specific COs based on user_course_id and matching co_name and co_body
+    const sql = `
+    DELETE FROM cos
+    WHERE usercourse_id = ?
+    AND (co_name, co_body) IN (?)`;
+
+    // Prepare values for the delete query
+    const deleteValues = cosToRemove.map(cos => [cos.co_name, cos.co_body]);
+
+    db.query(sql, [user_course_id, deleteValues], (err, result) => {
+      if (err) {
+        console.error("Error deleting COS records:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      // Check if any rows were affected, indicating a successful deletion
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "No matching COS records found to delete" });
+      }
+
+      return res.status(200).json({ message: "COS records removed successfully", result });
+    });
+  })
+};
+
+export const update_Cos = (req, res) => {
+  const { usercourse_id, updatedCos } = req.body;
+
+  if (!usercourse_id || !Array.isArray(updatedCos) || updatedCos.length === 0) {
+    return res.status(400).json({ error: "Invalid data provided" });
+  }
+
+  // Prepare SQL query to update each CO record individually
+  let completedUpdates = 0;
+  let errorOccurred = false;
+
+  updatedCos.forEach((cos) => {
+    const updateSql = `
+      UPDATE cos
+      SET co_body = ?, created_time = ?
+      WHERE usercourse_id = ? AND co_name = ?
+    `;
+
+    const updateValues = [
+      cos.co_body,
+      new Date(),
+      usercourse_id,
+      cos.co_name,
+    ];
+
+    db.query(updateSql, updateValues, (err, result) => {
+      if (err) {
+        console.error("Error updating CO record:", err);
+        if (!errorOccurred) {
+          errorOccurred = true;
+          return res.status(500).json({ error: "Database error" });
+        }
+      } else {
+        completedUpdates += 1;
+
+        // Check if all updates are completed
+        if (completedUpdates === updatedCos.length && !errorOccurred) {
+          res.status(200).json({ message: "CO records updated successfully" });
+        }
+      }
+    });
+  });
+};
+
+
+export const remove_cos = (req, res) => {
+  const user_course_id = req.body.usercourse_id;
+  const cosToRemove = req.body.cosToRemove; // Array of { co_name, co_body } objects
+
+  if (!cosToRemove || !user_course_id) {
+    return res.status(400).json({ error: "Invalid data" });
+  }
+
+  const deleteall = `DELETE FROM cos WHERE usercourse_id = ?`;
+
+  db.query(deleteall, user_course_id, (error, results) => {
+    if (error) {
+      console.error("Error fetching COS records:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    // SQL query to delete specific COs based on user_course_id and matching co_name and co_body
+    const sql = `
+    DELETE FROM cos
+    WHERE usercourse_id = ?
+    AND (co_name, co_body) IN (?)`;
+
+    // Prepare values for the delete query
+    const deleteValues = cosToRemove.map(cos => [cos.co_name, cos.co_body]);
+
+    db.query(sql, [user_course_id, deleteValues], (err, result) => {
+      if (err) {
+        console.error("Error deleting COS records:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      // Check if any rows were affected, indicating a successful deletion
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "No matching COS records found to delete" });
+      }
+
+      return res.status(200).json({ message: "COS records removed successfully", result });
+    });
+  })
+};
+

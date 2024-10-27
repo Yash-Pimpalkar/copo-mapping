@@ -63,7 +63,8 @@ import EditCourse from './pages/TeacherRegistration/EditCourse';
 import ManageClassroomStudents from './pages/LMS/Classroom/ManageClassroomStudents';
 import ViewAllClassroom from './pages/LMS/Classroom/ViewAllClassroom';
 import ClassroomActivities from './pages/LMS/Classroom/ClassroomActivities';
-
+import Admin_Cos_Edit from './component/Admin/COsData';
+import AdminCOs_course from './component/Admin/EditCOs';
 import AddStudent from './pages/TeacherForm/AddStudent';
 import EditPOs from './component/Admin/EditPOs';
 
@@ -172,6 +173,8 @@ function App() {
               <Route path="/userselection" element={<UserSelection />} />
               <Route path="/AssignCourse" element={<AssignCourse />} />
               <Route path="/EditPOs" element={<EditPOs />} />
+              <Route path="/editcos" element={<AdminCOs_course />}/>
+              <Route path="/addremovecos" element={<Admin_Cos_Edit />}/>
               {/* Add other routes for usertype === 3 here */}
             </>
           ) : (

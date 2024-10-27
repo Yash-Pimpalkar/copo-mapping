@@ -69,25 +69,28 @@ const EditQuestionsPage = ({ uid }) => {
     }, [uid]);
 
     // Arrays to populate day, month, and year dropdowns
-    const days = Array.from({ length: 31 }, (_, i) => i + 1);
+    const days = Array.from({ length: 31 }, (_, i) => i+1);
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December',
     ];
-    const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+    const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() + i);
 
     const handleDateChange = (day, month, year) => {
-        if (day && month && year) {
-            console.log(day)
-            console.log(month)
-            console.log(year)
+        if (day && month && year) { 
+            console.log(day);
+            console.log(month);
+            console.log(year);
+            
             const monthIndex = months.indexOf(month); // Convert month to its index (0-11)
-            const dateObject = new Date(year, monthIndex, day);
+            const dateObject = new Date(Date.UTC(year, monthIndex, day)); // Use Date.UTC to avoid timezone offset
+    
             setSelectedDate(dateObject.toISOString().split('T')[0]); // Store date in YYYY-MM-DD format
         } else {
-            console.error("Dta not reached here")
+            console.error("Data not reached here");
         }
     };
+    
 
     const handleDayChange = (e) => {
         const day = e.target.value;
@@ -110,7 +113,6 @@ const EditQuestionsPage = ({ uid }) => {
         handleDateChange(selectedDay, selectedMonth, year);
     };
 
-
     const handleNumQuestionsChange = (e) => {
         const newNumQuestions = parseInt(e.target.value, 10);
         setNumQuestions(newNumQuestions);
@@ -119,7 +121,6 @@ const EditQuestionsPage = ({ uid }) => {
         setQuestionsLabelData(Array.from({ length: newNumQuestions }, () => ({ LabelNames: [] })));
 
         const newQuestions = Array.from({ length: newNumQuestions }, (_, index) => ({
-            required: checkedStates[index] || false,
             questionName: '',
             numCOs: 0,
             coNames: [],
@@ -143,13 +144,20 @@ const EditQuestionsPage = ({ uid }) => {
     // };
 
     const handleNumCOsChange = (index, value) => {
+        // Parse and validate input
         const numCOs = parseInt(value, 10);
+        
+        if (isNaN(numCOs) || numCOs < 0) {
+            console.error("Invalid number of COs");
+            return;
+        }
+    
         setQuestionsCOData((prevData) => {
             const newQuestionsCOData = [...prevData];
             newQuestionsCOData[index] = { ...newQuestionsCOData[index], coNames: Array(numCOs).fill('') };
             return newQuestionsCOData;
         });
-
+    
         setFormData((prevData) => {
             const newQuestions = [...prevData.questions];
             if (newQuestions[index]) {
@@ -158,9 +166,8 @@ const EditQuestionsPage = ({ uid }) => {
             }
             return { ...prevData, questions: newQuestions };
         });
-
     };
-
+    
     const handleCONameChange = (questionIndex, coIndex, value) => {
         setQuestionsCOData((prevData) => {
             const newQuestionsCOData = [...prevData];
@@ -251,9 +258,9 @@ const EditQuestionsPage = ({ uid }) => {
         // You can call your API or any other logic to handle the data here.
 
         // Get the current time
-        console.log("selectedDate");
+        console.log("selectedDate", selectedDate);
 
-        const { label, coNames, questionName, numCOs } = formData;
+        const { label, questions} = formData;
         const currentTime = new Date().toISOString();
 
         const formatDateForDatabase = (isoDate) => {
@@ -276,9 +283,7 @@ const EditQuestionsPage = ({ uid }) => {
             const dataToSubmit = {
                 userid: userCourseId,
                 question_name: label,
-                conames: coNames,
-                questions: questionName,
-                noofcos: numCOs,
+                questions: questions,
                 created_at: formattedCreatedAt,
                 deadline: selectedDate,
             };
@@ -287,7 +292,7 @@ const EditQuestionsPage = ({ uid }) => {
 
             // Send data to the server
             await api.post("/api/lmsclassroom/feedback/create", {
-                formDataForCohortClassroom: dataToSubmit
+                formDataForStudentFeedback: dataToSubmit
             });
 
             alert('Data submitted successfully');
@@ -438,7 +443,7 @@ const EditQuestionsPage = ({ uid }) => {
                             </div>
                         )}
                     </div>
-                    <div className="p-4 flex flex-col items-center bg-gray-100 rounded-lg shadow-md">
+                    <div className="p-4 flex flex-col items-center bg-gray-100 rounded-lg shadow-md mt-4">
                         <h2 className="text-lg font-semibold mb-4">Add Deadline</h2>
 
                         <div className="flex space-x-4">
@@ -498,7 +503,7 @@ const EditQuestionsPage = ({ uid }) => {
                 </div>
             )
             }
-        </div >
+        </div>
     );
 };
 
