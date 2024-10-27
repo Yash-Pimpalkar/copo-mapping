@@ -43,7 +43,7 @@ const AddStudent = ({ uid }) => {
   useEffect(() => {
     const fetchClassroomStudents = async () => {
       try {
-        const response = await api.get(`/api/ia/${curriculum}/fetchstudents/${userCourseId}`); // Update the API endpoint as needed
+        const response = await api.get(`/api/students/${curriculum}/fetchstudents/${userCourseId}`); // Update the API endpoint as needed
         setInitialCohortStudents(response.data); // Set initial students
         setSelectedStudents(response.data); // Set initially selected students
       } catch (error) {

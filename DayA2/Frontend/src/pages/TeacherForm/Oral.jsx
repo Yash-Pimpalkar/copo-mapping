@@ -3,6 +3,8 @@ import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
 import LoadingButton from "../../component/Loading/Loading";
+import { useNavigate } from 'react-router-dom';
+
 
 const Oral = ({ uid }) => {
     const [courses, setCourses] = useState([]);
@@ -23,6 +25,11 @@ const Oral = ({ uid }) => {
     const [attainmentData, setAttainmentData] = useState({
         passedPercentage: 50,
     });
+
+    const navigate = useNavigate(); 
+
+    const curriculum = "oral";
+  
     useEffect(() => {
         const fetchCourseData = async () => {
             try {
@@ -189,31 +196,31 @@ const Oral = ({ uid }) => {
 
     const handleAttainmentChange = (event, key) => {
         let value = event.target.value;
-
+    
         // Prevent non-numeric input
         if (!/^\d*$/.test(value)) {
-            setError("Only numeric values are allowed.");
-            return;
+          setError("Only numeric values are allowed.");
+          return;
         }
-
+    
         // Convert value to a number for validation
         const numericValue = Number(value);
-
+    
         // Ensure value is within the range
-        if (numericValue < 0 || numericValue > maxLimit) {
-            setError(`Value must be between 0 and ${maxLimit}`);
-            return;
+        if (numericValue < 0 || numericValue > 100) {
+          setError(`Value must be between 0 and 100`);
+          return;
         } else {
-            setError(""); // Clear error if within range
+          setError(""); // Clear error if within range
         }
-
+    
         // Update the attainment data state
         setAttainmentData((prevData) => ({
-            ...prevData,
-            [key]: value,
+          ...prevData,
+          [key]: value,
         }));
-    };
-
+      };
+    
     const [error, setError] = useState("");
 
     const handleFileUpload = (event) => {
@@ -405,6 +412,10 @@ const Oral = ({ uid }) => {
         }
     };
 
+    const handleClick = () => {
+        navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+      }; 
+
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -413,9 +424,11 @@ const Oral = ({ uid }) => {
             <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-semibold">Select Course and Year</h1>
-                    <button className="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                        Add Student
-                    </button>
+                    {userCourseId && (
+            <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              Add Student
+            </button>
+          )}
                 </div>
 
                 <div className="flex flex-col md:flex-row md:space-x-4 mb-4">

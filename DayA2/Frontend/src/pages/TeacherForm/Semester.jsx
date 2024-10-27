@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api";
 import Pagination from "../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
+import { useNavigate } from 'react-router-dom';
 
 const Semester = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -20,6 +21,10 @@ const Semester = ({ uid }) => {
   const [attainmentData, setAttainmentData] = useState({
     passedPercentage: 50,
   });
+
+  const navigate = useNavigate(); 
+
+  const curriculum = "sem";
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -110,6 +115,11 @@ const Semester = ({ uid }) => {
   };
   let t;
 
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  }; 
+
+
   // const handleFileDownload = () => {
   //   const worksheet = XLSX.utils.json_to_sheet(SemData);
   //   const workbook = XLSX.utils.book_new();
@@ -197,8 +207,8 @@ const Semester = ({ uid }) => {
     const numericValue = Number(value);
 
     // Ensure value is within the range
-    if (numericValue < 0 || numericValue > maxLimit) {
-      setError(`Value must be between 0 and ${maxLimit}`);
+    if (numericValue < 0 || numericValue > 100) {
+      setError(`Value must be between 0 and 100`);
       return;
     } else {
       setError(""); // Clear error if within range
@@ -409,9 +419,11 @@ const Semester = ({ uid }) => {
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
-          <button className="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-            Add Student
-          </button>
+          {userCourseId && (
+            <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              Add Student
+            </button>
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">

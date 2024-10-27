@@ -425,7 +425,7 @@ export const OralPCEUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE table_oral SET marks = ? WHERE oral_id = ?';
+  const sql = 'UPDATE main_oralpce SET marks = ? WHERE idmain_oralpce = ?';
   const queryValues = updates.map(update => {
     const marks = parseInt(update.Marks, 10);
 
