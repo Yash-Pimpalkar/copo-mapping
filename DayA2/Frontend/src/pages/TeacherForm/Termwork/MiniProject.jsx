@@ -3,6 +3,7 @@ import api from "../../../api";
 import Pagination from "../../../component/Pagination/Pagination"; // Import the pagination component
 import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
+import { useNavigate } from "react-router-dom";
 
 const MiniProject = ({ userCourseId , tw_id  }) => {
   const [MiniprojectData, setMiniprojectData] = useState([]);
@@ -21,6 +22,13 @@ const MiniProject = ({ userCourseId , tw_id  }) => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 console.log(userCourseId)
+
+
+const navigate = useNavigate(); 
+
+
+
+const curriculum = "minipro";
   useEffect(() => {
     const fetch_MiniprojectAttainment_data = async () => {
       try {
@@ -411,10 +419,32 @@ console.log(questiondata)
   
     return MiniproattainmentList;
   };
-  
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+      {/* Container for Export, Import and Search Bar */}
+      <div className="flex flex-col items-center mb-6">
+    {/* Centered Title */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+      Mini Project
+    </h1>
+   
+ 
+    {/* Add Student Button aligned below the title, on the right */}
+    <div className="w-full flex justify-end mt-2">
+      {userCourseId && (
+        <button
+          onClick={handleClick}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          Add Student
+        </button>
+      )}
+    </div>
+    </div>
       {/* Container for Export, Import and Search Bar */}
       <div className="mb-4 flex justify-between items-center">
         {/* File Upload */}

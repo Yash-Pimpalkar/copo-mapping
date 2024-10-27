@@ -3,6 +3,7 @@ import api from "../../../api";
 import Pagination from "../../../component/Pagination/Pagination"; // Import the pagination component
 import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
+import { useNavigate } from "react-router-dom";
 
 const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
   const [TwAssignMentData, setTwAssignmentData] = useState([]);
@@ -20,6 +21,10 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
   const [questionColumns, setQuestionColumns] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
+  const navigate = useNavigate(); 
+
+  const curriculum = "assignment";
 
   useEffect(() => {
     const fetch_Termwork_Assignment_data = async () => {
@@ -392,303 +397,222 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
     return attainmentList;
   };
   
-
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  }; 
   return (
-    <div className="overflow-x-auto">
-      {/* Container for Export, Import and Search Bar */}
-      <div className="mb-4 flex justify-between items-center">
-        {/* File Upload */}
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={importFromExcel}
-          className="border px-4 py-2 rounded-md"
-        />
+    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+  {/* Header and Controls */}
+  <div className="flex flex-col items-center mb-6">
+    {/* Centered Title */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+      Assignments
+    </h1>
 
-        {/* Search Bar */}
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by student name or ID"
-          className="px-4 py-2 border rounded-md"
-        />
-
-        {/* Download Excel Button */}
+    {/* Add Student Button aligned below the title, on the right */}
+    <div className="w-full flex justify-end mt-2">
+      {userCourseId && (
         <button
-          onClick={exportToExcel}
-          className="bg-green-500 text-white px-4 py-2 rounded-md"
+          onClick={handleClick}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         >
-          Download Excel
+          Add Student
         </button>
-      </div>
-      {loading && (
-        <div className="flex justify-center mb-4">
-          <LoadingButton loading={loading} />
-        </div>
       )}
-      {/* Table */}
-      <table className="min-w-full border-collapse border border-gray-400">
-        <thead>
+    </div>
+  </div>
+  <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    {/* File Upload */}
+    <input
+      type="file"
+      accept=".xlsx, .xls"
+      onChange={importFromExcel}
+      className="border px-4 py-2 rounded-md w-full md:w-auto"
+    />
+  
+    {/* Search Bar */}
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search by student name or ID"
+      className="px-4 py-2 border rounded-md w-full md:w-auto"
+    />
+  
+    {/* Download Excel Button */}
+    <button
+      onClick={exportToExcel}
+      className="bg-green-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
+    >
+      Download Excel
+    </button>
+  </div>
+  
+  {/* Loading Indicator */}
+  {loading && (
+    <div className="flex justify-center mb-4">
+      <LoadingButton loading={loading} />
+    </div>
+  )}
+  
+  {/* Scrollable Table Container */}
+  <div className="overflow-x-auto">
+    <table className="min-w-full border-collapse border border-gray-400 rounded-md overflow-hidden shadow-md">
+      <thead className="bg-blue-700 text-white">
+        <tr>
+          <th className="border border-gray-300 px-4 py-2" rowSpan="2">Index</th>
+          <th className="border border-gray-300 px-4 py-2" rowSpan="2">Student ID</th>
+          <th className="border border-gray-300 px-4 py-2" rowSpan="2">Student Name</th>
+          <th className="border border-gray-300 px-4 py-2" colSpan={assignmentKeys.length}>
+            Assignments
+          </th>
+          <th className="border border-gray-300 px-4 py-2" rowSpan="2">Total</th>
+          <th className="border border-gray-300 px-4 py-2" rowSpan="2">Action</th>
+        </tr>
+        <tr>
+          {assignmentKeys.map((assignmentKey, index) => (
+            <th key={assignmentKey} className="border border-gray-300 px-4 py-2">
+              {index + 1}<br />
+              <span className="text-xs text-gray-200">{getCOName(assignmentKey)}</span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {currentData.map((student, index) => (
+          <tr key={index}>
+            <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+            <td className="border border-gray-300 px-4 py-2">{student.stud_clg_id}</td>
+            <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
+            {assignmentKeys.map((assignmentKey) => (
+              <td key={assignmentKey} className="border border-gray-300 px-4 py-2">
+                {editMode === student.sid ? (
+                  <input
+                    type="text"
+                    value={editedValues[assignmentKey] ?? student[assignmentKey]}
+                    onChange={(event) => handleInputChange(event, assignmentKey)}
+                    className="w-full border rounded-md px-2 py-1 focus:ring focus:border-blue-500 text-sm"
+                  />
+                ) : (
+                  student[assignmentKey] ?? ""
+                )}
+              </td>
+            ))}
+            <td className="border border-gray-300 px-4 py-2">{calculateTotal(student)}</td>
+            <td className="border  px-4 py-2 flex justify-center">
+              {editMode === student.sid ? (
+                <>
+                  <button onClick={() => saveEdits(student.sid)} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
+                    Save
+                  </button>
+                  <button onClick={cancelEditing} className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300">
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => startEditing(student.sid, student)} className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                  Edit
+                </button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  
+  {/* Pagination */}
+  {filteredData.length > dataPerPage && (
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+    />
+  )}
+  
+  {/* Attainment Section */}
+  <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
+    <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+      <h1 className="text-lg font-semibold">Total Students Passed Each Question</h1>
+      <button
+        onClick={() => handle_Attenment(distinctConames, questionColumns, attainmentData, tw_id, userCourseId)}
+        className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 mt-2 md:mt-0"
+      >
+        Update Attainment
+      </button>
+    </div>
+  
+    {/* Passed Percentage Input */}
+    <div className="mb-4">
+      <label htmlFor="total-student-passed" className="block text-sm font-medium text-gray-700 mb-2">
+        Total Students Passed with &gt;= PERCENTAGE %
+      </label>
+      <input
+        id="total-student-passed"
+        type="number"
+        min="0"
+        max="100"
+        value={attainmentData.passedPercentage}
+        onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+        className="block w-full border p-2 rounded-md shadow-sm focus:ring focus:border-blue-500"
+      />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}
+    </div>
+  
+    {/* Results Table */}
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-blue-700 text-white">
           <tr>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Index
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Student ID
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Student Name
-            </th>
-            <th
-              className="border border-gray-300 px-4 py-2"
-              colSpan={assignmentKeys.length}
-            >
-              Assignments
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Total
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Action
-            </th>
+            <th className="border border-gray-300 px-4 py-2" colSpan={assignmentKeys.length + 1}>Assignments</th>
           </tr>
           <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-200">Type</th>
             {assignmentKeys.map((assignmentKey, index) => (
-              <th
-                key={assignmentKey}
-                className="border border-gray-300 px-4 py-2"
-              >
+              <th key={assignmentKey} className="border border-gray-300 px-4 py-2 text-center">
                 {index + 1}
                 <br />
-                <span className="text-sm text-white">
-                  {getCOName(assignmentKey)}
-                </span>
+                <span className="text-xs text-gray-200">{getCOName(assignmentKey)}</span>
               </th>
             ))}
           </tr>
         </thead>
-        <tbody>
-          {currentData.map((student, index) => (
-            <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2">
-                {student.stud_clg_id}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {student.student_name}
-              </td>
-              {assignmentKeys.map((assignmentKey) => (
-                <td
-                  key={assignmentKey}
-                  className="border border-gray-300 px-4 py-2"
-                >
-                  {editMode === student.sid ? (
-                    <input
-                      type="text"
-                      value={
-                        editedValues[assignmentKey] !== undefined
-                          ? editedValues[assignmentKey]
-                          : student[assignmentKey]
-                      }
-                      onChange={(event) =>
-                        handleInputChange(event, assignmentKey)
-                      }
-                      className="w-24 border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  ) : student[assignmentKey] !== null ? (
-                    student[assignmentKey]
-                  ) : (
-                    ""
-                  )}
-                </td>
-              ))}
-              <td className="border border-gray-300 px-4 py-2">
-                {calculateTotal(student)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {editMode === student.sid ? (
-                  <>
-                    <button
-                      onClick={() => saveEdits(student.sid)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-md"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEditing}
-                      className="px-4 py-2 bg-red-500 text-white rounded-md ml-2"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => startEditing(student.sid, student)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                  >
-                    Edit
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
+        <tbody className="bg-white divide-y divide-gray-200">
+          {/* Students Passed */}
+          <tr>
+            <td className="px-6 py-4 text-gray-500">Total Students Passed With &gt;= {attainmentData.passedPercentage} %</td>
+            {getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage).map((count, index) => (
+              <td key={index} className="px-6 py-4 text-center text-gray-500">{count}</td>
+            ))}
+          </tr>
+
+          {/* Students Attempted */}
+          <tr>
+            <td className="px-6 py-4 text-gray-500">Students Attempted Per Question</td>
+            {getTotalStudentsAttempted().map((count, index) => (
+              <td key={index} className="px-6 py-4 text-center text-gray-500">{count}</td>
+            ))}
+          </tr>
+
+          {/* CO Attainment */}
+          <tr>
+            <td className="px-6 py-4 text-gray-500">CO Attainment</td>
+            {getTotalStudentsPassedPerQuestion(attainmentData.passedPercentage).map((passedCount, index) => {
+              const attemptedCount = getTotalStudentsAttempted()[index];
+              const attainment = attemptedCount ? ((passedCount / attemptedCount) * 100).toFixed(2) : 0;
+              return (
+                <td key={index} className="px-6 py-4 text-center text-gray-500">{attainment} %</td>
+              );
+            })}
+          </tr>
         </tbody>
       </table>
-
-      {/* Pagination Component */}
-      {filteredData.length > dataPerPage && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
-
-      {/* Container for Total Students Passed */}
-      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-lg font-semibold">
-            Total Students Passed Each Question
-          </h1>
-          <button
-            onClick={() =>
-              handle_Attenment(
-                distinctConames,
-                questionColumns,
-                attainmentData,
-                tw_id,
-                userCourseId
-              )
-            }
-            className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
-          >
-            Update Attainment
-          </button>
-        </div>
-
-        {/* Input for the percentage criteria */}
-        <div className="mb-4">
-          <label
-            htmlFor="total-student-passed"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Total Students Passed with &gt;= PERCENTAGE %
-          </label>
-          <input
-            id="total-student-passed"
-            type="number"
-            min="0"
-            max="100"
-            value={attainmentData.passedPercentage}
-            onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          {message && (
-            <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
-              {message}
-            </div>
-          )}
-        </div>
-
-        {/* Table displaying results */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            {/* Table Head */}
-            <thead className="bg-white-50">
-              {/* First Row - Assignments spanning across all columns */}
-              <tr>
-                <th
-                  className="border border-gray-300 px-4 py-2"
-                  colSpan={assignmentKeys.length + 1} // Spans all assignment columns and the "Type" column
-                >
-                  Assignments
-                </th>
-              </tr>
-
-              {/* Second Row - Assignment Numbers and CO names */}
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                  Type
-                </th>
-                {assignmentKeys.map((assignmentKey, index) => (
-                  <th
-                    key={assignmentKey}
-                    className="border border-gray-300 px-4 py-2 text-center"
-                  >
-                    {index + 1} {/* Assignment Number */}
-                    <br />
-                    <span className="text-sm text-white-600">
-                      {getCOName(assignmentKey)} {/* CO name */}
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            {/* Table Body */}
-            <tbody className="bg-white divide-y divide-gray-200">
-              {/* Students Passed */}
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  Total Students Passed With &gt;={" "}
-                  {attainmentData.passedPercentage} %
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((count, index) => (
-                  <td
-                    key={index}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
-                  >
-                    {count}
-                  </td>
-                ))}
-              </tr>
-
-              {/* Students Attempted */}
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  Students Attempted Per Question
-                </td>
-                {getTotalStudentsAttempted().map((count, index) => (
-                  <td
-                    key={index}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
-                  >
-                    {count}
-                  </td>
-                ))}
-              </tr>
-
-              {/* CO Attainment */}
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  CO Attainment
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((passedCount, index) => {
-                  const attemptedCount = getTotalStudentsAttempted()[index];
-                  const attainment = attemptedCount
-                    ? ((passedCount / attemptedCount) * 100).toFixed(2)
-                    : 0;
-                  return (
-                    <td
-                      key={index}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
-                    >
-                      {attainment} %
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
+  </div>
+</div>
+
+  
   );
 };
 

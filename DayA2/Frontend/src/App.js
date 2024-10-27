@@ -162,7 +162,7 @@ function App() {
               
               <Route path= "/lms/manageclassstudents/:classId" element={<ManageClassroomStudents uid={user_id}/>} />
               <Route path= "/lms/viewclasssroom/" element={<ViewAllClassroom uid={user_id}/>} />
-              <Route path="/AddStudent/:curriculum/:userCourseId" element={<AddStudent />} />
+              <Route path="/AddStudent/:curriculum/:userCourseId" element={<AddStudent  uid={user_id} />} />
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>

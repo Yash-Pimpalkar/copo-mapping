@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../../api';
 import * as XLSX from 'xlsx';
 import Pagination from '../../../component/Pagination/Pagination';
+import { useNavigate } from 'react-router-dom';
 
 const Journal = ({ uid, tw_id }) => {
   const [journalData, setJournalData] = useState([]);
@@ -17,6 +18,11 @@ const Journal = ({ uid, tw_id }) => {
     passedPercentage: 0, // Default percentage
   });
 
+  const navigate = useNavigate(); 
+  const userCourseId = uid;
+
+
+  const curriculum = "journal";
   useEffect(() => {
     const fetchJournalData = async () => {
       try {
@@ -235,15 +241,38 @@ const Journal = ({ uid, tw_id }) => {
     });
   };  
 
-  console.log(journalData)
-  console.log(COData)
-  console.log(maxLimit)
-  console.log(attainmentData.passedPercentage)
+  // console.log(journalData)
+  // console.log(COData)
+  // console.log(maxLimit)
+  // console.log(attainmentData.passedPercentage)
+
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  };
 
 
   return (
-    <div className="overflow-x-auto min-h-screen">
-      {/* Container for Export, Import and Search Bar */}
+    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    {/* Container for Export, Import and Search Bar */}
+    <div className="flex flex-col items-center mb-6">
+  {/* Centered Title */}
+  <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+    Journal
+  </h1>
+ 
+
+  {/* Add Student Button aligned below the title, on the right */}
+  <div className="w-full flex justify-end mt-2">
+    {userCourseId && (
+      <button
+        onClick={handleClick}
+        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+      >
+        Add Student
+      </button>
+    )}
+  </div>
+  </div>
       <div className="mb-4 flex justify-between items-center bg-white shadow-lg rounded-lg p-4">
         {/* File Upload */}
         <input

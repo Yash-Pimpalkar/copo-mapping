@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import * as XLSX from "xlsx";
 import Pagination from "../../../component/Pagination/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const Attendance = ({ uid }) => {
   const [attendanceData, setAttendanceData] = useState([]);
@@ -12,7 +13,11 @@ const Attendance = ({ uid }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [maxLimit, setMaxLimit] = useState(0);
   const [message, setMessage] = useState("");
+ const userCourseId = uid;
 
+ const navigate = useNavigate(); 
+
+ const curriculum = "attendance";
   useEffect(() => {
     const fetchAttendanceData = async () => {
       try {
@@ -166,39 +171,64 @@ const Attendance = ({ uid }) => {
     XLSX.writeFile(workbook, "attendance_data.xlsx");
   };
 
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  }; 
+
   return (
-    <div className="overflow-x-auto min-h-screen">
-      {/* Container for Export, Import and Search Bar */}
-      <div className="mb-4 flex justify-between items-center bg-white shadow-lg rounded-lg p-4">
-        {/* File Upload */}
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleFileUpload}
-          className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
-        />
-
-        {/* Search Bar */}
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by student name or ID"
-          className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
-        />
-
-        {/* Download Excel Button */}
+    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    {/* Attendance Header */}
+    <div className="flex flex-col items-center mb-6">
+    {/* Centered Title */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+      Attendance
+    </h1>
+   
+ 
+    {/* Add Student Button aligned below the title, on the right */}
+    <div className="w-full flex justify-end mt-2">
+      {userCourseId && (
         <button
-          onClick={handleFileDownload}
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+          onClick={handleClick}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         >
-          Download Excel
+          Add Student
         </button>
-      </div>
+      )}
+    </div>
+    </div>
+    <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    {/* File Upload */}
+    <input
+      type="file"
+      accept=".xlsx, .xls"
+      onChange={handleFileUpload}
+      className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+    />
 
-      {/* Table */}
-      <table className="min-w-full bg-white border-collapse border border-gray-400 shadow-md rounded-lg">
-        <thead className="bg-indigo-100">
+    {/* Search Bar */}
+    <input
+      type="text"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      placeholder="Search by student name or ID"
+      className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+    />
+
+    {/* Download Excel Button */}
+    <button
+      onClick={handleFileDownload}
+      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+    >
+      Download Excel
+    </button>
+  </div>
+
+  {/* Table Wrapper for Horizontal Scrolling */}
+  <div className="overflow-x-auto">
+  
+  <table className="min-w-full divide-y divide-gray-200">
+  <thead className="bg-blue-700 text-white">
           <tr>
             <th className="border border-gray-300 px-4 py-2">Index</th>
             <th className="border border-gray-300 px-4 py-2">Student ID</th>
@@ -216,12 +246,8 @@ const Attendance = ({ uid }) => {
               <td className="border border-gray-300 px-4 py-2">
                 {index + 1 + (currentPage - 1) * itemsPerPage}
               </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {student.sid}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {student.student_name}
-              </td>
+              <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
+              <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
               <td className="border border-gray-300 px-4 py-2">
                 {editingRow === student.att_id ? (
                   <input
@@ -239,7 +265,7 @@ const Attendance = ({ uid }) => {
                 )}
               </td>
 
-              <td className="border border-gray-300 px-4 py-2 flex justify-center">
+              <td className="border  px-4 py-2 flex justify-center">
                 {editingRow === student.att_id ? (
                   <>
                     <button
@@ -268,16 +294,21 @@ const Attendance = ({ uid }) => {
           ))}
         </tbody>
       </table>
-
-      {/* Pagination Component */}
-      {filteredData.length > itemsPerPage && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
     </div>
+
+
+
+    {/* Pagination Component */}
+    {filteredData.length > itemsPerPage && (
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
+    )}
+  </div>
+  
+  
   );
 };
 

@@ -39,7 +39,20 @@ const AddStudent = ({ uid }) => {
 
 //     fetchCohorts();
 //   }, [uid]);
+useEffect(() => {
+  const fetchCohorts = async () => {
+    try {
+      const response = await api.get(`/api/lmsclassroom/fetchcohorts/${uid}`);
+      setClassCohorts(response.data);
+    } catch (error) {
+      console.error('Error fetching cohorts:', error);
+      setErrorMessage('Failed to fetch students. Please try again later.');
+      setTimeout(() => setErrorMessage(''), 5000);
+    }
+  };
 
+  fetchCohorts();
+}, [uid]);
   useEffect(() => {
     const fetchClassroomStudents = async () => {
       try {
@@ -105,6 +118,37 @@ const AddStudent = ({ uid }) => {
     );
   };
 
+  // const handleCohortChange = (e) => {
+  //   const { options } = e.target;
+  //   const selectedCohortIds = Array.from(options)
+  //     .filter(option => option.selected)
+  //     .map(option => option.value);
+
+  //   setSelectedCohorts(selectedCohortIds);
+  //   console.log(selectedCohorts)
+  //   // Fetch students from selected cohorts
+  //   const fetchCohortStudents = async () => {
+  //     try {
+  //       const cohortStudents = await Promise.all(selectedCohortIds.map(cohortId =>
+  //         api.get(`/api/cohorts/cohortstudents/${cohortId}`)
+  //       ));
+
+  //       // Combine students and avoid duplicates
+  //       const allCohortStudents = cohortStudents.flatMap(res => res.data);
+  //       const uniqueStudents = Array.from(new Set(allCohortStudents.map(s => s.sid)))
+  //         .map(sid => allCohortStudents.find(s => s.sid === sid));
+
+  //       setStudents(uniqueStudents);
+  //       setFilteredStudents(uniqueStudents);
+  //     } catch (error) {
+  //       console.error('Error fetching cohort students:', error);
+  //       setErrorMessage('Failed to fetch cohort students. Please try again.');
+  //       setTimeout(() => setErrorMessage(''), 5000);
+  //     }
+  //   };
+
+  //   fetchCohortStudents();
+  // };
   // Remove student from selected list
   const handleRemoveStudent = async (student) => {
     try {
@@ -134,7 +178,7 @@ const AddStudent = ({ uid }) => {
       setTimeout(() => setErrorMessage(''), 5000);
     }
   };
-
+  console.log(classCohorts)
   // Add newly selected students from selected cohorts to the cohort
   const handleAddNewStudents = async (student) => {
     const newStudents = selectedStudents.filter(
@@ -165,38 +209,38 @@ const AddStudent = ({ uid }) => {
 
 
   // Handle cohort selection change
-//   const handleCohortChange = (e) => {
-//     const { options } = e.target;
-//     const selectedCohortIds = Array.from(options)
-//       .filter(option => option.selected)
-//       .map(option => option.value);
+  const handleCohortChange = (e) => {
+    const { options } = e.target;
+    const selectedCohortIds = Array.from(options)
+      .filter(option => option.selected)
+      .map(option => option.value);
 
-//     setSelectedCohorts(selectedCohortIds);
-//     console.log(selectedCohorts)
-//     // Fetch students from selected cohorts
-//     const fetchCohortStudents = async () => {
-//       try {
-//         const cohortStudents = await Promise.all(selectedCohortIds.map(cohortId =>
-//           api.get(`/api/cohorts/cohortstudents/${cohortId}`)
-//         ));
+    setSelectedCohorts(selectedCohortIds);
+    console.log(selectedCohorts)
+    // Fetch students from selected cohorts
+    const fetchCohortStudents = async () => {
+      try {
+        const cohortStudents = await Promise.all(selectedCohortIds.map(cohortId =>
+          api.get(`/api/cohorts/cohortstudents/${cohortId}`)
+        ));
 
-//         // Combine students and avoid duplicates
-//         const allCohortStudents = cohortStudents.flatMap(res => res.data);
-//         const uniqueStudents = Array.from(new Set(allCohortStudents.map(s => s.sid)))
-//           .map(sid => allCohortStudents.find(s => s.sid === sid));
+        // Combine students and avoid duplicates
+        const allCohortStudents = cohortStudents.flatMap(res => res.data);
+        const uniqueStudents = Array.from(new Set(allCohortStudents.map(s => s.sid)))
+          .map(sid => allCohortStudents.find(s => s.sid === sid));
 
-//         setStudents(uniqueStudents);
-//         setFilteredStudents(uniqueStudents);
-//       } catch (error) {
-//         console.error('Error fetching cohort students:', error);
-//         setErrorMessage('Failed to fetch cohort students. Please try again.');
-//         setTimeout(() => setErrorMessage(''), 5000);
-//       }
-//     };
+        setStudents(uniqueStudents);
+        setFilteredStudents(uniqueStudents);
+      } catch (error) {
+        console.error('Error fetching cohort students:', error);
+        setErrorMessage('Failed to fetch cohort students. Please try again.');
+        setTimeout(() => setErrorMessage(''), 5000);
+      }
+    };
 
-//     fetchCohortStudents();
-//   };
-  console.log("YAYY",userCourseId)
+    fetchCohortStudents();
+  };
+  // console.log("YAYY",userCourseId)
   const handleSelectAll = () => {
     if (selectedStudents.length === filteredStudents.length && filteredStudents.length > 0) {
       setSelectedStudents((prevSelected) =>
@@ -282,7 +326,7 @@ const AddStudent = ({ uid }) => {
           <h2 className="text-xl font-bold mb-4">Manage Students</h2>
 
           {/* Cohorts Multi-Select */}
-          {/* <div className="mb-4">
+           <div className="mb-4">
             <label className="block mb-2">Select Cohorts</label>
             <select multiple onChange={handleCohortChange} className="border border-gray-300 p-2 rounded w-full">
               {classCohorts.map((cohort) => (
@@ -291,10 +335,10 @@ const AddStudent = ({ uid }) => {
                 </option>
               ))}
             </select>
-          </div> */}
+          </div>
 
           {/* Search input */}
-          {/* <div className="mb-4">
+          <div className="mb-4">
             <input
               type="text"
               placeholder="Search by name, ID, or email"
@@ -302,7 +346,7 @@ const AddStudent = ({ uid }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="border border-gray-300 p-2 rounded w-full"
             />
-          </div> */}
+          </div>
 
           {/* Filters */}
           <div className="mb-4 grid grid-cols-3 gap-4">

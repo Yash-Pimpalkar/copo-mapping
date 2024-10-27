@@ -3,6 +3,7 @@ import api from "../../../api";
 import Pagination from "../../../component/Pagination/Pagination";
 import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
+import { useNavigate } from "react-router-dom";
 
 const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
   const [experimentData, setExperimentData] = useState([]);
@@ -18,6 +19,10 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
   const [attainmentData, setAttainmentData] = useState({
     passedPercentage: 50, // Default to 50% passing criteria
   });
+
+  const navigate = useNavigate(); 
+
+  const curriculum = "experiment";
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -391,215 +396,94 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
   
     return attainmentList;
   };
-  
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  }; 
 
   return (
 
     <>
-    <div className="overflow-x-auto">
-      {/* Container for Export, Import and Search Bar */}
-      <div className="mb-4 flex justify-between items-center">
+    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    <div className="flex flex-col items-center mb-6">
+    {/* Centered Title */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+      Experiments
+    </h1>
+
+    {/* Add Student Button aligned below the title, on the right */}
+    <div className="w-full flex justify-end mt-2">
+      {userCourseId && (
+        <button
+          onClick={handleClick}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          Add Student
+        </button>
+      )}
+    </div>
+  </div>
+      {/* Container for Export, Import, and Search Bar */}
+      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* File Upload */}
         <input
           type="file"
           accept=".xlsx, .xls"
           onChange={importFromExcel}
-          className="border px-4 py-2 rounded-md"
+          className="border px-4 py-2 rounded-md w-full md:w-auto"
         />
-
+  
         {/* Search Bar */}
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by student name or ID"
-          className="px-4 py-2 border rounded-md"
+          className="px-4 py-2 border rounded-md w-full md:w-auto"
         />
-
+  
         {/* Download Excel Button */}
         <button
           onClick={exportToExcel}
-          className="bg-green-500 text-white px-4 py-2 rounded-md"
+          className="bg-green-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
         >
           Download Excel
         </button>
       </div>
+  
       {loading && (
         <div className="flex justify-center mb-4">
           <LoadingButton loading={loading} />
         </div>
       )}
+  
       {/* Table */}
-      <table className="min-w-full border-collapse border border-gray-400">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Index
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Student ID
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Student Name
-            </th>
-            <th
-              className="border border-gray-300 px-4 py-2"
-              colSpan={experimentKeys.length}
-            >
-              Experiments
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Total
-            </th>
-            <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-              Action
-            </th>
-          </tr>
-          <tr>
-            {experimentKeys.map((experimentKey, index) => (
-              <th
-                key={experimentKey}
-                className="border border-gray-300 px-4 py-2"
-              >
-                {index + 1}
-                <br />
-                <span className="text-sm text-white">
-                  {getCOName(experimentKey)}
-                </span>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {currentData.map((student, index) => (
-            <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2">
-                {student.stud_clg_id}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {student.student_name}
-              </td>
-              {experimentKeys.map((experimentKey) => (
-                <td
-                  key={experimentKey}
-                  className="border border-gray-300 px-4 py-2"
-                >
-                  {editMode === student.sid ? (
-                    <input
-                      type="text"
-                      value={
-                        editedValues[experimentKey] !== undefined
-                          ? editedValues[experimentKey]
-                          : student[experimentKey]
-                      }
-                      onChange={(event) =>
-                        handleInputChange(event, experimentKey)
-                      }
-                      className="w-24 border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  ) : student[experimentKey] !== null ? (
-                    student[experimentKey]
-                  ) : (
-                    ""
-                  )}
-                </td>
-              ))}
-              <td className="border border-gray-300 px-4 py-2">
-                {calculateTotal(student)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {editMode === student.sid ? (
-                  <>
-                    <button
-                      onClick={() => saveEdits(student.sid)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-md"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEditing}
-                      className="px-4 py-2 bg-red-500 text-white rounded-md ml-2"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => startEditing(student.sid, student)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                  >
-                    Edit
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Pagination Component */}
-      {filteredData.length > dataPerPage && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
-
-      {/* New Section for Total Students Passed Each Question */}
-      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-lg font-semibold">
-            Total Students Passed Each Question
-          </h1>
-          <button
-            onClick={() =>
-              handle_Attenment(
-                experimentKeys,
-                attainmentData,
-                tw_id,
-                userCourseId
-              )
-            }
-            className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
-          >
-            Update Attainment
-          </button>
-         
-        </div>
-
-        <div className="mb-4">
-          <label
-            htmlFor="total-student-passed"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Total Students Passed with &gt;= PERCENTAGE %
-          </label>
-          <input
-            id="total-student-passed"
-            type="number"
-            min="0"
-            max="100"
-            value={attainmentData.passedPercentage}
-            onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-
+      <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-400">
-          <thead>
+          <thead className="bg-blue-700 text-white">
             <tr>
-              <th className="border border-gray-300 px-4 py-2">Type</th>
+              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                Index
+              </th>
+              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                Student ID
+              </th>
+              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                Student Name
+              </th>
               <th
                 className="border border-gray-300 px-4 py-2"
                 colSpan={experimentKeys.length}
               >
                 Experiments
               </th>
+              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                Total
+              </th>
+              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                Action
+              </th>
             </tr>
             <tr>
-              <th className="border border-gray-300 px-4 py-2">CO Name</th>
               {experimentKeys.map((experimentKey, index) => (
                 <th
                   key={experimentKey}
@@ -607,7 +491,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
                 >
                   {index + 1}
                   <br />
-                  <span className="text-sm text-white">
+                  <span className="text-sm text-gray-200">
                     {getCOName(experimentKey)}
                   </span>
                 </th>
@@ -615,56 +499,191 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                Total Students Passed
-              </td>
-              {getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              ).map((count, index) => (
-                <td key={index} className="border border-gray-300 px-4 py-2">
-                  {count}
+            {currentData.map((student, index) => (
+              <tr key={index}>
+                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {student.stud_clg_id}
                 </td>
-              ))}
-            </tr>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">
-                Total Students Attempted
-              </td>
-              {getTotalStudentsAttempted().map((count, index) => (
-                <td key={index} className="border border-gray-300 px-4 py-2">
-                  {count}
+                <td className="border border-gray-300 px-4 py-2">
+                  {student.student_name}
                 </td>
-              ))}
-            </tr>
-            {/* CO Attainment */}
-            <tr>
-              <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                CO Attainment
-              </td>
-              {getTotalStudentsPassedPerQuestion(
-                attainmentData.passedPercentage
-              ).map((passedCount, index) => {
-                const attemptedCount = getTotalStudentsAttempted()[index];
-                const attainment = attemptedCount
-                  ? ((passedCount / attemptedCount) * 100).toFixed(2)
-                  : 0;
-                return (
+                {experimentKeys.map((experimentKey) => (
                   <td
-                    key={index}
-                    className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+                    key={experimentKey}
+                    className="border border-gray-300 px-4 py-2"
                   >
-                    {attainment} %
+                    {editMode === student.sid ? (
+                      <input
+                        type="text"
+                        value={
+                          editedValues[experimentKey] !== undefined
+                            ? editedValues[experimentKey]
+                            : student[experimentKey]
+                        }
+                        onChange={(event) =>
+                          handleInputChange(event, experimentKey)
+                        }
+                        className="w-24 border border-gray-300 rounded-md px-2 py-1 focus:ring focus:border-blue-500 sm:text-sm"
+                      />
+                    ) : student[experimentKey] !== null ? (
+                      student[experimentKey]
+                    ) : (
+                      ""
+                    )}
                   </td>
-                );
-              })}
-            </tr>
+                ))}
+                <td className="border border-gray-300 px-4 py-2">
+                  {calculateTotal(student)}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {editMode === student.sid ? (
+                    <>
+                      <button
+                        onClick={() => saveEdits(student.sid)}
+                        className="px-4 py-2 bg-green-500 text-white rounded-md"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="px-4 py-2 bg-red-500 text-white rounded-md ml-2"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => startEditing(student.sid, student)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+  
+        {/* Pagination Component */}
+        {filteredData.length > dataPerPage && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
+  
+        {/* New Section for Total Students Passed Each Question */}
+        <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-lg font-semibold">
+              Total Students Passed Each Question
+            </h1>
+            <button
+              onClick={() =>
+                handle_Attenment(
+                  experimentKeys,
+                  attainmentData,
+                  tw_id,
+                  userCourseId
+                )
+              }
+              className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+            >
+              Update Attainment
+            </button>
+          </div>
+  
+          <div className="mb-4">
+            <label
+              htmlFor="total-student-passed"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Total Students Passed with &gt;= PERCENTAGE %
+            </label>
+            <input
+              id="total-student-passed"
+              type="number"
+              min="0"
+              max="100"
+              value={attainmentData.passedPercentage}
+              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-500"
+            />
+          </div>
+  
+          <table className="min-w-full border-collapse border border-gray-400">
+            <thead className="bg-blue-700 text-white">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2">Type</th>
+                {experimentKeys.map((experimentKey, index) => (
+                  <th
+                    key={experimentKey}
+                    className="border border-gray-300 px-4 py-2"
+                  >
+                    {index + 1}
+                    <br />
+                    <span className="text-sm text-gray-200">
+                      {getCOName(experimentKey)}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">
+                  Total Students Passed
+                </td>
+                {getTotalStudentsPassedPerQuestion(
+                  attainmentData.passedPercentage
+                ).map((count, index) => (
+                  <td key={index} className="border border-gray-300 px-4 py-2">
+                    {count}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">
+                  Total Students Attempted
+                </td>
+                {getTotalStudentsAttempted().map((count, index) => (
+                  <td key={index} className="border border-gray-300 px-4 py-2">
+                    {count}
+                  </td>
+                ))}
+              </tr>
+              {/* CO Attainment */}
+              <tr>
+                <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                  CO Attainment
+                </td>
+                {getTotalStudentsPassedPerQuestion(
+                  attainmentData.passedPercentage
+                ).map((passedCount, index) => {
+                  const attemptedCount = getTotalStudentsAttempted()[index];
+                  const attainment = attemptedCount
+                    ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                    : 0;
+                  return (
+                    <td
+                      key={index}
+                      className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+                    >
+                      {attainment} %
+                    </td>
+                  );
+                })}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-   
-    </>
+  </>
+  
     
   );
 };
