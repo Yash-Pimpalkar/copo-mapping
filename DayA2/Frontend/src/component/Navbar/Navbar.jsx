@@ -120,8 +120,11 @@ export default function Navbar() {
     { name: "Progress Tracker", href: "/", userTypes: [1] },
     { name: "Announcement", href: "/", userTypes: [1] },
     { name: "Feedback", href: "/", userTypes: [1] },
+    { name: "Edit POs", href: "/editpos", userTypes:[3] },
+    { name: "Edit COs", href:"/editcos", userTypes:[3] },
     { name: "User Selection", href: "/userselection", userTypes: [3] },
     { name: "Assign Course", href: "/assigncourse", userTypes: [3] },
+    { name: "Next Sem", href:"/nextsem", userTypes:[3] },
   ];
 
   const formNavigation = [

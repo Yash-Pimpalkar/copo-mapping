@@ -65,6 +65,7 @@ import ViewAllClassroom from './pages/LMS/Classroom/ViewAllClassroom';
 import ClassroomActivities from './pages/LMS/Classroom/ClassroomActivities';
 
 import AddStudent from './pages/TeacherForm/AddStudent';
+import EditPOs from './component/Admin/EditPOs';
 
 function App() {
   const [token, setToken] = useState("");
@@ -170,6 +171,7 @@ function App() {
             <>
               <Route path="/userselection" element={<UserSelection />} />
               <Route path="/AssignCourse" element={<AssignCourse />} />
+              <Route path="/EditPOs" element={<EditPOs />} />
               {/* Add other routes for usertype === 3 here */}
             </>
           ) : (
