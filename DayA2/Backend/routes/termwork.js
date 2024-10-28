@@ -1,28 +1,70 @@
 import express from "express";
-import { AttendanceLimit, AttendanceUpload, fetchTermworkLabels, GdLimit, GdUpload, getAssignmentsAndCOs, getExperimentAndCOs, getExperimentData, getTermworkAssignment, getTermworkData, JournalLimit, JournalUpload, MajorProjectLimit, MajorProjectUpload, MiniProjectLimit, MiniProjectUpload, PPTLimit, PPTUpload, ReportLimit, ReportUpload, SciLabLimit, SciLabUpload, showAttendanceData, showGdData, showJournalData, showMajorProjectData, showMiniProjectData, showPPTData, showReportData, showSciLabData, showTradeData, submitTermworkId, Termwork_Attainment, TradeLimit, TradeUpload, updateAssignments, updateExperiments, showjournalcodata, showcoPptData, showReportcoData, showSciLabcoData } from "../controller/termwork.js";
-const router =express.Router();
+import {
+  AttendanceLimit,
+  AttendanceUpload,
+  fetchTermworkLabels,
+  GdLimit,
+  GdUpload,
+  getAssignmentsAndCOs,
+  getExperimentAndCOs,
+  getExperimentData,
+  getTermworkAssignment,
+  getTermworkData,
+  JournalLimit,
+  JournalUpload,
+  MajorProjectLimit,
+  MajorProjectUpload,
+  MiniProjectLimit,
+  MiniProjectUpload,
+  PPTLimit,
+  PPTUpload,
+  ReportLimit,
+  ReportUpload,
+  SciLabLimit,
+  SciLabUpload,
+  showAttendanceData,
+  showGdData,
+  showJournalData,
+  showMajorProjectData,
+  showMiniProjectData,
+  showPPTData,
+  showReportData,
+  showSciLabData,
+  showTradeData,
+  submitTermworkId,
+  Termwork_Attainment,
+  TradeLimit,
+  TradeUpload,
+  updateAssignments,
+  updateExperiments,
+  showjournalcodata,
+  showcoPptData,
+  showReportcoData,
+  showSciLabcoData,
+  showReportTradeCoData,
+} from "../controller/termwork.js";
+const router = express.Router();
 
 // main termwork
-router.get("/checkboxlabels/:userCourseId",fetchTermworkLabels);
-router.post("/submit", submitTermworkId );
-router.get("/gettermworkdata/:usercourseid",getTermworkData);
+router.get("/checkboxlabels/:userCourseId", fetchTermworkLabels);
+router.post("/submit", submitTermworkId);
+router.get("/gettermworkdata/:usercourseid", getTermworkData);
 
 // assignment route
-router.get("/gettwassignmentdata/:usercourseid",getTermworkAssignment);
-router.get('/getassignments/:usercourseid', getAssignmentsAndCOs);
-router.put('/assignment/update', updateAssignments);
+router.get("/gettwassignmentdata/:usercourseid", getTermworkAssignment);
+router.get("/getassignments/:usercourseid", getAssignmentsAndCOs);
+router.put("/assignment/update", updateAssignments);
 
 //Experimnet routes
 router.get("/getexperimentdata/:usercourseid", getExperimentData);
 // Route to get assignments related to experiments for a specific user course ID
-router.get('/getexperiment/:usercourseid', getExperimentAndCOs);
+router.get("/getexperiment/:usercourseid", getExperimentAndCOs);
 // Route to update experiments
-router.put('/experiment/update', updateExperiments);
+router.put("/experiment/update", updateExperiments);
 
-
-router.get("/show/attendance/:uid",showAttendanceData)
-router.put("/attendance/update",AttendanceUpload);
-router.get("/attendance/limit/:uid",AttendanceLimit);
+router.get("/show/attendance/:uid", showAttendanceData);
+router.put("/attendance/update", AttendanceUpload);
+router.get("/attendance/limit/:uid", AttendanceLimit);
 // GD Routes
 router.get("/show/gd/:uid", showGdData);
 router.put("/gd/update", GdUpload);
@@ -34,8 +76,7 @@ router.get("/show/scilabco/:uid", showSciLabcoData);
 router.put("/scilab/update", SciLabUpload);
 router.get("/scilab/limit/:uid", SciLabLimit);
 
-
-//jornal Route 
+//jornal Route
 router.get("/show/journal/:uid", showJournalData);
 router.get("/show/journalco/:uid", showjournalcodata);
 router.put("/journal/update", JournalUpload);
@@ -51,7 +92,7 @@ router.get("/show/minipro/:uid", showMiniProjectData);
 router.put("/minipro/update", MiniProjectUpload);
 router.get("/minipro/limit/:uid", MiniProjectLimit);
 
-// ppt 
+// ppt
 router.get("/show/ppt/:uid", showPPTData);
 router.get("/showco/ppt/:uid", showcoPptData);
 router.put("/ppt/update", PPTUpload);
@@ -64,13 +105,12 @@ router.get("/show/reportco/:uid", showReportcoData);
 router.put("/report/update", ReportUpload);
 router.get("/report/limit/:uid", ReportLimit);
 
-
 // trade
 router.get("/show/trade/:uid", showTradeData);
+router.get("/show/tradeco/:uid", showReportTradeCoData);
 router.put("/trade/update", TradeUpload);
 router.get("/trade/limit/:uid", TradeLimit);
 
-
-router.put("/update-attainment",Termwork_Attainment)
+router.put("/update-attainment", Termwork_Attainment);
 
 export default router;

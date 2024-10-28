@@ -1356,21 +1356,7 @@ export const showTradeData = async (req, res) => {
   const userCourseId = req.params.uid;
   
   const sql = `
-    SELECT 
-      m.tradeid,
-      m.trade_id,
-      m.sid,
-      m.marks,
-      c.student_name,
-      c.stud_clg_id
-    FROM 
-      main_trade AS m
-    INNER JOIN 
-      upload_trade AS u ON m.trade_id = u.tradeid
-    INNER JOIN 
-      copo_students_details AS c ON m.sid = c.sid
-    WHERE 
-      u.usercourseid = ?;
+    call GetTradeMarks(?);
   `;
 
   db.query(sql, userCourseId, (error, results) => {
@@ -1382,6 +1368,39 @@ export const showTradeData = async (req, res) => {
     }
   });
 };
+
+
+export const showReportTradeCoData = async (req, res) => {
+  const userCourseId = req.params.uid;
+  
+  const sql = `
+    SELECT 
+      ct.idco_trade,
+      ct.coname,
+      ct.co_id,
+      qt.tradename,
+      ut.nooftrade,
+      ut.marks
+    FROM 
+      co_trade AS ct
+    INNER JOIN 
+      question_trade AS qt ON ct.co_id = qt.tradeid
+    INNER JOIN 
+      upload_trade AS ut ON qt.tradeid = ut.tradeid
+    WHERE 
+      ut.usercourseid = ?;
+  `;
+
+  db.query(sql, userCourseId, (error, results) => {
+    if (error) {
+      console.error('Error fetching trade report data:', error);
+      res.status(500).send('Server error');
+    } else {
+      res.status(200).json(results);
+    }
+  });
+};
+
 export const TradeUpload = async (req, res) => {
   let updates = req.body;
   console.log('Received updates:', updates);
