@@ -65,18 +65,19 @@ const UploadOral = ({ uid }) => {
   const handleNumQuestionsChange = () => {
     const num = 1; // Default to 1 question, non-changeable
     setNumQuestions(num);
+
     const initialQuestions = Array.from({ length: num }, (_, index) => ({
       qid: index + 1,
       cocount: "",
-      marks: 25, // Default to 80
+      marks: 25, // Default to 25
     }));
     setQuestions(initialQuestions);
 
     // Initialize formData with default values
-    const initialFormData = initialQuestions.reduce((acc, index) => {
+    const initialFormData = initialQuestions.reduce((acc, question, index) => {
       acc[index] = {
         cocount: "",
-        marks: 25, // Default to 80
+        marks: 25, // Default to 25
       };
       return acc;
     }, {});
@@ -93,7 +94,12 @@ const UploadOral = ({ uid }) => {
       ...prev,
       [index]: {
         ...prev[index],
-        [field]: value.toUpperCase(), // Convert input to uppercase
+        [field]:
+          field === "marks"
+            ? isNaN(value) || value === ""
+              ? ""
+              : Number(value)
+            : value.toUpperCase(), // Handle marks as number
       },
     }));
   };
@@ -132,7 +138,7 @@ const UploadOral = ({ uid }) => {
     } catch (error) {
       console.error("Error submitting data:", error);
       setError(error.response?.data?.error || "Failed to submit data"); // Set error message
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -238,8 +244,8 @@ const UploadOral = ({ uid }) => {
                       Max Marks
                     </label>
                     <input
-                      type="number"
-                      value={formData[index]?.marks || question.marks || 25} // Default 80
+                      type="text" // Changed type to text
+                      value={formData[index]?.marks || ""} // Default 80 handled in formData initialization
                       onChange={(e) =>
                         handleFormChange(index, "marks", e.target.value)
                       }

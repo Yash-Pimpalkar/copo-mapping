@@ -211,11 +211,15 @@ const UploadIa2 = ({ uid }) => {
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Max Marks</label>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Max Marks
+                    </label>
                     <input
-                      type="number"
-                      value={formData[index]?.marks || question.marks || ''}
-                      onChange={(e) => handleFormChange(index, 'marks', e.target.value)}
+                      type="text" // Changed type to text
+                      value={formData[index]?.marks || question.marks || ""}
+                      onChange={(e) =>
+                        handleFormChange(index, "marks", e.target.value)
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
                     />
                   </div>

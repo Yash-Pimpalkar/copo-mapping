@@ -65,11 +65,12 @@ const UploadSem = ({ uid }) => {
   const handleNumQuestionsChange = () => {
     const num = 1; // Default to 1 question, non-changeable
     setNumQuestions(num);
+
     const initialQuestions = Array.from({ length: num }, (_, index) => ({
       qid: index + 1,
       qname: "",
       cocount: "",
-      marks: 80, // Default to 80
+      marks: "80", // Default to 80 as string for editability
     }));
     setQuestions(initialQuestions);
 
@@ -78,7 +79,7 @@ const UploadSem = ({ uid }) => {
       acc[index] = {
         qname: "",
         cocount: "",
-        marks: 80, // Default to 80
+        marks: "80", // Default to 80
       };
       return acc;
     }, {});
@@ -95,7 +96,10 @@ const UploadSem = ({ uid }) => {
       ...prev,
       [index]: {
         ...prev[index],
-        [field]: value.toUpperCase(), // Convert input to uppercase
+        [field]:
+          field === "marks" && !isNaN(value) && value !== ""
+            ? Number(value)
+            : value.toUpperCase(), // Convert to uppercase or number as needed
       },
     }));
   };
@@ -133,7 +137,7 @@ const UploadSem = ({ uid }) => {
     } catch (error) {
       console.error("Error submitting data:", error);
       setError(error.response?.data?.error || "Failed to submit data"); // Set error message
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -252,8 +256,8 @@ const UploadSem = ({ uid }) => {
                       Max Marks
                     </label>
                     <input
-                      type="number"
-                      value={formData[index]?.marks || question.marks || 80} // Default 80
+                      type="text" // Changed type to text
+                      value={formData[index]?.marks || ""} // Default 80 handled in formData initialization
                       onChange={(e) =>
                         handleFormChange(index, "marks", e.target.value)
                       }
