@@ -18,7 +18,9 @@ export default function AdminEditPos() {
       api
         .post("api/pos/show", { branch: selectedBranch })
         .then((response) => {
-          setResponseData(response.data);
+          // Sort the data by po_id before setting it in the state
+          const sortedData = response.data.sort((a, b) => Number(a.po_id) - Number(b.po_id));
+          setResponseData(sortedData);
           setCurrentPage(1);
         })
         .catch((error) => {
@@ -27,6 +29,7 @@ export default function AdminEditPos() {
         });
     }
   }, [selectedBranch]);
+  
 
   useEffect(() => {
     const handleResize = () => {
@@ -134,14 +137,26 @@ export default function AdminEditPos() {
 
   const handleNewPoChange = (e) => {
     const { name, value } = e.target;
-    setNewPoData((prev) => ({ ...prev, [name]: value }));
+    
+    setNewPoData((prev) => ({
+      ...prev,
+      [name]: name === "po_id" ? Number(value) : value  // Convert po_id to a number
+    }));
   };
+  
 
   const saveNewPo = () => {
     api
       .post("api/pos/admin/create", { ...newPoData, branch: selectedBranch })
       .then((response) => {
-        setResponseData((prevData) => [...prevData, response.data]);
+        const newPo = { ...response.data, po_id: Number(response.data.po_id) };
+
+        setResponseData((prevData) => {
+          const updatedData = [...prevData, newPo].sort((a, b) => a.po_id - b.po_id);
+          console.log("Sorted Data:", updatedData); // Log sorted data
+          return updatedData;
+        });
+
         setIsAddingNew(false);
         alert("New PO added successfully!");
       })
@@ -150,6 +165,10 @@ export default function AdminEditPos() {
         setErrorMessage("Error adding new PO. Please try again.");
       });
   };
+
+
+
+
 
   const paginatedData = responseData?.slice(
     (currentPage - 1) * rowsPerPage,
