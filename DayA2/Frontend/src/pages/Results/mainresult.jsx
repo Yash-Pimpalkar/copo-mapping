@@ -35,11 +35,18 @@ const Mainresult = ({ uid }) => {
   console.log(Termworkdata); // Check the value of Termworkdata in the console
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
+    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
       {/* Heading */}
       <h1 className="text-3xl md:text-4xl font-bold text-blue-800 mb-6">
-        Results
+       
       </h1>
+
+      <div className="flex flex-col items-center mb-6">
+    {/* Centered Title */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+    Results
+    </h1>
+ 
 
       {/* Course Selector Card */}
       <div className="w-full max-w-lg md:max-w-2xl lg:max-w-3xl mb-6">
@@ -47,7 +54,7 @@ const Mainresult = ({ uid }) => {
           <CourseSelector uid={uid} onUserCourseIdChange={setUserCourseId} />
         </div>
       </div>
-
+      
       {/* Display course and academic year details */}
       {userCourseId && (
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-lg md:max-w-2xl lg:max-w-3xl border border-gray-200">
@@ -59,7 +66,7 @@ const Mainresult = ({ uid }) => {
           </p>
         </div>
       )}
-
+</div>
       {/* Conditional rendering based on Termworkdata */}
           <div>
       {Termworkdata !== null && (
