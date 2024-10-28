@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import api from '../../api';
+import React, { useEffect, useState } from "react";
+import api from "../../api";
 import LoadingButton from "../../component/Loading/Loading";
 
 const UploadIa1 = ({ uid }) => {
   const [courses, setCourses] = useState([]);
   const [distinctCourses, setDistinctCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const [numQuestions, setNumQuestions] = useState(0);
   const [formData, setFormData] = useState({});
   const [questions, setQuestions] = useState([]);
@@ -21,16 +21,19 @@ const UploadIa1 = ({ uid }) => {
         const res = await api.get(`/api/copo/${uid}`);
         setCourses(res.data);
 
-        const distinct = Array.from(new Set(res.data.map(course => course.course_name)))
-          .map(course_name => ({
-            course_name,
-            academic_year: res.data.find(course => course.course_name === course_name).academic_year
-          }));
+        const distinct = Array.from(
+          new Set(res.data.map((course) => course.course_name))
+        ).map((course_name) => ({
+          course_name,
+          academic_year: res.data.find(
+            (course) => course.course_name === course_name
+          ).academic_year,
+        }));
 
         setDistinctCourses(distinct);
       } catch (error) {
-        console.error('Error fetching course data:', error);
-      }finally{
+        console.error("Error fetching course data:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -43,11 +46,12 @@ const UploadIa1 = ({ uid }) => {
   const handleCourseChange = (event) => {
     const selectedCourse = event.target.value;
     setSelectedCourse(selectedCourse);
-    setSelectedYear('');
+    setSelectedYear("");
     setQuestions([]);
     setFormData({});
     setUserCourseId(
-      courses.find(course => course.course_name === selectedCourse)?.usercourse_id || null
+      courses.find((course) => course.course_name === selectedCourse)
+        ?.usercourse_id || null
     );
   };
 
@@ -61,21 +65,23 @@ const UploadIa1 = ({ uid }) => {
   const handleNumQuestionsChange = (event) => {
     const num = Math.min(parseInt(event.target.value, 10) || 0, 10); // Limit to max 10 questions
     setNumQuestions(num);
-    setQuestions(Array.from({ length: num }, (_, index) => ({
-      qid: index + 1,
-      qname: '',
-      coname: '',
-      marks: 0
-    })));
+    setQuestions(
+      Array.from({ length: num }, (_, index) => ({
+        qid: index + 1,
+        qname: "",
+        coname: "",
+        marks: 0,
+      }))
+    );
   };
 
   const handleFormChange = (index, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [index]: {
         ...prev[index],
-        [field]: value.toUpperCase() // Convert input to uppercase
-      }
+        [field]: value.toUpperCase(), // Convert input to uppercase
+      },
     }));
   };
 
@@ -83,20 +89,23 @@ const UploadIa1 = ({ uid }) => {
     event.preventDefault();
 
     if (!userCourseId) {
-      alert('Please select a valid course and academic year.');
+      alert("Please select a valid course and academic year.");
       return;
     }
 
     // Format data
-    const formattedData = Object.entries(formData).reduce((acc, [key, data]) => {
-      acc[key] = {
-        qname: data.qname || '',
-        coname: data.coname || '',
-        marks: parseInt(data.marks, 10) || 0, // Convert marks to number
-        usercourseid: userCourseId
-      };
-      return acc;
-    }, {});
+    const formattedData = Object.entries(formData).reduce(
+      (acc, [key, data]) => {
+        acc[key] = {
+          qname: data.qname || "",
+          coname: data.coname || "",
+          marks: parseInt(data.marks, 10) || 0, // Convert marks to number
+          usercourseid: userCourseId,
+        };
+        return acc;
+      },
+      {}
+    );
 
     try {
       setLoading(true);
@@ -107,9 +116,9 @@ const UploadIa1 = ({ uid }) => {
       alert("Data submitted successfully");
       setError(null);
     } catch (error) {
-      console.error('Error submitting data:', error);
-      setError(error.response?.data?.error || "Failed to submit data"); 
-    }finally{
+      console.error("Error submitting data:", error);
+      setError(error.response?.data?.error || "Failed to submit data");
+    } finally {
       setLoading(false);
     }
   };
@@ -119,7 +128,10 @@ const UploadIa1 = ({ uid }) => {
       <h1 className="text-2xl font-bold mb-4">Upload IA1</h1>
 
       <div className="mb-4">
-        <label htmlFor="course-select" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="course-select"
+          className="block text-sm font-medium text-gray-700"
+        >
           Select a Course
         </label>
         <select
@@ -139,7 +151,10 @@ const UploadIa1 = ({ uid }) => {
 
       {selectedCourse && (
         <div className="mb-4">
-          <label htmlFor="year-select" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="year-select"
+            className="block text-sm font-medium text-gray-700"
+          >
             Select Academic Year
           </label>
           <select
@@ -150,8 +165,8 @@ const UploadIa1 = ({ uid }) => {
           >
             <option value="">Select an academic year</option>
             {courses
-              .filter(course => course.course_name === selectedCourse)
-              .map(course => (
+              .filter((course) => course.course_name === selectedCourse)
+              .map((course) => (
                 <option key={course.usercourse_id} value={course.academic_year}>
                   {course.academic_year}
                 </option>
@@ -162,7 +177,10 @@ const UploadIa1 = ({ uid }) => {
 
       {selectedCourse && selectedYear && (
         <div className="mb-4">
-          <label htmlFor="num-questions" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="num-questions"
+            className="block text-sm font-medium text-gray-700"
+          >
             Number of Questions (Max 10)
           </label>
           <input
@@ -181,10 +199,15 @@ const UploadIa1 = ({ uid }) => {
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             {questions.map((question, index) => (
-              <div key={question.qid} className="p-4 border rounded-md shadow-sm">
+              <div
+                key={question.qid}
+                className="p-4 border rounded-md shadow-sm"
+              >
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Index</label>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Index
+                    </label>
                     <input
                       type="text"
                       value={question.qid}
@@ -193,29 +216,41 @@ const UploadIa1 = ({ uid }) => {
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Question Name</label>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Question Name
+                    </label>
                     <input
                       type="text"
-                      value={formData[index]?.qname || question.qname || ''}
-                      onChange={(e) => handleFormChange(index, 'qname', e.target.value)}
+                      value={formData[index]?.qname || question.qname || ""}
+                      onChange={(e) =>
+                        handleFormChange(index, "qname", e.target.value)
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">CO Name</label>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      CO Name
+                    </label>
                     <input
                       type="text"
-                      value={formData[index]?.coname || question.coname || ''}
-                      onChange={(e) => handleFormChange(index, 'coname', e.target.value)}
+                      value={formData[index]?.coname || question.coname || ""}
+                      onChange={(e) =>
+                        handleFormChange(index, "coname", e.target.value)
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
                     />
                   </div>
                   <div className="col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 uppercase">Max Marks</label>
+                    <label className="block text-sm font-medium text-gray-700 uppercase">
+                      Max Marks
+                    </label>
                     <input
-                      type="number"
-                      value={formData[index]?.marks || question.marks || ''}
-                      onChange={(e) => handleFormChange(index, 'marks', e.target.value)}
+                      type="text" // Changed type to text
+                      value={formData[index]?.marks || question.marks || ""}
+                      onChange={(e) =>
+                        handleFormChange(index, "marks", e.target.value)
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
                     />
                   </div>
