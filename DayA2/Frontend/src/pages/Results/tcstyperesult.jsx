@@ -777,6 +777,8 @@ const Tcstyperesult = ({ uid }) => {
     </div>
 
 
+ 
+    </div>
     <h2 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">
     PO, PSO Attainment
   </h2>
@@ -907,7 +909,6 @@ const Tcstyperesult = ({ uid }) => {
       </table>
     </div>
   </div>
-    </div>
   </div>
   </>
   );
