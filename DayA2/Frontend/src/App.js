@@ -67,6 +67,7 @@ import Admin_Cos_Edit from './component/Admin/COsData';
 import AdminCOs_course from './component/Admin/EditCOs';
 import AddStudent from './pages/TeacherForm/AddStudent';
 import EditPOs from './component/Admin/EditPOs';
+import NextSemButton from './component/Admin/NextSem'
 
 function App() {
   const [token, setToken] = useState("");
@@ -174,6 +175,7 @@ function App() {
               <Route path="/AssignCourse" element={<AssignCourse />} />
               <Route path="/EditPOs" element={<EditPOs />} />
               <Route path="/editcos" element={<AdminCOs_course />}/>
+              <Route path="/nextsem" element={<NextSemButton />}/>
               <Route path="/addremovecos" element={<Admin_Cos_Edit />}/>
               {/* Add other routes for usertype === 3 here */}
             </>

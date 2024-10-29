@@ -37,13 +37,13 @@ const Mainresult = ({ uid }) => {
   return (
     <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
       {/* Heading */}
-      <h1 className="text-3xl md:text-4xl font-bold text-blue-800 mb-6">
+      {/* <h1 className="text-3xl md:text-4xl font-bold text-blue-800 mb-6">
        
-      </h1>
+      </h1> */}
 
       <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
-    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center pb-6">
     Results
     </h1>
  
