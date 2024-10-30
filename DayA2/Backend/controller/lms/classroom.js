@@ -11,16 +11,16 @@ export const upload_classroom = (req, res) => {
     }
 
     // Check if the required fields are present in the incoming data
-    const { room_name, branch, semester, userid, created_at } = formDataForCohortClassroom;
+    const { room_name, branch, semester, userid, created_at ,academic_year} = formDataForCohortClassroom;
 
-    if (!room_name || !branch || !semester || !userid || !created_at) {
+    if (!room_name || !branch || !semester || !userid || !created_at || !academic_year) {
         return res.status(400).json({ error: 'Missing required data fields' });
     }
 
     try {
         // Check if the userid already exists in the database
-        const checkQuery = 'SELECT * FROM classroom WHERE room_name = ?';
-        db.query(checkQuery, [room_name], (error, results) => {
+        const checkQuery = 'SELECT * FROM classroom WHERE room_name = ? and academic_year = ?';
+        db.query(checkQuery, [room_name,academic_year], (error, results) => {
             if (error) {
                 console.log('Error checking existing userid:', error);
                 return res.status(500).json({ error: error.message });
@@ -31,8 +31,8 @@ export const upload_classroom = (req, res) => {
                 return res.status(400).json({ error: 'User ID already exists' });
             } else {
                 // Prepare the SQL query and values for insertion
-                const insertQuery = 'INSERT INTO classroom (room_name, branch, semester, userid, created_at) VALUES ?;';
-                const values = [[room_name, branch, semester, userid, created_at]];
+                const insertQuery = 'INSERT INTO classroom (room_name, branch, semester, userid, created_at ,academic_year) VALUES ?;';
+                const values = [[room_name, branch, semester, userid, created_at,academic_year]];
                 console.log("values:", values);
 
                 // Perform the data insertion

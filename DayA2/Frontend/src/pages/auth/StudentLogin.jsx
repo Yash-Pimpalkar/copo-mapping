@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import validateForm from './validate';
 import { HiEye, HiEyeOff } from 'react-icons/hi'; 
-import axios from 'axios';
 import { useNavigate, NavLink } from 'react-router-dom';
 import api from '../../api';
 import LoadingButton from "../../component/Loading/Loading";
 
-const Login = () => {
+const StudentLogin = () => {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
   const [user_id, setUID] = useState(0);
@@ -24,7 +23,6 @@ const Login = () => {
     const storedToken = window.localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
-
       const uid = window.localStorage.getItem("uid");
       const user_type = window.localStorage.getItem("user_type");
       const isRegister = window.localStorage.getItem("isregister");
@@ -48,7 +46,7 @@ const Login = () => {
     if (Object.keys(validationErrors).length === 0) {
       try {
         setLoading(true);
-        const res = await api.post('api/login', { email: formData.email, password: formData.password });
+        const res = await api.post('api/login/student', { email: formData.email, password: formData.password });
         window.localStorage.setItem("uid", res.data.uid);
         window.localStorage.setItem('token', res.data.token);
         window.localStorage.setItem('user_type', res.data.user_type);
@@ -59,7 +57,7 @@ const Login = () => {
         window.location.reload();
       } catch (err) {
         setErr(err.response.data);
-      } finally{
+      } finally {
         setLoading(false);
       }
     } else {
@@ -77,9 +75,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
- 
+      <div className="bg-white p-6 shadow-md w-full max-w-sm">
         <div className="flex justify-between mb-4">
           <button
             onClick={() => navigate("/")}
@@ -94,8 +90,10 @@ const Login = () => {
             Teacher Login
           </button>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome back Teacher!</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome back, Student!</h1>
+
         <h3 className="text-sm text-gray-600 mb-4">Please enter your credentials to sign in.</h3>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -104,7 +102,7 @@ const Login = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-gray-300 shadow-sm p-2"
               placeholder="Email"
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
@@ -117,7 +115,7 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                className="mt-1 block w-full border border-gray-300 shadow-sm p-2"
                 placeholder="Password"
               />
               <button
@@ -130,31 +128,17 @@ const Login = () => {
             </div>
             {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
           </div>
-          <div>
-            <a href="/teacher" className="text-sm text-blue-500 hover:text-blue-700">
-              Forgot password?
-            </a>
-          </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md"
+            className="w-full bg-blue-500 text-white py-2 px-4"
           >
             Submit
           </button>
           {err && <p className="text-red-500 text-sm">{err}</p>}
-          {/* <p className="mt-2 text-sm text-gray-600">
-            Don't have an account?{' '}
-            <NavLink
-              to="/teacher/register"
-              className="text-blue-500 hover:text-blue-700 focus:outline-none"
-            >
-              Sign Up
-            </NavLink>
-          </p> */}
         </form>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default StudentLogin;

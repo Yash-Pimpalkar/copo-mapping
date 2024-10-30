@@ -56,9 +56,9 @@ export const createActivity = (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     
-    const fileTypeArray = JSON.parse(file_type_allowed); // Convert the file types from JSON string
+    const fileTypeAllowedStr = JSON.parse(file_type_allowed).join(',');// Convert the file types from JSON string
 
-    db.query(insertActivityQuery, [classroom_id, teacher_id, title, description, fileTypeArray, max_file_size, deadline], (err, result) => {
+    db.query(insertActivityQuery, [classroom_id, teacher_id, title, description, fileTypeAllowedStr, max_file_size, deadline], (err, result) => {
       if (err) {
         console.error('Error inserting activity:', err);
         return res.status(500).json({ message: 'Failed to create activity' });

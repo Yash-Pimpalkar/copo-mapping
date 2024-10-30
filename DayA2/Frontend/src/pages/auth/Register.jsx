@@ -6,7 +6,7 @@ import api from '../../api';
 import LoadingButton from "../../component/Loading/Loading";
 
 const Register = () => {
-  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '',name: '' });
   const [err, setErr] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -28,7 +28,7 @@ const Register = () => {
       } else {
         try {
           setLoading(true);
-          const res = await api.post("api/register", { email: formData.email, password: formData.password });
+          const res = await api.post("api/register", { email: formData.email, password: formData.password ,name:formData.name });
           console.log(res);
           alert('Form submitted successfully!');
           setIsSubmitted(true);
@@ -73,6 +73,18 @@ const Register = () => {
         <h3 className="text-sm text-gray-600 mb-4">Create your account</h3>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              type="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              placeholder="Name"
+            />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <input

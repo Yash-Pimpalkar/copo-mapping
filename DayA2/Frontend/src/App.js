@@ -68,6 +68,10 @@ import AdminCOs_course from './component/Admin/EditCOs';
 import AddStudent from './pages/TeacherForm/AddStudent';
 import EditPOs from './component/Admin/EditPOs';
 import NextSemButton from './component/Admin/NextSem'
+import StudentLogin from './pages/auth/StudentLogin';
+import ViewClassroom from './pages/LMS/Student/ViewAllClassroom';
+import StudentClassRoomActivities from './pages/LMS/Student/StudentClassRoomActivities';
+import ActivityDetail from './pages/LMS/Student/Activitydetails';
 
 function App() {
   const [token, setToken] = useState("");
@@ -100,8 +104,10 @@ function App() {
         {token ? (
           usertype == 1 ? (
             <>
-              <Route path="/StudentlmsDashboard" element={<StudentlmsDashboard />} />
-              
+              <Route path="/" element={<StudentlmsDashboard uid={user_id} />} />
+              <Route path="/viewclassroom" element={<ViewClassroom uid={user_id} />} />
+              <Route path="/viewclassroom/:classroomId" element={<StudentClassRoomActivities uid={user_id} />} />
+              <Route path="/activity-detail/:id" element={<ActivityDetail  uid={user_id} />} />
             </>
           ) : usertype == 2 ? (
             <>
@@ -182,15 +188,16 @@ function App() {
           ) : (
             // Handle other user types if needed
             <>
-        <Route path="/" element={<Login />} />
+        <Route path="/teacher" element={<Login />} />
         <Route path="/register" element={<Register />} /> 
-      
+        <Route path="/" element={<StudentLogin />} />
         </>
           )
         ) : (
           <>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+        <Route path="/teacher" element={<Login />} />
+        <Route path="/teacher/register" element={<Register />} /> 
+        <Route path="/" element={<StudentLogin />} />
           </>
         )}
         {/* Handle unknown routes */}

@@ -8,6 +8,7 @@ export const register = asyncHand(async (req, res) => {
 
     const email = req.body.email;
     const pass = req.body.password;
+    const name= req.body.name;
     const currentDate = new Date();
 
 console.log(email,pass)
@@ -19,8 +20,8 @@ console.log(email,pass)
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(pass, salt);
   
-      const q = "INSERT INTO users (`emailid`,`password`, `created_time`,isuser) VALUES (?,?,?,2)";
-      const values = [email, hash, currentDate];
+      const q = "INSERT INTO users (`emailid`,`password`, `created_time`,isuser,teacher_name) VALUES (?,?,?,2,?)";
+      const values = [email, hash, currentDate,name];
       db.query(q, values, (err, data) => {
         if (err) return res.json(err);
         return res.status(200).json("User has been created.");
@@ -101,5 +102,16 @@ export const deleteUser = (req, res) => {
     }
 
     res.json({ message: 'User deleted successfully' });
+  });
+};
+
+export const getstudentemail = (req, res) => {
+  const { id } = req.params;
+  const query = `SELECT sid as uid, email as emailid from lms_students where sid = ?`;
+  db.query(query, id, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
   });
 };

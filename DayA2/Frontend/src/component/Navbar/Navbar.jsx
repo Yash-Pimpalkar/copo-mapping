@@ -84,8 +84,8 @@ export default function Navbar() {
   useEffect(() => {
     const storedToken = window.localStorage.getItem("token");
     const storedUserType = window.localStorage.getItem("user_type");
-
-    if (storedToken && storedUserType) {
+    console.log(storedUserType!=1)
+    if (storedToken && storedUserType && storedUserType!=1) {
       setToken(storedToken);
       setUserType(parseInt(storedUserType));
 
@@ -96,6 +96,7 @@ export default function Navbar() {
         const fetchEmail = async () => {
           try {
             const response = await api.post(`api/register/getemail/${uid}`);
+            console.log(response.data)
             if (response.data && response.data.length > 0) {
               setEmail(response.data[0].emailid);
             }
@@ -105,7 +106,32 @@ export default function Navbar() {
         };
         fetchEmail();
       }
+    }else if (storedToken && storedUserType == 1) {
+      setToken(storedToken);
+      setUserType(parseInt(storedUserType));
+
+  
+      const uid = window.localStorage.getItem("uid");
+      console.log(uid)
+      const isRegister = window.localStorage.getItem("isregister");
+      if (uid && isRegister) {
+        setUID(parseInt(uid));
+        const fetchStudentEmail = async () => {
+          try {
+            const response = await api.get(`api/register/student/getemail/${uid}`);
+            console.log(response.data)
+            if (response.data && response.data.length > 0) {
+              setEmail(response.data[0].emailid);
+              console.log(email)
+            }
+          } catch (err) {
+            console.error("Failed to fetch email:", err);
+          }
+        };
+        fetchStudentEmail();
+      }
     }
+    
   }, []);
 
   const handleSignOut = () => {
@@ -115,8 +141,9 @@ export default function Navbar() {
   };
 
   const navigation = [
-    { name: "LMS", href: "/StudentlmsDashboard", userTypes: [1] },
-    { name: "Upcoming Events", href: "/", userTypes: [1] },
+    { name: "LMS", href: "/", userTypes: [1] },
+    { name: "Classroom", href: "/viewclassroom", userTypes: [1] },
+    { name: "Upcoming Events", href: "/upcoming", userTypes: [1] },
     { name: "Progress Tracker", href: "/", userTypes: [1] },
     { name: "Announcement", href: "/", userTypes: [1] },
     { name: "Feedback", href: "/", userTypes: [1] },
@@ -195,7 +222,7 @@ export default function Navbar() {
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <div className="flex flex-shrink-0 items-center">
               <img
-                alt="Your Company"
+                alt="MAPLMS"
                 src={logo}
                 className="h-8 w-auto cursor-pointer"
               />

@@ -9,9 +9,24 @@ const CreateClassroom = ({ uid }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState("");
+  const [academicYears, setAcademicYears] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
+  // Generate academic years
+  useEffect(() => {
+    const generateAcademicYears = () => {
+      const currentYear = new Date().getFullYear();
+      const years = [];
+      for (let i = currentYear - 3; i <= currentYear + 1; i++) {
+        years.push(`${i}-${i + 1}`);
+      }
+      setAcademicYears(years);
+    };
+    generateAcademicYears();
+  }, []);
+
   // Fetch courses on mount
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -39,7 +54,6 @@ const CreateClassroom = ({ uid }) => {
     }
   }, [uid]);
 
-
   const cohorts = ["Cohort A", "Cohort B", "Cohort C"]; // Example cohorts
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]; // Example years
   const departments = [
@@ -59,7 +73,6 @@ const CreateClassroom = ({ uid }) => {
     { name: "Semester 8", value: 8 },
   ]; // Example semesters
 
-
   const handleCohortChange = (cohort) => {
     if (selectedCohorts.includes(cohort)) {
       setSelectedCohorts(selectedCohorts.filter((c) => c !== cohort));
@@ -71,44 +84,25 @@ const CreateClassroom = ({ uid }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get the current time
+    // Format current time for database
     const currentTime = new Date().toISOString();
-
     const formatDateForDatabase = (isoDate) => {
       const date = new Date(isoDate);
       const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+      const month = String(date.getMonth() + 1).padStart(2, '0'); 
       const day = String(date.getDate()).padStart(2, '0');
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
-
     const formattedCreatedAt = formatDateForDatabase(currentTime);
 
     const selectedDepartmentObj = departments.find(dep => dep.name === selectedDepartment);
     const selectedSemesterObj = semesters.find(sem => sem.name === selectedSemester);
 
-    // Handle the creation of the classroom here
-    console.log(
-      "Classroom Created:",
-      classroomName,
-      "Cohorts:",
-      selectedCohorts,
-      "Year:",
-      selectedYear,
-      "Department:",
-      selectedDepartment,
-      "Semester:",
-      selectedSemester
-    );
-
-    const formData = { classroomName, selectedCohorts, selectedYear, selectedDepartment, selectedSemester };
-    console.log("formData", formData);
-
     // Check for missing fields
-    if (!classroomName || !selectedCohorts || !selectedYear || !selectedDepartment || !selectedSemester) {
+    if (!classroomName || !selectedCohorts || !selectedYear || !selectedDepartment || !selectedSemester || !selectedAcademicYear) {
       alert('Please fill in all fields.');
       return;
     }
@@ -120,11 +114,11 @@ const CreateClassroom = ({ uid }) => {
       const dataToSubmit = {
         userid: uid,
         room_name: classroomName,
-        //selectedCohorts: selectedCohorts,
         selectedYear: parseInt(selectedYear, 10),
         branch: selectedDepartmentObj ? selectedDepartmentObj.value : null,
         semester: selectedSemesterObj ? selectedSemesterObj.value : null,
-        created_at: formattedCreatedAt
+        created_at: formattedCreatedAt,
+        academic_year: selectedAcademicYear,
       };
 
       console.log("dataToSubmit", dataToSubmit);
@@ -179,6 +173,29 @@ const CreateClassroom = ({ uid }) => {
               Select Year
             </option>
             {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Academic Year Selection */}
+        <div className="mb-4">
+          <label className="block mb-2" htmlFor="academicYear">
+            Select Academic Year
+          </label>
+          <select
+            id="academicYear"
+            value={selectedAcademicYear}
+            onChange={(e) => setSelectedAcademicYear(e.target.value)}
+            className="border border-gray-300 p-2 rounded w-full"
+            required
+          >
+            <option value="" disabled>
+              Select Academic Year
+            </option>
+            {academicYears.map((year) => (
               <option key={year} value={year}>
                 {year}
               </option>

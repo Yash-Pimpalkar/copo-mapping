@@ -1,33 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../../api";
 
-const StudentlmsDashboard = () => {
+const StudentlmsDashboard = ({ uid }) => {
   const [classrooms, setClassrooms] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredClassrooms, setFilteredClassrooms] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const enrolledClassrooms = [
-      { id: 1, name: "SE AIDS C", instructor: "Prof. John Doe" },
-      { id: 2, name: "TE COMPS B", instructor: "Dr. Jane Smith" },
-      { id: 3, name: "BE IT A", instructor: "Dr. Albert Taylor" },
-    ];
-    setClassrooms(enrolledClassrooms);
-    setFilteredClassrooms(enrolledClassrooms);
-  }, []);
+    const fetchClassrooms = async () => {
+      try {
+        const response = await api.get(`/api/studentlms/getclassroom/${uid}`);
+        const sortedClassrooms = response.data.sort((a, b) =>
+          new Date(b.created_at) - new Date(a.created_at)
+        );
+        const latestClassrooms = sortedClassrooms.slice(0, 9);
+        setClassrooms(latestClassrooms);
+        setFilteredClassrooms(latestClassrooms);
+      } catch (error) {
+        console.error("Error fetching classrooms:", error);
+      }
+    };
+    fetchClassrooms();
+  }, [uid]);
 
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
+
     const filtered = classrooms.filter((classroom) =>
-      classroom.name.toLowerCase().includes(value)
+      classroom.room_name.toLowerCase().includes(value) ||
+      classroom.teacher_name.toLowerCase().includes(value) ||
+      classroom.academic_year.toLowerCase().includes(value)
     );
+
     setFilteredClassrooms(filtered);
   };
 
   const handleViewClassroom = (classroomId) => {
-    navigate(`/classroom/${classroomId}`);
+    navigate(`/viewclassroom/${classroomId}`);
   };
 
   return (
@@ -73,8 +85,26 @@ const StudentlmsDashboard = () => {
               </li>
             </ul>
           </div>
+
+          <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Recent Notifications
+          </h2>
+          <p className="text-gray-600">No new notifications.</p>
+        </div>
+
+        {/* Attendance Summary */}
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Attendance Summary
+          </h2>
+          <p className="text-gray-600">
+            You have attended 85% of your classes this semester.
+          </p>
+        </div>
         </div>
       </div>
+      
 
       {/* Enrolled Classrooms Section */}
       <div className="mb-12">
@@ -98,18 +128,21 @@ const StudentlmsDashboard = () => {
           {filteredClassrooms.length > 0 ? (
             filteredClassrooms.map((classroom) => (
               <div
-                key={classroom.id}
+                key={classroom.classroom_id}
                 className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow duration-300"
               >
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  {classroom.name}
+                  {classroom.room_name}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Instructor: {classroom.instructor}
+                  Instructor: {classroom.teacher_name}
+                </p>
+                <p className="text-gray-600 mb-4">
+                  Academic Year: {classroom.academic_year}
                 </p>
                 <button
                   className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                  onClick={() => handleViewClassroom(classroom.id)}
+                  onClick={() => handleViewClassroom(classroom.classroom_id)}
                 >
                   View Classroom
                 </button>
@@ -122,25 +155,7 @@ const StudentlmsDashboard = () => {
       </div>
 
       {/* Additional Interactive Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Notifications Section */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            Recent Notifications
-          </h2>
-          <p className="text-gray-600">No new notifications.</p>
-        </div>
-
-        {/* Attendance Summary */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            Attendance Summary
-          </h2>
-          <p className="text-gray-600">
-            You have attended 85% of your classes this semester.
-          </p>
-        </div>
-      </div>
+     
     </div>
   );
 };
