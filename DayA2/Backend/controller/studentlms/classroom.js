@@ -47,7 +47,7 @@ export const get_all_classroom_by_sid = async (req, res) => {
 
 // Controller function to get classroom activities
 export const getClassroomActivities = (req, res) => {
-  const { cid } = req.params;  // classroom_id from route parameters
+  const { cid } = req.params; // classroom_id from route parameters
   const { student_id } = req.body;
 
   const classroomId = cid;
@@ -82,7 +82,7 @@ export const getClassroomActivities = (req, res) => {
     LEFT JOIN lms_activities_file laf 
       ON la.assignment_id = laf.assignment_id
     WHERE la.classroom_id = ?
-    ORDER BY la.created_at DESC;
+    ORDER BY la.created_at DESC
   `;
 
   db.query(query, [student_id, classroomId], (error, results) => {
@@ -90,14 +90,14 @@ export const getClassroomActivities = (req, res) => {
       console.error('Error fetching activities:', error);
       return res.status(500).json({ error: 'Database error' });
     }
-    
-    // Organize the results into a structure where each assignment includes an array of files
+
+    // Organize the results to prevent duplicate files
     const activities = results.reduce((acc, row) => {
-      // Check if the assignment already exists in the accumulator
+      // Find the existing activity by assignment_id
       let activity = acc.find(a => a.assignment_id === row.assignment_id);
-      
+
       if (!activity) {
-        // If the assignment does not exist, add it
+        // If the activity does not exist, create a new one
         activity = {
           assignment_id: row.assignment_id,
           classroom_id: row.classroom_id,
@@ -114,8 +114,11 @@ export const getClassroomActivities = (req, res) => {
         acc.push(activity);
       }
 
-      // Add file information if it exists
-      if (row.file_id) {
+      // Check if the file_id is already in the files array for this activity
+      const fileExists = activity.files.some(file => file.file_id === row.file_id);
+      
+      // Only add the file if it does not already exist in the files array
+      if (row.file_id && !fileExists) {
         activity.files.push({
           file_id: row.file_id,
           file_name: row.file_name,
@@ -128,10 +131,12 @@ export const getClassroomActivities = (req, res) => {
 
       return acc;
     }, []);
-
-    res.json({ activities });
+    
+    console.log(activities);
+    res.status(200).json({ activities });
   });
 };
+
 
 
 
