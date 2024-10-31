@@ -3,6 +3,7 @@ import api from "../../../api";
 import Pagination from "../../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
 import LoadingButton from "../../../component/Loading/Loading";
+import { useNavigate } from 'react-router-dom';
 
 const MiniproSem = ({ uid }) => {
   const [courses, setCourses] = useState([]);
@@ -23,6 +24,9 @@ const MiniproSem = ({ uid }) => {
   const [maxLimitreview1, setmaxlimitreview1] = useState(0);
   const [maxLimitreview2, setmaxlimitreview2] = useState(0);
   const [maxLimitproreport, setmaxlimitproreport] = useState(0);
+  const navigate = useNavigate(); 
+
+  const curriculum = "miniprosem";
   const [attainmentData, setAttainmentData] = useState({
     passedPercentage: 50,
   });
@@ -219,18 +223,18 @@ const MiniproSem = ({ uid }) => {
     const actualIndex = index;
     const mainminiprosemid = MiniproData[actualIndex].miniproid;
     const updatedData = editedMarks[index];
-
+  
     try {
       setLoading(true);
       await api.put("/api/uploadminiprosem/", {
         mainminiprosemid: mainminiprosemid,
-        logbookmarks: updatedData.logbookmarks,
-        review1marks: updatedData.review1marks,
-        review2marks: updatedData.review2marks,
-        proreportmarks: updatedData.proreportmarks,
-        // avgReviews: updatedData.avgReviews,
+        logbookmarks: parseInt(updatedData.logbookmarks, 10),
+        review1marks: parseInt(updatedData.review1marks, 10),
+        review2marks: parseInt(updatedData.review2marks, 10),
+        proreportmarks: parseInt(updatedData.proreportmarks, 10),
+        // avgReviews: parseInt(updatedData.avgReviews, 10), // Uncomment if needed
       });
-
+  
       SetMiniprodata((prevData) =>
         prevData.map((item, idx) =>
           idx === actualIndex ? { ...item, ...updatedData } : item
@@ -239,11 +243,11 @@ const MiniproSem = ({ uid }) => {
       setEditingRow(null);
     } catch (error) {
       console.error("Error saving data:", error);
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
-
+  
 
   const handleCancelClick = () => {
     setEditingRow(null);
@@ -667,6 +671,10 @@ const MiniproSem = ({ uid }) => {
     }
   };
 
+  const handleClick = () => {
+    navigate(`/AddStudent/${curriculum}/${userCourseId}`);
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -675,9 +683,11 @@ const MiniproSem = ({ uid }) => {
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
-          <button className="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-            Add Student
-          </button>
+          {userCourseId && (
+            <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              Add Student
+            </button>
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">

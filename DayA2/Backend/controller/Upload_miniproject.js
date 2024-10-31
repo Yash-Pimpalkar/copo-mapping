@@ -71,24 +71,24 @@ export const showMiniProjectData = async (req, res) => {
   const userCourseId = req.params.uid;
 
   const sql = `SELECT 
-      mp.mainminiprosemid,
-      mp.sid,
-      mp.logbookmarks,
-      mp.review1marks,
-      mp.review2marks,
-      mp.proreportmarks,
-      mp.miniproid,
-      c.student_name,
-      c.stud_clg_id
-  FROM 
-      main_miniprosem AS mp
-  INNER JOIN 
-      upload_miniprosem AS um ON mp.miniproid = um.miniprosemid
-  INNER JOIN 
-      copo_students_details AS c ON mp.sid = c.sid
-  WHERE 
-      um.usercourseid = ?;
-  `;
+    mp.mainminiprosemid,
+    mp.sid,
+    mp.logbookmarks,
+    mp.review1marks,
+    mp.review2marks,
+    mp.proreportmarks,
+    mp.miniproid,
+    l.student_name,
+    l.stud_clg_id
+FROM 
+    main_miniprosem AS mp
+INNER JOIN 
+    upload_miniprosem AS um ON mp.miniproid = um.miniprosemid
+INNER JOIN 
+    lms_students AS l ON mp.sid = l.sid
+WHERE 
+    um.usercourseid = ?`;
+
 
   db.query(sql, userCourseId, (error, results) => {
       if (error) {
@@ -142,6 +142,7 @@ export const MiniProjectUpload = async (req, res) => {
                       return reject(error);
                   }
                   console.log('Query result:', results); // Log results of the query
+                  console.log(`Rows affected: ${results.affectedRows}`);
                   resolve(results);
               });
           });
@@ -316,6 +317,8 @@ export const Co_miniprosem = async (req, res) => {
     console.error('Error inserting/updating Mini Project attainment and attainment:', error);
     res.status(500).json({ error: 'Error inserting/updating Mini Project attainment and attainment' });
   }
-}
+};
+
+
 
 

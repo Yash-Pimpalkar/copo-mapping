@@ -2294,3 +2294,337 @@ export const minipro_getStudentsForMiniProject = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while fetching students for the mini project' });
     }
 };
+
+
+
+//miniprosem
+export const minisem_addStudentsToClass = async (req, res) => {
+    const { selectedStudents, usercourseid } = req.body;
+
+    // Validate input
+    if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
+        return res.status(400).json({ message: 'No students provided' });
+    }
+
+    console.log(selectedStudents);
+    console.log(usercourseid);
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'No usercourseid provided' });
+    }
+
+    try {
+        // Query to fetch miniprosemid from upload_miniprosem based on usercourseid
+        const fetchQidQuery = `SELECT miniprosemid FROM upload_miniprosem WHERE usercourseid = ?`;
+        const [qidResults] = await db.promise().query(fetchQidQuery, [usercourseid]);
+
+        if (qidResults.length === 0) {
+            return res.status(404).json({ message: 'No questions found for this course' });
+        }
+
+        // Extract miniprosemid values
+        const miniproid = qidResults[0].miniprosemid; // Use the first result or adjust based on your logic
+
+        // Prepare insertion values for main_miniprosem
+        const insertValues = selectedStudents.map(sid => `(${sid}, ${miniproid})`).join(', ');
+
+        // Query to insert multiple rows into main_miniprosem (insert both sid and miniproid)
+        const insertQuery = `INSERT INTO main_miniprosem (sid, miniproid) VALUES ${insertValues}`;
+
+        // Execute the insert query
+        await db.promise().query(insertQuery);
+
+        // Send success response
+        res.status(201).json({ message: 'Students added successfully' });
+
+    } catch (error) {
+        console.error('Error occurred:', error);
+        res.status(500).json({ message: 'An error occurred while processing the request.' });
+    }
+};
+
+  
+  
+  
+  export const minisem_deleteAllStudentsFromClass = (req, res) => {
+  
+    
+    const {uid} = req.params;
+    console.log(uid)
+    try {
+        // const { classId } = req.params;
+  
+        const query = `DELETE main_miniprosem 
+FROM main_miniprosem 
+JOIN upload_miniprosem ON main_miniprosem.miniproid = upload_miniprosem.miniprosemid 
+WHERE upload_miniprosem.usercourseid = ?
+`;
+  
+        // Execute the query
+        db.query(query,[uid], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+  
+            // Check if any rows were affected
+            if (result.affectedRows === 0) {
+                return res.status(200).json({ message: 'No students found in the class' });
+            }
+  
+            res.status(200).json({ message: 'All students removed from the class successfully', affectedRows: result.affectedRows });
+        });
+  
+    } catch (error) {
+        console.log(error)
+    }
+  };
+  
+  
+  
+  // Delete One Student from Class
+  // Delete a Student from Class
+  export const minisem_deleteStudentFromClass = async (req, res) => {
+    const {  sid } = req.params;
+    const {userCourseId} = req.body;
+    console.log(userCourseId)
+    // const classIdAsInt = parseInt(classId); // Convert cohortId to an integer
+    const sidAsInt = parseInt(sid); // Convert cohortId to an integer
+    console.log( "sid:", sid);  // Log the parameter
+  
+    const query = `DELETE main_miniprosem 
+FROM main_miniprosem 
+JOIN upload_miniprosem ON main_miniprosem.miniproid = upload_miniprosem.miniprosemid 
+WHERE  main_miniprosem.sid = ? 
+    AND upload_miniprosem.usercourseid = ?
+`;
+    
+    try {
+        // Execute the query
+        db.query(query, [ sidAsInt, userCourseId], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+  
+            // Log the query result for debugging
+            console.log('Query Result:', result);
+  
+            // Check if any rows were affected (i.e., student was found and deleted)
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Student not found in the class' });
+            }
+  
+            res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
+        });
+  
+    } catch (error) {
+        console.error('Error deleting student:', error.message);  // Log the error
+        res.status(500).json({ message: 'Error deleting student' });
+    }
+  };
+  
+  
+  export const minisem_get_Usercourse_Students = (req, res) => {
+    const { uid } = req.params; // Assuming classId is passed as a parameter
+    const usercourseid = uid;
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'User Course ID is required' });
+    }
+    const sql = `
+SELECT DISTINCT
+    s.sid, 
+    s.stud_clg_id, 
+    s.student_name,
+    ua.logbookmarks, 
+    ua.review1marks, 
+    ua.review2marks, 
+    ua.proreportmarks,
+    ua.miniproid  -- Ensure this is included to retrieve the miniproid
+FROM 
+    lms_students AS s
+JOIN 
+    main_miniprosem AS ua ON s.sid = ua.sid
+JOIN 
+    upload_miniprosem AS ti ON ua.miniproid = ti.miniprosemid
+WHERE 
+    ti.usercourseid = ?
+
+    `;
+  
+    db.query(sql, [usercourseid], (error, results) => {
+        if (error) {
+            console.error('Error fetching classroom students:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+  
+        res.status(200).json(results);
+    });
+  };
+
+  //majorprosem
+  export const majorsem_addStudentsToClass = async (req, res) => {
+    const { selectedStudents, usercourseid } = req.body;
+
+    // Validate input
+    if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
+        return res.status(400).json({ message: 'No students provided' });
+    }
+
+    console.log(selectedStudents);
+    console.log(usercourseid);
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'No usercourseid provided' });
+    }
+
+    try {
+        // Query to fetch miniprosemid from upload_miniprosem based on usercourseid
+        const fetchQidQuery = `SELECT majorprosemid FROM upload_majorprosem WHERE usercourseid = ?`;
+        const [qidResults] = await db.promise().query(fetchQidQuery, [usercourseid]);
+
+        if (qidResults.length === 0) {
+            return res.status(404).json({ message: 'No questions found for this course' });
+        }
+
+        // Extract miniprosemid values
+        const majorprosemid = qidResults[0].majorprosemid; // Use the first result or adjust based on your logic
+
+        // Prepare insertion values for main_miniprosem
+        const insertValues = selectedStudents.map(sid => `(${sid}, ${majorprosemid})`).join(', ');
+
+        // Query to insert multiple rows into main_miniprosem (insert both sid and miniproid)
+        const insertQuery = `INSERT INTO main_majorprosem (sid, majorprosemid) VALUES ${insertValues}`;
+
+        // Execute the insert query
+        await db.promise().query(insertQuery);
+
+        // Send success response
+        res.status(201).json({ message: 'Students added successfully' });
+
+    } catch (error) {
+        console.error('Error occurred:', error);
+        res.status(500).json({ message: 'An error occurred while processing the request.' });
+    }
+};
+
+  
+  
+  
+  export const majorsem_deleteAllStudentsFromClass = (req, res) => {
+  
+    
+    const {uid} = req.params;
+    console.log(uid)
+    try {
+        // const { classId } = req.params;
+  
+        const query = `DELETE main_majorprosem 
+FROM main_majorprosem 
+JOIN upload_majorprosem ON main_majorprosem.majorprosemid = upload_majorprosem.majorprosemid 
+WHERE upload_majorprosem.usercourseid = ?
+`;
+  
+        // Execute the query
+        db.query(query,[uid], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+  
+            // Check if any rows were affected
+            if (result.affectedRows === 0) {
+                return res.status(200).json({ message: 'No students found in the class' });
+            }
+  
+            res.status(200).json({ message: 'All students removed from the class successfully', affectedRows: result.affectedRows });
+        });
+  
+    } catch (error) {
+        console.log(error)
+    }
+  };
+  
+  
+  
+  // Delete One Student from Class
+  // Delete a Student from Class
+  export const majorsem_deleteStudentFromClass = async (req, res) => {
+    const {  sid } = req.params;
+    const {userCourseId} = req.body;
+    console.log(userCourseId)
+    // const classIdAsInt = parseInt(classId); // Convert cohortId to an integer
+    const sidAsInt = parseInt(sid); // Convert cohortId to an integer
+    console.log( "sid:", sid);  // Log the parameter
+  
+    const query = `DELETE main_majorprosem 
+FROM main_majorprosem 
+JOIN upload_majorprosem ON main_majorprosem.majorprosemid = upload_majorprosem.majorprosemid 
+WHERE  main_majorprosem.sid = ? 
+    AND upload_majorprosem.usercourseid = ?
+`;
+    
+    try {
+        // Execute the query
+        db.query(query, [ sidAsInt, userCourseId], (error, result) => {
+            if (error) {
+                console.error('Error deleting students:', error);
+                return res.status(500).json({ message: 'Error deleting students' });
+            }
+  
+            // Log the query result for debugging
+            console.log('Query Result:', result);
+  
+            // Check if any rows were affected (i.e., student was found and deleted)
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Student not found in the class' });
+            }
+  
+            res.status(200).json({ message: 'Student removed from the class successfully', affectedRows: result.affectedRows });
+        });
+  
+    } catch (error) {
+        console.error('Error deleting student:', error.message);  // Log the error
+        res.status(500).json({ message: 'Error deleting student' });
+    }
+  };
+  
+  
+  export const majorsem_get_Usercourse_Students = (req, res) => {
+    const { uid } = req.params; // Assuming classId is passed as a parameter
+    const usercourseid = uid;
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'User Course ID is required' });
+    }
+    const sql = `
+SELECT DISTINCT
+    s.sid, 
+    s.stud_clg_id, 
+    s.student_name,
+    ua.logbookmarks, 
+    ua.review1marks, 
+    ua.review2marks, 
+    ua.proreportmarks,
+    ua.majorprosemid  
+FROM 
+    lms_students AS s
+JOIN 
+    main_majorprosem AS ua ON s.sid = ua.sid
+JOIN 
+    upload_majorprosem AS ti ON ua.majorprosemid = ti.majorprosemid
+WHERE 
+    ti.usercourseid = ?
+
+    `;
+  
+    db.query(sql, [usercourseid], (error, results) => {
+        if (error) {
+            console.error('Error fetching classroom students:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+  
+        res.status(200).json(results);
+    });
+  };

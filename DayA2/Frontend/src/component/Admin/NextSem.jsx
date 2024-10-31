@@ -29,7 +29,6 @@ const NextSemesterButton = () => {
         Promote to Next Semester
     </button>
 </div>
-
   
   );
 };

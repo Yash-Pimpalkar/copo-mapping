@@ -56,6 +56,14 @@ import {
   trade_deleteAllStudentsForTrade,
   trade_deleteStudentFromTrade,
   trade_getStudentsForTrade,
+  minisem_addStudentsToClass,
+  minisem_deleteAllStudentsFromClass,
+  minisem_deleteStudentFromClass,
+  minisem_get_Usercourse_Students,
+  majorsem_addStudentsToClass,
+  majorsem_deleteAllStudentsFromClass,
+  majorsem_deleteStudentFromClass,
+  majorsem_get_Usercourse_Students,
 } from "../controller/managestudents.js";
 const router = express.Router();
 
@@ -183,5 +191,18 @@ router.post("/addstudents/minipro/:sid", minipro_addStudentsWithQuestions); // R
 router.delete("/deleteallstudents/minipro/:uid", minipro_deleteAllStudentsForMiniProject); // Route to delete all students from a specific user course
 router.delete("/deletestudent/minipro/:sid", minipro_deleteStudentFromMiniProject); // Route to delete a specific student from a specific user course
 router.get("/minipro/fetchstudents/:uid", minipro_getStudentsForMiniProject); // Route to fetch all students for a specific user course
+
+
+//Mini Project for Semester 25 marks 
+router.post("/addstudents/miniprosem/:sid", minisem_addStudentsToClass); // Route to add students to mini projects
+router.delete("/deleteallstudents/miniprosem/:uid", minisem_deleteAllStudentsFromClass); // Route to delete all students from a specific user course
+router.delete("/deletestudent/miniprosem/:sid", minisem_deleteStudentFromClass); // Route to delete a specific student from a specific user course
+router.get("/miniprosem/fetchstudents/:uid", minisem_get_Usercourse_Students); // Route to fetch all students for a specific user course
+
+//Major Project for Semester 25 marks 
+router.post("/addstudents/majorprosem/:sid", majorsem_addStudentsToClass); // Route to add students to mini projects
+router.delete("/deleteallstudents/majorprosem/:uid", majorsem_deleteAllStudentsFromClass); // Route to delete all students from a specific user course
+router.delete("/deletestudent/majorprosem/:sid", majorsem_deleteStudentFromClass); // Route to delete a specific student from a specific user course
+router.get("/majorprosem/fetchstudents/:uid", majorsem_get_Usercourse_Students); // Route to fetch all students for a specific user course
 
 export default router;

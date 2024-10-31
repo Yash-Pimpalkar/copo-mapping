@@ -91,14 +91,18 @@ const Trade = ({ uid,tw_id  }) => {
   };
 
   // Calculate total pages based on data length
-  const totalPages = Math.ceil(experimentData.length / dataPerPage);
+  const totalPages = Math.ceil(experimentData?.length  / dataPerPage);
+
 
   // Get current data based on the current page
-  const filteredData = experimentData.filter(
-    (student) =>
-      student.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.stud_clg_id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = experimentData.filter((student) => {
+    const studentName = student.student_name?.toLowerCase() || ""; // Use optional chaining
+    const studentId = student.stud_clg_id?.toLowerCase() || ""; // Use optional chaining
+    const search = searchTerm.toLowerCase();
+  
+    return studentName.includes(search) || studentId.includes(search);
+  });
+  
 
   const currentData = filteredData.slice(
     (currentPage - 1) * dataPerPage,
@@ -132,12 +136,16 @@ const Trade = ({ uid,tw_id  }) => {
 
   // Save the edited values
   const saveEdits = async (sid) => {
+    console.log("Experiment Keys:", experimentKeys); 
     const updatedExperiments = experimentKeys.map((key) => {
       const value = editedValues[key];
+      // const tradeId = parseInt(key.replace("TRADE_", ""), 10); 
+      // console.log(`Processing key: ${key}, parsed trade_id: ${tradeId}`);
       return {
         question_id: questionData.find((q) => q.question_name === key)
           ?.question_id,
         value: value === null ? null : parseInt(value, 10),
+    
       };
     });
 
@@ -407,7 +415,7 @@ const Trade = ({ uid,tw_id  }) => {
     <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
     <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
-      Experiments
+      Trade
     </h1>
 
     {/* Add Student Button aligned below the title, on the right */}

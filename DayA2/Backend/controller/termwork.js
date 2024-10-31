@@ -1400,54 +1400,76 @@ export const showReportTradeCoData = async (req, res) => {
     }
   });
 };
-
 export const TradeUpload = async (req, res) => {
-  let updates = req.body;
-  console.log('Received updates:', updates);
+  const { sid, experiments } = req.body;
+  console.log(sid, experiments);
 
-  // Convert to an array if updates is an object
-  if (typeof updates === 'object' && !Array.isArray(updates)) {
-    updates = [updates];
+  let studentExperimentsData = [];
+
+  if (sid && Array.isArray(experiments)) {
+    studentExperimentsData = [{ sid, experiments }];
+    console.log("Single student case:", JSON.stringify(studentExperimentsData[0].experiments, null, 2));
+  } else if (Array.isArray(experiments) && experiments.length > 0 && experiments[0].sid) {
+    studentExperimentsData = experiments;
+    console.log("Multiple students case:", JSON.stringify(studentExperimentsData, null, 2));
+  } else {
+    return res.status(400).json({ message: 'Invalid input data' });
   }
-
-  // Validate input format
-  if (!Array.isArray(updates) || updates.length === 0) {
-    return res.status(400).send('Invalid input');
-  }
-
-  // Prepare the query and values
-  const sql = 'UPDATE main_trade SET marks = ? WHERE tradeid = ?';
-  const queryValues = updates.map(update => {
-    const Marks = parseInt(update.Marks, 10);
-    return [
-      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.tradeid
-    ];
-  });
-
-  // Log queryValues for debugging
-  console.log('Query Values:', queryValues);
 
   try {
-    // Handle multiple queries in parallel
-    await Promise.all(queryValues.map(values => {
-      return new Promise((resolve, reject) => {
-        db.query(sql, values, (error, results) => {
-          if (error) {
-            console.error('Database query error:', error);
-            return reject(error);
-          }
-          resolve(results);
-        });
-      });
-    }));
+    const updatePromises = [];
 
-    res.status(200).json('Trade marks updated successfully');
+    for (const studentData of studentExperimentsData) {
+      const { sid, experiments: studentExperiments } = studentData;
+
+      if (!sid || typeof sid !== 'number') {
+        return res.status(400).json({ message: 'Invalid or missing student ID (sid)' });
+      }
+
+      for (const experiment of studentExperiments) {
+        const { question_id, value } = experiment; // Destructure question_id
+
+        if (!question_id) {
+          return res.status(400).json({ message: `Invalid Experiment data for student ID: ${sid}` });
+        }
+
+        console.log(`Preparing query for student ${sid}, question_id ${question_id}, value ${value}`);
+
+        const updatePromise = new Promise((resolve, reject) => {
+          const updateQuery = `
+            UPDATE main_trade
+            SET marks = ? 
+            WHERE trade_id = ?  // Using question_id here
+              AND sid = ?
+          `;
+
+          const queryValue = value === null ? null : value;
+
+          db.query(updateQuery, [queryValue, question_id, sid], (error, results) => {
+            if (error) {
+              console.error(`Error executing query for sid ${sid}, question_id ${question_id}:`, error);
+              reject(error);
+            } else {
+              console.log(`Query successful for sid ${sid}, question_id ${question_id}, value ${queryValue}`);
+              resolve(results);
+            }
+          });
+        });
+
+        updatePromises.push(updatePromise);
+      }
+    }
+
+    await Promise.all(updatePromises);
+    res.status(200).json({ message: 'Experiments updated successfully' });
   } catch (error) {
-    console.error('Error updating trade marks:', error);
-    res.status(500).json('Server error');
+    console.error('Error updating experiments:', error);
+    return res.status(500).json({ message: 'An error occurred while updating experiments' });
   }
 };
+
+
+
 export const TradeLimit = (req, res) => {
   const userCourseId = req.params.uid;
   const checkQuery = 'SELECT * FROM upload_trade WHERE usercourseid = ?';
