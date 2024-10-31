@@ -258,3 +258,77 @@ export const getSubmissionsByAssignmentAndStudent = (req, res) => {
   });
 };
 
+
+
+ // Import your database connection
+
+export const downloadFileForSubmission = (req, res) => {
+    const { fileId } = req.params; // Extract fileId from request parameters
+    console.log(`Received request to download file with ID: ${fileId}`);
+
+    // Query to get the file path, file name, and file type by file_id in submissions_file
+    const query = 'SELECT file_path, file_name, file_type FROM submissions_file WHERE file_id = ?';
+
+    db.query(query, [fileId], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            console.warn(`File with ID ${fileId} not found`);
+            return res.status(404).json({ message: 'File not found' });
+        }
+
+        // Destructure the result to get file details
+        const { file_path: filePath, file_name: fileName, file_type: fileType } = results[0];
+        console.log(`Found file details - Path: ${filePath}, Name: ${fileName}, Type: ${fileType}`);
+
+        // Clean and construct the full file path
+        const cleanedFilePath = filePath.replace(/^\//, ''); // Remove leading slash if exists
+        const fullFilePath = path.resolve(process.cwd(), cleanedFilePath); // Use process.cwd() for a dynamic base path
+
+        console.log('Full file path:', fullFilePath);
+
+        // Attempt to send the file to the client
+        res.sendFile(fullFilePath, { 
+            headers: { 
+                'Content-Type': fileType || 'application/octet-stream', // Set content type; default to binary
+                'Content-Disposition': `attachment; filename="${fileName}"` // Prompts download
+            } 
+        }, (err) => {
+            if (err) {
+                console.error('Error serving file:', err);
+                return res.status(500).json({ message: 'Error serving file' });
+            } else {
+                console.log(`File ${fileName} sent successfully`);
+            }
+        });
+    });
+};
+
+
+
+export const updateSubmissionMarks = (req, res) => {
+  const { submissionId } = req.params;
+  const { marks } = req.body;
+
+  if (isNaN(marks)) {
+      return res.status(400).json({ message: 'Marks should be a valid integer' });
+  }
+
+  const query = 'UPDATE submissions SET marks = ? WHERE submission_id = ?';
+  
+  db.query(query, [marks, submissionId], (err, result) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Database error' });
+      }
+
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Submission not found' });
+      }
+
+      res.status(200).json({ message: 'Marks updated successfully' });
+  });
+};

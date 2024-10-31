@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api, { backend_url } from '../../../api';
 
 const ClassroomActivities = ({ uid }) => {
   const { classroomId } = useParams(); // Get classroom_id from the URL
   console.log(classroomId)
+  const navigate = useNavigate()
   // Predefined list of allowed file types
   const fileTypes = ['None', 'pdf', 'docx', 'zip', 'png', 'jpg', 'pptx', 'txt'];
 
@@ -162,7 +163,10 @@ const handleFileChange = (e) => {
         window.open(fileUrl, '_blank');
       };
 
-
+      const handleViewSubmissions = (assignmentId) => {
+        navigate(`/lms/viewclassroom/${classroomId}/submissions/${assignmentId}`);
+      };
+    
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-4">Classroom Activities for Classroom {classroomId}</h2>
@@ -317,6 +321,7 @@ const handleFileChange = (e) => {
         <li 
           key={activity.assignment_id} 
           className="mb-4 p-4 bg-white rounded-lg shadow-md flex justify-between"
+          onClick={() => handleViewSubmissions(activity.assignment_id)} //
         >
           <div className="flex flex-col w-3/4">
             {/* Title with responsive font sizes */}

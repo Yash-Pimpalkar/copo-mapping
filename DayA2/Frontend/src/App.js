@@ -72,6 +72,7 @@ import StudentLogin from './pages/auth/StudentLogin';
 import ViewClassroom from './pages/LMS/Student/ViewAllClassroom';
 import StudentClassRoomActivities from './pages/LMS/Student/StudentClassRoomActivities';
 import ActivityDetail from './pages/LMS/Student/Activitydetails';
+import AssignmentSubmissions from './pages/LMS/Classroom/AssignmentSubmissions';
 
 function App() {
   const [token, setToken] = useState("");
@@ -108,7 +109,9 @@ function App() {
               <Route path="/viewclassroom" element={<ViewClassroom uid={user_id} />} />
               <Route path="/viewclassroom/:classroomId" element={<StudentClassRoomActivities uid={user_id} />} />
               <Route path="/activity-detail/:id" element={<ActivityDetail  uid={user_id} />} />
+            
             </>
+         
           ) : usertype == 2 ? (
             <>
               <Route path='/' element={<TeacherDashboard  uid={user_id}/>} />
@@ -165,6 +168,7 @@ function App() {
               <Route path= "/lms/manageclasstudents/:classId" element={<ManageClassroomStudents uid={user_id}/>} />
               <Route path= "/lms/viewclassroom/" element={<ViewAllClassroom uid={user_id}/>} />
               <Route path= "/lms/viewclassroom/:classroomId" element={<ClassroomActivities uid={user_id}/>} />
+              
 
              
               
@@ -172,6 +176,7 @@ function App() {
               <Route path= "/lms/manageclassstudents/:classId" element={<ManageClassroomStudents uid={user_id}/>} />
               <Route path= "/lms/viewclasssroom/" element={<ViewAllClassroom uid={user_id}/>} />
               <Route path="/AddStudent/:curriculum/:userCourseId" element={<AddStudent  uid={user_id} />} />
+              <Route path="/lms/viewclassroom/:classroomId/submissions/:assignmentId" element={<AssignmentSubmissions  uid={user_id}/>} />
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>

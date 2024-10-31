@@ -56,9 +56,11 @@ export const createActivity = (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     
-    const fileTypeAllowedStr = JSON.parse(file_type_allowed).join(',');// Convert the file types from JSON string
+    const fileTypeArray = JSON.parse(file_type_allowed).join(',');; // Convert the file types from JSON string
+  
 
-    db.query(insertActivityQuery, [classroom_id, teacher_id, title, description, fileTypeAllowedStr, max_file_size, deadline], (err, result) => {
+
+    db.query(insertActivityQuery, [classroom_id, teacher_id, title, description, fileTypeArray, max_file_size, deadline], (err, result) => {
       if (err) {
         console.error('Error inserting activity:', err);
         return res.status(500).json({ message: 'Failed to create activity' });
@@ -233,4 +235,90 @@ export const loadFile = (req, res) => {
 
     });
 };
+
+
+ // Import the database connection pool
+
+// Controller function to get submissions by assignment ID
+export const getSubmissionsByAssignment = async (req, res) => {
+  const { assignmentId } = req.params;
+
+  const query = `
+    SELECT 
+      s.submission_id,
+      s.classroom_id,
+      s.student_id,
+      st.student_name,
+      st.stud_clg_id,
+      s.submitted_at,
+      s.is_late,
+      s.marks,
+      s.message_to_teacher,
+      sf.file_id,
+      sf.file_name,
+      sf.file_type,
+      sf.file_size,
+      sf.uploaded_date,
+      sf.file_path
+    FROM 
+      submissions s
+    LEFT JOIN 
+      submissions_file sf ON s.submission_id = sf.submission_id
+    LEFT JOIN 
+      lms_students st ON s.student_id = st.sid
+    WHERE 
+      s.assignment_id = ?
+    ORDER BY 
+      s.submitted_at DESC;
+  `;
+
+  db.query(query, [assignmentId], (error, results) => {
+    if (error) {
+      console.error('Error fetching submissions:', error);
+      return res.status(500).json({ message: 'Internal server error', error });
+    }
+
+    // Organize files into an array under each submission
+    const submissions = [];
+    const submissionsMap = new Map();
+
+    results.forEach(row => {
+      // Check if the submission already exists in the map
+      let submission = submissionsMap.get(row.submission_id);
+
+      // If the submission does not exist, create a new one
+      if (!submission) {
+        submission = {
+          submission_id: row.submission_id,
+          classroom_id: row.classroom_id,
+          student_id: row.student_id,
+          student_name: row.student_name,
+          stud_clg_id: row.stud_clg_id,
+          submitted_at: row.submitted_at,
+          is_late: row.is_late,
+          marks: row.marks,
+          message_to_teacher: row.message_to_teacher,
+          files: []
+        };
+        submissionsMap.set(row.submission_id, submission);
+        submissions.push(submission);
+      }
+
+      // Add file to the files array if it exists
+      if (row.file_id) {
+        submission.files.push({
+          file_id: row.file_id,
+          file_name: row.file_name,
+          file_type: row.file_type,
+          file_size: row.file_size,
+          uploaded_date: row.uploaded_date,
+          file_path: row.file_path
+        });
+      }
+    });
+
+    res.status(200).json(submissions);
+  });
+};
+
 
