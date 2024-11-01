@@ -29,7 +29,7 @@ export default function AdminEditPos() {
         });
     }
   }, [selectedBranch]);
-  
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -65,7 +65,7 @@ export default function AdminEditPos() {
     const actualIndex = (currentPage - 1) * rowsPerPage + index; // Calculate the actual index in responseData
     setEditingIndex(actualIndex);
     setEditPoData(responseData[actualIndex]);
-};
+  };
 
 
   const handleEditChange = (e) => {
@@ -82,15 +82,15 @@ export default function AdminEditPos() {
     setEditingIndex(null);
 
     api
-        .post("api/pos/admin/update/", updatedData[actualIndex]) // Send full updated data including branch
-        .then(() => {
-            alert("PO updated successfully!");
-        })
-        .catch((error) => {
-            console.error("Error updating PO:", error);
-            setErrorMessage("Error saving data. Please try again.");
-        });
-};
+      .post("api/pos/admin/update/", updatedData[actualIndex]) // Send full updated data including branch
+      .then(() => {
+        alert("PO updated successfully!");
+      })
+      .catch((error) => {
+        console.error("Error updating PO:", error);
+        setErrorMessage("Error saving data. Please try again.");
+      });
+  };
 
 
 
@@ -100,8 +100,8 @@ export default function AdminEditPos() {
 
     // Check if the calculated index is within bounds
     if (actualIndex < 0 || actualIndex >= responseData.length) {
-        console.error("Invalid index for deletion:", actualIndex);
-        return;
+      console.error("Invalid index for deletion:", actualIndex);
+      return;
     }
 
     const itemToDelete = responseData[actualIndex]; // Get the item to delete
@@ -111,24 +111,24 @@ export default function AdminEditPos() {
     console.log("Deleting PO with:", { po_id, branch }); // Log the data being sent
 
     api
-        .delete("api/pos/admin/delete", {
-            data: { po_id, branch } // Ensure 'data' key is used
-        })
-        .then(() => {
-            alert("PO deleted successfully!");
-            const updatedData = responseData.filter((_, i) => i !== actualIndex); // Remove the deleted item from the UI list
-            setResponseData(updatedData); // Update the state to reflect deletion
-        })
-        .catch((error) => {
-            console.error("Error deleting PO:", error);
-            setErrorMessage("Error deleting data. Please try again.");
-        });
-};
+      .delete("api/pos/admin/delete", {
+        data: { po_id, branch } // Ensure 'data' key is used
+      })
+      .then(() => {
+        alert("PO deleted successfully!");
+        const updatedData = responseData.filter((_, i) => i !== actualIndex); // Remove the deleted item from the UI list
+        setResponseData(updatedData); // Update the state to reflect deletion
+      })
+      .catch((error) => {
+        console.error("Error deleting PO:", error);
+        setErrorMessage("Error deleting data. Please try again.");
+      });
+  };
 
 
-  
-  
-  
+
+
+
 
   const handleAddNewClick = () => {
     setIsAddingNew(true);
@@ -137,13 +137,13 @@ export default function AdminEditPos() {
 
   const handleNewPoChange = (e) => {
     const { name, value } = e.target;
-    
+
     setNewPoData((prev) => ({
       ...prev,
       [name]: name === "po_id" ? Number(value) : value  // Convert po_id to a number
     }));
   };
-  
+
 
   const saveNewPo = () => {
     api
@@ -258,62 +258,62 @@ export default function AdminEditPos() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((pos, index) => (
-    <tr key={index}>
-        <td className="px-6 py-4 text-sm font-medium text-gray-900">
-            {editingIndex === (currentPage - 1) * rowsPerPage + index ? ( // Compare with the actual index
-                <input
-                    type="text"
-                    name="po_name"
-                    value={editPoData.po_name}
-                    onChange={handleEditChange}
-                    className="w-full border border-gray-300 rounded-md p-2"
-                />
-            ) : (
-                pos.po_name
-            )}
-        </td>
-        <td className="px-6 py-4 text-sm text-gray-600 text-justify">
-            {editingIndex === (currentPage - 1) * rowsPerPage + index ? (
-                <textarea
-                    name="po_body"
-                    value={editPoData.po_body}
-                    onChange={handleEditChange}
-                    className="w-full border border-gray-300 rounded-md p-2"
-                />
-            ) : (
-                pos.po_body
-            )}
-        </td>
-        <td className="px-6 py-4 text-sm text-gray-600">
-            <div className="flex items-center space-x-2">
-                {editingIndex === (currentPage - 1) * rowsPerPage + index ? (
-                    <button
-                        onClick={saveEdit} // Remove index from here
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-300"
-                    >
-                        Save
-                    </button>
-                ) : (
-                    <>
-                        <button
-                            onClick={() => startEdit(index)}
+                {paginatedData.map((pos, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {editingIndex === (currentPage - 1) * rowsPerPage + index ? ( // Compare with the actual index
+                        <input
+                          type="text"
+                          name="po_name"
+                          value={editPoData.po_name}
+                          onChange={handleEditChange}
+                          className="w-full border border-gray-300 rounded-md p-2"
+                        />
+                      ) : (
+                        pos.po_name
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-justify">
+                      {editingIndex === (currentPage - 1) * rowsPerPage + index ? (
+                        <textarea
+                          name="po_body"
+                          value={editPoData.po_body}
+                          onChange={handleEditChange}
+                          className="w-full border border-gray-300 rounded-md p-2"
+                        />
+                      ) : (
+                        pos.po_body
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      <div className="flex items-center space-x-2">
+                        {editingIndex === (currentPage - 1) * rowsPerPage + index ? (
+                          <button
+                            onClick={saveEdit} // Remove index from here
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-300"
-                        >
-                            Edit
-                        </button>
-                        <button
-                            onClick={() => deletePo(index)}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-300"
-                        >
-                            Delete
-                        </button>
-                    </>
-                )}
-            </div>
-        </td>
-    </tr>
-))}
+                          >
+                            Save
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => startEdit(index)}
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-300"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deletePo(index)}
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition duration-300"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
               </tbody>
             </table>

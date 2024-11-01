@@ -21,7 +21,7 @@ const Ia1 = ({ uid }) => {
   const [loading, setLoading] = useState(false);
   const [Err, setErr] = useState();
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const curriculum = "ia1";
 
@@ -680,11 +680,11 @@ const Ia1 = ({ uid }) => {
             : 3;
     });
   };
-  
+
   const handleClick = () => {
     navigate(`/AddStudent/${curriculum}/${userCourseId}`);
   };
-  
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl md:text-4xl lg:text-5xl mb-6 text-blue-700 text-center font-bold">
@@ -693,13 +693,13 @@ const Ia1 = ({ uid }) => {
       <div className="container mx-auto bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold">Select Course and Year</h1>
-          
+
           {userCourseId && (
             <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
               Add Student
             </button>
           )}
-        
+
         </div>
         <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
           <div className="mb-4 md:mb-0 flex-1">
@@ -750,50 +750,50 @@ const Ia1 = ({ uid }) => {
         </div>
         {/* Upload, Search, and Download Controls */}
         <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 items-center">
-  <div className="flex-1 w-full">
-    <label
-      htmlFor="file-upload"
-      className="block text-sm font-medium text-gray-700 mb-2"
-    >
-      Upload File
-    </label>
-    <input
-      type="file"
-      accept=".xlsx"
-      onChange={handleFileUpload}
-      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    />
-  </div>
+          <div className="flex-1 w-full">
+            <label
+              htmlFor="file-upload"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Upload File
+            </label>
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={handleFileUpload}
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
 
-  <div className="flex-1 w-full">
-    <label
-      htmlFor="search-bar"
-      className="block text-sm font-medium text-gray-700 mb-2"
-    >
-      Search
-    </label>
-    <input
-      type="text"
-      id="search-bar"
-      value={searchQuery}
-      onChange={handleSearchChange}
-      placeholder="Search by student name or ID"
-      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    />
-  </div>
+          <div className="flex-1 w-full">
+            <label
+              htmlFor="search-bar"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Search
+            </label>
+            <input
+              type="text"
+              id="search-bar"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by student name or ID"
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
 
-  <div className="mb-4 md:mb-0 flex-1">
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Download Data
-    </label>
-    <button
-      onClick={handleFileDownload}
-      className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    >
-      Download
-    </button>
-  </div>
-</div>
+          <div className="mb-4 md:mb-0 flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Download Data
+            </label>
+            <button
+              onClick={handleFileDownload}
+              className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              Download
+            </button>
+          </div>
+        </div>
 
 
         {Err && (

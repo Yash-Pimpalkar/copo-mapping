@@ -3,7 +3,7 @@ import api from "../../../api";
 import Pagination from "../../../component/Pagination/Pagination";
 import * as XLSX from "xlsx";
 import LoadingButton from "../../../component/Loading/Loading";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 // import { limit } from "../../../../../Backend/controller/Upload_majorproject";
 
 const MajorproSem = ({ uid }) => {
@@ -25,7 +25,7 @@ const MajorproSem = ({ uid }) => {
     const [maxLimitreview1, setmaxlimitreview1] = useState(0);
     const [maxLimitreview2, setmaxlimitreview2] = useState(0);
     const [maxLimitproreport, setmaxlimitproreport] = useState(0);
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     const curriculum = "majorprosem";
     const [attainmentData, setAttainmentData] = useState({
@@ -50,7 +50,7 @@ const MajorproSem = ({ uid }) => {
                 setDistinctCourses(distinct);
             } catch (error) {
                 console.error("Error fetching course data:", error);
-            } finally{
+            } finally {
                 setLoading(false);
             }
         };
@@ -253,7 +253,7 @@ const MajorproSem = ({ uid }) => {
             setEditingRow(null);
         } catch (error) {
             console.error("Error saving data:", error);
-        } finally{
+        } finally {
             setLoading(false);
         }
     };
@@ -580,7 +580,7 @@ const MajorproSem = ({ uid }) => {
             } catch (error) {
                 console.error("Error uploading file:", error);
                 alert("Failed to upload file. Please try again.");
-            }finally{
+            } finally {
                 setLoading(false);
             }
         };
@@ -627,7 +627,7 @@ const MajorproSem = ({ uid }) => {
             const avgatt = (((validLogbookmarksCount + validReview1marksCount + validReview2marksCount + validProreportmarksCount) / 4) /
                 ((MajorproData.length + MajorproData.length + MajorproData.length + MajorproData.length) / 4) * 100).toFixed(2);
 
-            console.log("Avgatt:",avgatt)
+            console.log("Avgatt:", avgatt)
 
             return { coName: course.coname, coAverage: avgatt };
         });
@@ -638,7 +638,7 @@ const MajorproSem = ({ uid }) => {
         if (userCourseId) {
             // Calculate CO averages
             const coAveragesAtt = calculateCoAverages(userCourse, MajorproData, maxLimitlogbook, maxLimitreview1, maxLimitreview2, maxLimitproreport, attainmentData);
-            console.log("coAverages: ",coAveragesAtt);
+            console.log("coAverages: ", coAveragesAtt);
 
             // Map over coAverages and calculate attainment for each CO
             const coAveragesWithAttainment = coAveragesAtt.map((co) => {
@@ -684,7 +684,7 @@ const MajorproSem = ({ uid }) => {
 
     const handleClick = () => {
         navigate(`/AddStudent/${curriculum}/${userCourseId}`);
-      };
+    };
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
@@ -695,10 +695,10 @@ const MajorproSem = ({ uid }) => {
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-semibold">Select Course and Year</h1>
                     {userCourseId && (
-            <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-              Add Student
-            </button>
-          )}
+                        <button onClick={handleClick} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                            Add Student
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
@@ -749,237 +749,237 @@ const MajorproSem = ({ uid }) => {
                     </div>
                 </div>
 
-        {/* Upload, Search, and Download Controls */}
-        <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 items-center">
-  <div className="flex-1 w-full">
-    <label
-      htmlFor="file-upload"
-      className="block text-sm font-medium text-gray-700 mb-2"
-    >
-      Upload File
-    </label>
-    <input
-      type="file"
-      accept=".xlsx"
-      onChange={handleFileUpload}
-      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    />
-  </div>
+                {/* Upload, Search, and Download Controls */}
+                <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0 items-center">
+                    <div className="flex-1 w-full">
+                        <label
+                            htmlFor="file-upload"
+                            className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                            Upload File
+                        </label>
+                        <input
+                            type="file"
+                            accept=".xlsx"
+                            onChange={handleFileUpload}
+                            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                    </div>
 
-  <div className="flex-1 w-full">
-    <label
-      htmlFor="search-bar"
-      className="block text-sm font-medium text-gray-700 mb-2"
-    >
-      Search
-    </label>
-    <input
-      type="text"
-      id="search-bar"
-      value={searchQuery}
-      onChange={handleSearchChange}
-      placeholder="Search by student name or ID"
-      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    />
-  </div>
+                    <div className="flex-1 w-full">
+                        <label
+                            htmlFor="search-bar"
+                            className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                            Search
+                        </label>
+                        <input
+                            type="text"
+                            id="search-bar"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            placeholder="Search by student name or ID"
+                            className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                    </div>
 
-  <div className="mb-4 md:mb-0 flex-1">
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Download Data
-    </label>
-    <button
-      onClick={handleFileDownload}
-      className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-    >
-      Download
-    </button>
-  </div>
-</div>
-{Err && (
-          <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
-            Error: {Err}
-          </p>
-        )}
-        {loading ? (
-          <div className="flex justify-center items-center">
-            <LoadingButton />
-          </div>
-        ) : (
-          <>
-                {filteredData.length > 0 && (
-                    <div className="mt-4 overflow-x-auto max-w-full">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="sticky left-0 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Seat No.
-                                </th>
-                                <th className="sticky left-10 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Student ID
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Student Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Logbook Marks
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Review 1 Marks
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Review 2 Marks
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Avg of reviews
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Project Report Quality
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Total
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredData.slice(startIndex, endIndex).map((student, index) => {
-                                const actualIndex = index + startIndex; // Adjust index to match actual data index
-
-                                // Calculate average of review1_marks and review2_marks
-                                const avgReviews = (student.review1_marks && student.review2_marks)
-                                    ? (parseInt(student.review1_marks) + parseInt(student.review2_marks)) / 2
-                                    : 0;
-
-                                return (
-                                    <tr key={student.sid} className="hover:bg-gray-100">
-                                        <td className="sticky left-0  bg-white z-10  px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {actualIndex + 1} {/* Displaying the row number */}
-                                        </td>
-                                        <td className="sticky left-10 bg-white z-10 px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {student.stud_clg_id}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {student.student_name}
-                                        </td>
-
-                                        {/* Logbook Marks */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <input
-                                                    type="text"
-                                                    value={
-                                                        editedMarks[actualIndex]?.logbookmarks !== undefined
-                                                            ? editedMarks[actualIndex].logbookmarks
-                                                            : student.logbookmarks
-                                                    }
-                                                    onChange={(event) => handleLogbookMarksChange(event, actualIndex)}
-                                                    className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            ) : (
-                                                student.logbookmarks // Show existing logbook marks if not editing
-                                            )}
-                                        </td>
-                                        {/* Review 1 Marks */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <input
-                                                    type="text"
-                                                    value={
-                                                        editedMarks[actualIndex]?.review1marks !== undefined
-                                                            ? editedMarks[actualIndex].review1marks
-                                                            : student.review1marks
-                                                    }
-                                                    onChange={(event) => handleReview1MarksChange(event, actualIndex)}
-                                                    className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            ) : (
-                                                student.review1marks // Show existing logbook marks if not editing
-                                            )}
-                                        </td>
-
-                                        {/* Review 2 Marks */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <input
-                                                    type="text"
-                                                    value={
-                                                        editedMarks[actualIndex]?.review2marks !== undefined
-                                                            ? editedMarks[actualIndex].review2marks
-                                                            : student.review2marks
-                                                    }
-                                                    onChange={(event) => handleReview2MarksChange(event, actualIndex)}
-                                                    className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            ) : (
-                                                student.review2marks // Show existing logbook marks if not editing
-                                            )}
-                                        </td>
-
-                                        {/* Automatically Calculated Average of Reviews */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {calculateavg(student)} {/* Display calculated average */}
-                                        </td>
-
-                                        {/* Pro Report Marks */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <input
-                                                    type="text"
-                                                    value={
-                                                        editedMarks[actualIndex]?.proreportmarks !== undefined
-                                                            ? editedMarks[actualIndex].proreportmarks
-                                                            : student.proreportmarks
-                                                    }
-                                                    onChange={(event) => handleProreportMarksChange(event, actualIndex)}
-                                                    className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            ) : (
-                                                student.proreportmarks // Show existing logbook marks if not editing
-                                            )}
-                                        </td>
-
-                                        {/* Total Marks */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {calculateTotal(student)}
-                                        </td>
-
-                                        {/* Actions */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {editingRow === actualIndex ? (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
-                                                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                                                    >
-                                                        Save
-                                                    </button>
-                                                    <button
-                                                        onClick={handleCancelClick}
-                                                        className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
-                                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                                                >
-                                                    Edit
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                    <div className="mb-4 md:mb-0 flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Download Data
+                        </label>
+                        <button
+                            onClick={handleFileDownload}
+                            className="w-full bg-indigo-600 text-white py-2 px-6 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            Download
+                        </button>
+                    </div>
                 </div>
+                {Err && (
+                    <p style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+                        Error: {Err}
+                    </p>
                 )}
-              </>
+                {loading ? (
+                    <div className="flex justify-center items-center">
+                        <LoadingButton />
+                    </div>
+                ) : (
+                    <>
+                        {filteredData.length > 0 && (
+                            <div className="mt-4 overflow-x-auto max-w-full">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="sticky left-0 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Seat No.
+                                            </th>
+                                            <th className="sticky left-10 px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Student ID
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Student Name
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Logbook Marks
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Review 1 Marks
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Review 2 Marks
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Avg of reviews
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Project Report Quality
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Total
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-white-500 uppercase tracking-wider">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {filteredData.slice(startIndex, endIndex).map((student, index) => {
+                                            const actualIndex = index + startIndex; // Adjust index to match actual data index
+
+                                            // Calculate average of review1_marks and review2_marks
+                                            const avgReviews = (student.review1_marks && student.review2_marks)
+                                                ? (parseInt(student.review1_marks) + parseInt(student.review2_marks)) / 2
+                                                : 0;
+
+                                            return (
+                                                <tr key={student.sid} className="hover:bg-gray-100">
+                                                    <td className="sticky left-0  bg-white z-10  px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {actualIndex + 1} {/* Displaying the row number */}
+                                                    </td>
+                                                    <td className="sticky left-10 bg-white z-10 px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {student.stud_clg_id}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {student.student_name}
+                                                    </td>
+
+                                                    {/* Logbook Marks */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {editingRow === actualIndex ? (
+                                                            <input
+                                                                type="text"
+                                                                value={
+                                                                    editedMarks[actualIndex]?.logbookmarks !== undefined
+                                                                        ? editedMarks[actualIndex].logbookmarks
+                                                                        : student.logbookmarks
+                                                                }
+                                                                onChange={(event) => handleLogbookMarksChange(event, actualIndex)}
+                                                                className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                            />
+                                                        ) : (
+                                                            student.logbookmarks // Show existing logbook marks if not editing
+                                                        )}
+                                                    </td>
+                                                    {/* Review 1 Marks */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {editingRow === actualIndex ? (
+                                                            <input
+                                                                type="text"
+                                                                value={
+                                                                    editedMarks[actualIndex]?.review1marks !== undefined
+                                                                        ? editedMarks[actualIndex].review1marks
+                                                                        : student.review1marks
+                                                                }
+                                                                onChange={(event) => handleReview1MarksChange(event, actualIndex)}
+                                                                className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                            />
+                                                        ) : (
+                                                            student.review1marks // Show existing logbook marks if not editing
+                                                        )}
+                                                    </td>
+
+                                                    {/* Review 2 Marks */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {editingRow === actualIndex ? (
+                                                            <input
+                                                                type="text"
+                                                                value={
+                                                                    editedMarks[actualIndex]?.review2marks !== undefined
+                                                                        ? editedMarks[actualIndex].review2marks
+                                                                        : student.review2marks
+                                                                }
+                                                                onChange={(event) => handleReview2MarksChange(event, actualIndex)}
+                                                                className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                            />
+                                                        ) : (
+                                                            student.review2marks // Show existing logbook marks if not editing
+                                                        )}
+                                                    </td>
+
+                                                    {/* Automatically Calculated Average of Reviews */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {calculateavg(student)} {/* Display calculated average */}
+                                                    </td>
+
+                                                    {/* Pro Report Marks */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {editingRow === actualIndex ? (
+                                                            <input
+                                                                type="text"
+                                                                value={
+                                                                    editedMarks[actualIndex]?.proreportmarks !== undefined
+                                                                        ? editedMarks[actualIndex].proreportmarks
+                                                                        : student.proreportmarks
+                                                                }
+                                                                onChange={(event) => handleProreportMarksChange(event, actualIndex)}
+                                                                className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                            />
+                                                        ) : (
+                                                            student.proreportmarks // Show existing logbook marks if not editing
+                                                        )}
+                                                    </td>
+
+                                                    {/* Total Marks */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {calculateTotal(student)}
+                                                    </td>
+
+                                                    {/* Actions */}
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {editingRow === actualIndex ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleSaveClick(actualIndex)} // Ensure to pass correct index for saving
+                                                                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                                                                >
+                                                                    Save
+                                                                </button>
+                                                                <button
+                                                                    onClick={handleCancelClick}
+                                                                    className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleEditClick(actualIndex)} // Ensure to pass correct index for editing
+                                                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </>
                 )}
                 {totalPages > 0 && (
                     <Pagination

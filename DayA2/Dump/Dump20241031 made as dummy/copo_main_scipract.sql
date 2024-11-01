@@ -1,0 +1,57 @@
+-- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+--
+-- Host: localhost    Database: copo
+-- ------------------------------------------------------
+-- Server version	8.0.39
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `main_scipract`
+--
+
+DROP TABLE IF EXISTS `main_scipract`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `main_scipract` (
+  `sciid` int NOT NULL AUTO_INCREMENT,
+  `scipract_id` int DEFAULT NULL,
+  `sid` int DEFAULT NULL,
+  `marks` int DEFAULT NULL,
+  PRIMARY KEY (`sciid`),
+  KEY `scipractid_idx` (`scipract_id`),
+  KEY `sid_idx` (`sid`),
+  CONSTRAINT `scipract_id` FOREIGN KEY (`scipract_id`) REFERENCES `uploadscilabpract` (`scipractid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `side` FOREIGN KEY (`sid`) REFERENCES `copo_students_details` (`sid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=154 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `main_scipract`
+--
+
+LOCK TABLES `main_scipract` WRITE;
+/*!40000 ALTER TABLE `main_scipract` DISABLE KEYS */;
+INSERT INTO `main_scipract` VALUES (1,5,1,3),(2,5,2,6),(3,5,3,6),(4,5,4,6),(5,5,5,6),(6,5,6,6),(7,5,7,6),(8,5,8,6),(9,5,9,6),(10,5,10,6),(11,5,11,6),(12,5,12,6),(13,5,13,6),(14,5,14,6),(15,5,15,6),(16,5,16,6),(17,5,17,6),(18,5,18,6),(19,5,19,6),(20,5,20,6),(21,5,21,6),(22,5,22,6),(23,5,23,6),(24,5,24,6),(25,5,25,6),(26,5,26,6),(27,5,27,6),(28,5,28,6),(29,5,29,6),(30,5,30,6),(31,5,31,6),(32,5,32,6),(33,5,33,6),(34,5,34,6),(35,5,35,6),(36,5,36,6),(37,5,37,6),(38,5,38,6),(39,5,39,6),(40,5,40,6),(41,5,41,6),(42,5,42,6),(43,5,43,6),(44,5,44,6),(45,5,45,6),(46,5,46,6),(47,5,47,6),(48,5,48,6),(49,5,49,6),(50,5,50,6),(51,5,51,6),(52,5,52,6),(53,5,53,6),(54,5,54,6),(55,5,55,6),(56,5,56,6),(57,5,57,6),(58,5,58,6),(59,5,59,6),(60,5,60,6),(61,5,61,6),(62,5,62,6),(63,5,63,6),(64,5,64,6),(65,5,65,6),(66,5,66,6),(67,5,67,6),(68,5,68,6),(69,5,69,6),(70,5,70,6),(71,5,71,6),(72,5,72,6),(73,5,73,6),(74,5,74,6),(75,5,75,6),(76,5,76,6),(77,5,77,6),(78,5,78,6),(79,5,79,6),(80,5,80,6),(81,5,81,6),(82,5,82,6),(83,5,83,6),(84,5,84,6),(85,5,85,6),(86,5,86,6),(87,5,87,6),(88,5,88,6),(89,5,89,6),(90,5,90,6),(91,5,91,6),(92,5,92,6),(93,5,93,6),(94,5,94,6),(95,5,95,6),(96,5,96,6),(97,5,97,6),(98,5,98,6),(99,5,99,6),(100,5,100,6),(101,5,101,6),(102,5,102,6),(103,5,103,6),(104,5,104,6),(105,5,105,6),(106,5,106,6),(107,5,107,6),(108,5,108,6),(109,5,109,6),(110,5,110,6),(111,5,111,6),(112,5,112,6),(113,5,113,6),(114,5,114,6),(115,5,115,6),(116,5,116,6),(117,5,117,6),(118,5,118,6),(119,5,119,6),(120,5,120,6),(121,5,121,6),(122,5,122,6),(123,5,123,6),(124,5,124,6),(125,5,125,6),(126,5,126,6),(127,5,127,6),(128,5,128,6),(129,5,129,6),(130,5,130,6),(131,5,131,6),(132,5,132,6),(133,5,133,6),(134,5,134,6),(135,5,135,6),(136,5,136,6),(137,5,137,6),(138,5,138,6),(139,5,139,6),(140,5,140,6),(141,5,141,6),(142,5,142,6),(143,5,143,6),(144,5,144,6),(145,5,145,6),(146,5,146,6),(147,5,147,6),(148,5,148,6),(149,5,149,6),(150,5,150,6),(151,5,151,6),(152,5,152,6),(153,5,153,6);
+/*!40000 ALTER TABLE `main_scipract` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-10-27  2:19:56

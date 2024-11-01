@@ -9,6 +9,8 @@ export default function Admin_Cos_Edit() {
     const [formData, setFormData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
+    const [newlyAddedCOs, setNewlyAddedCOs] = useState([]);
+    const [deletedCOs, setDeletedCOs] = useState([]);
     const [codata, setCOsdata] = useState([]);
 
     useEffect(() => {
@@ -41,6 +43,10 @@ export default function Admin_Cos_Edit() {
         fetchCOData();
     }, [usercourse_id]);
 
+    console.log("newlyAddedCOs", newlyAddedCOs)
+
+    console.log("deletedCOs", deletedCOs);
+
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -52,7 +58,9 @@ export default function Admin_Cos_Edit() {
     };
 
     const handleAddCO = () => {
-        setFormData([...formData, { cos_name: '', cos_body: '' }]);
+        const newCO = { cos_name: '', cos_body: '' };
+        setFormData([...formData, newCO]); // Update formData for displaying in the table
+        setNewlyAddedCOs([...newlyAddedCOs, newCO]); // Track only the newly added COs
     };
 
     const handleSubmit = async () => {
@@ -61,26 +69,69 @@ export default function Admin_Cos_Edit() {
         setSuccessMessage("");
 
         try {
-            // Prepare data in the format the backend expects
-            const updatedCos = formData.map((cos) => ({
-                co_name: cos.cos_name,
-                co_body: cos.cos_body,
-                idcos: cos.idcos
-            }));
+            if (formData.length > 0) {
+                // Handle updating existing COs
+                const updatedCos = formData.map((cos) => ({
+                    co_name: cos.cos_name,
+                    co_body: cos.cos_body,
+                }));
 
-            console.log(updatedCos);
+                const data = {
+                    usercourse_id,
+                    updatedCos
+                };
 
-            const data = {
-                usercourse_id,
-                updatedCos
-            };
+                await api.put(`/api/cos/admin/update/${usercourse_id}`, data);
+                setSuccessMessage("COS data updated successfully.");
 
-            console.log(data);
+            }
+            if (newlyAddedCOs.length > 0) {
 
-            // Send the data to the backend
-            await api.put(`/api/cos/admin/update/${usercourse_id}`, data);
+                const currentTime = new Date().toISOString();
 
-            setSuccessMessage("COS data updated successfully.");
+                const formatDateForDatabase = (isoDate) => {
+                    const date = new Date(isoDate);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                };
+
+                const formattedCreatedAt = formatDateForDatabase(currentTime);
+                // Handle adding new COs only
+                const newCOs = newlyAddedCOs.map((cos) => ({
+                    co_name: cos.cos_name,
+                    co_body: cos.cos_body,
+                    created_time: formattedCreatedAt,
+                }));
+
+                const newdata = {
+                    usercourse_id,
+                    newCOs,
+                };
+
+                await api.post(`/api/cos/admin/add/${usercourse_id}`, newdata);
+                setSuccessMessage("New COS added successfully.");
+
+            }
+            if (deletedCOs.length > 0) {
+                // Handle deleting COs only
+                const deleteCOs = deletedCOs.map((cos) => ({
+                    co_name: cos.cos_name,
+                    co_body: cos.cos_body,
+                }));
+
+                console.log(deleteCOs);
+
+                // Send `deleteCOs` as params or a separate API request
+                await api.delete(`/api/cos/admin/remove/${usercourse_id}`, {
+                    data: { usercourse_id, deleteCOs }
+                });
+                setSuccessMessage("Selected COS deleted successfully.");
+            }
         } catch (error) {
             console.error("Error updating COS data:", error);
             setErrorMessage("Failed to update COS data.");
@@ -89,17 +140,31 @@ export default function Admin_Cos_Edit() {
         }
     };
 
+
+    const handleRemoveCO = (index) => {
+        // Capture the deleted CO
+        const deletedCO = formData[index];
+
+        // Update formData to remove the CO
+        const newFormData = formData.filter((_, i) => i !== index);
+        setFormData(newFormData);
+
+        // Add the deleted CO to the `deletedCOs` array
+        setDeletedCOs((prevDeletedCOs) => [...prevDeletedCOs, deletedCO]);
+
+        if (index >= formData.length - newlyAddedCOs.length) {
+            // Remove from `newlyAddedCOs` if it's a newly added CO
+            const updatedNewlyAddedCOs = newlyAddedCOs.filter((_, i) => i !== (index - (formData.length - newlyAddedCOs.length)));
+            setNewlyAddedCOs(updatedNewlyAddedCOs);
+        }
+    };
+
     const handleEditCO = (index) => {
         alert(`Edit CO at index ${index}`);
     };
 
-    const handleRemoveCO = (index) => {
-        const newFormData = formData.filter((_, i) => i !== index);
-        setFormData(newFormData);
-    };
-
     return (
-        <div className="max-w-screen-md mx-auto p-6 border border-gray-300 shadow-lg rounded-md bg-white mt-10">
+        <div className="max-w-screen-lg mx-auto p-6 border border-gray-300 shadow-lg rounded-md bg-white mt-10">
             <h1 className="text-2xl mb-6 text-blue-500 text-center">
                 COS Form
             </h1>
@@ -124,15 +189,15 @@ export default function Admin_Cos_Edit() {
                 Add CO
             </button>
 
-            <table className="w-full border-collapse border border-gray-300 rounded-sm">
+            <table className="min-w-full divide-y divide-gray-200 border-collapse border border-gray-300 rounded-md">
                 <thead>
                     <tr className="bg-gray-200">
                         <th className="border border-gray-300 px-4 py-2 text-left">COS Name</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">COS Body</th>
+                        <th className="border border-gray-300 px-4 py-2 text-left mx-5">COS Body</th>
                         <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white divide-y divide-gray-200">
                     {formData.map((cos, index) => (
                         <tr key={index} className="border-b border-gray-300">
                             <td className="border border-gray-300 px-4 py-2">
@@ -145,20 +210,20 @@ export default function Admin_Cos_Edit() {
                                     style={{ textTransform: 'uppercase' }}
                                 />
                             </td>
-                            <td className="border border-gray-300 px-4 py-2">
+                            <td className="border border-gray-300 px-4 py-2 text-justify">
                                 <input
                                     type="text"
                                     name="cos_body"
                                     value={cos.cos_body}
                                     onChange={(e) => handleChange(index, e)}
-                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    className="w-full p-2 border border-gray-300 rounded-md p-2"
                                 />
                             </td>
                             <td className="border border-gray-300 px-4 py-2">
                                 <button
                                     type="button"
                                     onClick={() => handleEditCO(index)}
-                                    className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2"
+                                    className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2 mb-2"
                                 >
                                     Edit CO
                                 </button>

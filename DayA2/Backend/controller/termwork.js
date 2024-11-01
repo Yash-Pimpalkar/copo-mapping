@@ -1380,7 +1380,8 @@ export const showReportTradeCoData = async (req, res) => {
       ct.co_id,
       qt.tradename,
       ut.nooftrade,
-      ut.marks
+      ut.marks,
+      qt.trade_idq
     FROM 
       co_trade AS ct
     INNER JOIN 
@@ -1439,7 +1440,7 @@ export const TradeUpload = async (req, res) => {
           const updateQuery = `
             UPDATE main_trade
             SET marks = ? 
-            WHERE trade_id = ?  // Using question_id here
+            WHERE trade_id = ? 
               AND sid = ?
           `;
 
