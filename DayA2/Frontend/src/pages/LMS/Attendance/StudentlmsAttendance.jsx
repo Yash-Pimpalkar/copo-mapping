@@ -5,7 +5,6 @@ import api from '../../../api';
 import LoadingButton from '../../../component/Loading/Loading';
 
 const StudentLmsAttendance = ({ uid }) => {
-  // Component state initialization
   const [classrooms, setClassrooms] = useState([]);
   const [filteredClassrooms, setFilteredClassrooms] = useState([]);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('');
@@ -13,7 +12,8 @@ const StudentLmsAttendance = ({ uid }) => {
   const [timeSlot, setTimeSlot] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [existingAttendance, setExistingAttendance] = useState(null);
-  const [loading,setLoading]=useState(false)
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
@@ -33,14 +33,26 @@ const StudentLmsAttendance = ({ uid }) => {
   const uniqueAcademicYears = Array.from(new Set(classrooms.map((classroom) => classroom.academic_year)));
 
   const handleAcademicYearChange = (year) => {
+    setExistingAttendance(null);
     setSelectedAcademicYear(year);
     setSelectedClassroom(null);
     setFilteredClassrooms(classrooms.filter((classroom) => classroom.academic_year === year));
   };
 
   const handleClassroomChange = (classroomId) => {
+    setExistingAttendance(null);
     const selected = classrooms.find((classroom) => classroom.classroom_id === parseInt(classroomId, 10));
     setSelectedClassroom(selected);
+  };
+
+  const handleDateChange = (date) => {
+    setExistingAttendance(null);
+    setSelectedDate(date);
+  };
+
+  const handleTimeSlotChange = (slot) => {
+    setExistingAttendance(null);
+    setTimeSlot(slot);
   };
 
   const handleAttendanceChange = (studentId, status) => {
@@ -73,6 +85,8 @@ const StudentLmsAttendance = ({ uid }) => {
       return;
     }
 
+    setLoading(true);
+
     try {
       const response = await api.post(`/api/lmsclassroom/attendance/getattendance`, {
         class_id: selectedClassroom.classroom_id,
@@ -89,6 +103,8 @@ const StudentLmsAttendance = ({ uid }) => {
       }
     } catch (error) {
       toast.error('Failed to create or fetch attendance.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -106,40 +122,33 @@ const StudentLmsAttendance = ({ uid }) => {
   };
 
   const downloadAttendance = () => {
-  let i = 1;
-  
-  // Define header rows with classroom name, date, and time slot
-  const headers = [
-    { A: `Classroom: ${selectedClassroom ? selectedClassroom.room_name : ''}` },
-    { A: `Date: ${selectedDate || ''}` },
-    { A: `Time Slot: ${timeSlot || ''}` },
-    {}  // Blank row between headers and student data
-  ];
+    let i = 1;
 
-  // Convert headers to worksheet format
-  const headerSheet = XLSX.utils.json_to_sheet(headers, { header: ["A"], skipHeader: true });
-  
-  // Add student attendance data below the headers
-  XLSX.utils.sheet_add_json(headerSheet, 
-    existingAttendance.map((student) => ({
-      'Sr No': i++,
-      'ID No': student.stud_clg_id,
-      'Name': student.student_name,
-      'Attendance': student.status === 1 ? 'Present' : student.status === 0 ? 'Absent' : 'Not Marked',
-    })),
-    { origin: -1 } // Append data at the next available row
-  );
+    const headers = [
+      { A: `Classroom: ${selectedClassroom ? selectedClassroom.room_name : ''}` },
+      { A: `Date: ${selectedDate || ''}` },
+      { A: `Time Slot: ${timeSlot || ''}` },
+      {}
+    ];
 
-  // Create a new workbook and append the sheet
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, headerSheet, 'Attendance');
-  
-  // Write the file
-  XLSX.writeFile(wb, `${selectedClassroom ? selectedClassroom.room_name : ''}-${selectedDate || ''}attendance.xlsx`);
-  
-  // Success message
-  toast.success('Attendance downloaded successfully.');
-};
+    const headerSheet = XLSX.utils.json_to_sheet(headers, { header: ["A"], skipHeader: true });
+
+    XLSX.utils.sheet_add_json(headerSheet,
+      existingAttendance.map((student) => ({
+        'Sr No': i++,
+        'ID No': student.stud_clg_id,
+        'Name': student.student_name,
+        'Attendance': student.status === 1 ? 'Present' : student.status === 0 ? 'Absent' : 'Not Marked',
+      })),
+      { origin: -1 }
+    );
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, headerSheet, 'Attendance');
+
+    XLSX.writeFile(wb, `${selectedClassroom ? selectedClassroom.room_name : ''}-${selectedDate || ''}attendance.xlsx`);
+    toast.success('Attendance downloaded successfully.');
+  };
 
   const isAttendanceReady = selectedAcademicYear && selectedClassroom && selectedDate && timeSlot;
 
@@ -147,7 +156,6 @@ const StudentLmsAttendance = ({ uid }) => {
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-md">
       <h1 className="text-3xl font-bold text-center mb-6">Manage Student Attendance</h1>
 
-      {/* Academic Year Select */}
       <div className="mb-4">
         <label className="block text-lg font-medium text-gray-700">Select Academic Year:</label>
         <select
@@ -164,7 +172,6 @@ const StudentLmsAttendance = ({ uid }) => {
         </select>
       </div>
 
-      {/* Classroom Select */}
       <div className="mb-4">
         <label className="block text-lg font-medium text-gray-700">Select Classroom:</label>
         <select
@@ -182,23 +189,21 @@ const StudentLmsAttendance = ({ uid }) => {
         </select>
       </div>
 
-      {/* Date Picker */}
       <div className="mb-4">
         <label className="block text-lg font-medium text-gray-700">Select Date:</label>
         <input
           type="date"
           value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
+          onChange={(e) => handleDateChange(e.target.value)}
           className="mt-1 block w-full p-2 bg-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         />
       </div>
 
-      {/* Time Slot Picker */}
       <div className="mb-4">
         <label className="block text-lg font-medium text-gray-700">Select Time Slot:</label>
         <select
           value={timeSlot}
-          onChange={(e) => setTimeSlot(e.target.value)}
+          onChange={(e) => handleTimeSlotChange(e.target.value)}
           className="mt-1 block w-full p-2 bg-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         >
           <option value="" disabled>Select Time Slot</option>
@@ -210,7 +215,6 @@ const StudentLmsAttendance = ({ uid }) => {
         </select>
       </div>
 
-      {/* Create Attendance Button */}
       {isAttendanceReady && (
         <div className="flex justify-center mt-6">
           <button
@@ -222,7 +226,6 @@ const StudentLmsAttendance = ({ uid }) => {
         </div>
       )}
 
-      {/* Attendance Table */}
       {loading ? (
         <LoadingButton />
       ) : (
