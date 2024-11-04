@@ -1,5 +1,5 @@
 import { connection as db } from "../../config/dbConfig.js";
-
+import expressAsyncHandler from "express-async-handler";
 export const upload_classroom = (req, res) => {
     const { formDataForCohortClassroom } = req.body;
 
@@ -54,7 +54,23 @@ export const upload_classroom = (req, res) => {
 
 export const show_classroom = (req, res) => {
     const { uid } = req.params;
-    const sql = 'SELECT * FROM classroom WHERE userid = ?;';
+    const sql = `
+        SELECT 
+            c.classroom_id,
+            c.room_name,
+            c.branch,
+            c.semester,
+            c.userid,
+            c.academic_year,
+            c.created_at,
+            u.teacher_name
+        FROM 
+            classroom c
+        JOIN 
+            users u ON c.userid = u.userid
+        WHERE 
+            c.userid = ?;
+    `;
 
     db.query(sql, [uid], (error, rows) => {
         if (error) {
@@ -66,7 +82,8 @@ export const show_classroom = (req, res) => {
         }
         res.status(200).json(rows);
     });
-}
+};
+
 
 export const delete_classroom = (req, res) => {
     const { id } = req.params;
@@ -252,8 +269,40 @@ export const getClassroomStudents = (req, res) => {
 };
 
 
-
-
+export const getClassroomDetails = expressAsyncHandler(async (req, res) => {
+    const { classroom_id } = req.params;
+  
+    const query = `
+      SELECT 
+        c.classroom_id,
+        c.room_name,
+        c.branch,
+        c.semester,
+        c.userid,
+        c.academic_year,
+        c.created_at,
+        u.teacher_name
+      FROM 
+        classroom c
+      JOIN 
+        users u ON c.userid = u.userid
+      WHERE 
+        c.classroom_id = ?;
+    `;
+  
+    db.query(query, [classroom_id], (error, results) => {
+      if (error) {
+        console.error('Error fetching classroom details:', error);
+        return res.status(500).json({ message: 'Failed to retrieve classroom details', error });
+      }
+  
+      if (results.length > 0) {
+        res.json(results[0]);
+      } else {
+        res.status(404).json({ message: 'Classroom not found' });
+      }
+    });
+  });
 
 
 

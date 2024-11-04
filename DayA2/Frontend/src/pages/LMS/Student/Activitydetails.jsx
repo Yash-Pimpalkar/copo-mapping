@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api, { backend_url } from '../../../api';
+import { toast } from 'react-toastify';
+import { FaChalkboardTeacher } from 'react-icons/fa';
+import { MdMenu } from 'react-icons/md';
+import { HiOutlineDotsVertical } from 'react-icons/hi';
+import { AiOutlineUser } from 'react-icons/ai';
 
 const ActivityDetail = () => {
   const location = useLocation();
@@ -8,10 +13,66 @@ const ActivityDetail = () => {
   const [fileUpload, setFileUpload] = useState(null);
   const [fileError, setFileError] = useState(null); // State for error message
   const [uploading, setUploading] = useState(false);
-
+  
+  const [ classroomId ,setClassroomId] =useState(activity.classroom_id);
   const [submissions, setSubmissions] = useState([]);
+  const [attendanceData, setAttendanceData] = useState(null);
+
+    const [classroomDetails, setClassroomDetails] = useState(null);
+    const [showAttendance, setShowAttendance] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+
+
+
+  const fetchAttendanceData = async () => {
+    try {
+      const response = await api.get(`/api/lmsclassroom/attendance/percentage/${classroomId}`);
+      setAttendanceData(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch attendance data');
+    }
+  };
+
+  useEffect(() => {
+
+
+
+    const fetchAttendancePercentage = async () => {
+      if (!uid || !classroomId) {
+        alert('Please enter both Student ID and Classroom ID');
+        return;
+      }
+  
+      setLoading(true);
+      try {
+        const response = await api.get(`/api/lmsclassroom/attendance/percentage/${uid}/${classroomId}`);
+        // console.log(response.data)
+        setAttendanceData(response.data);
+        
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          
+        } else {
+          alert('Failed to fetch attendance percentage');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (uid && classroomId) {
+      fetchAttendancePercentage();
+    }
+  }, [uid, classroomId]);
+  const handleUserIconClick = () => {
+    setShowAttendance(!showAttendance);
+    if (!attendanceData) {
+      fetchAttendanceData();
+    }
+  };
+
 
 
   const handleDownload = (fileId, fileName) => {
@@ -56,7 +117,31 @@ const ActivityDetail = () => {
     fetchSubmissions();
   }, [activity.assignment_id, uid]); // Use only necessary dependencies
 
+  useEffect(() => {
+    const fetchClassroomDetails = async () => {
+      if (!classroomId) {
+        toast.error('Classroom ID is required');
+        return;
+      }
 
+      setLoading(true);
+      try {
+        const response = await api.get(`/api/lmsclassroom/classroom/${classroomId}`);
+        setClassroomDetails(response.data);
+        toast.success('Classroom details fetched successfully');
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          toast.error('Classroom not found');
+        } else {
+          toast.error('Failed to fetch classroom details');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClassroomDetails();
+  }, [classroomId]);
   const fetchSubmissions = async () => {
     console.log('Activity:', activity); // Log activity to confirm contents
 
@@ -147,8 +232,60 @@ const ActivityDetail = () => {
   }
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
+       <div className="flex items-center justify-between w-full bg-white shadow-lg p-4 rounded-lg">
+        {/* Left section with menu icon and classroom title */}
+        <div className="flex items-center space-x-4">
+         
+          <div className="flex items-center space-x-2">
+            <FaChalkboardTeacher className="text-3xl text-yellow-500" />
+            <h2 className="text-xl font-semibold text-gray-800">Classroom</h2>
+            <span className="text-gray-500">{'>'}</span>
+            {loading ? (
+              <span className="text-gray-500">Loading...</span>
+            ) : (
+              <div className="flex flex-col ">
+              <h2 className="text-base font-semibold text-blue-700">
+                {classroomDetails?.room_name || 'N/A'}
+              </h2>
+              <p className="text-xs font-medium text-gray-600 ">
+                {classroomDetails?.teacher_name || 'N/A'}
+              </p>
+            </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right section with more options and user icon */}
+        <div className="flex items-center space-x-4">
+          {/* <HiOutlineDotsVertical className="text-2xl text-gray-500 cursor-pointer" /> */}
+          <AiOutlineUser   onClick={handleUserIconClick} className="text-3xl text-blue-600 cursor-pointer" />
+        </div>
+      </div>
+      {showAttendance && (
+        attendanceData ? (
+          <div className="mt-8 bg-white p-6 rounded-lg shadow-inner">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+              <h3 className="text-xl font-semibold text-blue-800">
+                Attendance Details:
+              </h3>
+              <div className="flex items-center mt-4 md:mt-0">
+                <span className="text-lg font-semibold text-gray-700 mr-2">
+                  Attendance Percentage:
+                </span>
+                <span className="text-xl font-bold text-blue-700">
+                  {parseFloat(attendanceData.attendance_percentage).toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-8 text-center text-gray-500">
+            <p>No attendance data available for this classroom.</p>
+          </div>
+        )
+      )}
     <button
-      className="text-blue-500 mb-4"
+      className="text-blue-500 mb-4 mt-1"
       onClick={() => navigate(-1)}
     >
       &larr; Back to Activities

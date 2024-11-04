@@ -100,4 +100,45 @@ export const createOrFetchAttendance = expressAsyncHandler(async (req, res) => {
         res.status(500).json({ message: 'Failed to update attendance', error });
       });
   };
+
+
+  export const getStudentAttendancePercentage = expressAsyncHandler(async (req, res) => {
+    const { sid, classroom_id } = req.params;
+  
+    const query = `
+      SELECT 
+        ls.sid,
+        c.room_name AS classroom,
+        COUNT(CASE WHEN las.status = 1 THEN 1 END) * 100.0 / COUNT(*) AS attendance_percentage
+      FROM 
+        lms_attendance la
+      JOIN 
+        lms_attendance_students las ON la.attendance_id = las.lms_attendance_id
+      JOIN 
+        classroom c ON la.class_id = c.classroom_id
+      JOIN 
+        lms_students ls ON las.sid = ls.sid
+      WHERE 
+        las.sid = ? AND c.classroom_id = ?
+      GROUP BY 
+        ls.sid, c.room_name;
+    `;
+  
+    db.query(query, [sid, classroom_id], (error, results) => {
+      if (error) {
+        console.error('Error calculating attendance percentage:', error);
+        return res.status(500).json({ message: 'Failed to calculate attendance percentage', error });
+      }
+  
+      if (results.length > 0) {
+        res.json({
+          sid: results[0].sid,
+          classroom: results[0].classroom,
+          attendance_percentage: results[0].attendance_percentage
+        });
+      } else {
+        res.status(404).json({ message: 'No attendance records found for the specified student and classroom.' });
+      }
+    });
+  });
   
