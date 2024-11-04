@@ -152,10 +152,10 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 <>
                   <MiniProject  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
-                    onClick={() => setCurrentComponent("Attendance")}
+                    onClick={() => setCurrentComponent("Experiment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
                   >
-                    Back to Attendance
+                    Back to Experiment
                   </button>
                 </>
               )}
@@ -254,10 +254,10 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 <>
                   <MiniProject  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
-                    onClick={() => setCurrentComponent("Attendance")}
+                    onClick={() => setCurrentComponent("Experiment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
                   >
-                    Back to Attendance
+                    Back to Experiment
                   </button>
                 </>
               )}

@@ -1034,21 +1034,7 @@ export const showMiniProjectData = async (req, res) => {
   const userCourseId = req.params.uid;
   
   const sql = `
-    SELECT 
-      m.miniproid,
-      m.miniid,
-      m.sid,
-      m.marks,
-      c.student_name,
-      c.stud_clg_id
-    FROM 
-      main_minipro AS m
-    INNER JOIN 
-      upload_minipro AS u ON m.miniid = u.miniid
-    INNER JOIN 
-      copo_students_details AS c ON m.sid = c.sid
-    WHERE 
-      u.usercourseid = ?;
+    CALL GetMiniProjectMarks(?);
   `;
 
   db.query(sql, userCourseId, (error, results) => {

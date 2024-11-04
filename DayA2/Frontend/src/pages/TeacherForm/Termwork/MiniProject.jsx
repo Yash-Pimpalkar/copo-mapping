@@ -40,7 +40,7 @@ const curriculum = "minipro";
         );
         console.log("API Response:", response.data); 
         
-        setMiniprojectData(response.data);
+        setMiniprojectData(response.data.data);
         SetQuestionData(response1.data);
       } catch (error) {
         console.error("Error fetching termwork labels:", error);
@@ -64,7 +64,7 @@ const curriculum = "minipro";
         `/api/termwork/show/miniproco/${userCourseId}`
       );
       console.log("api response",response.data)
-      setMiniprojectData(response.data);
+      setMiniprojectData(response.data.data);
       SetQuestionData(response1.data);
     } catch (error) {
       console.error("Error fetching termwork labels:", error);
