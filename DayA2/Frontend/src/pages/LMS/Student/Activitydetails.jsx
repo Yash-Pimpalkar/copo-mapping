@@ -22,8 +22,9 @@ const ActivityDetail = () => {
     const [showAttendance, setShowAttendance] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [submission, setSubmission] = useState(null);
 
-
+  const [error, setError] = useState(null);
 
 
   const fetchAttendanceData = async () => {
@@ -85,7 +86,25 @@ const ActivityDetail = () => {
     document.body.removeChild(link);
   };
 
+  useEffect(() => {
+    const fetchSubmissionDetails = async () => {
+      try {
+        setLoading(true);
+        // Fetch data from the API endpoint
+        const response = await api.get(`/api/studentlms/submissions/${activity.assignment_id}`);
+        setSubmission(response.data); // Assuming the data is in `data.data`
+        setLoading(false);
+      } catch (error) {
+        setError('Error fetching submission details');
+        setLoading(false);
+      }
+    };
 
+    if (activity.assignment_id) {
+      fetchSubmissionDetails();
+    }
+  }, [activity.assignment_id]);
+  console.log(submission)
   useEffect(() => {
     const fetchSubmissions = async () => {
       console.log('Activity:', activity); // Log activity to confirm contents
@@ -225,12 +244,39 @@ const ActivityDetail = () => {
     }
   };
   
-  
+ 
+
+ console.log(activity.isSubmitted)
 
  const handleDelete=()=>{
 
   }
-  return (
+
+
+  const handleSubmission = async () => {
+    console.log("Button clicked!"); // Debugging log
+    setUploading(true); // Start loading
+    try {
+      // Make POST request to update the submission timestamp
+      const response = await api.post(`/api/studentlms/markasdone/${submission.submission_id}`);
+
+      if (response.status === 200) {
+        alert("Submission marked successfully!");
+        // Optionally, update the activity state to reflect the new submission status
+        // setActivity(prev => ({ ...prev, isSubmitted: true }));
+      } else {
+        console.error("Error updating submission:", response.data.error);
+        alert("Failed to mark submission.");
+      }
+    } catch (error) {
+      console.error("Error updating submission:", error);
+      alert("Failed to mark submission due to a network error.");
+    } finally {
+      setUploading(false); // Stop loading
+    }
+  };
+
+   return (
     <div className="p-6 bg-gray-100 min-h-screen">
        <div className="flex items-center justify-between w-full bg-white shadow-lg p-4 rounded-lg">
         {/* Left section with menu icon and classroom title */}
@@ -305,7 +351,7 @@ const ActivityDetail = () => {
             day: 'numeric',
           })}
         </p>
-        <p className="text-gray-600 text-sm mb-4">{activity.points} points</p>
+        <p className="text-gray-600 text-green-500 text-sm mb-4">{submission?.marks || "N|A"} points</p>
         <p className="text-gray-700 mb-4">{activity.description}</p>
   
         <p className="text-sm text-red-500 mb-4">
@@ -403,9 +449,9 @@ const ActivityDetail = () => {
             {fileError && <p className="text-xs text-red-500 mb-2">{fileError}</p>}
   
             <button
-              onClick={handleFileUpload}
+              onClick={handleSubmission}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full"
-              disabled={!fileUpload || uploading}
+              
             >
               {uploading ? "Uploading..." : activity.isSubmitted ? "Re-submit" : "Mark as done"}
             </button>

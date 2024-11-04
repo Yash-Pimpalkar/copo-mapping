@@ -322,3 +322,51 @@ export const getSubmissionsByAssignment = async (req, res) => {
 };
 
 
+
+
+
+// controllers/activityController.js
+
+// Function to get activity details based on teacherId
+export const getActivityDetails = async (req, res) => {
+  const { assignmentId } = req.params;
+
+  try {
+    // Define raw SQL query
+    const query = `
+      SELECT 
+        users.teacher_name,
+        classroom.room_name,
+        lmsactivities.classroom_id,
+        lmsactivities.title
+      FROM 
+        lmsactivities
+      JOIN 
+        classroom ON lmsactivities.classroom_id = classroom.classroom_id
+      JOIN 
+        users ON lmsactivities.teacher_id = users.userid
+      WHERE 
+        lmsactivities.assignment_id = ?
+    `;
+
+    // Execute the query with the assignmentId parameter
+    db.query(query, [assignmentId], (error, results) => {
+      if (error) {
+        console.error("Error fetching activities:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Error fetching activities",
+        });
+      }
+
+      // Return the result
+      res.status(200).json(results);
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

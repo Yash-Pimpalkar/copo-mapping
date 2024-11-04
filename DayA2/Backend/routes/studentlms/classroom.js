@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { createSubmission, downloadFileForSubmission, get_all_classroom_by_sid, getClassroomActivities, getSubmissionsByAssignmentAndStudent, updateSubmissionMarks } from "../../controller/studentlms/classroom.js";
+import { createSubmission, downloadFileForSubmission, get_all_classroom_by_sid, getAssignmentById, getClassroomActivities, getSubmissionsByAssignmentAndStudent, updateSubmissionMarks, updateSubmissionTimestamp } from "../../controller/studentlms/classroom.js";
 const router =express.Router()
 
 const upload = multer();
@@ -13,4 +13,9 @@ router.post('/getsubmissions',upload.none(), getSubmissionsByAssignmentAndStuden
 router.get('/submissions/download/:fileId', downloadFileForSubmission);
 
 router.post('/submissions/marks/:submissionId', updateSubmissionMarks);
+
+
+router.get('/submissions/:assignmentId', getAssignmentById);
+
+router.post('/markasdone/:submission_id', updateSubmissionTimestamp);
 export default router;

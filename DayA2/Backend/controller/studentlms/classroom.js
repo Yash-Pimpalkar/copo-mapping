@@ -332,3 +332,79 @@ export const updateSubmissionMarks = (req, res) => {
       res.status(200).json({ message: 'Marks updated successfully' });
   });
 };
+
+
+
+// controllers/submissionController.js
+
+
+
+// Function to get all submission details by submission ID
+export const getAssignmentById = (req, res) => {
+  const { assignmentId } = req.params;
+
+  // Define SQL query to fetch all fields
+  const query = `
+    SELECT 
+      submission_id,
+      classroom_id,
+      assignment_id,
+      student_id,
+      submitted_at,
+      is_late,
+      marks,
+      message_to_teacher
+    FROM 
+      submissions
+    WHERE 
+      assignment_id = ?
+  `;
+
+  // Execute the query with the submissionId parameter
+  db.query(query, [assignmentId], (error, results) => {
+    if (error) {
+      console.error("Error fetching submission details:", error);
+      return res.status(500).json({
+        message: "Error fetching submission details",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Submission not found",
+      });
+    }
+
+    // Return the result
+    res.status(200).json(results[0],);
+  });
+};
+
+
+
+export const updateSubmissionTimestamp = (req, res) => {
+  const { submission_id } = req.params;
+  const submittedAt = new Date(); // Current timestamp
+
+  // SQL query to update only the submitted_at field
+  const query = `
+      UPDATE submissions 
+      SET submitted_at = ? 
+      WHERE submission_id = ?
+  `;
+
+  db.execute(query, [submittedAt, submission_id], (err, results) => {
+      if (err) {
+          console.error("Error updating submission:", err);
+          return res.status(500).json({ error: "An error occurred while updating the submission" });
+      }
+
+      if (results.affectedRows > 0) {
+          res.json({ message: "Submission timestamp updated successfully" });
+      } else {
+          res.status(404).json({ error: "Submission not found" });
+      }
+  });
+};
+
