@@ -27,6 +27,7 @@ import FeedbackClassroomRoute from "./routes/lms/feedback.js"
 import ManageStudentsRoute from "./routes/managestudent.js"
 import NextSemRoute from "./routes/lms/next_sem.js"
 import StudentLmsRoute from "./routes/studentlms/classroom.js"
+import LMSAttendanceRoute from "./routes/lms/lms_attendance.js"
 // import LMSClassRoom from "./routes/lms/Upload_classroom.js"
 const port = 8081;
 
@@ -58,6 +59,7 @@ app.use("/api/lmsclassroom/feedback", FeedbackClassroomRoute);
 app.use("/api/students/", ManageStudentsRoute);
 app.use("/api/lmsstudents/", NextSemRoute);
 app.use("/api/studentlms/",StudentLmsRoute)
+app.use("/api/lmsclassroom/attendance",LMSAttendanceRoute)
 
 app.listen(port, () => {
   console.log("Server is Running on PORT :", port);

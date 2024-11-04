@@ -1,114 +1,182 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import * as XLSX from 'xlsx'; // For Excel download
+import * as XLSX from 'xlsx';
+import api from '../../../api';
+import LoadingButton from '../../../component/Loading/Loading';
 
-  
-const StudentLmsAttendance = () => {
+const StudentLmsAttendance = ({ uid }) => {
+  // Component state initialization
   const [classrooms, setClassrooms] = useState([]);
-  const [selectedClassroom, setSelectedClassroom] = useState('');
-  const [students, setStudents] = useState([]);
-  const [filteredStudents, setFilteredStudents] = useState([]);
-  const [attendance, setAttendance] = useState({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectAll, setSelectAll] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [filteredClassrooms, setFilteredClassrooms] = useState([]);
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState('');
+  const [selectedClassroom, setSelectedClassroom] = useState(null);
   const [timeSlot, setTimeSlot] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-
+  const [existingAttendance, setExistingAttendance] = useState(null);
+  const [loading,setLoading]=useState(false)
   useEffect(() => {
     const fetchClassrooms = async () => {
-      const data = ['Classroom A', 'Classroom B', 'Classroom C'];
-      setClassrooms(data);
+      try {
+        const response = await api.get(`/api/lmsclassroom/show/${uid}`);
+        const classroomData = Array.isArray(response.data) ? response.data : [response.data];
+        setClassrooms(classroomData);
+      } catch (error) {
+        toast.error('Error fetching classrooms.');
+      }
     };
-    fetchClassrooms();
-  }, []);
 
-  const handleClassroomChange = (classroom) => {
-    setSelectedClassroom(classroom);
-    fetchStudents(classroom);
+    if (uid) {
+      fetchClassrooms();
+    }
+  }, [uid]);
+
+  const uniqueAcademicYears = Array.from(new Set(classrooms.map((classroom) => classroom.academic_year)));
+
+  const handleAcademicYearChange = (year) => {
+    setSelectedAcademicYear(year);
+    setSelectedClassroom(null);
+    setFilteredClassrooms(classrooms.filter((classroom) => classroom.academic_year === year));
   };
 
-  const fetchStudents = async (classroom) => {
-    setLoading(true);
-    const data = [
-      { id: 1, srNo: 1, name: 'John Doe' },
-      { id: 2, srNo: 2, name: 'Jane Smith' },
-      { id: 3, srNo: 3, name: 'Mark Johnson' },
-    ];
-    setStudents(data);
-    setFilteredStudents(data);
-    setAttendance({});
-    setLoading(false);
+  const handleClassroomChange = (classroomId) => {
+    const selected = classrooms.find((classroom) => classroom.classroom_id === parseInt(classroomId, 10));
+    setSelectedClassroom(selected);
   };
 
   const handleAttendanceChange = (studentId, status) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: status,
+    setExistingAttendance((prev) =>
+      prev.map((student) =>
+        student.att_stud_id === studentId ? { ...student, status } : student
+      )
+    );
+  };
+
+  const handleSelectAllPresent = () => {
+    const updatedAttendance = existingAttendance.map((student) => ({
+      ...student,
+      status: 1, // Set all to "Present"
     }));
+    setExistingAttendance(updatedAttendance);
   };
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    if (query) {
-      setFilteredStudents(
-        students.filter((student) =>
-          student.name.toLowerCase().includes(query.toLowerCase()) ||
-          student.id.toString().includes(query)
-        )
-      );
-    } else {
-      setFilteredStudents(students);
-    }
+  const handleSelectAllAbsent = () => {
+    const updatedAttendance = existingAttendance.map((student) => ({
+      ...student,
+      status: 0, // Set all to "Absent"
+    }));
+    setExistingAttendance(updatedAttendance);
   };
 
-  const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    const newAttendance = {};
-    filteredStudents.forEach((student) => {
-      newAttendance[student.id] = selectAll ? '' : 'Present';
-    });
-    setAttendance(newAttendance);
-  };
-
-  const submitAttendance = () => {
-    if (Object.keys(attendance).length !== filteredStudents.length || !timeSlot || !selectedDate) {
-      toast.error('Please mark attendance, select a time slot, and a date.');
+  const showAttendance = async () => {
+    if (!selectedAcademicYear || !selectedClassroom || !selectedDate || !timeSlot) {
+      toast.error('Please select all fields.');
       return;
     }
-    console.log('Attendance submitted:', attendance, timeSlot, selectedDate);
-    toast.success('Attendance submitted successfully.');
+
+    try {
+      const response = await api.post(`/api/lmsclassroom/attendance/getattendance`, {
+        class_id: selectedClassroom.classroom_id,
+        attendance_date: selectedDate,
+        time_slot: timeSlot,
+      });
+
+      if (response.data.exists) {
+        setExistingAttendance(response.data.attendanceStudents);
+        toast.error('Attendance record already exists for this date and time.');
+      } else {
+        setExistingAttendance(response.data.attendanceStudents);
+        toast.success('Attendance created successfully.');
+      }
+    } catch (error) {
+      toast.error('Failed to create or fetch attendance.');
+    }
+  };
+
+  const submitAttendanceData = async () => {
+    try {
+      const response = await api.post(`/api/lmsclassroom/attendance/submitattendance`, existingAttendance);
+      if (response.status === 200) {
+        alert(response.data.message || 'Attendance updated successfully.');
+      } else {
+        alert(response.data.message || 'Failed to update attendance.');
+      }
+    } catch (error) {
+      alert('Failed to update attendance.');
+    }
   };
 
   const downloadAttendance = () => {
-    const ws = XLSX.utils.json_to_sheet(
-      filteredStudents.map((student) => ({
-        'Sr No': student.srNo,
-        'ID No': student.id,
-        'Name': student.name,
-        'Attendance': attendance[student.id] || 'Not Marked',
-      }))
-    );
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
-    XLSX.writeFile(wb, 'attendance.xlsx');
-  };
+  let i = 1;
+  
+  // Define header rows with classroom name, date, and time slot
+  const headers = [
+    { A: `Classroom: ${selectedClassroom ? selectedClassroom.room_name : ''}` },
+    { A: `Date: ${selectedDate || ''}` },
+    { A: `Time Slot: ${timeSlot || ''}` },
+    {}  // Blank row between headers and student data
+  ];
+
+  // Convert headers to worksheet format
+  const headerSheet = XLSX.utils.json_to_sheet(headers, { header: ["A"], skipHeader: true });
+  
+  // Add student attendance data below the headers
+  XLSX.utils.sheet_add_json(headerSheet, 
+    existingAttendance.map((student) => ({
+      'Sr No': i++,
+      'ID No': student.stud_clg_id,
+      'Name': student.student_name,
+      'Attendance': student.status === 1 ? 'Present' : student.status === 0 ? 'Absent' : 'Not Marked',
+    })),
+    { origin: -1 } // Append data at the next available row
+  );
+
+  // Create a new workbook and append the sheet
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, headerSheet, 'Attendance');
+  
+  // Write the file
+  XLSX.writeFile(wb, `${selectedClassroom ? selectedClassroom.room_name : ''}-${selectedDate || ''}attendance.xlsx`);
+  
+  // Success message
+  toast.success('Attendance downloaded successfully.');
+};
+
+  const isAttendanceReady = selectedAcademicYear && selectedClassroom && selectedDate && timeSlot;
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-md">
       <h1 className="text-3xl font-bold text-center mb-6">Manage Student Attendance</h1>
 
+      {/* Academic Year Select */}
+      <div className="mb-4">
+        <label className="block text-lg font-medium text-gray-700">Select Academic Year:</label>
+        <select
+          value={selectedAcademicYear}
+          onChange={(e) => handleAcademicYearChange(e.target.value)}
+          className="mt-1 block w-full p-2 bg-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="" disabled>Select Academic Year</option>
+          {uniqueAcademicYears.map((year, index) => (
+            <option key={index} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Classroom Select */}
       <div className="mb-4">
         <label className="block text-lg font-medium text-gray-700">Select Classroom:</label>
         <select
-          value={selectedClassroom}
+          value={selectedClassroom ? selectedClassroom.classroom_id : ''}
           onChange={(e) => handleClassroomChange(e.target.value)}
           className="mt-1 block w-full p-2 bg-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          disabled={!selectedAcademicYear}
         >
           <option value="" disabled>Select Classroom</option>
-          {classrooms.map((classroom, index) => (
-            <option key={index} value={classroom}>
-              {classroom}
+          {filteredClassrooms.map((classroom) => (
+            <option key={classroom.classroom_id} value={classroom.classroom_id}>
+              {classroom.room_name}
             </option>
           ))}
         </select>
@@ -142,56 +210,67 @@ const StudentLmsAttendance = () => {
         </select>
       </div>
 
-      <div className="mb-4 flex justify-between items-center">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Search by name or ID"
-          className="p-2 bg-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        <button
-          onClick={handleSelectAll}
-          className="bg-indigo-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-indigo-500"
-        >
-          {selectAll ? 'Deselect All' : 'Select All'}
-        </button>
-      </div>
+      {/* Create Attendance Button */}
+      {isAttendanceReady && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={showAttendance}
+            className="bg-indigo-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-indigo-500"
+          >
+            Show Attendance
+          </button>
+        </div>
+      )}
 
+      {/* Attendance Table */}
       {loading ? (
-        <div className="text-center text-gray-500">Loading students...</div>
+        <LoadingButton />
       ) : (
-        selectedClassroom && (
-          <div className="overflow-x-auto">
+        selectedClassroom && existingAttendance && (
+          <div className="overflow-x-auto mt-4">
+            <div className="flex justify-between mb-4">
+              <button
+                onClick={handleSelectAllPresent}
+                className="bg-green-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-green-500"
+              >
+                Select All Present
+              </button>
+              <button
+                onClick={handleSelectAllAbsent}
+                className="bg-red-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-red-500"
+              >
+                Select All Absent
+              </button>
+            </div>
             <table className="min-w-full table-auto border-collapse">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-white-700 uppercase tracking-wider">Sr No</th>
-                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-white-700 uppercase tracking-wider">ID No</th>
-                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-white-700 uppercase tracking-wider">Student Name</th>
-                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-white-700 uppercase tracking-wider">Present</th>
-                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-white-700 uppercase tracking-wider">Absent</th>
+                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Sr No</th>
+                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID No</th>
+                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Student Name</th>
+                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Present</th>
+                  <th className="px-6 py-3 border-b-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Absent</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.map((student, index) => (
-                  <tr key={student.id}>
-                    <td className="px-6 py-4 border-b border-gray-200">{student.srNo}</td>
-                    <td className="px-6 py-4 border-b border-gray-200">{student.id}</td>
-                    <td className="px-6 py-4 border-b border-gray-200">{student.name}</td>
+                {existingAttendance.map((student, index) => (
+                  <tr key={student.att_stud_id}>
+                    <td className="px-6 py-4 border-b border-gray-200">{index + 1}</td>
+                    <td className="px-6 py-4 border-b border-gray-200">{student.stud_clg_id}</td>
+                    <td className="px-6 py-4 border-b border-gray-200">{student.student_name}</td>
                     <td className="px-6 py-4 border-b border-gray-200">
                       <input
                         type="checkbox"
-                        onChange={() => handleAttendanceChange(student.id, 'Present')}
-                        checked={attendance[student.id] === 'Present'}
+                        checked={student.status === 1}
+                        onChange={() => handleAttendanceChange(student.att_stud_id, 1)}
                         className="form-checkbox h-4 w-4 text-indigo-600"
                       />
                     </td>
                     <td className="px-6 py-4 border-b border-gray-200">
                       <input
                         type="checkbox"
-                        onChange={() => handleAttendanceChange(student.id, 'Absent')}
-                        checked={attendance[student.id] === 'Absent'}
+                        checked={student.status === 0}
+                        onChange={() => handleAttendanceChange(student.att_stud_id, 0)}
                         className="form-checkbox h-4 w-4 text-indigo-600"
                       />
                     </td>
@@ -202,16 +281,16 @@ const StudentLmsAttendance = () => {
 
             <div className="flex justify-end mt-4">
               <button
-                onClick={submitAttendance}
-                className="bg-indigo-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-indigo-500 mr-2"
-              >
-                Submit Attendance
-              </button>
-              <button
                 onClick={downloadAttendance}
-                className="bg-green-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-green-500"
+                className="bg-green-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-green-500 mr-4"
               >
                 Download as Excel
+              </button>
+              <button
+                onClick={submitAttendanceData}
+                className="bg-blue-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-blue-500"
+              >
+                Submit Attendance
               </button>
             </div>
           </div>
