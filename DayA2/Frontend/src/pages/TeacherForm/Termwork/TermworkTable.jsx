@@ -6,7 +6,7 @@ import TheoryAssignment from "./TheoryAssignment";
 import Attendance from "./Attendance";
 import Experiment from "./Experiment";
 import SciLab from "./Scilab";
-import MiniProject from "./JournalTable";
+import MiniProject from "./MiniProject";
 import GroupDiscussion from "./GroupDiscussion"; 
 import PPT from "./PPT";
 import Report from "./Report";
@@ -150,7 +150,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : (
                 <>
-                  <MiniProject  tw_id={tw_id}  uid={userCourseId} />
+                  <MiniProject  tw_id={tw_id}  userCourseId={userCourseId} />
                   <button
                     onClick={() => setCurrentComponent("Attendance")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"

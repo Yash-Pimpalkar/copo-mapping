@@ -21,7 +21,7 @@ const MiniProject = ({ userCourseId , tw_id  }) => {
   const [questionColumns, setQuestionColumns] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-console.log(userCourseId)
+console.log("yayy",userCourseId)
 
 
 const navigate = useNavigate(); 
@@ -63,6 +63,7 @@ const curriculum = "minipro";
       const response1 = await api.get(
         `/api/termwork/show/miniproco/${userCourseId}`
       );
+      console.log("api response",response.data)
       setMiniprojectData(response.data);
       SetQuestionData(response1.data);
     } catch (error) {
