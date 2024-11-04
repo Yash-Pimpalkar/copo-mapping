@@ -20,14 +20,16 @@ const Tworalresultmajor = ({ uid }) => {
     const fetchCosData = async (uid) => {
       try {
         // Make all API requests concurrently using Promise.all
-        const [response1, response2] = await Promise.all([
-          api.get(`/api/result/ia2attainment/majorpro/${uid}`),
-          api.get(`/api/result/ia2attainment/oral/${uid}`),
+        const [response1, response2, response3] = await Promise.all([
+          api.get(`/api/result/majorpro/${uid}`),
+          api.get(`/api/result/oral/${uid}`),
+          api.get(`/api/result/indirect/${uid}`),
         ]);
 
         const majorproData = response1.data || [];
         const oralData = response2.data || [];
-        api.get(`/api/result/ia2attainment/popso/${uid}`)
+        const indirectData = response3.data ||[];
+        api.get(`/api/result/popso/${uid}`)
           .then(response => {
             console.log(response)
             setPoPsoData(response.data); // Assuming the data is returned in the required format
@@ -46,15 +48,20 @@ const Tworalresultmajor = ({ uid }) => {
           return acc;
         }, {});
 
+        const indirectMap = indirectData.reduce((acc, item) => {
+          acc[item.coname] = Number(item.marks) || 0;
+          return acc;
+        }, {});
+
         const combinedData = Array.from(
-          new Set([...majorproData.map(item => item.coname), ...oralData.map(item => item.coname)])
+          new Set([...majorproData.map(item => item.coname), ...oralData.map(item => item.coname),...indirectData.map((item) => item.coname)])
         ).map((coname) => {
           const majorproattainment = majorproMap[coname] || 0;
           const oralattainment = oralMap[coname] || 0;
           const directAttainment = ((((60 / 100) * majorproattainment) + ((40 / 100) * oralattainment)) * (80 / 100)).toFixed(2);
 
           //dummy data
-          const indirectAttainmentvalues = (Math.random() * 3).toFixed(2);  // Example calculation
+          const indirectAttainmentvalues = indirectMap[coname] || 0; // Example calculation
           // const twattainment = (Math.random() * 3).toFixed(2);  // Dummy twattainment data
 
           const indirectAttainment = (indirectAttainmentvalues * (20 / 100)).toFixed(2);;

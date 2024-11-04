@@ -35,11 +35,12 @@ const PureTheoryResult = ({ uid }) => {
       console.log(uid);
 
       try {
-        const [response1, response2, response3, response4] = await Promise.all([
+        const [response1, response2, response3, response4, response5] = await Promise.all([
           api.get(`/api/result/ia1attainment/ia1/${uid}`),
           api.get(`/api/result/ia2attainment/ia2/${uid}`),
-          api.get(`/api/result/ia2attainment/inta/${uid}`),
-          api.get(`/api/result/ia2attainment/univ/${uid}`),
+          api.get(`/api/result/inta/${uid}`),
+          api.get(`/api/result/univ/${uid}`),
+          api.get(`/api/result/indirect/${uid}`),
           // api.get(`/api/result/ia2attainment/popso/${uid}`)
         ]);
 
@@ -47,7 +48,8 @@ const PureTheoryResult = ({ uid }) => {
         const ia2Data = response2.data || [];
         const intaData = response3.data || [];
         const univData = response4.data || [];
-        api.get(`/api/result/ia2attainment/popso/${uid}`)
+        const indirectData = response5.data || [];
+        api.get(`/api/result/popso/${uid}`)
           .then(response => {
             console.log(response)
             setPoPsoData(response.data); // Assuming the data is returned in the required format
@@ -76,8 +78,13 @@ const PureTheoryResult = ({ uid }) => {
           return acc;
         }, {});
 
+        const indirectMap = indirectData.reduce((acc, item) => {
+          acc[item.coname] = Number(item.marks) || 0;
+          return acc;
+        }, {});
+
         const combinedData = Array.from(
-          new Set([...ia1Data.map(item => item.coname), ...ia2Data.map(item => item.coname), ...intaData.map(item => item.coname), ...univData.map(item => item.coname)])
+          new Set([...ia1Data.map(item => item.coname), ...ia2Data.map(item => item.coname), ...intaData.map(item => item.coname), ...univData.map(item => item.coname),...indirectData.map((item) => item.coname)])
         ).map((coname) => {
           const intaAttainment = intaMap[coname] || 0;
           const univAttainment = univMap[coname] || 0;
@@ -86,13 +93,9 @@ const PureTheoryResult = ({ uid }) => {
 
 
           // Dummy indirect attainment value
-          const dummyIndirectAttainment = (coname) => {
-            return (Math.random() * 3).toFixed(2);
-          };
-          const indirectAttainmentvalues = Number(dummyIndirectAttainment(coname));
+          const indirectAttainmentvalues = indirectMap[coname] || 0;
 
-
-          const indirectAttainment = (indirectAttainmentvalues * (20 / 100)).toFixed(2);    // separate indirect attainment column 
+          const indirectAttainment = (indirectAttainmentvalues * (20 / 100));    // separate indirect attainment column 
 
           const totalatt = parseFloat(directAttainment) + parseFloat(indirectAttainment);
 

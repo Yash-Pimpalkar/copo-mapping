@@ -16,12 +16,14 @@ const TWOnly = ({ uid }) => {
     const fetchCosData = async (uid) => {
       try {
         // Make all API requests concurrently using Promise.all
-        const [response1] = await Promise.all([
-          api.get(`/api/result/ia2attainment/tw/${uid}`),
+        const [response1, response2] = await Promise.all([
+          api.get(`/api/result/tw/${uid}`),
+          api.get(`/api/result/indirect/${uid}`),
         ]);
 
         const twData = response1.data || [];
-        api.get(`/api/result/ia2attainment/popso/${uid}`)
+        const indirectData = response2.data || {};
+        api.get(`/api/result/popso/${uid}`)
           .then(response => {
             console.log(response)
             setPoPsoData(response.data); // Assuming the data is returned in the required format
@@ -35,17 +37,24 @@ const TWOnly = ({ uid }) => {
           return acc;
         }, {});
 
+        const indirectMap = indirectData.reduce((acc, item) => {
+          acc[item.coname] = Number(item.marks) || 0;
+          return acc;
+        }, {});
+
         const combinedData = Array.from(
-          new Set([...twData.map(item => item.coname)])
+          new Set([...twData.map(item => item.coname),
+            ...indirectData.map((item) => item.coname),
+          ])
         ).map((coname) => {
           const twattainment = twMap[coname] || 0;
           // const directAttainment = ((((60 / 100) * twattainment) + ((40 / 100) * oralattainment)) * (80 / 100)).toFixed(2);
           const directAttainment = ((80 / 100) * twattainment).toFixed(2);
           //dummy data
-          const indirectAttainmentvalues = (Math.random() * 3).toFixed(2);  // Example calculation
+          const indirectAttainmentvalues = indirectMap[coname] || 0;  // Example calculation
           // const twattainment = (Math.random() * 3).toFixed(2);  // Dummy twattainment data
 
-          const indirectAttainment = (indirectAttainmentvalues * (20 / 100)).toFixed(2);;
+          const indirectAttainment = (indirectAttainmentvalues * (20 / 100));
           const totalAttainment = parseFloat(directAttainment) + parseFloat(indirectAttainment);
 
           return {

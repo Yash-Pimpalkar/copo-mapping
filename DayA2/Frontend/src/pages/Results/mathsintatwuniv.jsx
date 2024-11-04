@@ -24,13 +24,14 @@ const IntaTWUniv = ({ uid }) => {
     const fetchCosData = async (uid) => {
       try {
         // Make all API requests concurrently using Promise.all
-        const [response1, response2, response3, response4, response5] =
+        const [response1, response2, response3, response4, response5, response6] =
           await Promise.all([
             api.get(`/api/result/ia1attainment/ia1/${uid}`),
             api.get(`/api/result/ia2attainment/ia2/${uid}`),
-            api.get(`/api/result/ia2attainment/inta/${uid}`),
-            api.get(`/api/result/ia2attainment/univ/${uid}`),
-            api.get(`/api/result/ia2attainment/tw/${uid}`),
+            api.get(`/api/result/inta/${uid}`),
+            api.get(`/api/result/univ/${uid}`),
+            api.get(`/api/result/tw/${uid}`),
+            api.get (`/api/result/indirect/${uid}`),
           ]);
 
         const ia1Data = response1.data || [];
@@ -38,8 +39,9 @@ const IntaTWUniv = ({ uid }) => {
         const intaData = response3.data || [];
         const univData = response4.data || [];
         const twData = response5.data || [];
+        const indirectData= response6.data || [];
         api
-          .get(`/api/result/ia2attainment/popso/${uid}`)
+          .get(`/api/result/popso/${uid}`)
           .then((response) => {
             console.log(response);
             setPoPsoData(response.data); // Assuming the data is returned in the required format
@@ -73,6 +75,11 @@ const IntaTWUniv = ({ uid }) => {
           return acc;
         }, {});
 
+        const indirectMap = indirectData.reduce((acc, item) => {
+          acc[item.coname] = Number(item.marks) || 0;
+          return acc;
+        }, {});
+
         const combinedData = Array.from(
           new Set([
             ...ia1Data.map((item) => item.coname),
@@ -80,6 +87,7 @@ const IntaTWUniv = ({ uid }) => {
             ...intaData.map((item) => item.coname),
             ...univData.map((item) => item.coname),
             ...twData.map((item) => item.coname),
+            ...indirectData.map((item) => item.coname),
           ]),
         ).map((coname) => {
           const intaAttainment = intaMap[coname] || 0;
@@ -92,13 +100,13 @@ const IntaTWUniv = ({ uid }) => {
           ).toFixed(2);
 
           //dummy data
-          const indirectAttainmentvalues = (Math.random() * 3).toFixed(2); // Example calculation
+          const indirectAttainmentvalues = indirectMap[coname] || 0; // Example calculation
           // const twattainment = (Math.random() * 3).toFixed(2);  // Dummy twattainment data
 
-          const indirectAttainment = (
-            indirectAttainmentvalues *
-            (20 / 100)
-          ).toFixed(2);
+          const indirectAttainment = parseFloat(
+            (indirectAttainmentvalues * (20 / 100))
+        );
+        
           const totalAttainment =
             parseFloat(directAttainment) + parseFloat(indirectAttainment);
 

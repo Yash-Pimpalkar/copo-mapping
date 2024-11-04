@@ -25,13 +25,14 @@ const Tcstyperesult = ({ uid }) => {
       console.log(uid);
 
       try {
-        const [response1, response2, response3, response4, response5] =
+        const [response1, response2, response3, response4, response5, response6] =
           await Promise.all([
             api.get(`/api/result/ia1attainment/ia1/${uid}`),
             api.get(`/api/result/ia2attainment/ia2/${uid}`),
-            api.get(`/api/result/ia2attainment/inta/${uid}`),
-            api.get(`/api/result/ia2attainment/univ/${uid}`),
-            api.get(`/api/result/ia2attainment/tw/${uid}`),
+            api.get(`/api/result/inta/${uid}`),
+            api.get(`/api/result/univ/${uid}`),
+            api.get(`/api/result/tw/${uid}`),
+            api.get(`/api/result/indirect/${uid}`),
           ]);
 
         const ia1Data = response1.data || [];
@@ -39,8 +40,10 @@ const Tcstyperesult = ({ uid }) => {
         const intaData = response3.data || [];
         const univData = response4.data || [];
         const twData = response5.data || [];
+        const indirectData = response6.data || [];
+        console.log("yash",indirectData)
         api
-          .get(`/api/result/ia2attainment/popso/${uid}`)
+          .get(`/api/result/popso/${uid}`)
           .then((response) => {
             console.log(response);
             setPoPsoData(response.data); // Assuming the data is returned in the required format
@@ -74,6 +77,11 @@ const Tcstyperesult = ({ uid }) => {
           return acc;
         }, {});
 
+        const indirectMap = indirectData.reduce((acc, item) => {
+          acc[item.coname] = Number(item.marks) || 0;
+          return acc;
+        }, {});
+
         const combinedData = Array.from(
           new Set([
             ...ia1Data.map((item) => item.coname),
@@ -81,6 +89,7 @@ const Tcstyperesult = ({ uid }) => {
             ...intaData.map((item) => item.coname),
             ...univData.map((item) => item.coname),
             ...twData.map((item) => item.coname),
+            ...indirectData.map((item) => item.coname),
           ])
         ).map((coname) => {
           const intaAttainment = intaMap[coname] || 0;
@@ -96,12 +105,8 @@ const Tcstyperesult = ({ uid }) => {
             (80 / 100);
 
           // Dummy indirect attainment value
-          const dummyIndirectAttainment = (coname) => {
-            return (Math.random() * 3).toFixed(2);
-          };
-          const indirectAttainmentvalues = Number(
-            dummyIndirectAttainment(coname)
-          );
+          const indirectAttainmentvalues = indirectMap[coname] || 0; 
+          console.log("yayyy",indirectAttainmentvalues);
 
           const indirectAttainment = (
             indirectAttainmentvalues *
@@ -549,7 +554,7 @@ const Tcstyperesult = ({ uid }) => {
   return (
     <>
     <div class="container mx-auto mt-5 px-4">
-    <h1 class="text-2xl font-bold mb-4">Responsive Table in Tailwind</h1>
+    <h1 class="text-2xl md:text-3xl lg:text-4xl mb-6 text-blue-700 text-center font-bold">TCS TYPE RESULT</h1>
     <div class="overflow-x-auto">
       <table class="min-w-full bg-white border border-gray-200">
       <thead className="sticky top-0 bg-white z-10">

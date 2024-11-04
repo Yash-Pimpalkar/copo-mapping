@@ -281,6 +281,50 @@ export const fetchTermwork = (req, res) => {
     }
   };
 
+  export const indirect  = async (req, res) => {
+    const userCourseId = req.params.uid;
+
+    // Check if the userCourseId parameter is provided
+    if (!userCourseId) {
+        return res.status(400).json({ error: "usercourse id is required" });
+    }
+
+    // SQL query to join student_feedback and co_feedback based on usercourseid
+    const sql = `
+        SELECT sf.marks, cf.coname 
+        FROM student_feedback sf
+        JOIN co_feedback cf ON sf.qid = cf.q_id
+        WHERE sf.usercourseid = ?
+    `;
+
+    try {
+        // Wrap the query in a promise for async/await usage
+        const result = await new Promise((resolve, reject) => {
+            db.query(sql, [userCourseId], (error, result) => {
+                if (error) {
+                    console.error('Error executing the query:', error);
+                    reject(new Error('Internal server error'));
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+
+        // Extract unique CO names and their corresponding marks from the result
+        const uniqueFeedback = result.map(row => ({
+            coname: row.coname,
+            marks: row.marks
+        }));
+
+        return res.status(200).json(uniqueFeedback);
+
+    } catch (err) {
+        console.error("Error fetching feedback data:", err.message);
+        return res.status(500).json({ error: "Error fetching feedback data" });
+    }
+};
+
+
 
   export const Majorpro = async(req, res) => {
     const userCourseId = req.params.uid;
