@@ -184,7 +184,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               )}
             </>
-          ) : twdata[0].twid === 5 ? (
+          ) : twdata[0].twid === 5 || 10 ? (
             <>
               {currentComponent === "Experiment" ? (
                 <>
@@ -218,7 +218,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               )}
             </>
-          ) : twdata[0].twid === 6 ? (
+          ) : twdata[0].twid === 6 || 11 ? (
             <>
               {currentComponent === "Experiment" ? (
                 <>
