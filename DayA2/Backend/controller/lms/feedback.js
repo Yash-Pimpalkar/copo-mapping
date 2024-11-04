@@ -1,3 +1,4 @@
+import expressAsyncHandler from "express-async-handler";
 import { connection as db } from "../../config/dbConfig.js";
 
 export const create_feedback = (req, res) => {
@@ -291,3 +292,78 @@ WHERE
     });
 };
 
+
+
+export const getStudentFeedbackDetails = async (req, res) => {
+    const { usercourseid } = req.params;
+
+    if (!usercourseid) {
+        return res.status(400).json({ error: "User Course ID is required" });
+    }
+
+    try {
+        const query = `
+            SELECT 
+                f.feedback_id,
+                f.feedback_name,
+                sf.sid,
+                sf.qid,
+                GROUP_CONCAT(cf.coname ORDER BY cf.coname SEPARATOR ', ') AS conames,
+                sf.marks,
+                sf.submitted_at
+            FROM 
+                student_feedback sf
+            JOIN 
+                question_feedback qf ON sf.qid = qf.qid
+            JOIN 
+                feedback f ON f.feedback_id = qf.questionno_id
+            LEFT JOIN 
+                co_feedback cf ON cf.q_id = qf.qid
+            WHERE 
+                sf.usercourseid = ?
+            GROUP BY 
+                sf.sid, sf.qid, f.feedback_id, f.feedback_name, sf.marks, sf.submitted_at
+            ORDER BY 
+                sf.sid, sf.qid;
+        `;
+
+        const [results] = await db.promise().query(query, [usercourseid]);
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: "No feedback records found for the specified user course ID" });
+        }
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error("Error fetching feedback details:", error);
+        res.status(500).json({ error: "An error occurred while retrieving feedback details" });
+    }
+};
+
+
+
+export const updateFeedbackAttainment =expressAsyncHandler( async (req, res) => {
+    const { usercourseid, coAttainmentData } = req.body;
+
+    if (!usercourseid || !coAttainmentData || coAttainmentData.length === 0) {
+        return res.status(400).json({ error: "Invalid data provided." });
+    }
+
+    try {
+        const insertQuery = `
+            INSERT INTO feedback_attainment (coname, coaverage, attainment, usercourseid) 
+            VALUES (?, ?, ?, ?)
+        `;
+
+        // Loop through the coAttainmentData array and insert each entry
+        for (const entry of coAttainmentData) {
+            const { coName, coAverage, categorization } = entry;
+            await db.promise().query(insertQuery, [coName, coAverage, categorization, usercourseid]);
+        }
+
+        res.status(201).json({ message: "Attainment data updated successfully." });
+    } catch (error) {
+        console.error("Error updating feedback attainment:", error);
+        res.status(500).json({ error: "Failed to update attainment data." });
+    }
+});
