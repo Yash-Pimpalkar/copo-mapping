@@ -217,7 +217,7 @@ const StudentClassRoomActivities = ({ uid }) => {
             <div
               key={activity.assignment_id}
               className="bg-white p-6 rounded-lg shadow-md flex justify-between items-start "
-              onClick={() => navigate(`/activity-detail/${activity.assignment_id}`, { state: { activity, uid, classroomId } })}
+              onClick={() => navigate(`/lms/activity-detail/${activity.assignment_id}`, { state: { activity, uid, classroomId } })}
             >
               <div className="flex flex-col w-3/4"
               >

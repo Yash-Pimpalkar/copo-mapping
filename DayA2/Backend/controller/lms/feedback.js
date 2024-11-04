@@ -95,7 +95,8 @@ export const show_feedback = (req, res) => {
             qf.qid,
             qf.question_name,
             cf.co_id,
-            cf.coname
+            cf.coname,
+            f.usercourse_id
         FROM 
             feedback f
         LEFT JOIN 
@@ -171,11 +172,14 @@ export const student_submit_feedback = (req, res) => {
     const { userid, sid, questions, submitted_at } = formDataForStudentSubmit;
 
     // Check if required fields are present
-    if (!userid || !sid || !questions || questions.length === 0 || !submitted_at) {
+    if (!userid || !sid || !questions || questions.length === 0) {
         return res.status(400).json({ error: 'Missing required data fields' });
     }
 
-    // SQL query to check if the student exists with provided sid
+    // Set the submitted_at timestamp to the current date if not provided
+    const submissionDate = submitted_at || new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // SQL query to check if the student exists with provided sid and usercourseid in `student_feedback`
     const checkSql = 'SELECT * FROM student_feedback WHERE sid = ? AND usercourseid = ?';
     db.query(checkSql, [sid, userid], (checkError, checkResults) => {
         if (checkError) {
@@ -183,25 +187,107 @@ export const student_submit_feedback = (req, res) => {
             return res.status(500).json({ error: checkError.message });
         }
 
-        // Proceed if student exists or add logic for a condition check if needed
-        const insertSql = 'INSERT INTO student_feedback (usercourseid, sid, qid, marks, submitted_at) VALUES (?, ?, ?, ?, ?)';
+        // If the student feedback records exist, update each question's feedback
+        const updateSql = 'UPDATE student_feedback SET marks = ?, submitted_at = ? WHERE usercourseid = ? AND sid = ? AND qid = ?';
 
-        // Insert each question’s data sequentially without using Promises
+        // Update each question's data sequentially
         for (let i = 0; i < questions.length; i++) {
             const { qid, marks } = questions[i];
 
-            db.query(insertSql, [userid, sid, qid, marks, submitted_at], (error, results) => {
+            db.query(updateSql, [marks, submissionDate, userid, sid, qid], (error, results) => {
                 if (error) {
-                    console.error("Error inserting feedback data:", error);
+                    console.error("Error updating feedback data:", error);
                     return res.status(500).json({ error: error.message });
                 }
 
                 // If it’s the last question, send the response
                 if (i === questions.length - 1) {
-                    res.status(201).json({ message: 'Data submitted successfully' });
+                    res.status(200).json({ message: 'Feedback updated successfully' });
                 }
             });
         }
+    });
+};
+
+
+export const show_student_side_feedback = (req, res) => {
+    const { sid } = req.params;
+
+    const query = `
+
+    SELECT 
+    f.feedback_id,
+    f.feedback_name,
+    f.noofques,
+    qf.qid,
+    qf.question_name,
+    f.created_at AS question_created_at,
+    f.deadline AS question_deadline,
+    cf.co_id,
+    cf.coname,
+    sf.marks,
+    sf.submitted_at,
+    f.usercourse_id
+FROM 
+    student_feedback sf
+JOIN 
+    question_feedback qf ON sf.qid = qf.qid
+JOIN 
+    feedback f ON f.feedback_id = qf.questionno_id
+LEFT JOIN 
+    co_feedback cf ON cf.q_id = qf.qid
+WHERE 
+    sf.sid = ? 
+    AND sf.submitted_at IS NULL;
+
+    `;
+
+    db.query(query, [sid], (error, results) => {
+        if (error) {
+            console.error("Error fetching feedback data:", error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Transform the data into a structured format
+        const feedbackData = [];
+        const feedbackMap = {};
+
+        results.forEach((row) => {
+            if (!feedbackMap[row.feedback_id]) {
+                feedbackMap[row.feedback_id] = {
+                    feedback_id: row.feedback_id,
+                    usercourse_id: row.usercourse_id,
+                    feedback_name: row.feedback_name,
+                    noofques: row.noofques,
+                    created_at: row.created_at,
+                    deadline: row.deadline,
+                    questions: [],
+                };
+                feedbackData.push(feedbackMap[row.feedback_id]);
+            }
+
+            const feedbackItem = feedbackMap[row.feedback_id];
+            const questionIndex = feedbackItem.questions.findIndex(
+                (q) => q.qid === row.qid
+            );
+
+            if (questionIndex === -1) {
+                feedbackItem.questions.push({
+                    qid: row.qid,
+                    question_name: row.question_name,
+                    coNames: row.co_id ? [{ co_id: row.co_id, coname: row.coname }] : [],
+                });
+            } else {
+                if (row.co_id) {
+                    feedbackItem.questions[questionIndex].coNames.push({
+                        co_id: row.co_id,
+                        coname: row.coname,
+                    });
+                }
+            }
+        });
+
+        res.status(200).json({ feedbackData });
     });
 };
 

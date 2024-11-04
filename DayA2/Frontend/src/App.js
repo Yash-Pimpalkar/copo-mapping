@@ -73,6 +73,9 @@ import ViewClassroom from './pages/LMS/Student/ViewAllClassroom';
 import StudentClassRoomActivities from './pages/LMS/Student/StudentClassRoomActivities';
 import ActivityDetail from './pages/LMS/Student/Activitydetails';
 import AssignmentSubmissions from './pages/LMS/Classroom/AssignmentSubmissions';
+import StudentSideFeedback from './pages/LMS/Student/StudentSideFeedback';
+import FeedbackForm from './pages/LMS/LMSFeedback/FeedbackForm';
+import ViewFeedback from './pages/LMS/Student/ViewFeedback';
 
 function App() {
   const [token, setToken] = useState("");
@@ -108,8 +111,9 @@ function App() {
               <Route path="/" element={<StudentlmsDashboard uid={user_id} />} />
               <Route path="/viewclassroom" element={<ViewClassroom uid={user_id} />} />
               <Route path="/viewclassroom/:classroomId" element={<StudentClassRoomActivities uid={user_id} />} />
-              <Route path="/activity-detail/:id" element={<ActivityDetail  uid={user_id} />} />
-            
+              <Route path="/lms/activity-detail/:id" element={<ActivityDetail  uid={user_id} />} />
+              <Route path="/feedback-student" element={<StudentSideFeedback uid={user_id} />} />
+              <Route path="/viewfeedback/:feedbackid" element={<ViewFeedback uid={user_id}/>} />
             </>
          
           ) : usertype == 2 ? (
@@ -151,7 +155,7 @@ function App() {
               <Route path='/PureTheoryResult' element={<PureTheoryResult uid={user_id}/>}/>
               <Route path='/Mainresult' element={<MainResult uid={user_id}/>}/>
               <Route path='/lms/StudentFeedback' element={<FeedbackPage uid={user_id}/>}/>
-              <Route path='/lms/editlmsquestions' element={<EditQuestionsPage uid={user_id}/>} />
+              <Route path='/lms/editlmsquestions/:usercourseId' element={<EditQuestionsPage uid={user_id}/>} />
               <Route path='/TeacherlmsDashboard' element={<TeacherlmsDashboard uid={user_id}/>} />
               <Route path='/lms/CreateClassroom' element={<CreateClassroom uid={user_id}/>} />
               <Route path='/lms/StudentLmsAttendance' element={<StudentLmsAttendance uid={user_id}/>} />
@@ -177,6 +181,8 @@ function App() {
               <Route path= "/lms/viewclasssroom/" element={<ViewAllClassroom uid={user_id}/>} />
               <Route path="/AddStudent/:curriculum/:userCourseId" element={<AddStudent  uid={user_id} />} />
               <Route path="/lms/viewclassroom/:classroomId/submissions/:assignmentId" element={<AssignmentSubmissions  uid={user_id}/>} />
+             
+              <Route path="/viewfeedback/:feedbackid" element={<FeedbackForm uid={user_id}/>} />
               <Route path="*"  element={<NotFound />} />
               {/* Add other routes for usertype === 2 here */}
             </>

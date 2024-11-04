@@ -64,6 +64,10 @@ import {
   majorsem_deleteAllStudentsFromClass,
   majorsem_deleteStudentFromClass,
   majorsem_get_Usercourse_Students,
+  addStudentsWithFeedbackQuestions,
+  deleteAllStudentFeedbackForCourse,
+  deleteStudentFeedbackForCourse,
+  getStudentsForFeedbackCourse,
 } from "../controller/managestudents.js";
 const router = express.Router();
 
@@ -177,32 +181,65 @@ router.delete("/deleteallstudents/ppt/:uid", deleteAllStudentsFromPPT); // Route
 router.delete("/deletestudent/ppt/:sid", deleteStudentFromPPT); // Route to delete a specific student from a specific user course
 router.get("/ppt/fetchstudents/:uid", ppt_get_Usercourse_Students); // Route to fetch all students for a specific user course
 
-
 // Trade Routes
 router.post("/addstudents/trade/:sid", trade_addStudentsWithQuestions); // Route to add students to trades
 router.delete("/deleteallstudents/trade/:uid", trade_deleteAllStudentsForTrade); // Route to delete all students from a specific user course
 router.delete("/deletestudent/trade/:sid", trade_deleteStudentFromTrade); // Route to delete a specific student from a specific user course
 router.get("/trade/fetchstudents/:uid", trade_getStudentsForTrade); // Route to fetch all students for a specific user course
 
-
-
 // Mini Project Routes
 router.post("/addstudents/minipro/:sid", minipro_addStudentsWithQuestions); // Route to add students to mini projects
-router.delete("/deleteallstudents/minipro/:uid", minipro_deleteAllStudentsForMiniProject); // Route to delete all students from a specific user course
-router.delete("/deletestudent/minipro/:sid", minipro_deleteStudentFromMiniProject); // Route to delete a specific student from a specific user course
+router.delete(
+  "/deleteallstudents/minipro/:uid",
+  minipro_deleteAllStudentsForMiniProject
+); // Route to delete all students from a specific user course
+router.delete(
+  "/deletestudent/minipro/:sid",
+  minipro_deleteStudentFromMiniProject
+); // Route to delete a specific student from a specific user course
 router.get("/minipro/fetchstudents/:uid", minipro_getStudentsForMiniProject); // Route to fetch all students for a specific user course
 
-
-//Mini Project for Semester 25 marks 
+//Mini Project for Semester 25 marks
 router.post("/addstudents/miniprosem/:sid", minisem_addStudentsToClass); // Route to add students to mini projects
-router.delete("/deleteallstudents/miniprosem/:uid", minisem_deleteAllStudentsFromClass); // Route to delete all students from a specific user course
+router.delete(
+  "/deleteallstudents/miniprosem/:uid",
+  minisem_deleteAllStudentsFromClass
+); // Route to delete all students from a specific user course
 router.delete("/deletestudent/miniprosem/:sid", minisem_deleteStudentFromClass); // Route to delete a specific student from a specific user course
 router.get("/miniprosem/fetchstudents/:uid", minisem_get_Usercourse_Students); // Route to fetch all students for a specific user course
 
-//Major Project for Semester 25 marks 
+//Major Project for Semester 25 marks
 router.post("/addstudents/majorprosem/:sid", majorsem_addStudentsToClass); // Route to add students to mini projects
-router.delete("/deleteallstudents/majorprosem/:uid", majorsem_deleteAllStudentsFromClass); // Route to delete all students from a specific user course
-router.delete("/deletestudent/majorprosem/:sid", majorsem_deleteStudentFromClass); // Route to delete a specific student from a specific user course
+router.delete(
+  "/deleteallstudents/majorprosem/:uid",
+  majorsem_deleteAllStudentsFromClass
+); // Route to delete all students from a specific user course
+router.delete(
+  "/deletestudent/majorprosem/:sid",
+  majorsem_deleteStudentFromClass
+); // Route to delete a specific student from a specific user course
 router.get("/majorprosem/fetchstudents/:uid", majorsem_get_Usercourse_Students); // Route to fetch all students for a specific user course
+
+
+
+
+
+// Route to add students with feedback questions
+router.post("/addstudents/feedback/:sid", addStudentsWithFeedbackQuestions);
+
+// Route to delete all feedback for a specific user course
+router.delete("/deleteallstudents/feedback/:uid", deleteAllStudentFeedbackForCourse);
+
+// Route to delete a specific student's feedback for a specific user course
+router.delete("/deletestudent/feedback/:sid", deleteStudentFeedbackForCourse);
+
+// Route to fetch students for a specific feedback course
+router.get("/feedback/fetchstudents/:uid", getStudentsForFeedbackCourse);
+
+
+router.post("/addstudents/trade/:sid", trade_addStudentsWithQuestions); // Route to add students to trades
+router.delete("/deleteallstudents/trade/:uid", trade_deleteAllStudentsForTrade); // Route to delete all students from a specific user course
+router.delete("/deletestudent/trade/:sid", trade_deleteStudentFromTrade); // Route to delete a specific student from a specific user course
+router.get("/trade/fetchstudents/:uid", trade_getStudentsForTrade); 
 
 export default router;

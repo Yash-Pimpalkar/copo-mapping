@@ -146,7 +146,7 @@ export default function Navbar() {
     { name: "Upcoming Events", href: "/upcoming", userTypes: [1] },
     { name: "Progress Tracker", href: "/", userTypes: [1] },
     { name: "Announcement", href: "/", userTypes: [1] },
-    { name: "Feedback", href: "/", userTypes: [1] },
+    { name: "Feedback", href: "/feedback-student", userTypes: [1] },
     { name: "Edit POs", href: "/editpos", userTypes:[3] },
     { name: "Edit COs", href:"/editcos", userTypes:[3] },
     { name: "User Selection", href: "/userselection", userTypes: [3] },

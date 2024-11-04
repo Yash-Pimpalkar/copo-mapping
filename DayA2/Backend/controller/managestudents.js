@@ -1,5 +1,5 @@
 import { connection as db } from "../config/dbConfig.js";
-
+import ExpressAsyncHandler from "express-async-handler"
 
 //ia1
 export const ia1_addStudentsToClass = async (req, res) => {
@@ -2628,3 +2628,203 @@ WHERE
         res.status(200).json(results);
     });
   };
+
+
+
+
+
+export const addStudentsWithFeedbackQuestions =ExpressAsyncHandler( async (req, res) => {
+    const { selectedStudents, usercourseid } = req.body;
+
+    if (!selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
+        return res.status(400).json({ message: 'No students provided' });
+    }
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'No usercourseid provided' });
+    }
+
+    try {
+        // Fetch question IDs related to the usercourse_id in question_feedback
+        const fetchQuestionIdsQuery = `
+            SELECT qid 
+            FROM question_feedback 
+            WHERE questionno_id = (
+                SELECT feedback_id 
+                FROM feedback 
+                WHERE usercourse_id = ?
+            )
+        `;
+        const [questionResults] = await db.promise().query(fetchQuestionIdsQuery, [usercourseid]);
+
+        if (questionResults.length === 0) {
+            return res.status(404).json({ message: 'No questions found for this course' });
+        }
+
+        // Prepare values for bulk insert into student_feedback table
+        const values = [];
+        selectedStudents.forEach(sid => {
+            questionResults.forEach(question => {
+                values.push([usercourseid, sid, question.qid]); // Insert usercourseid, sid, qid only
+            });
+        });
+
+        const insertQuery = `
+            INSERT INTO student_feedback (usercourseid, sid, qid) 
+            VALUES ?
+            ON DUPLICATE KEY UPDATE 
+                usercourseid = VALUES(usercourseid), 
+                sid = VALUES(sid), 
+                qid = VALUES(qid)
+        `;
+
+        await db.promise().query(insertQuery, [values]);
+        res.status(201).json({ message: 'Students and question IDs added to feedback successfully' });
+    } catch (error) {
+        console.error('Error occurred:', error);
+        res.status(500).json({ message: 'An error occurred while processing the request.' });
+    }
+});
+
+export const deleteAllStudentFeedbackForCourse = ExpressAsyncHandler(async (req, res) => {
+    const { uid } = req.params; // `usercourseid` from the request parameters
+    const usercourseid = uid;
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'User Course ID is required' });
+    }
+
+    try {
+        // Step 1: Retrieve all qid values linked to the usercourseid in question_feedback
+        const getQuestionIdsQuery = `
+            SELECT qid 
+            FROM question_feedback 
+            WHERE questionno_id = (
+                SELECT feedback_id 
+                FROM feedback 
+                WHERE usercourse_id = ?
+            )
+        `;
+
+        const [questionIds] = await db.promise().query(getQuestionIdsQuery, [usercourseid]);
+
+        if (questionIds.length === 0) {
+            return res.status(404).json({ message: 'No questions found for the specified user course' });
+        }
+
+        // Extract qid values from the result
+        const questionIdValues = questionIds.map(row => row.qid);
+
+        // Step 2: Delete all student feedback linked to these qid values and the specified usercourseid
+        const deleteFeedbackQuery = `
+            DELETE FROM student_feedback 
+            WHERE usercourseid = ? 
+            AND qid IN (${questionIdValues.join(', ')})
+        `;
+
+        const [deleteResult] = await db.promise().query(deleteFeedbackQuery, [usercourseid]);
+
+        if (deleteResult.affectedRows === 0) {
+            return res.status(404).json({ message: 'No student feedback found to delete for the specified course' });
+        }
+
+        // Send success response indicating deletion
+        res.status(200).json({ message: 'All student feedback removed for the specified course successfully', affectedRows: deleteResult.affectedRows });
+    } catch (error) {
+        console.error('Error deleting student feedback for course:', error);
+        res.status(500).json({ message: 'An error occurred while deleting student feedback for the course' });
+    }
+});
+
+
+export const deleteStudentFeedbackForCourse = async (req, res) => {
+    const { sid } = req.params; // Student ID from request parameters
+    const { usercourseid } = req.body; // User Course ID from request body
+
+    if (!sid || !usercourseid) {
+        return res.status(400).json({ message: 'Student ID and User Course ID are required' });
+    }
+
+    try {
+        // Step 1: Retrieve question IDs (qid) linked to the given usercourseid
+        const getQuestionIdsQuery = `
+            SELECT qid 
+            FROM question_feedback 
+            WHERE questionno_id = (
+                SELECT feedback_id 
+                FROM feedback 
+                WHERE usercourse_id = ?
+            )
+        `;
+
+        const [questionIds] = await db.promise().query(getQuestionIdsQuery, [usercourseid]);
+
+        if (questionIds.length === 0) {
+            return res.status(404).json({ message: 'No questions found for the specified user course' });
+        }
+
+        // Extract qid values from the result
+        const questionIdValues = questionIds.map(row => row.qid);
+
+        // Step 2: Delete entries in student_feedback for the specific student
+        const deleteQuery = `
+            DELETE FROM student_feedback 
+            WHERE sid = ? 
+            AND usercourseid = ? 
+            AND qid IN (${questionIdValues.join(', ')})
+        `;
+
+        const [result] = await db.promise().query(deleteQuery, [sid, usercourseid]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'No feedback records found for the specified student and course' });
+        }
+
+        res.status(200).json({ message: 'Student feedback records removed successfully' });
+    } catch (error) {
+        console.error('Error deleting student feedback records:', error);
+        res.status(500).json({ message: 'An error occurred while deleting student feedback records' });
+    }
+};
+
+
+export const getStudentsForFeedbackCourse = async (req, res) => {
+    const { uid } = req.params; // `usercourseid` from request parameters
+    const usercourseid = uid;
+
+    if (!usercourseid) {
+        return res.status(400).json({ message: 'User Course ID is required' });
+    }
+
+    try {
+        // Step 1: Find all students linked to the usercourseid in student_feedback
+        const getStudentsQuery = `
+            SELECT DISTINCT 
+                s.sid, 
+                s.stud_clg_id, 
+                s.student_name
+            FROM 
+                lms_students s
+            JOIN 
+                student_feedback sf ON s.sid = sf.sid
+            WHERE 
+                sf.usercourseid = ?
+        `;
+
+        const [students] = await db.promise().query(getStudentsQuery, [usercourseid]);
+
+        if (students.length === 0) {
+            return res.status(404).json({ message: 'No students found for the specified course' });
+        }
+
+        // Send success response with the list of students
+        res.status(200).json(students);
+    } catch (error) {
+        console.error('Error fetching students for feedback course:', error);
+        res.status(500).json({ message: 'An error occurred while fetching students for the course' });
+    }
+};
+
+
+
+
