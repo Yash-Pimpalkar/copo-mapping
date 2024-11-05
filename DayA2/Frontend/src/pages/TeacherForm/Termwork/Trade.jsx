@@ -421,7 +421,7 @@ const Trade = ({ uid, tw_id }) => {
   return (
 
     <>
-      <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+      <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
         <div className="flex flex-col items-center mb-6">
           {/* Centered Title */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
@@ -583,7 +583,7 @@ const Trade = ({ uid, tw_id }) => {
               ))}
             </tbody>
           </table>
-
+         </div>
           {/* Pagination Component */}
           {filteredData.length > dataPerPage && (
             <Pagination
@@ -595,111 +595,114 @@ const Trade = ({ uid, tw_id }) => {
 
           {/* New Section for Total Students Passed Each Question */}
           <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-lg font-semibold">
-                Total Students Passed Each Question
-              </h1>
-              <button
-                onClick={() =>
-                  handle_Attenment(
-                    experimentKeys,
-                    attainmentData,
-                    tw_id,
-                    userCourseId
-                  )
-                }
-                className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
-              >
-                Update Attainment
-              </button>
-            </div>
+  <div className="flex justify-between items-center mb-4">
+    <h1 className="text-lg font-semibold">
+      Total Students Passed Each Question
+    </h1>
+    <button
+      onClick={() =>
+        handle_Attenment(
+          experimentKeys,
+          attainmentData,
+          tw_id,
+          userCourseId
+        )
+      }
+      className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+    >
+      Update Attainment
+    </button>
+  </div>
 
-            <div className="mb-4">
-              <label
-                htmlFor="total-student-passed"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Total Students Passed with &gt;= PERCENTAGE %
-              </label>
-              <input
-                id="total-student-passed"
-                type="number"
-                min="0"
-                max="100"
-                value={attainmentData.passedPercentage}
-                onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-                className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-500"
-              />
-            </div>
+  <div className="mb-4">
+    <label
+      htmlFor="total-student-passed"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Total Students Passed with &gt;= PERCENTAGE %
+    </label>
+    <input
+      id="total-student-passed"
+      type="number"
+      min="0"
+      max="100"
+      value={attainmentData.passedPercentage}
+      onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-500"
+    />
+  </div>
 
-            <table className="min-w-full border-collapse border border-gray-400">
-              <thead className="bg-blue-700 text-white">
-                <tr>
-                  <th className="border border-gray-300 px-4 py-2">Type</th>
-                  {experimentKeys.map((experimentKey, index) => (
-                    <th
-                      key={experimentKey}
-                      className="border border-gray-300 px-4 py-2"
-                    >
-                      {index + 1}
-                      <br />
-                      <span className="text-sm text-gray-200">
-                        {getCOName(experimentKey)}
-                      </span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2">
-                    Total Students Passed
-                  </td>
-                  {getTotalStudentsPassedPerQuestion(
-                    attainmentData.passedPercentage
-                  ).map((count, index) => (
-                    <td key={index} className="border border-gray-300 px-4 py-2">
-                      {count}
-                    </td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2">
-                    Total Students Attempted
-                  </td>
-                  {getTotalStudentsAttempted().map((count, index) => (
-                    <td key={index} className="border border-gray-300 px-4 py-2">
-                      {count}
-                    </td>
-                  ))}
-                </tr>
-                {/* CO Attainment */}
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                    CO Attainment
-                  </td>
-                  {getTotalStudentsPassedPerQuestion(
-                    attainmentData.passedPercentage
-                  ).map((passedCount, index) => {
-                    const attemptedCount = getTotalStudentsAttempted()[index];
-                    const attainment = attemptedCount
-                      ? ((passedCount / attemptedCount) * 100).toFixed(2)
-                      : 0;
-                    return (
-                      <td
-                        key={index}
-                        className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
-                      >
-                        {attainment} %
-                      </td>
-                    );
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+  {/* Wrapping the table in a responsive container */}
+  <div className="overflow-x-auto">
+    <table className="min-w-full border-collapse border border-gray-400">
+      <thead className="bg-blue-700 text-white">
+        <tr>
+          <th className="border border-gray-300 px-4 py-2">Type</th>
+          {experimentKeys.map((experimentKey, index) => (
+            <th
+              key={experimentKey}
+              className="border border-gray-300 px-4 py-2"
+            >
+              {index + 1}
+              <br />
+              <span className="text-sm text-gray-200">
+                {getCOName(experimentKey)}
+              </span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="border border-gray-300 px-4 py-2">
+            Total Students Passed
+          </td>
+          {getTotalStudentsPassedPerQuestion(
+            attainmentData.passedPercentage
+          ).map((count, index) => (
+            <td key={index} className="border border-gray-300 px-4 py-2">
+              {count}
+            </td>
+          ))}
+        </tr>
+        <tr>
+          <td className="border border-gray-300 px-4 py-2">
+            Total Students Attempted
+          </td>
+          {getTotalStudentsAttempted().map((count, index) => (
+            <td key={index} className="border border-gray-300 px-4 py-2">
+              {count}
+            </td>
+          ))}
+        </tr>
+        {/* CO Attainment */}
+        <tr>
+          <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+            CO Attainment
+          </td>
+          {getTotalStudentsPassedPerQuestion(
+            attainmentData.passedPercentage
+          ).map((passedCount, index) => {
+            const attemptedCount = getTotalStudentsAttempted()[index];
+            const attainment = attemptedCount
+              ? ((passedCount / attemptedCount) * 100).toFixed(2)
+              : 0;
+            return (
+              <td
+                key={index}
+                className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+              >
+                {attainment} %
+              </td>
+            );
+          })}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+      
     </>
 
 

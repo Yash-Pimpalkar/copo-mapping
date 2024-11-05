@@ -245,7 +245,7 @@ const SciLab = ({ uid, tw_id }) => {
     navigate(`/AddStudent/${curriculum}/${userCourseId}`);
   };
   return (
-    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    <div className="container overflow-x-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
        <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
     <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
@@ -266,7 +266,7 @@ const SciLab = ({ uid, tw_id }) => {
     </div>
     </div>
       {/* Container for Export, Import, and Search Bar */}
-      <div className="mb-4 flex justify-between items-center bg-white shadow-lg rounded-lg p-4">
+      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* File Upload */}
         <input
           type="file"
@@ -277,12 +277,13 @@ const SciLab = ({ uid, tw_id }) => {
 
         {/* Search Bar */}
         <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by student name or ID"
-          className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
-        />
+  type="text"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  placeholder="Search by student name or ID"
+  className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500 leading-normal placeholder-gray-400 md:w-auto"
+/>
+
 
         {/* Download Excel Button */}
         <button onClick={handleFileDownload} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
@@ -291,6 +292,7 @@ const SciLab = ({ uid, tw_id }) => {
       </div>
 
       {/* Table */}
+      <div className = "overflow-x-auto">
       <table className="min-w-full bg-white border-collapse border border-gray-400 shadow-md rounded-lg">
         <thead className="bg-indigo-100">
           <tr>
@@ -339,6 +341,7 @@ const SciLab = ({ uid, tw_id }) => {
           ))}
         </tbody>
       </table>
+    </div>
 
       {/* Pagination Component */}
       {filteredData.length > itemsPerPage && (
@@ -397,6 +400,8 @@ const SciLab = ({ uid, tw_id }) => {
               {/* {attainmentData.passedPercentage} % of Max Marks: {maxLimit} ={" "}
               {(t = (maxLimit * attainmentData.passedPercentage) / 100)}{" "} */}
             </h1>
+            
+            
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-blue-500 text-white">
                 <tr>
@@ -434,6 +439,7 @@ const SciLab = ({ uid, tw_id }) => {
               </tbody>
             </table>
             {sciLabcoData.length > 0 && (
+              <div className="overflow-x-auto">
               <table className="min-w-full table-fixed divide-y divide-gray-200">
                 <thead className="bg-blue-500 text-white">
                   <tr>
@@ -506,11 +512,11 @@ const SciLab = ({ uid, tw_id }) => {
                 </tbody>
 
               </table>
-
+            </div>
             )}
             </div>
             </div>
-
+            
 )}
       </div>
     </div>

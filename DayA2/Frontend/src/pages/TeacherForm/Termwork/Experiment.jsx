@@ -403,7 +403,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
   return (
 
     <>
-    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
     <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
     <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
@@ -565,7 +565,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
             ))}
           </tbody>
         </table>
-  
+      </div>
         {/* Pagination Component */}
         {filteredData.length > dataPerPage && (
           <Pagination
@@ -613,75 +613,77 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
               className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-500"
             />
           </div>
-  
-          <table className="min-w-full border-collapse border border-gray-400">
-            <thead className="bg-blue-700 text-white">
-              <tr>
-                <th className="border border-gray-300 px-4 py-2">Type</th>
-                {experimentKeys.map((experimentKey, index) => (
-                  <th
-                    key={experimentKey}
-                    className="border border-gray-300 px-4 py-2"
-                  >
-                    {index + 1}
-                    <br />
-                    <span className="text-sm text-gray-200">
-                      {getCOName(experimentKey)}
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">
-                  Total Students Passed
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((count, index) => (
-                  <td key={index} className="border border-gray-300 px-4 py-2">
-                    {count}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">
-                  Total Students Attempted
-                </td>
-                {getTotalStudentsAttempted().map((count, index) => (
-                  <td key={index} className="border border-gray-300 px-4 py-2">
-                    {count}
-                  </td>
-                ))}
-              </tr>
-              {/* CO Attainment */}
-              <tr>
-                <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                  CO Attainment
-                </td>
-                {getTotalStudentsPassedPerQuestion(
-                  attainmentData.passedPercentage
-                ).map((passedCount, index) => {
-                  const attemptedCount = getTotalStudentsAttempted()[index];
-                  const attainment = attemptedCount
-                    ? ((passedCount / attemptedCount) * 100).toFixed(2)
-                    : 0;
-                  return (
-                    <td
-                      key={index}
-                      className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
-                    >
-                      {attainment} %
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+  <table className="min-w-full border-collapse border border-gray-400">
+    <thead className="bg-blue-700 text-white">
+      <tr>
+        <th className="border border-gray-300 px-4 py-2">Type</th>
+        {experimentKeys.map((experimentKey, index) => (
+          <th
+            key={experimentKey}
+            className="border border-gray-300 px-4 py-2"
+          >
+            {index + 1}
+            <br />
+            <span className="text-sm text-gray-200">
+              {getCOName(experimentKey)}
+            </span>
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td className="border border-gray-300 px-4 py-2">
+          Total Students Passed
+        </td>
+        {getTotalStudentsPassedPerQuestion(
+          attainmentData.passedPercentage
+        ).map((count, index) => (
+          <td key={index} className="border border-gray-300 px-4 py-2">
+            {count}
+          </td>
+        ))}
+      </tr>
+      <tr>
+        <td className="border border-gray-300 px-4 py-2">
+          Total Students Attempted
+        </td>
+        {getTotalStudentsAttempted().map((count, index) => (
+          <td key={index} className="border border-gray-300 px-4 py-2">
+            {count}
+          </td>
+        ))}
+      </tr>
+      {/* CO Attainment */}
+      <tr>
+        <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+          CO Attainment
+        </td>
+        {getTotalStudentsPassedPerQuestion(
+          attainmentData.passedPercentage
+        ).map((passedCount, index) => {
+          const attemptedCount = getTotalStudentsAttempted()[index];
+          const attainment = attemptedCount
+            ? ((passedCount / attemptedCount) * 100).toFixed(2)
+            : 0;
+          return (
+            <td
+              key={index}
+              className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+            >
+              {attainment} %
+            </td>
+          );
+        })}
+      </tr>
+    </tbody>
+  </table>
+</div>
+
         </div>
       </div>
-    </div>
+  
   </>
   
     

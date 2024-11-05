@@ -404,7 +404,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
     navigate(`/AddStudent/${curriculum}/${userCourseId}`);
   }; 
   return (
-    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
   {/* Header and Controls */}
   <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
@@ -460,7 +460,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
   
   {/* Scrollable Table Container */}
   <div className="overflow-x-auto">
-    <table className="min-w-full border-collapse border border-gray-400 rounded-md overflow-hidden shadow-md">
+    <table className="min-w-full border-collapse border border-gray-400 rounded-md shadow-md">
       <thead className="bg-blue-700 text-white">
         <tr>
           <th className="border border-gray-300 px-4 py-2" rowSpan="2">Index</th>

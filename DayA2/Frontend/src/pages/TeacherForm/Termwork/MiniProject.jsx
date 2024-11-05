@@ -434,7 +434,7 @@ console.log(questiondata)
   };
 
   return (
-    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    <div className="container overflow mx-auto mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
       {/* Container for Export, Import and Search Bar */}
       <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
@@ -456,7 +456,7 @@ console.log(questiondata)
     </div>
     </div>
       {/* Container for Export, Import and Search Bar */}
-      <div className="mb-4 flex justify-between items-center">
+      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* File Upload */}
         <input
           type="file"
@@ -488,6 +488,7 @@ console.log(questiondata)
         </div>
       )}
       {/* Table */}
+      <div className="overflow-x-auto">
       <table className="min-w-full border-collapse border border-gray-400">
         <thead>
           <tr>
@@ -596,7 +597,7 @@ console.log(questiondata)
           ))}
         </tbody>
       </table>
-
+    </div>
       {/* Pagination Component */}
       {filteredData.length > dataPerPage && (
         <Pagination

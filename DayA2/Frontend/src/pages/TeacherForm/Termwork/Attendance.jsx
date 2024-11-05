@@ -186,7 +186,7 @@ const Attendance = ({ uid }) => {
   }; 
 
   return (
-    <div className="container mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+    <div className="container  overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
     {/* Attendance Header */}
     <div className="flex flex-col items-center mb-6">
     {/* Centered Title */}
