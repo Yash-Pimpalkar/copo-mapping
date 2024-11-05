@@ -892,12 +892,13 @@ export const JournalUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_journal SET marks = ? WHERE journalid = ?';
+  const sql = 'UPDATE main_journal SET marks = ? WHERE journal1_id = ? AND sid = ?';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.journalid
+      update.journal1_id,
+      update.sid  // Ensure sid is included here
     ];
   });
 
@@ -924,6 +925,7 @@ export const JournalUpload = async (req, res) => {
     res.status(500).json('Server error');
   }
 };
+
 export const JournalLimit = (req, res) => {
   const userCourseId = req.params.uid;
   const checkQuery = 'SELECT * FROM upload_journal WHERE usercourseid = ?';
@@ -1030,82 +1032,249 @@ export const MajorProjectLimit = (req, res) => {
   });
 };
 
-export const showMiniProjectData = async (req, res) => {
-  const userCourseId = req.params.uid;
+// export const showMiniProjectData = async (req, res) => {
+//   const userCourseId = req.params.uid;
   
-  const sql = `
-    CALL GetMiniProjectMarks(?);
-  `;
+//   const sql = `
+//     CALL GetMiniProjectMarks(?);
+//   `;
 
-  db.query(sql, userCourseId, (error, results) => {
+//   db.query(sql, userCourseId, (error, results) => {
+//     if (error) {
+//       console.error('Error fetching mini project data:', error);
+//       res.status(500).send('Server error');
+//     } else {
+//       res.status(200).json(results);
+//     }
+//   });
+// };
+// export const MiniProjectUpload = async (req, res) => {
+//   let updates = req.body;
+//   console.log('Received updates:', updates);
+
+//   // Convert to an array if updates is an object
+//   if (typeof updates === 'object' && !Array.isArray(updates)) {
+//     updates = [updates];
+//   }
+
+//   // Validate input format
+//   if (!Array.isArray(updates) || updates.length === 0) {
+//     return res.status(400).send('Invalid input');
+//   }
+
+//   // Prepare the query and values
+//   const sql = 'UPDATE main_minipro SET marks = ? WHERE miniproid = ?';
+//   const queryValues = updates.map(update => {
+//     const Marks = parseInt(update.Marks, 10);
+//     return [
+//       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
+//       update.miniproid
+//     ];
+//   });
+
+//   // Log queryValues for debugging
+//   console.log('Query Values:', queryValues);
+
+//   try {
+//     // Handle multiple queries in parallel
+//     await Promise.all(queryValues.map(values => {
+//       return new Promise((resolve, reject) => {
+//         db.query(sql, values, (error, results) => {
+//           if (error) {
+//             console.error('Database query error:', error);
+//             return reject(error);
+//           }
+//           resolve(results);
+//         });
+//       });
+//     }));
+
+//     res.status(200).json('Mini project marks updated successfully');
+//   } catch (error) {
+//     console.error('Error updating mini project marks:', error);
+//     res.status(500).json('Server error');
+//   }
+// };
+// export const MiniProjectLimit = (req, res) => {
+//   const userCourseId = req.params.uid;
+//   const checkQuery = 'SELECT * FROM upload_minipro WHERE usercourseid = ?';
+
+//   db.query(checkQuery, userCourseId, (Err, result) => {
+//     if (Err) {
+//       console.log(Err);
+//       res.status(500).send('Server error');
+//     } else {
+//       res.status(200).json(result);
+//     }
+//   });
+// };
+
+export const GetMiniProject = (req, res) => {
+  const { usercourseid } = req.params;
+  
+  const uc=parseInt(usercourseid);
+  // Execute the stored procedure
+  const sql = `CALL GetMiniProjectMarks(?)`
+  db.query(sql, uc, (error, results) => {
     if (error) {
-      console.error('Error fetching mini project data:', error);
-      res.status(500).send('Server error');
-    } else {
-      res.status(200).json(results);
+      console.error('Error executing the stored procedure:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
+    // console.log(results)
+    // Handle the results of the stored procedure
+    res.status(200).json({
+      message: 'Miniproject marks retrieved successfully',
+      data: results[0] || [], // assuming the results are returned in the first index
+    });
   });
 };
-export const MiniProjectUpload = async (req, res) => {
-  let updates = req.body;
-  console.log('Received updates:', updates);
 
-  // Convert to an array if updates is an object
-  if (typeof updates === 'object' && !Array.isArray(updates)) {
-    updates = [updates];
+
+export const getMiniProjectAndCOs = async (req, res) => {
+  const { usercourseid } = req.params;
+
+  if (!usercourseid) {
+    return res.status(400).json({ error: 'usercourseid is required' });
   }
-
-  // Validate input format
-  if (!Array.isArray(updates) || updates.length === 0) {
-    return res.status(400).send('Invalid input');
-  }
-
-  // Prepare the query and values
-  const sql = 'UPDATE main_minipro SET marks = ? WHERE miniproid = ?';
-  const queryValues = updates.map(update => {
-    const Marks = parseInt(update.Marks, 10);
-    return [
-      isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.miniproid
-    ];
-  });
-
-  // Log queryValues for debugging
-  console.log('Query Values:', queryValues);
 
   try {
-    // Handle multiple queries in parallel
-    await Promise.all(queryValues.map(values => {
-      return new Promise((resolve, reject) => {
-        db.query(sql, values, (error, results) => {
-          if (error) {
-            console.error('Database query error:', error);
-            return reject(error);
-          }
-          resolve(results);
-        });
-      });
-    }));
+    const sql = `
+      SELECT
+        ua.usercourseid,
+        ua.maxmarks,
+        qa.minipro_id AS minipro_id,
+        qa.miniproname AS question_name,
+        qa.idquestions_minipro AS question_id,   -- Ensure this is 'question_id'
+        GROUP_CONCAT(ca.coname ORDER BY ca.co_id) AS conames
+      FROM
+        upload_minipro ua
+      JOIN
+        questions_minipro qa ON ua.miniid = qa.minipro_id
+      LEFT JOIN
+        co_minipro ca ON qa.idquestions_minipro = ca.co_id
+      WHERE
+        ua.usercourseid = ?
+      GROUP BY
+        ua.usercourseid, ua.maxmarks, qa.minipro_id, qa.idquestions_minipro, qa.miniproname;
+    `;
 
-    res.status(200).json('Mini project marks updated successfully');
+    // Execute the query
+    db.query(sql, [usercourseid], (error, results) => {
+      if (error) {
+        console.error('Error executing the query:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      // Log the raw results to ensure the query works correctly
+      console.log('Raw results from SQL query:', results);
+
+      // Format the results, making sure to map 'assign_idq' to 'question_id'
+      const formattedResults = results.map(row => ({
+        usercourseid: row.usercourseid,
+        maxmarks: row.maxmarks,
+        minipro_id: row.minipro_id,
+        question_name: row.question_name,
+        question_id: row.question_id,  // Make sure this is being mapped correctly
+        conames: row.conames ? row.conames.split(',') : []
+      }));
+
+      // Log the formatted results to verify the transformation
+      console.log('Formatted results:', formattedResults);
+
+      // Return the formatted results as JSON
+      res.status(200).json(formattedResults);
+    });
   } catch (error) {
-    console.error('Error updating mini project marks:', error);
-    res.status(500).json('Server error');
+    console.error('Error fetching assignments and COs:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
-export const MiniProjectLimit = (req, res) => {
-  const userCourseId = req.params.uid;
-  const checkQuery = 'SELECT * FROM upload_minipro WHERE usercourseid = ?';
 
-  db.query(checkQuery, userCourseId, (Err, result) => {
-    if (Err) {
-      console.log(Err);
-      res.status(500).send('Server error');
-    } else {
-      res.status(200).json(result);
+
+// assuming you have a database config file for MySQL
+
+// Update Assignments
+export const updateMiniProject = async (req, res) => {
+const { sid, MiniProject } = req.body;
+
+// Check if the input is for a single student or multiple students
+let studentAssignmentsData = [];
+
+if (sid && Array.isArray(MiniProject)) {
+  // Single student case
+  studentAssignmentsData = [{ sid, MiniProject }];
+  console.log("Single student case:", JSON.stringify(studentAssignmentsData[0].MiniProject, null, 2));
+} else if (Array.isArray(MiniProject) && MiniProject.length > 0 && MiniProject[0].sid) {
+  // Multiple students case
+  studentAssignmentsData = MiniProject;
+  console.log("Multiple students case:", JSON.stringify(studentAssignmentsData, null, 2));
+} else {
+  return res.status(400).json({ message: 'Invalid input data' });
+}
+
+try {
+  // Array to store promises for database queries
+  const updatePromises = [];
+
+  // Loop through each student's assignment data
+  for (const studentData of studentAssignmentsData) {
+    const { sid, MiniProject: studentAssignments } = studentData;
+
+    // Validate student ID
+    if (!sid || typeof sid !== 'number') {
+      return res.status(400).json({ message: 'Invalid or missing student ID (sid)' });
     }
-  });
+
+    // Loop through each assignment and prepare the query promises
+    for (const MiniProject of studentAssignments) {
+      const { question_id, value } = MiniProject;
+
+      if (!question_id) {
+        return res.status(400).json({ message: `Invalid assignment data for student ID: ${sid}` });
+      }
+
+      console.log(`Preparing query for student ${sid}, question_id ${question_id}, value ${value}`);
+
+      // Create a promise for each query
+      const updatePromise = new Promise((resolve, reject) => {
+        const updateQuery = `
+          UPDATE main_minipro
+          SET marks = ? 
+          WHERE miniid = ? 
+            AND sid = ?
+        `;
+
+        // Handle `null` values for the marks field in SQL
+        const queryValue = value === null ? null : value;
+
+        // Execute the query
+        db.query(updateQuery, [queryValue, question_id, sid], (error, results) => {
+          if (error) {
+            console.error(`Error executing query for sid ${sid}, question_id ${question_id}:`, error);
+            reject(error);  // Reject the promise if there is an error
+          } else {
+            console.log(`Query successful for sid ${sid}, question_id ${question_id}, value ${queryValue}`);
+            resolve(results);  // Resolve the promise if the query succeeds
+          }
+        });
+      });
+
+      // Add the promise to the array
+      updatePromises.push(updatePromise);
+    }
+  }
+
+  // Wait for all promises to complete
+  await Promise.all(updatePromises);
+
+  // If all updates succeed, send a success response
+  res.status(200).json({ message: 'MiniProject updated successfully' });
+} catch (error) {
+  console.error('Error updating MiniProject:', error);
+  return res.status(500).json({ message: 'An error occurred while updating MiniProject' });
+}
 };
+
 export const showPPTData = async (req, res) => {
   const userCourseId = req.params.uid;
   

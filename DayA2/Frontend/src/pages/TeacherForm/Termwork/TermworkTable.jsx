@@ -19,6 +19,7 @@ const TermworkTable = ({ uid }) => {
   const [currentComponent, setCurrentComponent] = useState("TheoryAssignment");
   const [attainmentList, setAttainmentList] = useState([]); // State for attainment list
   const [experimentList, setExperimentList] = useState([]); // 
+  const [miniprojectList, setminiprojectList] = useState([]);
 
   const [tw_id ,setTWid]= useState(0)  // const [showAttainmentList, setShowAttainmentList] = useState(false); 
   useEffect(() => {
@@ -46,6 +47,10 @@ const TermworkTable = ({ uid }) => {
   // Function to update the experiment list
   const updateExperimentList = (list) => {
     setExperimentList(list);
+  };
+
+  const updateMiniProjectList = (list) => {
+    setminiprojectList(list);
   };
 //  console.log(experimentList,attainmentList)
 useEffect(() => {
@@ -150,7 +155,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : (
                 <>
-                  <MiniProject  tw_id={tw_id}  userCourseId={userCourseId} />
+                  <MiniProject  tw_id={tw_id}  userCourseId={userCourseId}  onUpdateMiniProjectList={updateMiniProjectList}  />
                   <button
                     onClick={() => setCurrentComponent("Experiment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -184,7 +189,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               )}
             </>
-          ) : twdata[0].twid === 5 || 10 ? (
+          ) : twdata[0].twid === 5 || twdata[0].twid === 10 ? (
             <>
               {currentComponent === "Experiment" ? (
                 <>
@@ -218,7 +223,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               )}
             </>
-          ) : twdata[0].twid === 6 || 11 ? (
+          ) : twdata[0].twid === 6 || twdata[0].twid === 11  ? (
             <>
               {currentComponent === "Experiment" ? (
                 <>
@@ -252,7 +257,7 @@ localStorage.removeItem("TradeAttainmentData"); // For trade
                 </>
               ) : (
                 <>
-                  <MiniProject  tw_id={tw_id}  userCourseId={userCourseId} />
+                  <MiniProject  tw_id={tw_id}  userCourseId={userCourseId}   onUpdateMiniProjectList={updateMiniProjectList} />
                   <button
                     onClick={() => setCurrentComponent("Experiment")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"

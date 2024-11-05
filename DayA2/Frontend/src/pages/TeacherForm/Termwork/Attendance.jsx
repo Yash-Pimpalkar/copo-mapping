@@ -51,17 +51,17 @@ const Attendance = ({ uid }) => {
     currentPage * itemsPerPage
   );
 
-  const handleEditClick = (att_id) => {
-    setEditingRow(att_id);
+  const handleEditClick = (attend_id) => {
+    setEditingRow(attend_id);
     setEditedMarks((prev) => ({
       ...prev,
-      [att_id]: attendanceData.find((student) => student.att_id === att_id)
+      [attend_id]: attendanceData.find((student) => student.att_id === attend_id)
         .marks,
     }));
   };
 
-  const handleSaveClick = async (att_id) => {
-    const marks = editedMarks[att_id];
+  const handleSaveClick = async (attend_id) => {
+    const marks = editedMarks[attend_id];
   
     // Validate that marks is a valid number
     if (isNaN(marks) || marks === "") {
@@ -72,14 +72,14 @@ const Attendance = ({ uid }) => {
     try {
       // Send the updated marks to the backend
       await api.put("/api/termwork/attendance/update", {
-        att_id: att_id,
+        att_id: attend_id,
         marks: parseInt(marks, 10), // Ensure marks are integers
       });
   
       // Update the local state to reflect saved changes
       setAttendanceData((prevData) =>
         prevData.map((item) =>
-          item.att_id === att_id ? { ...item, marks: parseInt(marks, 10) } : item
+          item.attend_id === attend_id ? { ...item, marks: parseInt(marks, 10) } : item
         )
       );
   
@@ -97,11 +97,11 @@ const Attendance = ({ uid }) => {
     setEditedMarks({});
   };
 
-  const handleMarksChange = (event, att_id) => {
+  const handleMarksChange = (event, attend_id) => {
     const value = event.target.value;
 
     if (value === "") {
-      setEditedMarks((prev) => ({ ...prev, [att_id]: null }));
+      setEditedMarks((prev) => ({ ...prev, [attend_id]: null }));
       return;
     }
 
@@ -116,7 +116,7 @@ const Attendance = ({ uid }) => {
       return;
     }
 
-    setEditedMarks((prev) => ({ ...prev, [att_id]: value }));
+    setEditedMarks((prev) => ({ ...prev, [attend_id]: value }));
   };
 
   // Function to handle file upload (Excel import)
@@ -156,13 +156,13 @@ const Attendance = ({ uid }) => {
   // Function to handle Excel file download (Excel export)
   const handleFileDownload = () => {
     const formattedData = attendanceData.map((student) => ({
-      att_id: student.att_id,
+      attend_id: student.attend_id,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["att_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["attend_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);

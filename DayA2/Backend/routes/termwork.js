@@ -14,8 +14,6 @@ import {
   JournalUpload,
   MajorProjectLimit,
   MajorProjectUpload,
-  MiniProjectLimit,
-  MiniProjectUpload,
   PPTLimit,
   PPTUpload,
   ReportLimit,
@@ -26,7 +24,6 @@ import {
   showGdData,
   showJournalData,
   showMajorProjectData,
-  showMiniProjectData,
   showPPTData,
   showReportData,
   showSciLabData,
@@ -42,6 +39,9 @@ import {
   showReportcoData,
   showSciLabcoData,
   showReportTradeCoData,
+  GetMiniProject,
+  getMiniProjectAndCOs,
+  updateMiniProject,
 } from "../controller/termwork.js";
 const router = express.Router();
 
@@ -88,9 +88,12 @@ router.put("/majorpro/update", MajorProjectUpload);
 router.get("/majorpro/limit/:uid", MajorProjectLimit);
 
 // mini project
-router.get("/show/minipro/:uid", showMiniProjectData);
-router.put("/minipro/update", MiniProjectUpload);
-router.get("/minipro/limit/:uid", MiniProjectLimit);
+// router.get("/show/minipro/:usercourseid", showMiniProjectData);
+// router.put("/minipro/update", MiniProjectUpload);
+// router.get("/minipro/limit/:uid", MiniProjectLimit);
+router.get("/show/minipro/:usercourseid", GetMiniProject);
+router.get("/show/miniproco/:usercourseid", getMiniProjectAndCOs);
+router.put("/minipro/update", updateMiniProject);
 
 // ppt
 router.get("/show/ppt/:uid", showPPTData);

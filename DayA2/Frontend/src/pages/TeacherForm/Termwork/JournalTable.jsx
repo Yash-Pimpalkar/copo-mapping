@@ -92,13 +92,13 @@ const Journal = ({ uid, tw_id }) => {
 
   const handleFileDownload = () => {
     const formattedData = journalData.map((student) => ({
-      att_id: student.att_id,
+      journal1_id: student.journal1_id,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["att_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["journal1_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
@@ -116,11 +116,13 @@ const Journal = ({ uid, tw_id }) => {
   };
 
   const handleSaveClick = async (index) => {
-    const att_id = journalData[index].att_id;
+    const { journal1_id, sid } = journalData[index]; // Destructure sid from journalData
     const marks = editedMarks[index];
-
+  
     try {
-      await api.put("/api/termwork/journal/update", { att_id: att_id, Marks: marks });
+      // Include both journal1_id and sid in the PUT request
+      await api.put("/api/termwork/journal/update", { journal1_id, sid, Marks: marks });
+  
       setJournalData((prevData) =>
         prevData.map((item, idx) =>
           idx === index ? { ...item, marks } : item
@@ -131,6 +133,7 @@ const Journal = ({ uid, tw_id }) => {
       console.error("Error saving marks:", error);
     }
   };
+  
 
   const handleCancelClick = () => {
     setEditingRow(null);
@@ -309,41 +312,51 @@ const Journal = ({ uid, tw_id }) => {
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((student, index) => (
-            <tr key={index} className="hover:bg-gray-100 transition duration-200">
-              <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
-              <td className="border border-gray-300 px-4 py-2">
-                {editingRow === index ? (
-                  <input
-                    type="text"
-                    value={editedMarks[index] || student.marks}
-                    onChange={(e) => handleMarksChange(e, index)}
-                    className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
-                  />
-                ) : (
-                  student.marks
-                )}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 flex justify-center">
-                {editingRow === index ? (
-                  <>
-                    <button onClick={() => handleSaveClick(index)} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
-                      Save
-                    </button>
-                    <button onClick={handleCancelClick} className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300">
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button onClick={() => handleEditClick(index)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
-                    Edit
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
+        {paginatedData.map((student, index) => (
+  <tr key={index} className="hover:bg-gray-100 transition duration-200">
+    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+    <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
+    <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
+    <td className="border border-gray-300 px-4 py-2">
+      {editingRow === index ? (
+        <input
+          type="text"
+          value={editedMarks[index] !== undefined ? editedMarks[index] : student.marks}
+          onChange={(e) => handleMarksChange(e, index)}
+          className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
+        />
+      ) : (
+        student.marks
+      )}
+    </td>
+    <td className="border border-gray-300 px-4 py-2 flex justify-center">
+      {editingRow === index ? (
+        <>
+          <button
+            onClick={() => handleSaveClick(index)}
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+          >
+            Save
+          </button>
+          <button
+            onClick={handleCancelClick}
+            className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300"
+          >
+            Cancel
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={() => handleEditClick(index)}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+        >
+          Edit
+        </button>
+      )}
+    </td>
+  </tr>
+))}
+
         </tbody>
       </table>
 

@@ -5,7 +5,7 @@ import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
 import { useNavigate } from "react-router-dom";
 
-const MiniProject = ({ userCourseId , tw_id  }) => {
+const MiniProject = ({ userCourseId ,onUpdateMiniProjectList, tw_id  }) => {
   const [MiniprojectData, setMiniprojectData] = useState([]);
   const [questiondata, SetQuestionData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,7 +165,7 @@ console.log(questiondata)
 
     const formattedData = {
       sid, // Include sid here
-      miniprojects: updatedAssignments,
+      MiniProject: updatedAssignments,
     };
 
     try {
@@ -177,7 +177,7 @@ console.log(questiondata)
         `/api/termwork/show/minipro/${userCourseId}`
       );
       console.log("Save Response:", response);
-      setMiniprojectData(response.data);
+      setMiniprojectData(response.data.data);
     } catch (error) {
       console.error("Error saving miniproject data:", error);
     }
@@ -312,11 +312,11 @@ console.log(questiondata)
     userCourseId
   ) => {
     // Logic to handle attainment calculation
-    const MiniproattainmentList = calculateAttainmentList();
+    const attainmentList = calculateAttainmentList();
     
     // Store data in localStorage
     const dataToStore = {
-      MiniproattainmentList,
+      attainmentList,
       passedPercentage: attainmentData.passedPercentage,
       tw_id,
       userCourseId,
@@ -325,6 +325,14 @@ console.log(questiondata)
     localStorage.setItem('MiniProjectAttainmentData', JSON.stringify(dataToStore));
   
     // Call onUpdateAttainmentList
+    // Call the function to update the experiment list
+    onUpdateMiniProjectList(attainmentList);
+  
+    // Log the data after updating
+    console.log("Attainment updated:",  attainmentData);
+  
+    // Display a success message
+    setMessage("Attainment data has been updated successfully.");
     // onUpdateMiniproAttainmentList(MiniproattainmentList);
   
     console.log(
@@ -390,6 +398,7 @@ console.log(questiondata)
     // Only calculate attainment list if there is data to process
     if (MiniprojectData.length > 0 && questiondata.length > 0) {
       const MiniproattainmentList = calculateAttainmentList();
+      onUpdateMiniProjectList(MiniproattainmentList); 
  
     }
   }, [MiniprojectData, questiondata]); // Trigger whenever the assignment data or question data changes

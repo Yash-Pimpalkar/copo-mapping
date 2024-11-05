@@ -87,7 +87,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
     );
     return question ? question.maxmarks : 100;
   };
-
+ console.log(questiondata)
   // Calculate total pages based on data length
   const totalPages = Math.ceil(TwAssignMentData.length / dataPerPage);
 
@@ -373,7 +373,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
   const calculateAttainmentList = () => {
     const attainmentList = assignmentKeys.map((assignmentKey, index) => {
       const coname = getCOName(assignmentKey);
-       
+       console.log(coname)
       // Get total students passed and attempted for this question/CO name
       const passedCount = getTotalStudentsPassedPerQuestion(
         attainmentData.passedPercentage
@@ -393,9 +393,12 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
         attainment: `${attainment}%`,
       };
     });
+
   
     return attainmentList;
   };
+  console.log(assignmentKeys)
+  console.log(questiondata)
   
   const handleClick = () => {
     navigate(`/AddStudent/${curriculum}/${userCourseId}`);
