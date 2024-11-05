@@ -341,8 +341,7 @@ export const getStudentFeedbackDetails = async (req, res) => {
 };
 
 
-
-export const updateFeedbackAttainment =expressAsyncHandler( async (req, res) => {
+export const updateFeedbackAttainment = expressAsyncHandler(async (req, res) => {
     const { usercourseid, coAttainmentData } = req.body;
 
     if (!usercourseid || !coAttainmentData || coAttainmentData.length === 0) {
@@ -350,15 +349,36 @@ export const updateFeedbackAttainment =expressAsyncHandler( async (req, res) => 
     }
 
     try {
+        const checkQuery = `
+            SELECT idfeedback_attainment FROM feedback_attainment 
+            WHERE coname = ? AND usercourseid = ?
+        `;
+        
         const insertQuery = `
             INSERT INTO feedback_attainment (coname, coaverage, attainment, usercourseid) 
             VALUES (?, ?, ?, ?)
         `;
 
-        // Loop through the coAttainmentData array and insert each entry
+        const updateQuery = `
+            UPDATE feedback_attainment 
+            SET coaverage = ?, attainment = ? 
+            WHERE coname = ? AND usercourseid = ?
+        `;
+
+        // Loop through the coAttainmentData array
         for (const entry of coAttainmentData) {
             const { coName, coAverage, categorization } = entry;
-            await db.promise().query(insertQuery, [coName, coAverage, categorization, usercourseid]);
+
+            // Check if record exists
+            const [existingRecords] = await db.promise().query(checkQuery, [coName, usercourseid]);
+
+            if (existingRecords.length > 0) {
+                // Update if record exists
+                await db.promise().query(updateQuery, [coAverage, categorization, coName, usercourseid]);
+            } else {
+                // Insert new record if not found
+                await db.promise().query(insertQuery, [coName, coAverage, categorization, usercourseid]);
+            }
         }
 
         res.status(201).json({ message: "Attainment data updated successfully." });
