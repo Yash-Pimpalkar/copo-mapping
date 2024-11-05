@@ -53,12 +53,18 @@ export default function Admin_Cos_Edit() {
     };
 
     const handleAddNewClick = () => {
-        setIsAddingNew(true);
-        setNewlyAddedCOs((prev) => [
-            ...prev,
-            { cos_name: "", cos_body: "", created_time: new Date().toISOString() }
-        ]);
+        // Check if there's already an empty CO being added
+        const hasEmptyCO = newlyAddedCOs.some(co => co.cos_name === "" && co.cos_body === "");
+        
+        if (!hasEmptyCO) {
+            setIsAddingNew(true);
+            setNewlyAddedCOs((prev) => [
+                ...prev,
+                { cos_name: "", cos_body: "", created_time: new Date().toISOString() }
+            ]);
+        }
     };
+    
 
     const handleNewCoChange = (index, event) => {
         const { name, value } = event.target;
@@ -213,13 +219,13 @@ export default function Admin_Cos_Edit() {
                                 />
                             </td>
                             <td className="border border-gray-300 px-4 py-2">
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() => handleEditCO(index)}
                                     className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2"
                                 >
                                     Edit CO
-                                </button>
+                                </button> */}
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveCO(index)}
