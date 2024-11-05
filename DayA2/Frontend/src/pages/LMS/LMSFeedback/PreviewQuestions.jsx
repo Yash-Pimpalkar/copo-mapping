@@ -12,7 +12,7 @@ const PreviewQuestions = ({ uid }) => {
                 setErr("");
                 setLoading(true);
                 try {
-                    const res = await api.get(`/api/lmsclassroom/feedback/show/${uid}`);
+                    const res = await api.get(`/api/lmsclassroom/feedback/show/teacher/${uid}`);
                     const fetchedFeedbackData = res.data.feedbackData;
                     setFeedbackData(fetchedFeedbackData);
                     console.log(fetchedFeedbackData);

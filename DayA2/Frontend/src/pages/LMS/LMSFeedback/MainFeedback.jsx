@@ -112,7 +112,7 @@ const FeedbackPage = ({ uid }) => {
           console.log("userCourseId", userCourseId);
           console.log("Reached here");
           const res = await api.get(
-            `/api/lmsclassroom/feedback/show/${userCourseId}`
+            `/api/lmsclassroom/feedback/show/teacher/${userCourseId}`
           );
           const fetchedFeedbackData = res.data.feedbackData;
           console.log("fetchedFeedbackData", fetchedFeedbackData);
@@ -245,7 +245,7 @@ const FeedbackPage = ({ uid }) => {
 
           {showAnalysis && !showResponseFeedback && (
             <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-              <Analysis uid={userCourseId} />
+              <Analysis usercourseid={userCourseId} />
             </div>
           )}
 
