@@ -95,7 +95,7 @@ const PureTheoryResult = ({ uid }) => {
           // Dummy indirect attainment value
           const indirectAttainmentvalues = indirectMap[coname] || 0;
 
-          const indirectAttainment = (indirectAttainmentvalues * (20 / 100));    // separate indirect attainment column 
+          const indirectAttainment = (indirectAttainmentvalues * (20 / 100)).toFixed(2);    // separate indirect attainment column 
 
           const totalatt = parseFloat(directAttainment) + parseFloat(indirectAttainment);
 

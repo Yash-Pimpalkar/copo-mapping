@@ -105,7 +105,7 @@ const IntaTWUniv = ({ uid }) => {
 
           const indirectAttainment = parseFloat(
             (indirectAttainmentvalues * (20 / 100))
-        );
+        ).toFixed(2);
         
           const totalAttainment =
             parseFloat(directAttainment) + parseFloat(indirectAttainment);

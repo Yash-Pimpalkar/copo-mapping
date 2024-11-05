@@ -64,7 +64,7 @@ const Tworalresult = ({ uid }) => {
           const indirectAttainmentvalues =  indirectMap[coname] || 0;  // Example calculation
           // const twattainment = (Math.random() * 3).toFixed(2);  // Dummy twattainment data
 
-          const indirectAttainment = (indirectAttainmentvalues * (20 / 100));
+          const indirectAttainment = (indirectAttainmentvalues * (20 / 100)).toFixed(2);
           const totalAttainment = parseFloat(directAttainment) + parseFloat(indirectAttainment);
 
           return {

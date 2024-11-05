@@ -291,10 +291,9 @@ export const fetchTermwork = (req, res) => {
 
     // SQL query to join student_feedback and co_feedback based on usercourseid
     const sql = `
-        SELECT sf.marks, cf.coname 
-        FROM student_feedback sf
-        JOIN co_feedback cf ON sf.qid = cf.q_id
-        WHERE sf.usercourseid = ?
+        SELECT attainment, coname
+        FROM feedback_attainment
+        WHERE usercourseid = ?
     `;
 
     try {
@@ -313,7 +312,7 @@ export const fetchTermwork = (req, res) => {
         // Extract unique CO names and their corresponding marks from the result
         const uniqueFeedback = result.map(row => ({
             coname: row.coname,
-            marks: row.marks
+            marks: row.attainment
         }));
 
         return res.status(200).json(uniqueFeedback);
