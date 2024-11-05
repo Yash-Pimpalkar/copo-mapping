@@ -107,21 +107,26 @@ const Report = ({ uid, tw_id }) => {
 
   const handleEditClick = (index) => {
     setEditingRow(index);
+    const student = paginatedData[index]; // Access the correct paginated student
     setEditedMarks({
       ...editedMarks,
-      [index]: reportData[index].marks,
+      [index]: student.marks, 
     });
   };
 
   const handleSaveClick = async (index) => {
-    const id = reportData[index].id;
+    // Calculate the correct index in reportData based on pagination
+    const globalIndex = (currentPage - 1) * itemsPerPage + index;
+  
+    const { report_id, sid } = reportData[globalIndex];
     const marks = editedMarks[index];
-
+  
     try {
-      await api.put("/api/termwork/report/update", { id: id, Marks: marks });
+      await api.put("/api/termwork/report/update", { report_id: report_id, sid: sid, Marks: marks });
+  
       setReportData((prevData) =>
         prevData.map((item, idx) =>
-          idx === index ? { ...item, marks } : item
+          idx === globalIndex ? { ...item, marks } : item
         )
       );
       setEditingRow(null);
@@ -129,6 +134,7 @@ const Report = ({ uid, tw_id }) => {
       console.error("Error saving marks:", error);
     }
   };
+  
 
   const handleCancelClick = () => {
     setEditingRow(null);
@@ -313,7 +319,7 @@ const Report = ({ uid, tw_id }) => {
                 {editingRow === index ? (
                   <input
                     type="text"
-                    value={editedMarks[index] || student.marks}
+                    value={editedMarks[index] !== undefined ? editedMarks[index] : student.marks}
                     onChange={(e) => handleMarksChange(e, index)}
                     className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
                   />

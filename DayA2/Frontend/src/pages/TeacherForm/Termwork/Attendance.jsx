@@ -51,17 +51,20 @@ const Attendance = ({ uid }) => {
     currentPage * itemsPerPage
   );
 
-  const handleEditClick = (attend_id) => {
-    setEditingRow(attend_id);
+  const handleEditClick = (attend_id, sid) => {
+    const uniqueKey = `${attend_id}-${sid}`;
+    setEditingRow(uniqueKey);
     setEditedMarks((prev) => ({
       ...prev,
-      [attend_id]: attendanceData.find((student) => student.att_id === attend_id)
-        .marks,
+      [uniqueKey]: attendanceData.find(
+        (student) => student.attend_id === attend_id && student.sid === sid
+      )?.marks,
     }));
   };
-
-  const handleSaveClick = async (attend_id) => {
-    const marks = editedMarks[attend_id];
+  
+  const handleSaveClick = async (attend_id, sid) => {
+    const uniqueKey = `${attend_id}-${sid}`;
+    const marks = editedMarks[uniqueKey];
   
     // Validate that marks is a valid number
     if (isNaN(marks) || marks === "") {
@@ -72,14 +75,17 @@ const Attendance = ({ uid }) => {
     try {
       // Send the updated marks to the backend
       await api.put("/api/termwork/attendance/update", {
-        att_id: attend_id,
+        attend_id: attend_id,
+        sid: sid,
         marks: parseInt(marks, 10), // Ensure marks are integers
       });
   
       // Update the local state to reflect saved changes
       setAttendanceData((prevData) =>
         prevData.map((item) =>
-          item.attend_id === attend_id ? { ...item, marks: parseInt(marks, 10) } : item
+          item.attend_id === attend_id && item.sid === sid
+            ? { ...item, marks: parseInt(marks, 10) }
+            : item
         )
       );
   
@@ -91,33 +97,37 @@ const Attendance = ({ uid }) => {
     }
   };
   
+  const handleMarksChange = (event, attend_id, sid) => {
+    const uniqueKey = `${attend_id}-${sid}`;
+    const value = event.target.value;
+  
+    if (value === "") {
+      setEditedMarks((prev) => ({ ...prev, [uniqueKey]: null }));
+      return;
+    }
+  
+    // Validate against `maxLimit`
+    if (parseInt(value) > maxLimit) {
+      alert(`Value should not be greater than ${maxLimit}`);
+      return;
+    }
+  
+    if (parseInt(value) < 0) {
+      alert("Value should not be less than 0");
+      return;
+    }
+  
+    setEditedMarks((prev) => ({ ...prev, [uniqueKey]: value }));
+  };
+  
+  
+  
 
   const handleCancelClick = () => {
     setEditingRow(null);
     setEditedMarks({});
   };
 
-  const handleMarksChange = (event, attend_id) => {
-    const value = event.target.value;
-
-    if (value === "") {
-      setEditedMarks((prev) => ({ ...prev, [attend_id]: null }));
-      return;
-    }
-
-    // Validate against `maxLimit`
-    if (parseInt(value) > maxLimit) {
-      alert(`Value should not be greater than ${maxLimit}`);
-      return;
-    }
-
-    if (parseInt(value) < 0) {
-      alert("Value should not be less than 0");
-      return;
-    }
-
-    setEditedMarks((prev) => ({ ...prev, [attend_id]: value }));
-  };
 
   // Function to handle file upload (Excel import)
   const handleFileUpload = (event) => {
@@ -156,13 +166,13 @@ const Attendance = ({ uid }) => {
   // Function to handle Excel file download (Excel export)
   const handleFileDownload = () => {
     const formattedData = attendanceData.map((student) => ({
-      attend_id: student.attend_id,
+      att_id: student.att_id,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["attend_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["att_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
@@ -249,47 +259,48 @@ const Attendance = ({ uid }) => {
               <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
               <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
               <td className="border border-gray-300 px-4 py-2">
-                {editingRow === student.att_id ? (
-                  <input
-                    type="number" // Ensure the input type is 'number'
-                    value={
-                      editedMarks[student.att_id] !== undefined
-                        ? editedMarks[student.att_id]
-                        : student.marks
-                    }
-                    onChange={(e) => handleMarksChange(e, student.att_id)}
-                    className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
-                  />
-                ) : (
-                  student.marks
-                )}
-              </td>
+  {editingRow === `${student.attend_id}-${student.sid}` ? (
+    <input
+      type="number" // Ensure the input type is 'number'
+      value={
+        editedMarks[`${student.attend_id}-${student.sid}`] !== undefined
+          ? editedMarks[`${student.attend_id}-${student.sid}`]
+          : student.marks
+      }
+      onChange={(e) => handleMarksChange(e, student.attend_id, student.sid)}
+      className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
+    />
+  ) : (
+    student.marks
+  )}
+</td>
 
-              <td className="border  px-4 py-2 flex justify-center">
-                {editingRow === student.att_id ? (
-                  <>
-                    <button
-                      onClick={() => handleSaveClick(student.att_id)}
-                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancelClick}
-                      className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => handleEditClick(student.att_id)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
-                  >
-                    Edit
-                  </button>
-                )}
-              </td>
+<td className="border px-4 py-2 flex justify-center">
+  {editingRow === `${student.attend_id}-${student.sid}` ? (
+    <>
+      <button
+        onClick={() => handleSaveClick(student.attend_id, student.sid)}
+        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+      >
+        Save
+      </button>
+      <button
+        onClick={handleCancelClick}
+        className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300"
+      >
+        Cancel
+      </button>
+    </>
+  ) : (
+    <button
+      onClick={() => handleEditClick(student.attend_id, student.sid)}
+      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+    >
+      Edit
+    </button>
+  )}
+</td>
+
             </tr>
           ))}
         </tbody>

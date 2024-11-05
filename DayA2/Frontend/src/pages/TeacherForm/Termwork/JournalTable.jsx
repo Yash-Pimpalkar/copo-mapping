@@ -92,13 +92,13 @@ const Journal = ({ uid, tw_id }) => {
 
   const handleFileDownload = () => {
     const formattedData = journalData.map((student) => ({
-      journal1_id: student.journal1_id,
+      journal_id: student.journal_id,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["journal1_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["journal_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
@@ -109,31 +109,27 @@ const Journal = ({ uid, tw_id }) => {
 
   const handleEditClick = (index) => {
     setEditingRow(index);
+    const student = paginatedData[index]; // Access the correct paginated student
     setEditedMarks({
       ...editedMarks,
-      [index]: journalData[index].marks,
+      [index]: student.marks, // Initialize the edited marks
     });
-  };
+};
 
-  const handleSaveClick = async (index) => {
-    const { journal1_id, sid } = journalData[index]; // Destructure sid from journalData
+const handleSaveClick = async (index) => {
+  const student = paginatedData[index];
+    const { journal1_id, sid } = student; // Destructure sid from journalData
     const marks = editedMarks[index];
-  
     try {
-      // Include both journal1_id and sid in the PUT request
-      await api.put("/api/termwork/journal/update", { journal1_id, sid, Marks: marks });
-  
-      setJournalData((prevData) =>
-        prevData.map((item, idx) =>
-          idx === index ? { ...item, marks } : item
-        )
-      );
-      setEditingRow(null);
+        await api.put("/api/termwork/journal/update", { journal1_id, sid, Marks: marks });
+        setJournalData((prevData) =>
+          prevData.map((item) => (item.sid === sid ? { ...item, marks } : item))
+        );
+        setEditingRow(null);
     } catch (error) {
-      console.error("Error saving marks:", error);
+        console.error("Error saving marks:", error);
     }
-  };
-  
+};
 
   const handleCancelClick = () => {
     setEditingRow(null);

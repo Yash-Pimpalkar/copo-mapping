@@ -563,12 +563,13 @@ export const AttendanceUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_atten SET marks = ? WHERE att_id = ?';
+  const sql = 'UPDATE main_atten SET marks = ? WHERE attend_id = ? AND sid = ?';
   const queryValues = updates.map(update => {
     const marks = parseInt(update.marks, 10);  // Change 'Marks' to 'marks'
     return [
       isNaN(marks) ? null : marks,  // Use null if marks is NaN
-      update.att_id
+      update.attend_id,
+      update.sid
     ];
   });
 
@@ -775,12 +776,13 @@ export const SciLabUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_scipract SET marks = ? WHERE sciid = ?';
+  const sql = 'UPDATE main_scipract SET marks = ? WHERE scipract_id = ? AND sid = ?';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.sciid
+      update.scipract_id,
+      update.sid
     ];
   });
 
@@ -1346,12 +1348,13 @@ export const PPTUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_ppt SET marks = ? WHERE id = ?';
+  const sql = 'UPDATE main_ppt SET marks = ? WHERE ppt_id = ? AND sid= ?';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.id
+      update.ppt_id,
+      update.sid
     ];
   });
 
@@ -1436,12 +1439,13 @@ export const ReportUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_report SET marks = ? WHERE id = ?';
+  const sql = 'UPDATE main_report SET marks = ? WHERE report_id = ? AND sid= ?';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.id
+      update.report_id,
+      update.sid
     ];
   });
 

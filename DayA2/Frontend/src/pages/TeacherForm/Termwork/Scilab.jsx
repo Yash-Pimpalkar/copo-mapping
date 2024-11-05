@@ -106,22 +106,22 @@ const SciLab = ({ uid, tw_id }) => {
 
   const handleEditClick = (index) => {
     setEditingRow(index);
+    const student = paginatedData[index]; // Access the correct paginated student
     setEditedMarks({
       ...editedMarks,
-      [index]: sciLabData[index].marks,
+      [index]: student.marks, // Initialize the edited marks
     });
   };
 
   const handleSaveClick = async (index) => {
-    const sciid = sciLabData[index].sciid;
+    const student = paginatedData[index]; // Access the correct paginated student
+    const { scipract_id, sid } = student;
     const marks = editedMarks[index];
 
     try {
-      await api.put("/api/termwork/scilab/update", { sciid: sciid, Marks: marks });
+      await api.put("/api/termwork/scilab/update", { scipract_id: scipract_id, sid:sid, Marks: marks });
       setSciLabData((prevData) =>
-        prevData.map((item, idx) =>
-          idx === index ? { ...item, marks } : item
-        )
+        prevData.map((item) => (item.sid === sid ? { ...item, marks } : item))
       );
       setEditingRow(null);
     } catch (error) {
@@ -311,7 +311,7 @@ const SciLab = ({ uid, tw_id }) => {
                 {editingRow === index ? (
                   <input
                     type="text"
-                    value={editedMarks[index] || student.marks}
+                    value={editedMarks[index] !== undefined ? editedMarks[index] : student.marks}
                     onChange={(e) => handleMarksChange(e, index)}
                     className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
                   />

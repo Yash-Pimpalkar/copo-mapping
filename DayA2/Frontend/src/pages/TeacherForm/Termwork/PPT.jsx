@@ -142,55 +142,60 @@ const PPT = ({ uid , tw_id}) => {
 
   const handleEditClick = (index) => {
     setEditingRow(index);
+    const student = paginatedData[index]; // Access the correct paginated student
     setEditedMarks({
       ...editedMarks,
-      [index]: pptData[index].marks,
+      [index]: student.marks, // Initialize the edited marks
     });
   };
-
+  
   const handleSaveClick = async (index) => {
-    const id = pptData[index].id;
-    const marks = editedMarks[index];
-
+    const student = paginatedData[index]; // Access the correct paginated student
+    const { ppt_id, sid } = student; // Get ppt_id and sid
+  
+    const marks = editedMarks[index]; // Get the edited marks
+  
     try {
-      await api.put("/api/termwork/ppt/update", { id: id, Marks: marks });
-      setPptData((prevData) =>
-        prevData.map((item, idx) =>
-          idx === index ? { ...item, marks } : item
-        )
+      await api.put("/api/termwork/ppt/update", { ppt_id, sid, Marks: marks });
+      
+      // Update the original data using sid for accurate matching
+      setPptData((prevData) => 
+        prevData.map((item) => (item.sid === sid ? { ...item, marks } : item))
       );
+      
       setEditingRow(null);
     } catch (error) {
       console.error("Error saving marks:", error);
     }
   };
-
+  
+  
   const handleCancelClick = () => {
     setEditingRow(null);
     setEditedMarks({});
   };
-
+  
   const handleMarksChange = (event, index) => {
     const value = event.target.value;
-
+  
     if (value === "") {
       setEditedMarks((prev) => ({ ...prev, [index]: null }));
       return;
     }
-
+  
     if (value > maxLimit) {
       alert(`Value should not be greater than ${maxLimit}`);
       return;
     }
-
+  
     if (value < 0) {
       alert("Value should not be less than 0");
       return;
     }
-
+  
     setEditedMarks((prev) => ({ ...prev, [index]: value }));
   };
-
+  
   
   // console.log(pptData)
   // console.log(pptcoData)
@@ -315,7 +320,7 @@ const PPT = ({ uid , tw_id}) => {
                 {editingRow === index ? (
                   <input
                     type="text"
-                    value={editedMarks[index] || student.marks}
+                    value={editedMarks[index] !== undefined ? editedMarks[index] : student.marks}
                     onChange={(e) => handleMarksChange(e, index)}
                     className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
                   />
