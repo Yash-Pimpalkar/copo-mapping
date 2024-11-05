@@ -18,7 +18,7 @@ const Report = ({ uid, tw_id }) => {
     passedPercentage: 0, // Default percentage
   });
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const userCourseId = uid;
 
 
@@ -110,20 +110,20 @@ const Report = ({ uid, tw_id }) => {
     const student = paginatedData[index]; // Access the correct paginated student
     setEditedMarks({
       ...editedMarks,
-      [index]: student.marks, 
+      [index]: student.marks,
     });
   };
 
   const handleSaveClick = async (index) => {
     // Calculate the correct index in reportData based on pagination
     const globalIndex = (currentPage - 1) * itemsPerPage + index;
-  
+
     const { report_id, sid } = reportData[globalIndex];
     const marks = editedMarks[index];
-  
+
     try {
       await api.put("/api/termwork/report/update", { report_id: report_id, sid: sid, Marks: marks });
-  
+
       setReportData((prevData) =>
         prevData.map((item, idx) =>
           idx === globalIndex ? { ...item, marks } : item
@@ -134,7 +134,7 @@ const Report = ({ uid, tw_id }) => {
       console.error("Error saving marks:", error);
     }
   };
-  
+
 
   const handleCancelClick = () => {
     setEditingRow(null);
@@ -146,17 +146,17 @@ const Report = ({ uid, tw_id }) => {
 
     if (value === "") {
       setEditedMarks((prev) => ({ ...prev, [index]: null }));
-      return; 
+      return;
     }
 
     if (value > maxLimit) {
       alert(`Value should not be greater than ${maxLimit}`);
-      return; 
+      return;
     }
 
     if (value < 0) {
       alert("Value should not be less than 0");
-      return; 
+      return;
     }
 
     setEditedMarks((prev) => ({ ...prev, [index]: value }));
@@ -190,10 +190,10 @@ const Report = ({ uid, tw_id }) => {
     }));
   };
 
-  const handle_Attainment = ()=> {
+  const handle_Attainment = () => {
 
   }
-  
+
 
   const [error, setError] = useState("");
 
@@ -204,9 +204,9 @@ const Report = ({ uid, tw_id }) => {
   ) => {
     // Logic to handle attainment calculation
     const attainmentList = calculatereportAttainmentList(reportcoData, reportData, maxLimit, attainmentData); // Corrected here
-  
+
     console.log(attainmentData.passedPercentage);
-  
+
     // Store data in localStorage
     const dataToStore = {
       attainmentList,
@@ -214,36 +214,36 @@ const Report = ({ uid, tw_id }) => {
       tw_id,
       userCourseId,
     };
-  
+
     localStorage.setItem('ReportAttainmentData', JSON.stringify(dataToStore));
-  
+
     console.log("Report Attainment updated", reportcoData, reportData);
     setMessage("Report attainment data has been updated successfully.");
   };
-  
+
   const calculatereportAttainmentList = (reportcoData, reportData, maxLimit, attainmentData) => {
     console.log(attainmentData.passedPercentage); // Now this will correctly log the passedPercentage
     return reportcoData.map((course) => {
       const coname = course.coname; // Get the CO name
-  
+
       // Calculate the passing threshold based on the passed percentage
       const passingMarks = (maxLimit * attainmentData.passedPercentage) / 100;
-  
+
       // Calculate the number of students who passed
       const passedCount = reportData.filter(student => student.marks >= passingMarks).length;
-  
+
       // Calculate the percentage of students who passed
-      const attainmentPercentage = reportData.length > 0 
-        ? ((passedCount / reportData.length) * 100).toFixed(2) 
+      const attainmentPercentage = reportData.length > 0
+        ? ((passedCount / reportData.length) * 100).toFixed(2)
         : 0;
-  
+
       // Return the coname and its corresponding attainment percentage
       return {
         coname: coname,
         attainment: `${attainmentPercentage} %`,
       };
     });
-  };  
+  };
 
   // console.log(reportData)
   // console.log(reportcoData)
@@ -256,24 +256,24 @@ const Report = ({ uid, tw_id }) => {
     <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
       {/* Container for Export, Import and Search Bar */}
       <div className="flex flex-col items-center mb-6">
-    {/* Centered Title */}
-    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
-      Report
-    </h1>
-   
- 
-    {/* Add Student Button aligned below the title, on the right */}
-    <div className="w-full flex justify-end mt-2">
-      {userCourseId && (
-        <button
-          onClick={handleClick}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Add Student
-        </button>
-      )}
-    </div>
-    </div>
+        {/* Centered Title */}
+        <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+          Report
+        </h1>
+
+
+        {/* Add Student Button aligned below the title, on the right */}
+        <div className="w-full flex justify-end mt-2">
+          {userCourseId && (
+            <button
+              onClick={handleClick}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+              Add Student
+            </button>
+          )}
+        </div>
+      </div>
       <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* File Upload */}
         <input
@@ -283,13 +283,14 @@ const Report = ({ uid, tw_id }) => {
           className="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
         />
 
+
         {/* Search Bar */}
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by student name or ID"
-          className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+          className="w-64 px-5 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
         />
 
         {/* Download Excel Button */}
@@ -300,55 +301,55 @@ const Report = ({ uid, tw_id }) => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-  <table className="min-w-full bg-white border-collapse border border-gray-400 shadow-md rounded-lg">
-    <thead className="bg-indigo-100">
-      <tr>
-        <th className="border border-gray-300 px-4 py-2">Index</th>
-        <th className="border border-gray-300 px-4 py-2">Student ID</th>
-        <th className="border border-gray-300 px-4 py-2">Student Name</th>
-        <th className="border border-gray-300 px-4 py-2">Marks</th>
-        <th className="border border-gray-300 px-4 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {paginatedData.map((student, index) => (
-        <tr key={index} className="hover:bg-gray-100 transition duration-200">
-          <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-          <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
-          <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
-          <td className="border border-gray-300 px-4 py-2">
-            {editingRow === index ? (
-              <input
-                type="text"
-                value={editedMarks[index] !== undefined ? editedMarks[index] : student.marks}
-                onChange={(e) => handleMarksChange(e, index)}
-                className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
-              />
-            ) : (
-              student.marks
-            )}
-          </td>
-          <td className="border border-gray-300 px-4 py-2 flex justify-center">
-            {editingRow === index ? (
-              <>
-                <button onClick={() => handleSaveClick(index)} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
-                  Save
-                </button>
-                <button onClick={handleCancelClick} className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300">
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button onClick={() => handleEditClick(index)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
-                Edit
-              </button>
-            )}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+        <table className="min-w-full bg-white border-collapse border border-gray-400 shadow-md rounded-lg">
+          <thead className="bg-indigo-100">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">Index</th>
+              <th className="border border-gray-300 px-4 py-2">Student ID</th>
+              <th className="border border-gray-300 px-4 py-2">Student Name</th>
+              <th className="border border-gray-300 px-4 py-2">Marks</th>
+              <th className="border border-gray-300 px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((student, index) => (
+              <tr key={index} className="hover:bg-gray-100 transition duration-200">
+                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
+                <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {editingRow === index ? (
+                    <input
+                      type="text"
+                      value={editedMarks[index] !== undefined ? editedMarks[index] : student.marks}
+                      onChange={(e) => handleMarksChange(e, index)}
+                      className="border border-gray-300 rounded-md px-2 py-1 focus:ring-indigo-500"
+                    />
+                  ) : (
+                    student.marks
+                  )}
+                </td>
+                <td className="border border-gray-300 px-4 py-2 flex justify-center">
+                  {editingRow === index ? (
+                    <>
+                      <button onClick={() => handleSaveClick(index)} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
+                        Save
+                      </button>
+                      <button onClick={handleCancelClick} className="bg-red-500 text-white px-4 py-2 rounded-md ml-2 hover:bg-red-600 transition duration-300">
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => handleEditClick(index)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                      Edit
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
 
       {/* Pagination Component */}
@@ -360,170 +361,170 @@ const Report = ({ uid, tw_id }) => {
         />
       )}
       <div>
-  {reportData.length > 0 && (
-    <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-lg font-semibold">
-          Total Students Passed Each Question
-        </h1>
-        <button
-          onClick={() =>
-            handle_Attenment(
-              attainmentData,
-              tw_id,
-              uid
-            )
-          }
-          className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
-        >
-          Update Attainment
-        </button>
-      </div>
+        {reportData.length > 0 && (
+          <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-lg font-semibold">
+                Total Students Passed Each Question
+              </h1>
+              <button
+                onClick={() =>
+                  handle_Attenment(
+                    attainmentData,
+                    tw_id,
+                    uid
+                  )
+                }
+                className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
+              >
+                Update Attainment
+              </button>
+            </div>
 
-      <div className="mb-4">
-        <label
-          htmlFor="total-student-passed"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Total Students Passed with &gt;= PERCENTAGE %
-        </label>
-        <input
-          id="total-student-passed"
-          type="text"
-          value={attainmentData.passedPercentage}
-          onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-          className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        {message && (
-          <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
-            {message}
-          </div>
-        )}
-      </div>
+            <div className="mb-4">
+              <label
+                htmlFor="total-student-passed"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Total Students Passed with &gt;= PERCENTAGE %
+              </label>
+              <input
+                id="total-student-passed"
+                type="text"
+                value={attainmentData.passedPercentage}
+                onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+                className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              {message && (
+                <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">
+                  {message}
+                </div>
+              )}
+            </div>
 
-      <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
-        <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
+            <div className="container mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+              <h1 className="text-lg font-semibold mb-4">Student Statistics</h1>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-blue-500 text-white">
-              <tr>
-                <th
-                  colSpan={2}
-                  className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider"
-                >
-                  Attainment calculation
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              <tr className="bg-white">
-                <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
-                  Students passed with {attainmentData.passedPercentage} %
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {
-                    reportData.filter(
-                      (student) =>
-                        student.marks >=
-                        (maxLimit * attainmentData.passedPercentage) / 100
-                    ).length
-                  }
-                </td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
-                  Total Students
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {reportData.length}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-blue-500 text-white">
+                    <tr>
+                      <th
+                        colSpan={2}
+                        className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider"
+                      >
+                        Attainment calculation
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    <tr className="bg-white">
+                      <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                        Students passed with {attainmentData.passedPercentage} %
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {
+                          reportData.filter(
+                            (student) =>
+                              student.marks >=
+                              (maxLimit * attainmentData.passedPercentage) / 100
+                          ).length
+                        }
+                      </td>
+                    </tr>
+                    <tr className="bg-white">
+                      <td className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider bg-blue-100">
+                        Total Students
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {reportData.length}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-        {reportcoData.length > 0 && (
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full table-fixed divide-y divide-gray-200">
-              <thead className="bg-blue-500 text-white">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
-                    Details
-                  </th>
-                  {reportcoData.map((course) => (
-                    <th
-                      key={course.idco_report}
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
-                    >
-                      {course.coname}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                <tr>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
-                    Total Passed
-                  </td>
-                  {reportcoData.map((course) => (
-                    <td
-                      key={course.idco_report}
-                      className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
-                    >
-                      {
-                        reportData.filter(
-                          (student) =>
-                            student.marks >=
-                            (maxLimit * attainmentData.passedPercentage) / 100
-                        ).length
-                      }
-                    </td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
-                    Total Students
-                  </td>
-                  {reportcoData.map((course) => (
-                    <td
-                      key={course.idco_report}
-                      className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
-                    >
-                      {reportData.length}
-                    </td>
-                  ))}
-                </tr>
+              {reportcoData.length > 0 && (
+                <div className="overflow-x-auto mt-4">
+                  <table className="min-w-full table-fixed divide-y divide-gray-200">
+                    <thead className="bg-blue-500 text-white">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4">
+                          Details
+                        </th>
+                        {reportcoData.map((course) => (
+                          <th
+                            key={course.idco_report}
+                            className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4"
+                          >
+                            {course.coname}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      <tr>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                          Total Passed
+                        </td>
+                        {reportcoData.map((course) => (
+                          <td
+                            key={course.idco_report}
+                            className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                          >
+                            {
+                              reportData.filter(
+                                (student) =>
+                                  student.marks >=
+                                  (maxLimit * attainmentData.passedPercentage) / 100
+                              ).length
+                            }
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4">
+                          Total Students
+                        </td>
+                        {reportcoData.map((course) => (
+                          <td
+                            key={course.idco_report}
+                            className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-1/4"
+                          >
+                            {reportData.length}
+                          </td>
+                        ))}
+                      </tr>
 
-                {reportcoData.map((course) => (
-                  <tr
-                    key={course.idco_report}
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  >
-                    <td className="w-1/4"> {course.coname}</td>
-                    <td className="w-1/4">
-                      {(
-                        (reportData.filter(
-                          (student) =>
-                            student.marks >=
-                            (maxLimit * attainmentData.passedPercentage) / 100
-                        ).length /
-                          reportData.length) *
-                        100
-                      ).toFixed(2)} %
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      {reportcoData.map((course) => (
+                        <tr
+                          key={course.idco_report}
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                        >
+                          <td className="w-1/4"> {course.coname}</td>
+                          <td className="w-1/4">
+                            {(
+                              (reportData.filter(
+                                (student) =>
+                                  student.marks >=
+                                  (maxLimit * attainmentData.passedPercentage) / 100
+                              ).length /
+                                reportData.length) *
+                              100
+                            ).toFixed(2)} %
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
     </div>
-  )}
-</div>
-</div>
   );
 };
 

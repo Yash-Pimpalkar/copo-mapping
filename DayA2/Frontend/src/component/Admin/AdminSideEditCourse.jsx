@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import api from '../../api';
 
-const EditCourse = () => {
+const AdminSideEditCourse = () => {
   const { usercourse_id } = useParams(); // Get course ID from URL
   const navigate = useNavigate();
   const [courseid, setCourseId] = useState(0);
@@ -146,4 +146,4 @@ const EditCourse = () => {
   );
 };
 
-export default EditCourse;
+export default AdminSideEditCourse;

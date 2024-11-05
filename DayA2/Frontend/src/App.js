@@ -65,6 +65,8 @@ import ViewAllClassroom from './pages/LMS/Classroom/ViewAllClassroom';
 import ClassroomActivities from './pages/LMS/Classroom/ClassroomActivities';
 import Admin_Cos_Edit from './component/Admin/COsData';
 import AdminCOs_course from './component/Admin/EditCOs';
+import AdminSideShowCOs from './component/Admin/AdminSideShowCOs';
+import AdminSideEditCourse from './component/Admin/AdminSideEditCourse';
 import AddStudent from './pages/TeacherForm/AddStudent';
 import EditPOs from './component/Admin/EditPOs';
 import NextSemButton from './component/Admin/NextSem'
@@ -194,6 +196,8 @@ function App() {
               <Route path="/editcos" element={<AdminCOs_course />}/>
               <Route path="/nextsem" element={<NextSemButton />}/>
               <Route path="/addremovecos" element={<Admin_Cos_Edit />}/>
+              <Route path="/adminshowcos" element={<AdminSideShowCOs />} />
+              <Route path="/AdminEditCourse/:userCourseId" element={<AdminSideEditCourse />} />
               {/* Add other routes for usertype === 3 here */}
             </>
           ) : (

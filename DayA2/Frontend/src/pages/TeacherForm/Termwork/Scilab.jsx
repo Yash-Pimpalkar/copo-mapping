@@ -277,12 +277,12 @@ const SciLab = ({ uid, tw_id }) => {
 
         {/* Search Bar */}
         <input
-  type="text"
-  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-  placeholder="Search by student name or ID"
-  className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500 leading-normal placeholder-gray-400 md:w-auto"
-/>
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by student name or ID"
+          className="w-64 px-5 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+        />
 
 
         {/* Download Excel Button */}

@@ -35,9 +35,11 @@ const AdminCOs_course = ({ uid }) => {
         navigate(`/addremovecos`, { state: { usercourse_id, co_count } });
     };
 
-    const handleShowCos = (usercourse_id) => {
-        navigate(`/cos`, { state: { usercourse_id } });
+    const handleShowCos = (usercourse_id, co_count) => {
+        navigate(`/adminshowcos`, { state: { usercourse_id, co_count } });
     };
+
+
 
     const handleEditClick = (index) => {
         setEditIndex(index);
@@ -197,13 +199,13 @@ const AdminCOs_course = ({ uid }) => {
                                             <Link
                                                 className="bg-yellow-500 text-white px-4 py-2 rounded"
                                                 // onClick={() => handleEditClick(index)}
-                                                to={`/EditCourse/${item.usercourse_id}`}
+                                                to={`/AdminEditCourse/${item.usercourse_id}`}
                                             >
                                                 Edit
                                             </Link>
                                             <button
                                                 className="bg-teal-500 text-white px-4 py-2 rounded"
-                                                onClick={() => handleShowCos(item.usercourse_id)}
+                                                onClick={() => handleShowCos(item.usercourse_id, item.co_count)}
                                             >
                                                 Show COS
                                             </button>

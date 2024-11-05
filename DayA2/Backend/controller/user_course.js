@@ -90,7 +90,7 @@ export const show_user_course = (req, res) => {
 
 export const show_specific_user_course = (req, res) => {
   const id = req.params.uid;
-  const sql = `select u.usercourse_id,u.user_id,c.coursecode,c.course_name,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where u.usercourse_id=? `;
+  const sql = `select u.usercourse_id,u.user_id,c.courseid,c.coursecode,c.course_name,u.semester,u.academic_year,u.branch,u.co_count from user_course as u inner join course as c on u.course_id = c.courseid where u.usercourse_id=? `;
   db.query(sql, id, (err, result) => {
     if (err) {
       console.error('Error saving to database:', err);
@@ -100,12 +100,13 @@ export const show_specific_user_course = (req, res) => {
   })
 };
 
-export const edit_specific_course = () => {
+export const edit_specific_course = (req, res) => {
+  console.log("Reached here");
   const { usercourse_id } = req.params;
-  const { course_name, branch, semester, cocount, academic_year } = req.body;
+  const { course_name, branch, semester, cocount, academic_year, courseid } = req.body;
 
-  // SQL query to update the course based on usercourse_id
-  const query = `
+  // SQL query to update the course details in user_course table based on usercourse_id
+  const userCourseQuery = `
     UPDATE user_course 
     SET 
       branch = ?, 
@@ -115,17 +116,32 @@ export const edit_specific_course = () => {
     WHERE 
       usercourse_id = ?`;
 
-  // Execute the query with the values from the request body
-  db.query(query, [branch, semester, cocount, academic_year], (err, result) => {
+  // SQL query to update the course_name in course table based on courseid
+  const courseNameQuery = `
+    UPDATE course 
+    SET 
+      course_name = ? 
+    WHERE 
+      courseid = ?`;
+
+  // Execute the first query to update user_course
+  db.query(userCourseQuery, [branch, semester, cocount, academic_year, usercourse_id], (err, result) => {
     if (err) {
-      console.error('Error updating the course:', err);
-      res.status(500).json({ error: 'An error occurred while updating the course.' });
-    } else {
-      res.status(200).json({ message: 'Course updated successfully!' });
+      console.error('Error updating the user_course:', err);
+      return res.status(500).json({ error: 'An error occurred while updating the user course.' });
     }
-    res.status(201).json(result);
+
+    // Execute the second query to update the course table with course_name
+    db.query(courseNameQuery, [course_name, courseid], (err, result) => {
+      if (err) {
+        console.error('Error updating the course table:', err);
+        return res.status(500).json({ error: 'An error occurred while updating the course name.' });
+      }
+
+      res.status(200).json({ message: 'Course updated successfully!' });
+    });
   });
-}
+};
 
 export const show_CoCount = (req, res) => {
   const id = req.params.uid;
