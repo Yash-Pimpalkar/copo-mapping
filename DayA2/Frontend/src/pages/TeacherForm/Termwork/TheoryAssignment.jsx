@@ -139,7 +139,7 @@ const TheoryAssignment = ({ userCourseId ,onUpdateAttainmentList, tw_id  }) => {
         value: value === null ? null : parseInt(value, 10),
       };
     });
-
+//  console.log(questiondata)
     const formattedData = {
       sid, // Include sid here
       assignments: updatedAssignments,

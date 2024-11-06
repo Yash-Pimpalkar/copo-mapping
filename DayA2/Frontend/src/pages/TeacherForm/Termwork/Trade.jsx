@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 
 const Trade = ({ uid, tw_id }) => {
   const [experimentData, setExperimentData] = useState([]);
-  const [questionData, setQuestionData] = useState([]);
+  let [questionData, setQuestionData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataPerPage] = useState(10); // Number of rows per page
   const [editMode, setEditMode] = useState(null);
   const [editedValues, setEditedValues] = useState({});
   const [searchTerm, setSearchTerm] = useState(""); // Search term for students
   const [loading, setLoading] = useState(false);
-  const userCourseId = uid
+  const userCourseId = uid;
   // New State for Attainment Calculation
   const [attainmentData, setAttainmentData] = useState({
     passedPercentage: 50, // Default to 50% passing criteria
@@ -29,13 +29,9 @@ const Trade = ({ uid, tw_id }) => {
   useEffect(() => {
     const fetchExperimentData = async () => {
       try {
-        const response = await api.get(
-          `/api/termwork/show/trade/${uid}`
-        );
-        console.log("response.data[0]", response.data[0])
-        const response1 = await api.get(
-          `/api/termwork/show/tradeco/${uid}`
-        );
+        const response = await api.get(`/api/termwork/show/trade/${uid}`);
+        console.log("response.data[0]", response.data[0]);
+        const response1 = await api.get(`/api/termwork/show/tradeco/${uid}`);
         setExperimentData(response.data[0]);
         setQuestionData(response1.data);
         console.log("Here:", response1.data);
@@ -48,23 +44,19 @@ const Trade = ({ uid, tw_id }) => {
       fetchExperimentData();
     }
   }, [userCourseId]);
-  console.log("questionData", questionData)
+  console.log("questionData", questionData);
 
   const fetchExperimentData = async () => {
     try {
-      const response = await api.get(
-        `/api/termwork/show/trade/${uid}`
-      );
-      const response1 = await api.get(
-        `/api/termwork/show/tradeco/${uid}`
-      );
+      const response = await api.get(`/api/termwork/show/trade/${uid}`);
+      const response1 = await api.get(`/api/termwork/show/tradeco/${uid}`);
       setExperimentData(response.data[0]);
       setQuestionData(response1.data);
     } catch (error) {
       console.error("Error fetching experiment data:", error);
     }
   };
-  console.log("experimentData", experimentData)
+  console.log("experimentData", experimentData);
 
   // Get experiment keys dynamically (e.g., EXPERIMENT1, EXPERIMENT2, etc.)
   const getExperimentKeys = () => {
@@ -77,11 +69,39 @@ const Trade = ({ uid, tw_id }) => {
   };
 
   const experimentKeys = getExperimentKeys();
+  console.log(experimentKeys);
+  console.log(questionData);
+
+  function mergeConameByTradeIdq(questiondata) {
+    // Create a map to store unique entries based on trade_idq
+    const mergedDataMap = new Map();
+
+    questiondata.forEach((item) => {
+      const { trade_idq, coname, ...rest } = item;
+
+      if (mergedDataMap.has(trade_idq)) {
+        // If the trade_idq exists, add the coname to the existing array
+        const existingEntry = mergedDataMap.get(trade_idq);
+        if (!existingEntry.conames.includes(coname)) {
+          existingEntry.conames.push(coname);
+        }
+      } else {
+        // If the trade_idq is new, add it to the map with coname as an array
+        mergedDataMap.set(trade_idq, { ...rest, trade_idq, conames: [coname] });
+      }
+    });
+
+    // Convert the map back to an array
+    return Array.from(mergedDataMap.values());
+  }
+
+  questionData = mergeConameByTradeIdq(questionData);
+  console.log(questionData);
 
   // Find the corresponding conames for each experimentKey from questionData
   const getCOName = (experimentKey) => {
     const question = questionData.find(
-      (q) => q.question_name === experimentKey
+      (q) => q.tradename === experimentKey
     );
     return question ? question.conames.join(", ") : "";
   };
@@ -89,12 +109,12 @@ const Trade = ({ uid, tw_id }) => {
   // Get the maximum marks for an experiment
   const getMaxMarks = (experimentKey) => {
     const question = questionData.find(
-      (q) => q.question_name === experimentKey
+      (q) => q.tradename === experimentKey
     );
-    return question ? question.maxmarks : 100;
+    return question ? question.marks : 100;
   };
 
-  console.log(experimentData.length)
+  console.log(experimentData.length);
 
   // Calculate total pages based on data length
   const totalPages = Math.ceil(experimentData.length / dataPerPage);
@@ -107,7 +127,6 @@ const Trade = ({ uid, tw_id }) => {
 
     return studentName.includes(search) || studentId.includes(search);
   });
-
 
   const currentData = filteredData.slice(
     (currentPage - 1) * dataPerPage,
@@ -144,7 +163,7 @@ const Trade = ({ uid, tw_id }) => {
     console.log("Experiment Keys:", experimentKeys);
     const updatedExperiments = experimentKeys.map((key) => {
       const value = editedValues[key];
-      // const tradeId = parseInt(key.replace("TRADE_", ""), 10); 
+      // const tradeId = parseInt(key.replace("TRADE_", ""), 10);
       // console.log(`Processing key: ${key}, parsed trade_id: ${tradeId}`);
 
       // Find the questionData item by matching tradename with key
@@ -154,7 +173,6 @@ const Trade = ({ uid, tw_id }) => {
         //   ?.question_id,
         question_id: questionItem ? questionItem.trade_idq : null,
         value: value === null ? null : parseInt(value, 10),
-
       };
     });
 
@@ -165,10 +183,8 @@ const Trade = ({ uid, tw_id }) => {
 
     try {
       await api.put("/api/termwork/trade/update", formattedData);
-      const response = await api.get(
-        `/api/termwork/show/trade/${uid}`
-      );
-      console.log("In save Edit", response.data[0])
+      const response = await api.get(`/api/termwork/show/trade/${uid}`);
+      console.log("In save Edit", response.data[0]);
       setExperimentData(response.data[0]);
     } catch (error) {
       console.error("Error saving experiment data:", error);
@@ -216,7 +232,7 @@ const Trade = ({ uid, tw_id }) => {
   // Export to Excel
   const exportToExcel = () => {
     // Create a deep copy of the data to avoid mutating the original array
-    const sortedExperimentData = experimentData.map(student => {
+    const sortedExperimentData = experimentData.map((student) => {
       const sortedStudentData = {};
 
       // First, copy the student identification info like sid, stud_clg_id, student_name
@@ -226,15 +242,15 @@ const Trade = ({ uid, tw_id }) => {
 
       // Extract and sort the experiment fields
       const experimentKeys = Object.keys(student)
-        .filter(key => key.startsWith('TRADE'))  // Only get the keys that are experiments
+        .filter((key) => key.startsWith("TRADE")) // Only get the keys that are experiments
         .sort((a, b) => {
-          const aNumber = parseInt(a.replace('TRADE', ''));
-          const bNumber = parseInt(b.replace('TRADE', ''));
-          return aNumber - bNumber;  // Sort in ascending order based on the number
+          const aNumber = parseInt(a.replace("TRADE", ""));
+          const bNumber = parseInt(b.replace("TRADE", ""));
+          return aNumber - bNumber; // Sort in ascending order based on the number
         });
 
       // Add sorted experiment data back to the object
-      experimentKeys.forEach(key => {
+      experimentKeys.forEach((key) => {
         sortedStudentData[key] = student[key];
       });
 
@@ -247,7 +263,6 @@ const Trade = ({ uid, tw_id }) => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Trade");
     XLSX.writeFile(workbook, "TradeData.xlsx");
   };
-
 
   // Import from Excel and upload to the backend
   const importFromExcel = (event) => {
@@ -299,28 +314,27 @@ const Trade = ({ uid, tw_id }) => {
       reader.readAsArrayBuffer(file);
     }
   };
-  console.log(experimentData)
-
+  console.log(experimentData);
+  console.log(experimentKeys)
   const handle_Attenment = (
     experimentKeys,
     attainmentData,
     tw_id,
     userCourseId
   ) => {
-
-    console.log(userCourseId)
+    console.log(userCourseId);
     // Logic to handle attainment calculation
     const attainmentList = calculateAttainmentList();
-    console.log(attainmentData.passedPercentage)
+    console.log(attainmentData.passedPercentage);
     // Store data in localStorage as 'ExperimentAttainmentData'
     const dataToStore = {
       attainmentList,
       passedPercentage: attainmentData.passedPercentage,
-      tw_id,          // Include tw_id
-      userCourseId,   // Include userCourseId
+      tw_id, // Include tw_id
+      userCourseId, // Include userCourseId
     };
 
-    localStorage.setItem('TradeAttainmentData', JSON.stringify(dataToStore));
+    localStorage.setItem("TradeAttainmentData", JSON.stringify(dataToStore));
 
     // Call the function to update the experiment list
     // updateExperimentList(attainmentList);
@@ -338,7 +352,7 @@ const Trade = ({ uid, tw_id }) => {
         (student) =>
           student[experimentKey] !== null &&
           student[experimentKey] >=
-          (getMaxMarks(experimentKey) * percentage) / 100
+            (getMaxMarks(experimentKey) * percentage) / 100
       ).length;
     });
   };
@@ -375,11 +389,10 @@ const Trade = ({ uid, tw_id }) => {
   // Helper function to map experiment key (e.g., EXPERIMENT1) to question_id
   const getQuestionIdFromExperimentKey = (experimentKey) => {
     const question = questionData.find(
-      (q) => q.question_name === experimentKey
+      (q) => q.tradename === experimentKey
     );
-    return question ? question.question_id : null;
+    return question ? question.trade_idq : null;
   };
-
 
   useEffect(() => {
     // Only calculate attainment list if there is data to process
@@ -419,7 +432,6 @@ const Trade = ({ uid, tw_id }) => {
   };
 
   return (
-
     <>
       <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
         <div className="flex flex-col items-center mb-6">
@@ -519,7 +531,9 @@ const Trade = ({ uid, tw_id }) => {
             <tbody>
               {currentData.map((student, index) => (
                 <tr key={index}>
-                  <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {index + 1}
+                  </td>
                   <td className="border border-gray-300 px-4 py-2">
                     {student.stud_clg_id}
                   </td>
@@ -583,129 +597,130 @@ const Trade = ({ uid, tw_id }) => {
               ))}
             </tbody>
           </table>
-         </div>
-          {/* Pagination Component */}
-          {filteredData.length > dataPerPage && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
+        </div>
+        {/* Pagination Component */}
+        {filteredData.length > dataPerPage && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
 
-          {/* New Section for Total Students Passed Each Question */}
-          <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
-  <div className="flex justify-between items-center mb-4">
-    <h1 className="text-lg font-semibold">
-      Total Students Passed Each Question
-    </h1>
-    <button
-      onClick={() =>
-        handle_Attenment(
-          experimentKeys,
-          attainmentData,
-          tw_id,
-          userCourseId
-        )
-      }
-      className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
-    >
-      Update Attainment
-    </button>
-  </div>
-
-  <div className="mb-4">
-    <label
-      htmlFor="total-student-passed"
-      className="block text-sm font-medium text-gray-700 mb-2"
-    >
-      Total Students Passed with &gt;= PERCENTAGE %
-    </label>
-    <input
-      id="total-student-passed"
-      type="number"
-      min="0"
-      max="100"
-      value={attainmentData.passedPercentage}
-      onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
-      className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-500"
-    />
-  </div>
-
-  {/* Wrapping the table in a responsive container */}
-  <div className="overflow-x-auto">
-    <table className="min-w-full border-collapse border border-gray-400">
-      <thead className="bg-blue-700 text-white">
-        <tr>
-          <th className="border border-gray-300 px-4 py-2">Type</th>
-          {experimentKeys.map((experimentKey, index) => (
-            <th
-              key={experimentKey}
-              className="border border-gray-300 px-4 py-2"
+        {/* New Section for Total Students Passed Each Question */}
+        <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-lg font-semibold">
+              Total Students Passed Each Question
+            </h1>
+            <button
+              onClick={() =>
+                handle_Attenment(
+                  experimentKeys,
+                  attainmentData,
+                  tw_id,
+                  userCourseId
+                )
+              }
+              className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600"
             >
-              {index + 1}
-              <br />
-              <span className="text-sm text-gray-200">
-                {getCOName(experimentKey)}
-              </span>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td className="border border-gray-300 px-4 py-2">
-            Total Students Passed
-          </td>
-          {getTotalStudentsPassedPerQuestion(
-            attainmentData.passedPercentage
-          ).map((count, index) => (
-            <td key={index} className="border border-gray-300 px-4 py-2">
-              {count}
-            </td>
-          ))}
-        </tr>
-        <tr>
-          <td className="border border-gray-300 px-4 py-2">
-            Total Students Attempted
-          </td>
-          {getTotalStudentsAttempted().map((count, index) => (
-            <td key={index} className="border border-gray-300 px-4 py-2">
-              {count}
-            </td>
-          ))}
-        </tr>
-        {/* CO Attainment */}
-        <tr>
-          <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-            CO Attainment
-          </td>
-          {getTotalStudentsPassedPerQuestion(
-            attainmentData.passedPercentage
-          ).map((passedCount, index) => {
-            const attemptedCount = getTotalStudentsAttempted()[index];
-            const attainment = attemptedCount
-              ? ((passedCount / attemptedCount) * 100).toFixed(2)
-              : 0;
-            return (
-              <td
-                key={index}
-                className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
-              >
-                {attainment} %
-              </td>
-            );
-          })}
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-</div>
-      
+              Update Attainment
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="total-student-passed"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Total Students Passed with &gt;= PERCENTAGE %
+            </label>
+            <input
+              id="total-student-passed"
+              type="number"
+              min="0"
+              max="100"
+              value={attainmentData.passedPercentage}
+              onChange={(e) => handleAttainmentChange(e, "passedPercentage")}
+              className="block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-500"
+            />
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse border border-gray-400">
+              <thead className="bg-blue-700 text-white">
+                <tr>
+                  <th className="border border-gray-300 px-4 py-2">Type</th>
+                  {experimentKeys.map((experimentKey, index) => (
+                    <th
+                      key={experimentKey}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {index + 1}
+                      <br />
+                      <span className="text-sm text-gray-200">
+                        {getCOName(experimentKey)}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">
+                    Total Students Passed
+                  </td>
+                  {getTotalStudentsPassedPerQuestion(
+                    attainmentData.passedPercentage
+                  ).map((count, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {count}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">
+                    Total Students Attempted
+                  </td>
+                  {getTotalStudentsAttempted().map((count, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {count}
+                    </td>
+                  ))}
+                </tr>
+                {/* CO Attainment */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                    CO Attainment
+                  </td>
+                  {getTotalStudentsPassedPerQuestion(
+                    attainmentData.passedPercentage
+                  ).map((passedCount, index) => {
+                    const attemptedCount = getTotalStudentsAttempted()[index];
+                    const attainment = attemptedCount
+                      ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                      : 0;
+                    return (
+                      <td
+                        key={index}
+                        className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+                      >
+                        {attainment} %
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </>
-
-
   );
 };
 

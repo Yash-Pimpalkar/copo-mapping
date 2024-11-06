@@ -5,7 +5,7 @@ import * as XLSX from "xlsx"; // For Excel download and upload
 import LoadingButton from "../../../component/Loading/Loading";
 import { useNavigate } from "react-router-dom";
 
-const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
+const Experiment = ({ userCourseId, updateExperimentList, tw_id }) => {
   const [experimentData, setExperimentData] = useState([]);
   const [questionData, setQuestionData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,7 +20,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
     passedPercentage: 50, // Default to 50% passing criteria
   });
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const curriculum = "experiment";
   const [error, setError] = useState("");
@@ -46,7 +46,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
       fetchExperimentData();
     }
   }, [userCourseId]);
-  
+
   const fetchExperimentData = async () => {
     try {
       const response = await api.get(
@@ -198,51 +198,50 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
   // Export to Excel
   const exportToExcel = () => {
     // Create a deep copy of the data to avoid mutating the original array
-    const sortedExperimentData = experimentData.map(student => {
+    const sortedExperimentData = experimentData.map((student) => {
       const sortedStudentData = {};
-      
+
       // First, copy the student identification info like sid, stud_clg_id, student_name
       sortedStudentData.sid = student.sid;
       sortedStudentData.stud_clg_id = student.stud_clg_id;
       sortedStudentData.student_name = student.student_name;
-      
+
       // Extract and sort the experiment fields
       const experimentKeys = Object.keys(student)
-        .filter(key => key.startsWith('EXPERIMENT'))  // Only get the keys that are experiments
+        .filter((key) => key.startsWith("EXPERIMENT")) // Only get the keys that are experiments
         .sort((a, b) => {
-          const aNumber = parseInt(a.replace('EXPERIMENT', ''));
-          const bNumber = parseInt(b.replace('EXPERIMENT', ''));
-          return aNumber - bNumber;  // Sort in ascending order based on the number
+          const aNumber = parseInt(a.replace("EXPERIMENT", ""));
+          const bNumber = parseInt(b.replace("EXPERIMENT", ""));
+          return aNumber - bNumber; // Sort in ascending order based on the number
         });
-  
+
       // Add sorted experiment data back to the object
-      experimentKeys.forEach(key => {
+      experimentKeys.forEach((key) => {
         sortedStudentData[key] = student[key];
       });
-  
+
       return sortedStudentData;
     });
-  
+
     // Export the sorted data to Excel
     const worksheet = XLSX.utils.json_to_sheet(sortedExperimentData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Experiments");
     XLSX.writeFile(workbook, "ExperimentsData.xlsx");
   };
-  
 
- // Import from Excel and upload to the backend
- const importFromExcel = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    setLoading(true); // Start loading
+  // Import from Excel and upload to the backend
+  const importFromExcel = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setLoading(true); // Start loading
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         const headers = jsonData[0];
         const rows = jsonData.slice(1);
@@ -266,7 +265,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
           }));
 
         try {
-      await  api.put("/api/termwork/experiment/update", {
+          await api.put("/api/termwork/experiment/update", {
             experiments: formattedData,
           });
           setLoading(false);
@@ -281,35 +280,37 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
       reader.readAsArrayBuffer(file);
     }
   };
-  console.log(experimentData)
-  
+  console.log(experimentData);
+
   const handle_Attenment = (
     experimentKeys,
     attainmentData,
     tw_id,
     userCourseId
   ) => {
-
-    console.log(userCourseId)
+    console.log(userCourseId);
     // Logic to handle attainment calculation
     const attainmentList = calculateAttainmentList();
-     console.log(attainmentData.passedPercentage)
+    console.log(attainmentData.passedPercentage);
     // Store data in localStorage as 'ExperimentAttainmentData'
     const dataToStore = {
       attainmentList,
-      passedPercentage:attainmentData.passedPercentage,
-      tw_id,          // Include tw_id
-      userCourseId,   // Include userCourseId
+      passedPercentage: attainmentData.passedPercentage,
+      tw_id, // Include tw_id
+      userCourseId, // Include userCourseId
     };
-  
-    localStorage.setItem('ExperimentAttainmentData', JSON.stringify(dataToStore));
-  
+
+    localStorage.setItem(
+      "ExperimentAttainmentData",
+      JSON.stringify(dataToStore)
+    );
+
     // Call the function to update the experiment list
     updateExperimentList(attainmentList);
-  
+
     // Log the data after updating
-    console.log("Attainment updated:",  attainmentData);
-  
+    console.log("Attainment updated:", attainmentData);
+
     // Display a success message
     setMessage("Attainment data has been updated successfully.");
   };
@@ -362,7 +363,6 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
     return question ? question.question_id : null;
   };
 
-
   useEffect(() => {
     // Only calculate attainment list if there is data to process
     if (experimentData.length > 0 && questionData.length > 0) {
@@ -370,202 +370,203 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
       updateExperimentList(attainmentList); // Pass the attainment list correctly
     }
   }, [experimentData, questionData]); // Trigger whenever the experiment data or question data changes
-  
+
   const calculateAttainmentList = () => {
     const attainmentList = experimentKeys.map((experimentKey, index) => {
       const coname = getCOName(experimentKey);
-  
+
       // Get total students passed and attempted for this experiment/CO name
       const passedCount = getTotalStudentsPassedPerQuestion(
         attainmentData.passedPercentage
       )[index];
-  
+
       const attemptedCount = getTotalStudentsAttempted()[index];
-  
+
       // Calculate attainment percentage
       const attainment = attemptedCount
         ? ((passedCount / attemptedCount) * 100).toFixed(2)
         : 0;
-  
+
       // Return the coname and its corresponding attainment
       return {
         coname: coname,
         attainment: `${attainment}%`,
       };
     });
-  
+
     return attainmentList;
   };
   const handleClick = () => {
     navigate(`/AddStudent/${curriculum}/${userCourseId}`);
-  }; 
+  };
 
   return (
-
     <>
-    <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
-    <div className="flex flex-col items-center mb-6">
-    {/* Centered Title */}
-    <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
-      Experiments
-    </h1>
+      <div className="container overflow mx-auto p-4 md:px-8 lg:px-10 bg-white shadow-lg rounded-lg">
+        <div className="flex flex-col items-center mb-6">
+          {/* Centered Title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl text-blue-700 font-bold text-center">
+            Experiments
+          </h1>
 
-    {/* Add Student Button aligned below the title, on the right */}
-    <div className="w-full flex justify-end mt-2">
-      {userCourseId && (
-        <button
-          onClick={handleClick}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Add Student
-        </button>
-      )}
-    </div>
-  </div>
-      {/* Container for Export, Import, and Search Bar */}
-      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        {/* File Upload */}
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={importFromExcel}
-          className="border px-4 py-2 rounded-md w-full md:w-auto"
-        />
-  
-        {/* Search Bar */}
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by student name or ID"
-          className="w-64 px-5 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
-        />
-  
-        {/* Download Excel Button */}
-        <button
-          onClick={exportToExcel}
-          className="bg-green-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
-        >
-          Download Excel
-        </button>
-      </div>
-  
-      {loading && (
-        <div className="flex justify-center mb-4">
-          <LoadingButton loading={loading} />
-        </div>
-      )}
-  
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-400">
-          <thead className="bg-blue-700 text-white">
-            <tr>
-              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-                Index
-              </th>
-              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-                Student ID
-              </th>
-              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-                Student Name
-              </th>
-              <th
-                className="border border-gray-300 px-4 py-2"
-                colSpan={experimentKeys.length}
+          {/* Add Student Button aligned below the title, on the right */}
+          <div className="w-full flex justify-end mt-2">
+            {userCourseId && (
+              <button
+                onClick={handleClick}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
-                Experiments
-              </th>
-              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-                Total
-              </th>
-              <th className="border border-gray-300 px-4 py-2" rowSpan="2">
-                Action
-              </th>
-            </tr>
-            <tr>
-              {experimentKeys.map((experimentKey, index) => (
-                <th
-                  key={experimentKey}
-                  className="border border-gray-300 px-4 py-2"
-                >
-                  {index + 1}
-                  <br />
-                  <span className="text-sm text-gray-200">
-                    {getCOName(experimentKey)}
-                  </span>
+                Add Student
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Container for Export, Import, and Search Bar */}
+        <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* File Upload */}
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={importFromExcel}
+            className="border px-4 py-2 rounded-md w-full md:w-auto"
+          />
+
+          {/* Search Bar */}
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by student name or ID"
+            className="w-64 px-5 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
+          />
+
+          {/* Download Excel Button */}
+          <button
+            onClick={exportToExcel}
+            className="bg-green-500 text-white px-4 py-2 rounded-md w-full md:w-auto"
+          >
+            Download Excel
+          </button>
+        </div>
+
+        {loading && (
+          <div className="flex justify-center mb-4">
+            <LoadingButton loading={loading} />
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse border border-gray-400">
+            <thead className="bg-blue-700 text-white">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                  Index
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.map((student, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {student.stud_clg_id}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {student.student_name}
-                </td>
-                {experimentKeys.map((experimentKey) => (
-                  <td
+                <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                  Student ID
+                </th>
+                <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                  Student Name
+                </th>
+                <th
+                  className="border border-gray-300 px-4 py-2"
+                  colSpan={experimentKeys.length}
+                >
+                  Experiments
+                </th>
+                <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                  Total
+                </th>
+                <th className="border border-gray-300 px-4 py-2" rowSpan="2">
+                  Action
+                </th>
+              </tr>
+              <tr>
+                {experimentKeys.map((experimentKey, index) => (
+                  <th
                     key={experimentKey}
                     className="border border-gray-300 px-4 py-2"
                   >
+                    {index + 1}
+                    <br />
+                    <span className="text-sm text-gray-200">
+                      {getCOName(experimentKey)}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {currentData.map((student, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {index + 1}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {student.stud_clg_id}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {student.student_name}
+                  </td>
+                  {experimentKeys.map((experimentKey) => (
+                    <td
+                      key={experimentKey}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {editMode === student.sid ? (
+                        <input
+                          type="text"
+                          value={
+                            editedValues[experimentKey] !== undefined
+                              ? editedValues[experimentKey]
+                              : student[experimentKey]
+                          }
+                          onChange={(event) =>
+                            handleInputChange(event, experimentKey)
+                          }
+                          className="w-24 border border-gray-300 rounded-md px-2 py-1 focus:ring focus:border-blue-500 sm:text-sm"
+                        />
+                      ) : student[experimentKey] !== null ? (
+                        student[experimentKey]
+                      ) : (
+                        ""
+                      )}
+                    </td>
+                  ))}
+                  <td className="border border-gray-300 px-4 py-2">
+                    {calculateTotal(student)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
                     {editMode === student.sid ? (
-                      <input
-                        type="text"
-                        value={
-                          editedValues[experimentKey] !== undefined
-                            ? editedValues[experimentKey]
-                            : student[experimentKey]
-                        }
-                        onChange={(event) =>
-                          handleInputChange(event, experimentKey)
-                        }
-                        className="w-24 border border-gray-300 rounded-md px-2 py-1 focus:ring focus:border-blue-500 sm:text-sm"
-                      />
-                    ) : student[experimentKey] !== null ? (
-                      student[experimentKey]
+                      <>
+                        <button
+                          onClick={() => saveEdits(student.sid)}
+                          className="px-4 py-2 bg-green-500 text-white rounded-md"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          className="px-4 py-2 bg-red-500 text-white rounded-md ml-2"
+                        >
+                          Cancel
+                        </button>
+                      </>
                     ) : (
-                      ""
+                      <button
+                        onClick={() => startEditing(student.sid, student)}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                      >
+                        Edit
+                      </button>
                     )}
                   </td>
-                ))}
-                <td className="border border-gray-300 px-4 py-2">
-                  {calculateTotal(student)}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {editMode === student.sid ? (
-                    <>
-                      <button
-                        onClick={() => saveEdits(student.sid)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-md"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        className="px-4 py-2 bg-red-500 text-white rounded-md ml-2"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => startEditing(student.sid, student)}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                    >
-                      Edit
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         {/* Pagination Component */}
         {filteredData.length > dataPerPage && (
           <Pagination
@@ -574,7 +575,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
             onPageChange={handlePageChange}
           />
         )}
-  
+
         {/* New Section for Total Students Passed Each Question */}
         <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
           <div className="flex justify-between items-center mb-4">
@@ -595,7 +596,7 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
               Update Attainment
             </button>
           </div>
-  
+
           <div className="mb-4">
             <label
               htmlFor="total-student-passed"
@@ -614,79 +615,81 @@ const Experiment = ({ userCourseId,updateExperimentList , tw_id  }) => {
             />
           </div>
           <div className="overflow-x-auto">
-  <table className="min-w-full border-collapse border border-gray-400">
-    <thead className="bg-blue-700 text-white">
-      <tr>
-        <th className="border border-gray-300 px-4 py-2">Type</th>
-        {experimentKeys.map((experimentKey, index) => (
-          <th
-            key={experimentKey}
-            className="border border-gray-300 px-4 py-2"
-          >
-            {index + 1}
-            <br />
-            <span className="text-sm text-gray-200">
-              {getCOName(experimentKey)}
-            </span>
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td className="border border-gray-300 px-4 py-2">
-          Total Students Passed
-        </td>
-        {getTotalStudentsPassedPerQuestion(
-          attainmentData.passedPercentage
-        ).map((count, index) => (
-          <td key={index} className="border border-gray-300 px-4 py-2">
-            {count}
-          </td>
-        ))}
-      </tr>
-      <tr>
-        <td className="border border-gray-300 px-4 py-2">
-          Total Students Attempted
-        </td>
-        {getTotalStudentsAttempted().map((count, index) => (
-          <td key={index} className="border border-gray-300 px-4 py-2">
-            {count}
-          </td>
-        ))}
-      </tr>
-      {/* CO Attainment */}
-      <tr>
-        <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-          CO Attainment
-        </td>
-        {getTotalStudentsPassedPerQuestion(
-          attainmentData.passedPercentage
-        ).map((passedCount, index) => {
-          const attemptedCount = getTotalStudentsAttempted()[index];
-          const attainment = attemptedCount
-            ? ((passedCount / attemptedCount) * 100).toFixed(2)
-            : 0;
-          return (
-            <td
-              key={index}
-              className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
-            >
-              {attainment} %
-            </td>
-          );
-        })}
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+            <table className="min-w-full border-collapse border border-gray-400">
+              <thead className="bg-blue-700 text-white">
+                <tr>
+                  <th className="border border-gray-300 px-4 py-2">Type</th>
+                  {experimentKeys.map((experimentKey, index) => (
+                    <th
+                      key={experimentKey}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {index + 1}
+                      <br />
+                      <span className="text-sm text-gray-200">
+                        {getCOName(experimentKey)}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">
+                    Total Students Passed
+                  </td>
+                  {getTotalStudentsPassedPerQuestion(
+                    attainmentData.passedPercentage
+                  ).map((count, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {count}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">
+                    Total Students Attempted
+                  </td>
+                  {getTotalStudentsAttempted().map((count, index) => (
+                    <td
+                      key={index}
+                      className="border border-gray-300 px-4 py-2"
+                    >
+                      {count}
+                    </td>
+                  ))}
+                </tr>
+                {/* CO Attainment */}
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                    CO Attainment
+                  </td>
+                  {getTotalStudentsPassedPerQuestion(
+                    attainmentData.passedPercentage
+                  ).map((passedCount, index) => {
+                    const attemptedCount = getTotalStudentsAttempted()[index];
+                    const attainment = attemptedCount
+                      ? ((passedCount / attemptedCount) * 100).toFixed(2)
+                      : 0;
+                    return (
+                      <td
+                        key={index}
+                        className="border border-gray-300 px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center"
+                      >
+                        {attainment} %
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-  
-  </>
-  
-    
+    </>
   );
 };
 
