@@ -218,10 +218,10 @@ const MiniproSem = ({ uid }) => {
   //       console.error("Error saving IA data:", error);
   //     }
   //   };
-
+  console.log(MiniproData)
   const handleSaveClick = async (index) => {
     const actualIndex = index;
-    const mainminiprosemid = MiniproData[actualIndex].miniproid;
+    const mainminiprosemid = MiniproData[actualIndex].mainminiprosemid;
     const updatedData = editedMarks[index];
   
     try {
