@@ -116,18 +116,16 @@ const Report = ({ uid, tw_id }) => {
 
   const handleSaveClick = async (index) => {
     // Calculate the correct index in reportData based on pagination
-    const globalIndex = (currentPage - 1) * itemsPerPage + index;
-
-    const { report_id, sid } = reportData[globalIndex];
-    const marks = editedMarks[index];
+    const student = paginatedData[index]; // Access the correct paginated student
+    const { id, sid } = student; // Get ppt_id and sid
+  
+    const marks = editedMarks[index]; 
 
     try {
-      await api.put("/api/termwork/report/update", { report_id: report_id, sid: sid, Marks: marks });
+      await api.put("/api/termwork/report/update", { id: id,  Marks: marks });
 
-      setReportData((prevData) =>
-        prevData.map((item, idx) =>
-          idx === globalIndex ? { ...item, marks } : item
-        )
+      setReportData((prevData) => 
+        prevData.map((item) => (item.sid === sid ? { ...item, marks } : item))
       );
       setEditingRow(null);
     } catch (error) {
@@ -315,7 +313,7 @@ const Report = ({ uid, tw_id }) => {
             {paginatedData.map((student, index) => (
               <tr key={index} className="hover:bg-gray-100 transition duration-200">
                 <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
+                <td className="border border-gray-300 px-4 py-2">{student.stud_clg_id}</td>
                 <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {editingRow === index ? (

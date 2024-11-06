@@ -2828,3 +2828,185 @@ export const getStudentsForFeedbackCourse = async (req, res) => {
 
 
 
+export const addReportsWithStudents = async (req, res) => {
+    const { report_id, students } = req.body;
+  
+    // Validate inputs
+    if (!report_id || !students || !Array.isArray(students) || students.length === 0) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+  
+    try {
+      // Prepare query for adding students to the report
+      const values = students.map((student) => `(${report_id}, ${student.sid})`);
+      const sql = `
+        INSERT INTO main_report (report_id, sid) 
+        VALUES ${values.join(", ")} 
+        ON DUPLICATE KEY UPDATE sid = VALUES(sid);
+      `;
+  
+      // Execute query
+      await db.promise().query(sql);
+  
+      res.status(201).json({ message: "Reports and students added successfully" });
+    } catch (error) {
+      console.error("Error adding reports:", error);
+      res.status(500).json({ message: "Error adding reports and students" });
+    }
+  };
+  
+
+  export const addStudentsToReports = (req, res) => {
+    const { usercourseid, selectedStudents } = req.body;
+  
+    // Validate inputs
+    if (!usercourseid || !selectedStudents || !Array.isArray(selectedStudents) || selectedStudents.length === 0) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+  
+    // Fetch report IDs associated with the usercourseid
+    const fetchReportsQuery = `
+      SELECT report_id 
+      FROM upload_report 
+      WHERE usercourseid = ?;
+    `;
+  
+    db.query(fetchReportsQuery, [usercourseid], (fetchError, reportResults) => {
+      if (fetchError) {
+        console.error("Error fetching reports:", fetchError);
+        return res.status(500).json({ message: "Error fetching reports" });
+      }
+  
+      if (reportResults.length === 0) {
+        return res.status(404).json({ message: "No reports found for the specified user course" });
+      }
+  
+      // Prepare values for inserting students into main_report
+      const values = [];
+      reportResults.forEach(({ report_id }) => {
+        selectedStudents.forEach((sid) => {
+          values.push([report_id, sid]);
+        });
+      });
+  
+      // Prepare query for inserting into main_report
+      const insertQuery = `
+        INSERT INTO main_report (report_id, sid) 
+        VALUES ? 
+        ON DUPLICATE KEY UPDATE sid = VALUES(sid);
+      `;
+  
+      db.query(insertQuery, [values], (insertError, insertResult) => {
+        if (insertError) {
+          console.error("Error inserting students into reports:", insertError);
+          return res.status(500).json({ message: "Error adding students to reports" });
+        }
+  
+        res.status(201).json({ message: "Students added to reports successfully", affectedRows: insertResult.affectedRows });
+      });
+    });
+  };
+  
+
+  export const report_get_Usercourse_Students = (req, res) => {
+    const { uid } = req.params;
+    console.log("User Course ID:", uid);
+  
+    const sql = `
+      SELECT DISTINCT
+        s.sid, 
+        s.stud_clg_id, 
+        s.student_name
+      FROM 
+        lms_students s
+      JOIN 
+        main_report mr ON s.sid = mr.sid
+      JOIN 
+        upload_report ur ON mr.report_id = ur.report_id
+      WHERE 
+        ur.usercourseid = ?;
+    `;
+  
+    db.query(sql, [uid], (error, results) => {
+      if (error) {
+        console.error('Error fetching report students:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+  
+      res.status(200).json(results);
+    });
+  };
+
+
+
+  export const report_deleteStudentFromClass = (req, res) => {
+    const { sid } = req.params; // Student ID from URL params
+    const { userCourseId } = req.body; // User Course ID from request body
+    const sidAsInt = parseInt(sid);
+  
+    const query = `
+      DELETE main_report
+      FROM main_report
+      JOIN upload_report ON main_report.report_id = upload_report.report_id
+      WHERE main_report.sid = ?
+      AND upload_report.usercourseid = ?;
+    `;
+  
+    try {
+      db.query(query, [sidAsInt, userCourseId], (error, result) => {
+        if (error) {
+          console.error('Error deleting student from report:', error);
+          return res.status(500).json({ message: 'Error deleting student from report' });
+        }
+  
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Student not found in the report' });
+        }
+  
+        res.status(200).json({
+          message: 'Student removed from the report successfully',
+          affectedRows: result.affectedRows,
+        });
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'An error occurred while deleting the student' });
+    }
+  };
+  
+
+  export const report_deleteAllStudentsFromClass = (req, res) => {
+    const { uid } = req.params; // `uid` is the usercourseid
+    console.log("Usercourse ID:", uid);
+  
+    try {
+      // Delete all rows from main_report based on usercourseid in upload_report
+      const query = `
+        DELETE main_report
+        FROM main_report
+        JOIN upload_report ON main_report.report_id = upload_report.report_id
+        WHERE upload_report.usercourseid = ?;
+      `;
+  
+      db.query(query, [uid], (error, result) => {
+        if (error) {
+          console.error('Error deleting students from reports:', error);
+          return res.status(500).json({ message: 'Error deleting students from reports' });
+        }
+  
+        if (result.affectedRows === 0) {
+          return res.status(200).json({ message: 'No students found in the reports for this class' });
+        }
+  
+        res.status(200).json({
+          message: 'All students removed from reports successfully',
+          affectedRows: result.affectedRows,
+        });
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: 'An error occurred while deleting students from reports' });
+    }
+  };
+  
+  

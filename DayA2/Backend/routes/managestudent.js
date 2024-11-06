@@ -68,6 +68,10 @@ import {
   deleteAllStudentFeedbackForCourse,
   deleteStudentFeedbackForCourse,
   getStudentsForFeedbackCourse,
+  addStudentsToReports,
+  report_deleteAllStudentsFromClass,
+  report_deleteStudentFromClass,
+  report_get_Usercourse_Students,
 } from "../controller/managestudents.js";
 const router = express.Router();
 
@@ -241,5 +245,12 @@ router.post("/addstudents/trade/:sid", trade_addStudentsWithQuestions); // Route
 router.delete("/deleteallstudents/trade/:uid", trade_deleteAllStudentsForTrade); // Route to delete all students from a specific user course
 router.delete("/deletestudent/trade/:sid", trade_deleteStudentFromTrade); // Route to delete a specific student from a specific user course
 router.get("/trade/fetchstudents/:uid", trade_getStudentsForTrade); 
+
+
+
+router.post("/addstudents/report/:sid",addStudentsToReports); // Route to add students to trades
+router.delete("/deleteallstudents/report/:uid", report_deleteAllStudentsFromClass); // Route to delete all students from a specific user course
+router.delete("/deletestudent/report/:sid", report_deleteStudentFromClass); // Route to delete a specific student from a specific user course
+router.get("/report/fetchstudents/:uid", report_get_Usercourse_Students); 
 
 export default router;
