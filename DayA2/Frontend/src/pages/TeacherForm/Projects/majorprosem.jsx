@@ -230,18 +230,21 @@ const MajorproSem = ({ uid }) => {
     //       console.error("Error saving IA data:", error);
     //     }
     //   };
-
+   console.log(MajorproData)
+   
     const handleSaveClick = async (index) => {
         const actualIndex = index;
         const mainmajorprosemId = MajorproData[actualIndex].mainmajorprosemid;
+
         const updatedData = editedMarks[index];
+        console.log(updatedData)
         try {
             setLoading(true);
             await api.put("/api/uploadmajorprosem/", {
                 mainmajorprosemid: mainmajorprosemId,
-                logbook_marks: updatedData.logbook_marks,
-                review1_marks: updatedData.review1_marks,
-                review2_marks: updatedData.review2_marks,
+                logbook_marks: updatedData.logbookmarks,
+                review1_marks: updatedData.review1marks,
+                review2_marks: updatedData.review2marks,
                 proreportmarks: updatedData.proreportmarks
             });
 
@@ -544,49 +547,64 @@ const MajorproSem = ({ uid }) => {
         ((MajorproData.length + MajorproData.length + MajorproData.length + MajorproData.length) / 4) * 100).toFixed(2);
 
 
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-
-        reader.onload = async (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-
-            let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            const headers = jsonData[0];
-            const rows = jsonData.slice(1);
-
-            const validatedData = rows.map((row) => {
-                return {
-                    mainmajorprosemid: row[headers.indexOf("Majorpro Id")],
-                    stud_clg_id: row[headers.indexOf("Student ID")],
-                    student_name: row[headers.indexOf("Student Name")],
-                    logbookmarks: row[headers.indexOf("Logbook Marks")],
-                    review1marks: row[headers.indexOf("Review1 Marks")],
-                    review2marks: row[headers.indexOf("Review2 Marks")],
-                    proreportmarks: row[headers.indexOf("Project Report Quality")],
-                };
-            });
-
-            try {
-                setLoading(true);
-                console.log(validatedData);
-                await api.put("/api/uploadmajorprosem/", validatedData);
-                SetMajorproData(validatedData);
-                alert("File uploaded successfully!");
-                window.location.reload();
-            } catch (error) {
-                console.error("Error uploading file:", error);
-                alert("Failed to upload file. Please try again.");
-            } finally {
-                setLoading(false);
-            }
+        const handleFileUpload = (event) => {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+        
+            reader.onload = async (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+        
+                let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                const headers = jsonData[0];
+                const rows = jsonData.slice(1);
+        
+                const validatedData = rows.map((row) => {
+                    // Extract data based on headers and map to required backend field names
+                    const logbook_marks = row[headers.indexOf("Logbook Marks")];
+                    const review1_marks = row[headers.indexOf("Review1 Marks")];
+                    const review2_marks = row[headers.indexOf("Review2 Marks")];
+                    const proreportmarks = row[headers.indexOf("Project Report Quality")];
+        
+                    // Calculate avgReviews and total
+                    const avgReviews = (review1_marks && review2_marks)
+                        ? Math.round((parseInt(review1_marks, 10) + parseInt(review2_marks, 10)) / 2)
+                        : 0;
+                    const total = parseInt(logbook_marks, 10) + avgReviews + parseInt(proreportmarks, 10);
+        
+                    return {
+                        mainmajorprosemid: row[headers.indexOf("Majorpro Id")],
+                        stud_clg_id: row[headers.indexOf("Student ID")],
+                        student_name: row[headers.indexOf("Student Name")],
+                        logbook_marks, // Matching backend expected field names
+                        review1_marks,
+                        review2_marks,
+                        avgReviews, // Calculated average of reviews
+                        proreportmarks,
+                        total, // Calculated total
+                    };
+                });
+        
+                try {
+                    setLoading(true);
+                    console.log(validatedData);
+                    await api.put("/api/uploadmajorprosem/", validatedData); // Send data to backend
+                    SetMajorproData(validatedData); // Update state with validated data
+                    alert("File uploaded successfully!");
+                    window.location.reload();
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    alert("Failed to upload file. Please try again.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+        
+            reader.readAsArrayBuffer(file);
         };
-
-        reader.readAsArrayBuffer(file);
-    };
+        
 
 
 
