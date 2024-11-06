@@ -1377,12 +1377,12 @@ export const scilab_addStudentsToPracticals = async (req, res) => {
         const values = [];
         selectedStudents.forEach(sid => {
             scipractIdValues.forEach(scipractid => {
-                values.push(`(${scipractid}, ${sid}, 0)`); // Assuming initial marks as 0
+                values.push(`(${scipractid}, ${sid})`); // Assuming initial marks as 0
             });
         });
 
         // Query to insert multiple rows into main_scipract
-        const insertQuery = `INSERT INTO main_scipract (scipract_id, sid, marks) VALUES ${values.join(', ')} 
+        const insertQuery = `INSERT INTO main_scipract (scipract_id, sid) VALUES ${values.join(', ')} 
                              ON DUPLICATE KEY UPDATE sid = VALUES(sid)`;
 
         // Execute the insert query

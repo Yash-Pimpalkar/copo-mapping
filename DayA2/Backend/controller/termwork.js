@@ -775,13 +775,12 @@ export const SciLabUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_scipract SET marks = ? WHERE scipract_id = ? AND sid = ?';
+  const sql = 'UPDATE main_scipract SET marks = ? WHERE sciid = ? ';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
       update.scipract_id,
-      update.sid
     ];
   });
 

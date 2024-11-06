@@ -89,13 +89,13 @@ const SciLab = ({ uid, tw_id }) => {
 
   const handleFileDownload = () => {
     const formattedData = sciLabData.map((student) => ({
-      sciid: student.sciid,
+      scipract_id: student.sciid,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["sciid", "Student ID", "Student Name", "Marks"];
+    const headers = ["scipract_id", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
@@ -115,11 +115,11 @@ const SciLab = ({ uid, tw_id }) => {
 
   const handleSaveClick = async (index) => {
     const student = paginatedData[index]; // Access the correct paginated student
-    const { scipract_id, sid } = student;
+    const { sciid, sid } = student;
     const marks = editedMarks[index];
 
     try {
-      await api.put("/api/termwork/scilab/update", { scipract_id: scipract_id, sid:sid, Marks: marks });
+      await api.put("/api/termwork/scilab/update", { scipract_id: sciid, Marks: marks });
       setSciLabData((prevData) =>
         prevData.map((item) => (item.sid === sid ? { ...item, marks } : item))
       );
@@ -307,7 +307,7 @@ const SciLab = ({ uid, tw_id }) => {
           {paginatedData.map((student, index) => (
             <tr key={index} className="hover:bg-gray-100 transition duration-200">
               <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
+              <td className="border border-gray-300 px-4 py-2">{student.stud_clg_id}</td>
               <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
               <td className="border border-gray-300 px-4 py-2">
                 {editingRow === index ? (
