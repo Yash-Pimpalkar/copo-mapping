@@ -102,8 +102,8 @@ WHERE
 export const MajorProjectUpload = async (req, res) => {
   let updates = req.body;
   console.log('Received updates:', updates);
-  console.log(typeof updates);
-
+  
+  
   if (typeof updates === 'object' && !Array.isArray(updates)) {
     updates = [updates];
   }
@@ -141,11 +141,12 @@ export const MajorProjectUpload = async (req, res) => {
         return;
       }
 
-      // Use the current value if no new value is provided
-      const logbookmarks = update.logbookmarks !== undefined ? parseInt(update.logbookmarks, 10) : currentData.logbookmarks;
-      const review1marks = update.review1marks !== undefined ? parseInt(update.review1marks, 10) : currentData.review1marks;
-      const review2marks = update.review2marks !== undefined ? parseInt(update.review2marks, 10) : currentData.review2marks;
+      // Map the received properties to match the expected names
+      const logbookmarks = update.logbook_marks !== undefined ? parseInt(update.logbook_marks, 10) : currentData.logbookmarks;
+      const review1marks = update.review1_marks !== undefined ? parseInt(update.review1_marks, 10) : currentData.review1marks;
+      const review2marks = update.review2_marks !== undefined ? parseInt(update.review2_marks, 10) : currentData.review2marks;
       const proreportmarks = update.proreportmarks !== undefined ? parseInt(update.proreportmarks, 10) : currentData.proreportmarks;
+      console.log(logbookmarks, review1marks, review2marks, proreportmarks);
 
       return [
         logbookmarks,
@@ -157,7 +158,6 @@ export const MajorProjectUpload = async (req, res) => {
     })
   );
 
-
   try {
     await Promise.all(queryValues.map((values) => {
       return new Promise((resolve, reject) => {
@@ -167,7 +167,7 @@ export const MajorProjectUpload = async (req, res) => {
             console.error('Database query error:', error);
             return reject(error);
           }
-          console.log('Query result:', results);
+          // console.log('Query result:', results);
           resolve(results);
         });
       });
@@ -179,6 +179,7 @@ export const MajorProjectUpload = async (req, res) => {
     res.status(500).json('Server error');
   }
 };
+
 
 
 export const limit = (req, res) => {
