@@ -73,7 +73,7 @@ const Attendance = ({ uid }) => {
       // Send the updated marks to the backend
       await api.put("/api/termwork/attendance/update", {
         att_id: att_id,
-        marks: parseInt(marks, 10), // Ensure marks are integers
+        Marks: parseInt(marks, 10), // Ensure marks are integers
       });
   
       // Update the local state to reflect saved changes
@@ -152,14 +152,14 @@ const Attendance = ({ uid }) => {
     };
     reader.readAsArrayBuffer(file);
   };
-
+  console.log(attendanceData)
   // Function to handle Excel file download (Excel export)
   const handleFileDownload = () => {
     const formattedData = attendanceData.map((student) => ({
       att_id: student.att_id,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
-      marks: student.marks,
+      Marks: student.marks,
     }));
 
     const headers = ["att_id", "Student ID", "Student Name", "Marks"];

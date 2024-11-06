@@ -564,7 +564,7 @@ export const AttendanceUpload = async (req, res) => {
   // Prepare the query and values
   const sql = 'UPDATE main_atten SET marks = ? WHERE att_id = ?';
   const queryValues = updates.map(update => {
-    const marks = parseInt(update.marks, 10);  // Change 'Marks' to 'marks'
+    const marks = parseInt(update.Marks, 10);  // Change 'Marks' to 'marks'
     return [
       isNaN(marks) ? null : marks,  // Use null if marks is NaN
       update.att_id
