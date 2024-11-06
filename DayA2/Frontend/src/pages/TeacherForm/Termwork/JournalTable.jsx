@@ -89,16 +89,16 @@ const Journal = ({ uid, tw_id }) => {
     };
     reader.readAsArrayBuffer(file);
   };
-
+  console.log(journalData)
   const handleFileDownload = () => {
     const formattedData = journalData.map((student) => ({
-      journal_id: student.journal_id,
+      journalid: student.journalid,
       stud_clg_id: student.stud_clg_id,
       student_name: student.student_name,
       marks: student.marks,
     }));
 
-    const headers = ["journal_id", "Student ID", "Student Name", "Marks"];
+    const headers = ["journalid", "Student ID", "Student Name", "Marks"];
     const dataWithHeaders = [headers, ...formattedData.map(Object.values)];
 
     const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
@@ -117,18 +117,19 @@ const Journal = ({ uid, tw_id }) => {
 };
 
 const handleSaveClick = async (index) => {
-  const student = paginatedData[index];
-    const { journal1_id, sid } = student; // Destructure sid from journalData
-    const marks = editedMarks[index];
-    try {
-        await api.put("/api/termwork/journal/update", { journal1_id, sid, Marks: marks });
-        setJournalData((prevData) =>
-          prevData.map((item) => (item.sid === sid ? { ...item, marks } : item))
-        );
-        setEditingRow(null);
-    } catch (error) {
-        console.error("Error saving marks:", error);
-    }
+  const journalid = journalData[index].journalid;
+  const marks = editedMarks[index];
+  try {
+    await api.put("/api/termwork/journal/update", { journalid: journalid, Marks: marks });
+    setJournalData((prevData) =>
+      prevData.map((item, idx) =>
+        idx === index ? { ...item, marks } : item
+      )
+    );
+    setEditingRow(null);
+  } catch (error) {
+    console.error("Error saving marks:", error);
+  }
 };
 
 const handleCancelClick = () => {
@@ -312,7 +313,7 @@ const handleCancelClick = () => {
       {paginatedData.map((student, index) => (
         <tr key={index} className="hover:bg-gray-100 transition duration-200">
           <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-          <td className="border border-gray-300 px-4 py-2">{student.sid}</td>
+          <td className="border border-gray-300 px-4 py-2">{student.stud_clg_id}</td>
           <td className="border border-gray-300 px-4 py-2">{student.student_name}</td>
           <td className="border border-gray-300 px-4 py-2">
             {editingRow === index ? (

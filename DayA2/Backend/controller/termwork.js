@@ -563,13 +563,12 @@ export const AttendanceUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_atten SET marks = ? WHERE attend_id = ? AND sid = ?';
+  const sql = 'UPDATE main_atten SET marks = ? WHERE att_id = ? ';
   const queryValues = updates.map(update => {
     const marks = parseInt(update.marks, 10);  // Change 'Marks' to 'marks'
     return [
       isNaN(marks) ? null : marks,  // Use null if marks is NaN
-      update.attend_id,
-      update.sid
+      update.att_id,
     ];
   });
 
@@ -894,13 +893,12 @@ export const JournalUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_journal SET marks = ? WHERE journal1_id = ? AND sid = ?';
+  const sql = 'UPDATE main_journal SET marks = ? WHERE journalid = ?';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.journal1_id,
-      update.sid  // Ensure sid is included here
+      update.journalid, // Ensure sid is included here
     ];
   });
 
