@@ -151,12 +151,12 @@ const PPT = ({ uid , tw_id}) => {
   
   const handleSaveClick = async (index) => {
     const student = paginatedData[index]; // Access the correct paginated student
-    const { ppt_id, sid } = student; // Get ppt_id and sid
+    const { id, sid } = student; // Get ppt_id and sid
   
     const marks = editedMarks[index]; // Get the edited marks
   
     try {
-      await api.put("/api/termwork/ppt/update", { ppt_id, sid, Marks: marks });
+      await api.put("/api/termwork/ppt/update", { id, Marks: marks });
       
       // Update the original data using sid for accurate matching
       setPptData((prevData) => 

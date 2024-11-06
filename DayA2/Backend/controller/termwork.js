@@ -1346,13 +1346,12 @@ export const PPTUpload = async (req, res) => {
   }
 
   // Prepare the query and values
-  const sql = 'UPDATE main_ppt SET marks = ? WHERE ppt_id = ? AND sid= ?';
+  const sql = 'UPDATE main_ppt SET marks = ? WHERE id = ?';
   const queryValues = updates.map(update => {
     const Marks = parseInt(update.Marks, 10);
     return [
       isNaN(Marks) ? null : Marks,  // Use null if marks is NaN
-      update.ppt_id,
-      update.sid
+      update.id,
     ];
   });
 
