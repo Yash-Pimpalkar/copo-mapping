@@ -317,9 +317,9 @@ const UploadOralPCE = ({ uid }) => {
                                 className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none"
                                 required
                             />
-                            <label className="block text-sm font-medium text-gray-700 uppercase">
+                            {/* <label className="block text-sm font-medium text-gray-700 uppercase">
                                 Enter the CO Names
-                            </label>
+                            </label> */}
                             <div className="grid grid-cols-3 gap-2 mt-1">
                                 {Array.from({ length: formData[index]?.numCOs || 0 }).map((_, coIndex) => (
                                     <input
@@ -332,6 +332,9 @@ const UploadOralPCE = ({ uid }) => {
                                     />
                                 ))}
                             </div>
+                            <label className="block text-sm font-medium text-gray-700 uppercase">
+                                Enter the Marks
+                            </label>
                             <input
                                 type="text"
                                 placeholder="Marks"

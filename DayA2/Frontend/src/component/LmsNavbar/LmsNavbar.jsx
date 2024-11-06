@@ -63,7 +63,7 @@ const LMSTeacherNavbar = () => {
             isActive={activeDropdown === 'students'}
             toggle={() => handleDropdownToggle('students')}
             links={[
-              { href: '#studentCohorts', label: 'Student Cohorts' },
+              // { href: '#studentCohorts', label: 'Student Cohorts' },
               { href: '/lms/StudentlmsAttendance', label: 'Student Attendance' },
               { href: '/lms/StudentFeedback', label: 'Student Feedback' }
             ]}
